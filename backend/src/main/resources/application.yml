@@ -1,0 +1,93 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: it-asset-management-backend
+
+  # ===============================
+  # DATABASE & ORM CONFIGURATION
+  # ===============================
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:itam_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:24102004}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Sử dụng Flyway để quản lý schema thay vì ddl-auto
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # ===============================
+  # FLYWAY MIGRATION
+  # ===============================
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  # ===============================
+  # CACHING (REDIS)
+  # ===============================
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:24102004}
+
+  # ===============================
+  # MESSAGE BROKER (RABBITMQ)
+  # ===============================
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+  # ===============================
+  # EMAIL CONFIGURATION
+  # ===============================
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your_email@gmail.com}
+    password: ${MAIL_PASSWORD:your_app_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# ===============================
+# SWAGGER / OPENAPI
+# ===============================
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# ===============================
+# CUSTOM APP CONFIGURATIONS
+# ===============================
+app:
+  # JWT Config
+  jwt:
+    secret: ${JWT_SECRET:very_long_super_secret_key_change_this_in_production_environment_for_security}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION:604800000} # 7 ngay (7 * 24 * 60 * 60 * 1000)
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION:2592000000} # 30 ngay (30 * 24 * 60 * 60 * 1000)
+
+  # Cloudflare R2 Config (Tuong thich voi AWS S3 API)
+  r2:
+    endpoint: ${R2_ENDPOINT:https://your_account_id.r2.cloudflarestorage.com}
+    region: ${R2_REGION:auto} # R2 thuong dung auto region
+    access-key: ${R2_ACCESS_KEY:your_r2_access_key}
+    secret-key: ${R2_SECRET_KEY:your_r2_secret_key}
+    bucket-name: ${R2_BUCKET_NAME:itam-bucket}

@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "ma_xac_thuc_otp")
+@Table(name = "ma_xac_thuc_otp", indexes = {
+    @Index(name = "idx_otp_nguoi_dung_loai_trang_thai", columnList = "id_nguoi_dung, loai_ma, trang_thai, thoi_gian_tao DESC")
+})
 public class MaXacThucOTP extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

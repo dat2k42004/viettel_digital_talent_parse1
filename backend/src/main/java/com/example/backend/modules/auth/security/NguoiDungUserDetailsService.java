@@ -26,8 +26,8 @@ public class NguoiDungUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + username));
+        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhapAndThoiGianXoaIsNull(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng hoặc tài khoản đã bị xóa: " + username));
 
         // Tự động gom toàn bộ quyền động của User này
         List<Quyen> quyenList = quyenRepository.findAllByNguoiDungId(nguoiDung.getId());

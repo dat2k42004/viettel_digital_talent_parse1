@@ -7,12 +7,19 @@ import com.example.backend.modules.tenant.dto.DanhMucCauHinhResponse;
 import com.example.backend.modules.tenant.model.DanhMucCauHinh;
 import com.example.backend.modules.tenant.repository.DanhMucCauHinhRepository;
 import com.example.backend.shared.exception.NghiepVuException;
+import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +30,28 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
     private final DanhMucCauHinhRepository danhMucCauHinhRepository;
 
     @Override
-    public List<DanhMucCauHinhResponse> layDanhSach() {
+    public PageResponse<DanhMucCauHinhResponse> layDanhSach(String tenCauHinh, String maCauHinh, int page, int size) {
         KiemTraQuyenHeThong();
-        return danhMucCauHinhRepository.findByThoiGianXoaIsNull().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+
+        Specification<DanhMucCauHinh> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+
+            if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("tenCauHinh")), "%" + tenCauHinh.trim().toLowerCase() + "%"));
+            }
+
+            if (maCauHinh != null && !maCauHinh.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("maCauHinh")), "%" + maCauHinh.trim().toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<DanhMucCauHinh> pageResult = danhMucCauHinhRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<DanhMucCauHinhResponse> responsePage = pageResult.map(this::mapToResponse);
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -105,6 +129,18 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
                 .giaTriMacDinh(entity.getGiaTriMacDinh())
                 .trangThai(entity.getTrangThai())
                 .build();
+    }
+
+    @Override
+    public DanhMucCauHinhResponse layTheoId(Long id) {
+        DanhMucCauHinh entity = danhMucCauHinhRepository.findByIdAndThoiGianXoaIsNull(id)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục cấu hình hoặc danh mục đã bị xóa", 404));
+
+        if (!"HOAT_DONG".equals(entity.getTrangThai())) {
+            throw new NghiepVuException("Danh mục cấu hình hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
+
+        return mapToResponse(entity);
     }
 }
 

@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface PhienDangNhapRepository extends JpaRepository<PhienDangNhap, Long> {
     Optional<PhienDangNhap> findByTokenLamMoi(String tokenLamMoi);
+    Optional<PhienDangNhap> findByTokenTruyCapAndThoiGianXoaIsNull(String tokenTruyCap);
+    Optional<PhienDangNhap> findByTokenLamMoiAndThoiGianXoaIsNull(String tokenLamMoi);
 }

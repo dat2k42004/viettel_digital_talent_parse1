@@ -5,6 +5,8 @@ import com.example.backend.modules.auth.service.interfaces.VaiTroService;
 import com.example.backend.modules.auth.dto.QuyenResponse;
 import com.example.backend.modules.auth.dto.VaiTroRequest;
 import com.example.backend.modules.auth.dto.VaiTroResponse;
+import com.example.backend.modules.auth.dto.VaiTroQuyenUpdateRequest;
+import com.example.backend.shared.dto.TrangThaiRequest;
 import com.example.backend.modules.auth.model.Quyen;
 import com.example.backend.modules.auth.model.VaiTro;
 import com.example.backend.modules.auth.model.VaiTroQuyen;
@@ -12,12 +14,19 @@ import com.example.backend.modules.auth.repository.QuyenRepository;
 import com.example.backend.modules.auth.repository.VaiTroQuyenRepository;
 import com.example.backend.modules.auth.repository.VaiTroRepository;
 import com.example.backend.shared.exception.NghiepVuException;
+import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,15 +38,36 @@ public class VaiTroServiceImpl implements VaiTroService {
     private final VaiTroQuyenRepository vaiTroQuyenRepository;
     private final QuyenRepository quyenRepository;
 
-    public List<VaiTroResponse> layDanhSach() {
+    @Override
+    public PageResponse<VaiTroResponse> layDanhSach(String tenVaiTro, String maVaiTro, String trangThai, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
-        List<VaiTro> danhSach;
-        if (idDonVi == null) {
-            danhSach = vaiTroRepository.findByIdDonViIsNullAndThoiGianXoaIsNull();
-        } else {
-            danhSach = vaiTroRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-        }
-        return danhSach.stream().map(this::mapToResponse).collect(Collectors.toList());
+
+        Specification<VaiTro> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+
+            // Phân quyền theo Đơn vị (Tenant)
+            if (idDonVi == null) {
+                predicates.add(cb.isNull(root.get("idDonVi")));
+            } else {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
+
+            if (tenVaiTro != null && !tenVaiTro.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("tenVaiTro")), "%" + tenVaiTro.trim().toLowerCase() + "%"));
+            }
+
+            if (maVaiTro != null && !maVaiTro.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("maVaiTro")), "%" + maVaiTro.trim().toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<VaiTro> pageResult = vaiTroRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<VaiTroResponse> responsePage = pageResult.map(this::mapToResponse);
+        return PageResponse.from(responsePage);
     }
 
     @Transactional
@@ -143,6 +173,42 @@ public class VaiTroServiceImpl implements VaiTroService {
                 .moTa(vaiTro.getMoTaVaiTro())
                 .danhSachQuyen(danhSachQuyen)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void capNhatQuyen(Long id, VaiTroQuyenUpdateRequest request) {
+        VaiTro vaiTro = kiemTraTonTaiVaQuyen(id);
+        capNhatQuyenChoVaiTro(vaiTro, request.getDanhSachIdQuyen());
+    }
+
+    @Override
+    @Transactional
+    public void capNhatTrangThai(Long id, TrangThaiRequest request) {
+        VaiTro vaiTro = kiemTraTonTaiVaQuyen(id);
+        String status = request.getTrangThai();
+        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
+            throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+        }
+        vaiTro.setTrangThai(status);
+        vaiTroRepository.save(vaiTro);
+    }
+
+    @Override
+    public VaiTroResponse layTheoId(Long id) {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        VaiTro vaiTro = vaiTroRepository.findByIdAndThoiGianXoaIsNull(id)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy vai trò hoặc vai trò đã bị xóa", 404));
+
+        if (!"HOAT_DONG".equals(vaiTro.getTrangThai())) {
+            throw new NghiepVuException("Vai trò hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
+
+        if (idDonVi != null && vaiTro.getIdDonVi() != null && !idDonVi.equals(vaiTro.getIdDonVi())) {
+            throw new NghiepVuException("Bạn không có quyền xem vai trò thuộc đơn vị khác", 403);
+        }
+
+        return mapToResponse(vaiTro);
     }
 }
 

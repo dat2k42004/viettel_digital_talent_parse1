@@ -4,17 +4,25 @@ import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
 
 import com.example.backend.modules.tenant.dto.PhongBanRequest;
 import com.example.backend.modules.tenant.dto.PhongBanResponse;
+import com.example.backend.shared.dto.TrangThaiRequest;
 import com.example.backend.modules.tenant.model.DonVi;
 import com.example.backend.modules.tenant.model.PhongBan;
 import com.example.backend.modules.tenant.repository.DonViRepository;
 import com.example.backend.modules.tenant.repository.PhongBanRepository;
 import com.example.backend.shared.exception.NghiepVuException;
+import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,14 +34,32 @@ public class PhongBanServiceImpl implements PhongBanService {
     private final DonViRepository donViRepository;
 
     @Override
-    public List<PhongBanResponse> layDanhSach() {
+    public PageResponse<PhongBanResponse> layDanhSach(String tenPhongBan, String maPhongBan, String trangThai, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
         if (idDonVi == null) {
             throw new NghiepVuException("Chỉ admin đơn vị mới được xem phòng ban", 403);
         }
-        return phongBanRepository.findByDonViIdAndThoiGianXoaIsNull(idDonVi).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+
+        Specification<PhongBan> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+
+            if (tenPhongBan != null && !tenPhongBan.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("tenPhongBan")), "%" + tenPhongBan.trim().toLowerCase() + "%"));
+            }
+
+            if (maPhongBan != null && !maPhongBan.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("maPhongBan")), "%" + maPhongBan.trim().toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<PhongBan> pageResult = phongBanRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<PhongBanResponse> responsePage = pageResult.map(this::mapToResponse);
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -123,6 +149,39 @@ public class PhongBanServiceImpl implements PhongBanService {
                 .trangThai(phongBan.getTrangThai())
                 .thoiGianThanhLap(phongBan.getThoiGianThanhLap())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void capNhatTrangThai(Long id, TrangThaiRequest request) {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        PhongBan phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban", 404));
+        String status = request.getTrangThai();
+        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
+            throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+        }
+        phongBan.setTrangThai(status);
+        phongBanRepository.save(phongBan);
+    }
+
+    @Override
+    public PhongBanResponse layTheoId(Long id) {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        PhongBan phongBan;
+        if (idDonVi == null) {
+            phongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban hoặc phòng ban đã bị xóa", 404));
+        } else {
+            phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban thuộc đơn vị của bạn", 404));
+        }
+
+        if (!"HOAT_DONG".equals(phongBan.getTrangThai())) {
+            throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
+
+        return mapToResponse(phongBan);
     }
 }
 

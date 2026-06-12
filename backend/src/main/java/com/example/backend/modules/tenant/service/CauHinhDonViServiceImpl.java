@@ -11,12 +11,19 @@ import com.example.backend.modules.tenant.repository.CauHinhDonViRepository;
 import com.example.backend.modules.tenant.repository.DanhMucCauHinhRepository;
 import com.example.backend.modules.tenant.repository.DonViRepository;
 import com.example.backend.shared.exception.NghiepVuException;
+import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,14 +36,30 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
     private final DonViRepository donViRepository;
 
     @Override
-    public List<CauHinhDonViResponse> layDanhSach() {
+    public PageResponse<CauHinhDonViResponse> layDanhSach(String tenCauHinh, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
         if (idDonVi == null) {
             throw new NghiepVuException("Chỉ admin đơn vị mới được xem cấu hình đơn vị", 403);
         }
-        return cauHinhDonViRepository.findByDonViIdAndThoiGianXoaIsNull(idDonVi).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+
+        Specification<CauHinhDonVi> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+            predicates.add(cb.isNull(root.get("danhMucCauHinh").get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("danhMucCauHinh").get("trangThai"), "HOAT_DONG"));
+
+            if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("danhMucCauHinh").get("tenCauHinh")), 
+                        "%" + tenCauHinh.trim().toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<CauHinhDonVi> pageResult = cauHinhDonViRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<CauHinhDonViResponse> responsePage = pageResult.map(this::mapToResponse);
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -111,6 +134,25 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
                 .tenCauHinh(entity.getDanhMucCauHinh().getTenCauHinh())
                 .giaTriCauHinh(entity.getGiaTriCauHinh())
                 .build();
+    }
+
+    @Override
+    public CauHinhDonViResponse layTheoId(Long id) {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        CauHinhDonVi entity;
+        if (idDonVi == null) {
+            entity = cauHinhDonViRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy cấu hình đơn vị hoặc cấu hình đã bị xóa", 404));
+        } else {
+            entity = cauHinhDonViRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy cấu hình đơn vị thuộc đơn vị của bạn", 404));
+        }
+
+        if (!"HOAT_DONG".equals(entity.getDanhMucCauHinh().getTrangThai())) {
+            throw new NghiepVuException("Danh mục cấu hình liên kết hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
+
+        return mapToResponse(entity);
     }
 }
 

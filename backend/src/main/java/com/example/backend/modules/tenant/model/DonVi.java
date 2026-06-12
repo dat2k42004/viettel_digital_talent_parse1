@@ -10,7 +10,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "don_vi")
+@Table(name = "don_vi", indexes = {
+    @Index(name = "idx_don_vi_ma_trang_thai_xoa", columnList = "ma_don_vi, trang_thai, thoi_gian_xoa")
+})
 public class DonVi extends BaseEntity {
 
     @Column(name = "ma_don_vi", length = 50)

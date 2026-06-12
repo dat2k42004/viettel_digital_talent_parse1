@@ -4,12 +4,11 @@ import com.example.backend.modules.tenant.dto.DanhMucCauHinhRequest;
 import com.example.backend.modules.tenant.dto.DanhMucCauHinhResponse;
 import com.example.backend.modules.tenant.service.interfaces.DanhMucCauHinhService;
 import com.example.backend.shared.response.ApiResponse;
+import com.example.backend.shared.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/danh-muc-cau-hinh")
@@ -20,8 +19,19 @@ public class DanhMucCauHinhController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('XEM_DANH_MUC_CAU_HINH')")
-    public ApiResponse<List<DanhMucCauHinhResponse>> layDanhSach() {
-        return ApiResponse.success(danhMucCauHinhService.layDanhSach());
+    public ApiResponse<PageResponse<DanhMucCauHinhResponse>> layDanhSach(
+            @RequestParam(required = false) String tenCauHinh,
+            @RequestParam(required = false) String maCauHinh,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(danhMucCauHinhService.layDanhSach(tenCauHinh, maCauHinh, page, size));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('XEM_DANH_MUC_CAU_HINH')")
+    public ApiResponse<DanhMucCauHinhResponse> layTheoId(@PathVariable Long id) {
+        return ApiResponse.success(danhMucCauHinhService.layTheoId(id));
     }
 
     @PostMapping

@@ -39,6 +39,12 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:24102004}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+          max-wait: ${REDIS_POOL_MAX_WAIT:-1ms}
 
   # ===============================
   # MESSAGE BROKER (RABBITMQ)
@@ -91,3 +97,4 @@ app:
     access-key: ${R2_ACCESS_KEY:your_r2_access_key}
     secret-key: ${R2_SECRET_KEY:your_r2_secret_key}
     bucket-name: ${R2_BUCKET_NAME:itam-bucket}
+    public-url: ${R2_PUBLIC_URL:https://pub-xxxx.r2.dev}

@@ -20,4 +20,6 @@ public class NguoiDungResponse {
     private String danhDaiDienUrl;
     private String trangThai;
     private List<VaiTroResponse> danhSachVaiTro;
+    private List<QuyenResponse> danhSachQuyen;
+    private List<String> danhSachQuyenPhanGiai;
 }

@@ -8,7 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "vai_tro_quyen")
+@Table(name = "vai_tro_quyen", indexes = {
+    @Index(name = "idx_vai_tro_quyen_vai_tro_quyen", columnList = "id_vai_tro, id_quyen")
+})
 public class VaiTroQuyen extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

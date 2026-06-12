@@ -2,13 +2,18 @@ package com.example.backend.modules.auth.service.interfaces;
 
 import com.example.backend.modules.auth.dto.VaiTroRequest;
 import com.example.backend.modules.auth.dto.VaiTroResponse;
+import com.example.backend.modules.auth.dto.VaiTroQuyenUpdateRequest;
+import com.example.backend.shared.dto.TrangThaiRequest;
 
-import java.util.List;
+import com.example.backend.shared.response.PageResponse;
 
 public interface VaiTroService {
-    List<VaiTroResponse> layDanhSach();
+    PageResponse<VaiTroResponse> layDanhSach(String tenVaiTro, String maVaiTro, String trangThai, int page, int size);
     VaiTroResponse themMoi(VaiTroRequest request);
     VaiTroResponse capNhat(Long id, VaiTroRequest request);
     void xoaMem(Long id);
+    void capNhatQuyen(Long id, VaiTroQuyenUpdateRequest request);
+    void capNhatTrangThai(Long id, TrangThaiRequest request);
+    VaiTroResponse layTheoId(Long id);
 }
 

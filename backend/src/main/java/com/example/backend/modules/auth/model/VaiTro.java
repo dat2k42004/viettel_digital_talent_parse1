@@ -8,7 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "vai_tro")
+@Table(name = "vai_tro", indexes = {
+    @Index(name = "idx_vai_tro_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa"),
+    @Index(name = "idx_vai_tro_ma_don_vi_xoa", columnList = "ma_vai_tro, id_don_vi, thoi_gian_xoa")
+})
 public class VaiTro extends BaseEntity {
 
     @Column(name = "id_don_vi")

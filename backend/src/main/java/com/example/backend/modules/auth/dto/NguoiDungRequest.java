@@ -28,4 +28,5 @@ public class NguoiDungRequest {
     private String trangThai;
 
     private List<Long> danhSachIdVaiTro;
+    private List<Long> danhSachIdQuyen;
 }

@@ -7,16 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import java.io.InputStream;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import java.util.UUID;
 public class FileServiceImpl implements FileService {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${app.r2.bucket-name}")
     private String bucketName;
@@ -89,65 +89,24 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public InputStream downloadFile(String key) {
+    public String generatePresignedDownloadUrl(String key) {
         validateKey(key);
         try {
-            ResponseInputStream<GetObjectResponse> s3is = s3Client.getObject(
-                    GetObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(key)
-                            .build()
-            );
-            return s3is;
-        } catch (Exception e) {
-            log.error("Lỗi khi tải file từ Cloudflare R2 (key = {}): {}", key, e.getMessage(), e);
-            throw new NghiepVuException("Không tìm thấy hoặc không thể tải xuống file yêu cầu", 404);
-        }
-    }
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
 
-    @Override
-    public String getOriginalFilename(String key) {
-        validateKey(key);
-        if (key.contains("/")) {
-            key = key.substring(key.lastIndexOf("/") + 1);
-        }
-        if (key.length() > 37 && key.substring(36, 37).equals("_")) {
-            return key.substring(37);
-        }
-        return key;
-    }
+            GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(5)) // Link có thời hạn 5 phút
+                    .getObjectRequest(getObjectRequest)
+                    .build();
 
-    @Override
-    public long getFileLength(String key) {
-        validateKey(key);
-        try {
-            HeadObjectResponse response = s3Client.headObject(
-                    HeadObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(key)
-                            .build()
-            );
-            return response.contentLength();
+            PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(getObjectPresignRequest);
+            return presignedGetObjectRequest.url().toString();
         } catch (Exception e) {
-            log.error("Lỗi khi lấy thông tin Head Object của file key = {}: {}", key, e.getMessage());
-            throw new NghiepVuException("Không tìm thấy file yêu cầu trên hệ thống lưu trữ", 404);
-        }
-    }
-
-    @Override
-    public String getContentType(String key) {
-        validateKey(key);
-        try {
-            HeadObjectResponse response = s3Client.headObject(
-                    HeadObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(key)
-                            .build()
-            );
-            return response.contentType();
-        } catch (Exception e) {
-            log.error("Lỗi khi lấy Content-Type của file key = {}: {}", key, e.getMessage());
-            return "application/octet-stream";
+            log.error("Lỗi khi sinh pre-signed URL cho key = {}: {}", key, e.getMessage(), e);
+            throw new NghiepVuException("Không thể tạo liên kết tải file: " + e.getMessage(), 500);
         }
     }
 

@@ -67,8 +67,8 @@ public class BaoMatConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Cho php truy cấp Login khng cón Token
-                .requestMatchers("/api/don-vi/dang-ky", "/api/don-vi/xac-thuc-otp").permitAll() // API ng kể, xc thực OTP
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll() // Cho php Swagger
+                .requestMatchers("/api/don-vi/dang-ky", "/api/don-vi/xac-thuc-otp", "/api/don-vi/check-domain").permitAll() // API ng kể, xc thực OTP, check-domain
+                .requestMatchers("/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Cho php Swagger
                 .anyRequest().authenticated()
             );
 

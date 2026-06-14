@@ -6,12 +6,15 @@ import lombok.Data;
 
 @Data
 public class DangKyDonViRequest {
-    @NotBlank(message = "Tn php lỗi khng ức ? trảng")
+    @NotBlank(message = "Tên pháp lý không được để trống")
     private String tenPhapLy;
+
+    @NotBlank(message = "Tên miền hệ thống không được để trống")
+    private String tenMienHeThong;
     
     private String maSoThue;
     
-    @NotBlank(message = "Tn ngĐi Đi diện khng ức ? trảng")
+    @NotBlank(message = "Tên người đại diện không được để trống")
     private String tenNguoiDaiDien;
 
     // Admin info

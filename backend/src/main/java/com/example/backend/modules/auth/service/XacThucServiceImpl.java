@@ -1,12 +1,14 @@
 package com.example.backend.modules.auth.service;
 
 import com.example.backend.modules.auth.service.interfaces.XacThucService;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 import com.example.backend.modules.auth.dto.XacThucResponse;
 import com.example.backend.modules.auth.dto.DangNhapRequest;
 import com.example.backend.modules.auth.dto.RefreshTokenRequest;
 import com.example.backend.modules.auth.dto.QuenMatKhauRequest;
 import com.example.backend.modules.auth.dto.DatLaiMatKhauRequest;
 import com.example.backend.modules.auth.dto.NguoiDungResponse;
+import com.example.backend.modules.auth.dto.DoiMatKhauRequest;
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.auth.model.PhienDangNhap;
 import com.example.backend.modules.auth.model.MaXacThucOTP;
@@ -28,6 +30,7 @@ import com.example.backend.modules.tenant.dto.CauHinhDonViResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import com.example.backend.modules.auth.event.DangNhapEvent;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +42,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,6 +51,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class XacThucServiceImpl implements XacThucService {
 
     private final AuthenticationManager authenticationManager;
@@ -63,6 +68,8 @@ public class XacThucServiceImpl implements XacThucService {
     private final EmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
     private final RabbitTemplate rabbitTemplate;
+    private final NguoiDungService nguoiDungService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     @Transactional
@@ -95,41 +102,18 @@ public class XacThucServiceImpl implements XacThucService {
             phien.setThoiGianHetHan(LocalDateTime.now().plusDays(30)); // Refresh Token sống 30 ngày
             phienDangNhapRepository.save(phien);
 
-            // Trích xuất danh sách Quyền để nạp về Frontend
-            List<String> permissions = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-
             // Phát sự kiện đăng nhập thành công
             eventPublisher.publishEvent(new DangNhapEvent(
                     nguoiDung, request.getUsername(), "THANH_CONG", 
                     httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
             ));
 
-            // Load DonVi & CauHinhDonVi if not Super Admin
-            DonViResponse donViRes = null;
-            List<CauHinhDonViResponse> cauHinhResList = null;
-            if (nguoiDung.getIdDonVi() != null) {
-                DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdDonVi()).orElse(null);
-                if (donVi != null) {
-                    donViRes = mapToDonViResponse(donVi);
-                }
-                List<com.example.backend.modules.tenant.model.CauHinhDonVi> configs = 
-                        cauHinhDonViRepository.findByDonViIdAndThoiGianXoaIsNull(nguoiDung.getIdDonVi());
-                if (configs != null) {
-                    cauHinhResList = configs.stream().map(this::mapToCauHinhResponse).collect(Collectors.toList());
-                }
-            }
-
             return XacThucResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .idDonVi(nguoiDung.getIdDonVi())
                     .username(nguoiDung.getTenDangNhap())
-                    .permissions(permissions)
                     .thongTinNguoiDung(mapToNguoiDungResponse(nguoiDung))
-                    .thongTinDonVi(donViRes)
-                    .cauHinhDonVi(cauHinhResList)
                     .build();
 
         } catch (Exception e) {
@@ -147,17 +131,39 @@ public class XacThucServiceImpl implements XacThucService {
 
     @Override
     @Transactional
-    public void logout(String accessToken) {
+    public void logout(String accessToken, String refreshToken) {
         if (accessToken != null && accessToken.startsWith("Bearer ")) {
             accessToken = accessToken.substring(7);
         }
-        Optional<PhienDangNhap> phienOpt = phienDangNhapRepository.findByTokenTruyCapAndThoiGianXoaIsNull(accessToken);
-        if (phienOpt.isPresent()) {
-            PhienDangNhap phien = phienOpt.get();
-            phien.setTrangThai("DA_DANG_XUAT");
-            phien.setThoiGianXoa(LocalDateTime.now());
-            phien.setLyDoXoa("Đăng xuất");
-            phienDangNhapRepository.save(phien);
+
+        // 1. Đẩy accessToken vào blacklist trên Redis với TTL bằng thời gian sống còn lại của token
+        if (accessToken != null && tokenProvider.validateToken(accessToken)) {
+            try {
+                long expirationTime = tokenProvider.getExpirationTimeFromToken(accessToken);
+                if (expirationTime > 0) {
+                    redisTemplate.opsForValue().set(
+                            "jwt_blacklist:" + accessToken, 
+                            "blacklisted", 
+                            java.time.Duration.ofMillis(expirationTime)
+                    );
+                    log.info("Access Token đã được đưa vào blacklist thành công.");
+                }
+            } catch (Exception e) {
+                log.error("Lỗi khi thêm access token vào blacklist: {}", e.getMessage());
+            }
+        }
+
+        // 2. Vô hiệu hóa refresh token trong DB
+        if (org.springframework.util.StringUtils.hasText(refreshToken)) {
+            Optional<PhienDangNhap> phienOpt = phienDangNhapRepository.findByTokenLamMoiAndThoiGianXoaIsNull(refreshToken);
+            if (phienOpt.isPresent()) {
+                PhienDangNhap phien = phienOpt.get();
+                phien.setTrangThai("EXPIRED");
+                phien.setThoiGianXoa(LocalDateTime.now());
+                phien.setLyDoXoa("Đăng xuất chủ động");
+                phienDangNhapRepository.save(phien);
+                log.info("Refresh Token đã được vô hiệu hóa thành công.");
+            }
         }
     }
 
@@ -197,10 +203,10 @@ public class XacThucServiceImpl implements XacThucService {
             throw new NghiepVuException("Tên đăng nhập không khớp", 401);
         }
 
-        // Tự động load lại User Details & Authorities giống loadUserByUsername
-        List<com.example.backend.modules.auth.model.Quyen> quyenList = quyenRepository.findAllByNguoiDungId(user.getId());
-        List<org.springframework.security.core.GrantedAuthority> authorities = quyenList.stream()
-                .map(q -> new org.springframework.security.core.authority.SimpleGrantedAuthority(q.getMaQuyen()))
+        // Tự động load lại User Details & Authorities giống loadUserByUsername qua Cache
+        List<String> userPermissions = nguoiDungService.resolveAndCacheUserPermissions(user.getId());
+        List<org.springframework.security.core.GrantedAuthority> authorities = userPermissions.stream()
+                .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
         NguoiDungUserDetails userDetails = new NguoiDungUserDetails(user, authorities);
 
@@ -219,16 +225,12 @@ public class XacThucServiceImpl implements XacThucService {
         phienMoi.setThoiGianHetHan(LocalDateTime.now().plusDays(30));
         phienDangNhapRepository.save(phienMoi);
 
-        List<String> permissions = authorities.stream()
-                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
         return XacThucResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .idDonVi(user.getIdDonVi())
                 .username(user.getTenDangNhap())
-                .permissions(permissions)
+                .thongTinNguoiDung(mapToNguoiDungResponse(user))
                 .build();
     }
 
@@ -313,15 +315,6 @@ public class XacThucServiceImpl implements XacThucService {
                         .build())
                 .collect(Collectors.toList());
 
-        List<com.example.backend.modules.auth.dto.QuyenResponse> danhSachQuyen = 
-                nguoiDungQuyenRepository.findByNguoiDungId(nguoiDung.getId()).stream()
-                .map(nq -> com.example.backend.modules.auth.dto.QuyenResponse.builder()
-                        .id(nq.getQuyen().getId())
-                        .maQuyen(nq.getQuyen().getMaQuyen())
-                        .tenQuyen(nq.getQuyen().getTenQuyen())
-                        .build())
-                .collect(Collectors.toList());
-
         return NguoiDungResponse.builder()
                 .id(nguoiDung.getId())
                 .idDonVi(nguoiDung.getIdDonVi())
@@ -335,8 +328,27 @@ public class XacThucServiceImpl implements XacThucService {
                 .danhDaiDienUrl(nguoiDung.getDanhDaiDienUrl())
                 .trangThai(nguoiDung.getTrangThai())
                 .danhSachVaiTro(danhSachVaiTro)
-                .danhSachQuyen(danhSachQuyen)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "user_permissions", key = "#userId")
+    public void doiMatKhau(Long userId, DoiMatKhauRequest request) {
+        NguoiDung user = nguoiDungRepository.findByIdAndThoiGianXoaIsNull(userId)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy người dùng", 404));
+
+        if (!passwordEncoder.matches(request.getMatKhauCu(), user.getMatKhau())) {
+            throw new NghiepVuException("Mật khẩu cũ không chính xác", 400);
+        }
+
+        user.setMatKhau(passwordEncoder.encode(request.getMatKhauMoi()));
+        nguoiDungRepository.save(user);
+    }
+
+    @Override
+    public NguoiDungResponse layHoSoCaNhan(Long userId) {
+        return nguoiDungService.layTheoId(userId);
     }
 
     private DonViResponse mapToDonViResponse(DonVi donVi) {

@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +38,7 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
     private final DonViRepository donViRepository;
 
     @Override
-    public PageResponse<CauHinhDonViResponse> layDanhSach(String tenCauHinh, int page, int size) {
-        Long idDonVi = DonViContextHolder.getTenantId();
+    public PageResponse<CauHinhDonViResponse> layDanhSach(Long idDonVi, String tenCauHinh, int page, int size) {
         if (idDonVi == null) {
             throw new NghiepVuException("Chỉ admin đơn vị mới được xem cấu hình đơn vị", 403);
         }
@@ -64,8 +65,8 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
 
     @Override
     @Transactional
-    public CauHinhDonViResponse themMoi(CauHinhDonViRequest request) {
-        Long idDonVi = DonViContextHolder.getTenantId();
+    @CacheEvict(value = "tenant_configs", key = "#idDonVi")
+    public CauHinhDonViResponse themMoi(Long idDonVi, CauHinhDonViRequest request) {
         if (idDonVi == null) {
             throw new NghiepVuException("Chỉ admin đơn vị mới được thêm cấu hình đơn vị", 403);
         }
@@ -91,8 +92,8 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
 
     @Override
     @Transactional
-    public CauHinhDonViResponse capNhat(Long id, CauHinhDonViRequest request) {
-        Long idDonVi = DonViContextHolder.getTenantId();
+    @CacheEvict(value = "tenant_configs", key = "#idDonVi")
+    public CauHinhDonViResponse capNhat(Long id, Long idDonVi, CauHinhDonViRequest request) {
         CauHinhDonVi entity = cauHinhDonViRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy cấu hình đơn vị", 404));
 
@@ -115,8 +116,8 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
 
     @Override
     @Transactional
-    public void xoaMem(Long id) {
-        Long idDonVi = DonViContextHolder.getTenantId();
+    @CacheEvict(value = "tenant_configs", key = "#idDonVi")
+    public void xoaMem(Long id, Long idDonVi) {
         CauHinhDonVi entity = cauHinhDonViRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy cấu hình đơn vị", 404));
         
@@ -153,6 +154,26 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
         }
 
         return mapToResponse(entity);
+    }
+
+    @Override
+    @Cacheable(value = "tenant_configs", key = "#idDonVi", unless = "#result == null")
+    public List<CauHinhDonViResponse> layCauHinhMine(Long idDonVi) {
+        if (idDonVi == null) {
+            return List.of();
+        }
+
+        List<CauHinhDonVi> configs = cauHinhDonViRepository.findByDonViIdAndThoiGianXoaIsNull(idDonVi);
+        if (configs == null) {
+            return List.of();
+        }
+
+        return configs.stream()
+                .filter(c -> c.getDanhMucCauHinh() != null 
+                        && "HOAT_DONG".equals(c.getDanhMucCauHinh().getTrangThai()) 
+                        && c.getDanhMucCauHinh().getThoiGianXoa() == null)
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 }
 

@@ -5,6 +5,8 @@ import com.example.backend.modules.tenant.dto.XacThucOtpRequest;
 import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.tenant.dto.DonViUpdateRequest;
 import com.example.backend.modules.tenant.dto.DonViTrangThaiRequest;
+import com.example.backend.modules.tenant.dto.CheckDomainResponse;
+import com.example.backend.modules.tenant.dto.GiaHanHopDongRequest;
 import com.example.backend.modules.tenant.service.interfaces.DonViService;
 import com.example.backend.shared.response.ApiResponse;
 import com.example.backend.shared.response.PageResponse;
@@ -30,6 +32,12 @@ public class DonViController {
     public ApiResponse<String> xacThucOtp(@Valid @RequestBody XacThucOtpRequest request) {
         donViService.xacThucOtp(request);
         return ApiResponse.success("Kích hoạt đơn vị thành công. Bạn có thể đăng nhập.");
+    }
+
+    @GetMapping("/check-domain")
+    public ApiResponse<CheckDomainResponse> checkDomain(@RequestParam String domain) {
+        boolean available = donViService.checkDomain(domain);
+        return ApiResponse.success(new CheckDomainResponse(available));
     }
 
     @GetMapping("/{id}")
@@ -65,6 +73,15 @@ public class DonViController {
             @Valid @RequestBody DonViTrangThaiRequest request) {
         donViService.capNhatTrangThai(id, request);
         return ApiResponse.success("Cập nhật trạng thái đơn vị và các thực thể liên quan thành công");
+    }
+
+    @PutMapping("/{id}/gia-han")
+    @PreAuthorize("hasAuthority('GIA_HAN_DON_VI')")
+    public ApiResponse<String> giaHanHopDong(
+            @PathVariable Long id,
+            @Valid @RequestBody GiaHanHopDongRequest request) {
+        donViService.giaHanHopDong(id, request);
+        return ApiResponse.success("Gia hạn hợp đồng đơn vị thành công");
     }
 
     @DeleteMapping("/{id}")

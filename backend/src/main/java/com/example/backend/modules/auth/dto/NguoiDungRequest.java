@@ -25,8 +25,6 @@ public class NguoiDungRequest {
 
     private String soDienThoai;
     private String danhDaiDienUrl;
-    private String trangThai;
 
     private List<Long> danhSachIdVaiTro;
-    private List<Long> danhSachIdQuyen;
 }

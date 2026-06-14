@@ -36,9 +36,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
-@RequiredArgsConstructor
 public class NguoiDungServiceImpl implements NguoiDungService {
 
     private final NguoiDungRepository nguoiDungRepository;
@@ -47,6 +48,21 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final VaiTroRepository vaiTroRepository;
     private final QuyenRepository quyenRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public NguoiDungServiceImpl(
+            NguoiDungRepository nguoiDungRepository,
+            NguoiDungVaiTroRepository nguoiDungVaiTroRepository,
+            NguoiDungQuyenRepository nguoiDungQuyenRepository,
+            VaiTroRepository vaiTroRepository,
+            QuyenRepository quyenRepository,
+            @org.springframework.context.annotation.Lazy PasswordEncoder passwordEncoder) {
+        this.nguoiDungRepository = nguoiDungRepository;
+        this.nguoiDungVaiTroRepository = nguoiDungVaiTroRepository;
+        this.nguoiDungQuyenRepository = nguoiDungQuyenRepository;
+        this.vaiTroRepository = vaiTroRepository;
+        this.quyenRepository = quyenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public PageResponse<NguoiDungResponse> layDanhSach(String search, String trangThai, int page, int size) {
@@ -83,6 +99,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
     @Transactional
     public NguoiDungResponse themMoi(NguoiDungRequest request) {
+        kiemTraChotChanDacQuyen(request.getDanhSachIdVaiTro());
+
         if (nguoiDungRepository.existsByTenDangNhapAndThoiGianXoaIsNull(request.getTenDangNhap())) {
             throw new NghiepVuException("Tên đăng nhập đã tồn tại", 400);
         }
@@ -107,18 +125,19 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         nguoiDung.setEmail(request.getEmail());
         nguoiDung.setSoDienThoai(request.getSoDienThoai());
         nguoiDung.setDanhDaiDienUrl(request.getDanhDaiDienUrl());
-        nguoiDung.setTrangThai(StringUtils.hasText(request.getTrangThai()) ? request.getTrangThai() : "HOAT_DONG");
+        nguoiDung.setTrangThai("HOAT_DONG");
 
         nguoiDung = nguoiDungRepository.save(nguoiDung);
 
         capNhatVaiTroChoNguoiDung(nguoiDung, request.getDanhSachIdVaiTro());
-        capNhatQuyenTrucTiepChoNguoiDung(nguoiDung, request.getDanhSachIdQuyen());
 
         return mapToResponse(nguoiDung);
     }
 
     @Transactional
+    @CacheEvict(value = "user_permissions", key = "#id")
     public NguoiDungResponse capNhat(Long id, NguoiDungRequest request) {
+        kiemTraChotChanDacQuyen(request.getDanhSachIdVaiTro());
         NguoiDung nguoiDung = kiemTraTonTaiVaQuyen(id);
 
         if (!nguoiDung.getTenDangNhap().equals(request.getTenDangNhap()) &&
@@ -141,18 +160,16 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         nguoiDung.setEmail(request.getEmail());
         nguoiDung.setSoDienThoai(request.getSoDienThoai());
         nguoiDung.setDanhDaiDienUrl(request.getDanhDaiDienUrl());
-        nguoiDung.setTrangThai(
-                StringUtils.hasText(request.getTrangThai()) ? request.getTrangThai() : nguoiDung.getTrangThai());
 
         nguoiDung = nguoiDungRepository.save(nguoiDung);
 
         capNhatVaiTroChoNguoiDung(nguoiDung, request.getDanhSachIdVaiTro());
-        capNhatQuyenTrucTiepChoNguoiDung(nguoiDung, request.getDanhSachIdQuyen());
 
         return mapToResponse(nguoiDung);
     }
 
     @Transactional
+    @CacheEvict(value = "user_permissions", key = "#id")
     public void xoaMem(Long id) {
         NguoiDung nguoiDung = kiemTraTonTaiVaQuyen(id);
         nguoiDung.setThoiGianXoa(LocalDateTime.now());
@@ -226,6 +243,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user_permissions", key = "#id")
     public void capNhatTrangThai(Long id, NguoiDungTrangThaiRequest request) {
         NguoiDung nguoiDung = kiemTraTonTaiVaQuyen(id);
         String trangThai = request.getTrangThai();
@@ -238,6 +256,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user_permissions", key = "#id")
     public void capNhatQuyenTrucTiep(Long id, NguoiDungQuyenUpdateRequest request) {
         NguoiDung nguoiDung = kiemTraTonTaiVaQuyen(id);
         capNhatQuyenTrucTiepChoNguoiDung(nguoiDung, request.getDanhSachIdQuyen());
@@ -278,5 +297,36 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         }
 
         return mapToResponse(nguoiDung);
+    }
+
+    @Override
+    @Cacheable(value = "user_permissions", key = "#userId", unless = "#result == null")
+    public List<String> resolveAndCacheUserPermissions(Long userId) {
+        return quyenRepository.findAllByNguoiDungId(userId).stream()
+                .map(Quyen::getMaQuyen)
+                .collect(Collectors.toList());
+    }
+
+    private void kiemTraChotChanDacQuyen(List<Long> idVaiTroList) {
+        if (idVaiTroList == null || idVaiTroList.isEmpty()) {
+            return;
+        }
+
+        org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
+            Long currentUserIdDonVi = userDetails.getNguoiDung().getIdDonVi();
+            
+            // Nếu Current User là "Admin cấp cơ sở" (idDonVi != null)
+            if (currentUserIdDonVi != null) {
+                // Kiểm tra xem trong các vai trò được gán có vai trò nào là của Super Admin (idDonVi == null) không
+                List<VaiTro> vaiTroList = vaiTroRepository.findAllById(idVaiTroList);
+                for (VaiTro vaiTro : vaiTroList) {
+                    if (vaiTro.getIdDonVi() == null) {
+                        throw new NghiepVuException("Bạn không có quyền cấp phát vai trò cấp cao hệ thống", 403);
+                    }
+                }
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.example.backend.modules.tenant.dto.XacThucOtpRequest;
 import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.tenant.dto.DonViUpdateRequest;
 import com.example.backend.modules.tenant.dto.DonViTrangThaiRequest;
+import com.example.backend.modules.tenant.dto.GiaHanHopDongRequest;
 import com.example.backend.shared.response.PageResponse;
 
 public interface DonViService {
@@ -16,5 +17,7 @@ public interface DonViService {
     DonViResponse capNhatThongTin(Long id, DonViUpdateRequest request);
     void capNhatTrangThai(Long id, DonViTrangThaiRequest request);
     void xoaMem(Long id);
+    boolean checkDomain(String domain);
+    void giaHanHopDong(Long id, GiaHanHopDongRequest request);
 }
 

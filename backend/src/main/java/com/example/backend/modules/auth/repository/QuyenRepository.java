@@ -17,4 +17,5 @@ public interface QuyenRepository extends JpaRepository<Quyen, Long> {
     List<Quyen> findAllByNguoiDungId(@Param("userId") Long userId);
 
     boolean existsByMaQuyen(String maQuyen);
+    List<Quyen> findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull(String loaiQuyen, String trangThai);
 }

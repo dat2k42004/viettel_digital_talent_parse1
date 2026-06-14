@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.access-expiration:604800000}") // 7 ngày
+    @Value("${app.jwt.access-expiration:604800000}") // 7 ngày
     private long jwtAccessExpiration;
 
-    @Value("${jwt.refresh-expiration:2592000000}") // 30 ngày
+    @Value("${app.jwt.refresh-expiration:2592000000}") // 30 ngày
     private long jwtRefreshExpiration;
 
     private SecretKey getSigningKey() {
@@ -79,5 +79,16 @@ public class JwtTokenProvider {
             log.error("Invalid JWT token: {}", ex.getMessage());
         }
         return false;
+    }
+
+    public long getExpirationTimeFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        Date expiration = claims.getExpiration();
+        long diff = expiration.getTime() - System.currentTimeMillis();
+        return diff > 0 ? diff : 0;
     }
 }

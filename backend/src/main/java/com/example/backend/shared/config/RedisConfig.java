@@ -44,8 +44,15 @@ public class RedisConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonRedisSerializer))
                 .disableCachingNullValues();
 
+        java.util.Map<String, RedisCacheConfiguration> cacheConfigurations = new java.util.HashMap<>();
+        cacheConfigurations.put("global_permissions", config.entryTtl(Duration.ofDays(1)));
+        cacheConfigurations.put("global_catalog_configs", config.entryTtl(Duration.ofDays(1)));
+        cacheConfigurations.put("tenant_configs", config.entryTtl(Duration.ofHours(12)));
+        cacheConfigurations.put("user_permissions", config.entryTtl(Duration.ofMinutes(30)));
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
 }

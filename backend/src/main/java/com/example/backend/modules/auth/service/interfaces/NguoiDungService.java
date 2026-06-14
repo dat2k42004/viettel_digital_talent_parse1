@@ -15,5 +15,6 @@ public interface NguoiDungService {
     void capNhatTrangThai(Long id, NguoiDungTrangThaiRequest request);
     void capNhatQuyenTrucTiep(Long id, NguoiDungQuyenUpdateRequest request);
     NguoiDungResponse layTheoId(Long id);
+    java.util.List<String> resolveAndCacheUserPermissions(Long userId);
 }
 

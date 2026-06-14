@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.IOException;
 
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final NguoiDungUserDetailsService customUserDetailsService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -29,19 +31,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String username = tokenProvider.getUsernameFromToken(jwt);
+            if (StringUtils.hasText(jwt)) {
+                // Kiểm tra blacklist trên Redis
+                Boolean isBlacklisted = redisTemplate.hasKey("jwt_blacklist:" + jwt);
+                if (Boolean.TRUE.equals(isBlacklisted)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (tokenProvider.validateToken(jwt)) {
+                    String username = tokenProvider.getUsernameFromToken(jwt);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Tự động set Tenant ID từ thông tin đăng nhập, đè lên Header (Bảo mật hơn)
-                if (userDetails instanceof NguoiDungUserDetails customUser) {
-                     DonViContextHolder.setTenantId(customUser.getIdDonVi());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // Tự động set Tenant ID từ thông tin đăng nhập, đè lên Header (Bảo mật hơn)
+                    if (userDetails instanceof NguoiDungUserDetails customUser) {
+                         DonViContextHolder.setTenantId(customUser.getIdDonVi());
+                    }
                 }
             }
         } catch (Exception ex) {

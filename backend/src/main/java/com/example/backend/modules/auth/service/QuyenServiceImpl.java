@@ -11,12 +11,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
+
 @Service
 @RequiredArgsConstructor
 public class QuyenServiceImpl implements QuyenService {
 
     private final QuyenRepository quyenRepository;
 
+    @Override
+    @Cacheable(value = "global_permissions", key = "'all'", unless = "#result == null")
     public List<QuyenResponse> layDanhSachQuyen() {
         return quyenRepository.findAll().stream()
                 .filter(q -> q.getThoiGianXoa() == null) // Bỏ qua quyền đã xóa

@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
     private final DanhMucCauHinhRepository danhMucCauHinhRepository;
 
     @Override
+    @Cacheable(value = "global_catalog_configs", key = "'all'", unless = "#result == null")
     public PageResponse<DanhMucCauHinhResponse> layDanhSach(String tenCauHinh, String maCauHinh, int page, int size) {
         KiemTraQuyenHeThong();
 
@@ -56,6 +59,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "global_catalog_configs", allEntries = true)
     public DanhMucCauHinhResponse themMoi(DanhMucCauHinhRequest request) {
         KiemTraQuyenHeThong();
 
@@ -72,6 +76,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "global_catalog_configs", allEntries = true)
     public DanhMucCauHinhResponse capNhat(Long id, DanhMucCauHinhRequest request) {
         KiemTraQuyenHeThong();
 
@@ -91,6 +96,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "global_catalog_configs", allEntries = true)
     public void xoaMem(Long id) {
         KiemTraQuyenHeThong();
 

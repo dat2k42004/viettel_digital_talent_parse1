@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: it-asset-management-backend
+    name: itam-backend
 
   # ===============================
   # DATABASE & ORM CONFIGURATION
@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # Sử dụng Flyway để quản lý schema thay vì ddl-auto
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -24,12 +24,19 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 
   # ===============================
-  # FLYWAY MIGRATION
+  # FLYWAY MIGRATION (DISABLED)
   # ===============================
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
+    enabled: false
+
+  # ===============================
+  # DEVTOOLS CONFIGURATION
+  # ===============================
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
 
   # ===============================
   # CACHING (REDIS)
@@ -52,8 +59,8 @@ spring:
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:24102004}
 
   # ===============================
   # EMAIL CONFIGURATION
@@ -61,8 +68,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:your_email@gmail.com}
-    password: ${MAIL_PASSWORD:your_app_password}
+    username: ${MAIL_USERNAME:Nguyenddat2410@gmail.com}
+    password: ${MAIL_PASSWORD:ekgf ximb gwyb njit}
     properties:
       mail:
         smtp:
@@ -86,15 +93,15 @@ springdoc:
 app:
   # JWT Config
   jwt:
-    secret: ${JWT_SECRET:very_long_super_secret_key_change_this_in_production_environment_for_security}
+    secret: ${JWT_SECRET:m9enVDe6U4uBwv9NpYaLhQE3nVQpqIoi1HuiPanBPC8=}
     access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION:604800000} # 7 ngay (7 * 24 * 60 * 60 * 1000)
     refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION:2592000000} # 30 ngay (30 * 24 * 60 * 60 * 1000)
 
   # Cloudflare R2 Config (Tuong thich voi AWS S3 API)
   r2:
-    endpoint: ${R2_ENDPOINT:https://your_account_id.r2.cloudflarestorage.com}
+    endpoint: ${R2_ENDPOINT:https://f10d418fce8f37155b57fb15f65919a9.r2.cloudflarestorage.com/itam}
     region: ${R2_REGION:auto} # R2 thuong dung auto region
-    access-key: ${R2_ACCESS_KEY:your_r2_access_key}
-    secret-key: ${R2_SECRET_KEY:your_r2_secret_key}
-    bucket-name: ${R2_BUCKET_NAME:itam-bucket}
-    public-url: ${R2_PUBLIC_URL:https://pub-xxxx.r2.dev}
+    access-key: ${R2_ACCESS_KEY:02728685b077da919cbc283d7deafc2a}
+    secret-key: ${R2_SECRET_KEY:2223d30ac1350bb9df943739acfc9d731e91f939c7020dc786d60d46c8b96f47}
+    bucket-name: ${R2_BUCKET_NAME:itam}
+    public-url: ${R2_PUBLIC_URL:https://pub-7db9e073ec7840a2b9ca96df78110737.r2.dev}

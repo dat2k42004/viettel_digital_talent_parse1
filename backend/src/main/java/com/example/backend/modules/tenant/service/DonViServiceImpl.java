@@ -4,14 +4,23 @@ import com.example.backend.modules.tenant.service.interfaces.DonViService;
 
 import com.example.backend.modules.auth.model.MaXacThucOTP;
 import com.example.backend.modules.auth.model.NguoiDung;
+import com.example.backend.modules.auth.model.Quyen;
+import com.example.backend.modules.auth.model.VaiTro;
+import com.example.backend.modules.auth.model.VaiTroQuyen;
+import com.example.backend.modules.auth.model.NguoiDungVaiTro;
 import com.example.backend.modules.auth.repository.MaXacThucOTPRepository;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.repository.QuyenRepository;
 import com.example.backend.modules.auth.repository.VaiTroRepository;
+import com.example.backend.modules.auth.repository.VaiTroQuyenRepository;
+import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
+import java.util.stream.Collectors;
 import com.example.backend.modules.tenant.dto.DangKyDonViRequest;
 import com.example.backend.modules.tenant.dto.XacThucOtpRequest;
 import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.tenant.dto.DonViUpdateRequest;
 import com.example.backend.modules.tenant.dto.DonViTrangThaiRequest;
+import com.example.backend.modules.tenant.dto.GiaHanHopDongRequest;
 import com.example.backend.modules.tenant.model.DonVi;
 import com.example.backend.modules.tenant.repository.DonViRepository;
 import com.example.backend.modules.tenant.repository.PhongBanRepository;
@@ -53,6 +62,9 @@ public class DonViServiceImpl implements DonViService {
     private final VaiTroRepository vaiTroRepository;
     private final CauHinhDonViRepository cauHinhDonViRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final QuyenRepository quyenRepository;
+    private final VaiTroQuyenRepository vaiTroQuyenRepository;
+    private final NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
 
     @Override
     @Transactional
@@ -63,11 +75,15 @@ public class DonViServiceImpl implements DonViService {
         if (nguoiDungRepository.existsByEmailAndThoiGianXoaIsNull(request.getEmailAdmin())) {
             throw new NghiepVuException("Email admin đã được sử dụng", 400);
         }
+        if (donViRepository.existsByTenMienHeThongAndThoiGianXoaIsNull(request.getTenMienHeThong().trim())) {
+            throw new NghiepVuException("Tên miền hệ thống này đã bị đăng ký bởi đơn vị khác", 400);
+        }
 
         // 1. Tạo Đơn Vị (Tenant)
         DonVi donVi = new DonVi();
         donVi.setMaDonVi("DV" + System.currentTimeMillis());
         donVi.setTenPhapLy(request.getTenPhapLy());
+        donVi.setTenMienHeThong(request.getTenMienHeThong().trim());
         donVi.setMaSoThue(request.getMaSoThue());
         donVi.setTenNguoiDaiDien(request.getTenNguoiDaiDien());
         donVi.setTrangThai("CHO_XAC_THUC");
@@ -83,13 +99,40 @@ public class DonViServiceImpl implements DonViService {
         admin.setTrangThai("CHO_XAC_THUC");
         admin = nguoiDungRepository.save(admin);
 
-        // 3. Sinh mã OTP
+        // 3. Tạo vai trò Admin Đơn Vị cụ thể cho đơn vị này (độc lập, không trùng lặp)
+        VaiTro vaiTro = new VaiTro();
+        vaiTro.setIdDonVi(donVi.getId());
+        vaiTro.setMaVaiTro("ADMIN_" + donVi.getMaDonVi());
+        vaiTro.setTenVaiTro("Admin Đơn vị " + donVi.getTenPhapLy());
+        vaiTro.setMoTaVaiTro("Vai trò quản trị tối cao của đơn vị " + donVi.getTenPhapLy());
+        vaiTro.setLaHeThong(false);
+        vaiTro.setTrangThai("HOAT_DONG");
+        final VaiTro savedVaiTro = vaiTroRepository.save(vaiTro);
+
+        // 4. Gán các quyền có loại là QUYEN_DON_VI cho vai trò này
+        List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", "HOAT_DONG");
+        List<VaiTroQuyen> vaiTroQuyens = corporatePermissions.stream().map(q -> {
+            VaiTroQuyen vq = new VaiTroQuyen();
+            vq.setVaiTro(savedVaiTro);
+            vq.setQuyen(q);
+            return vq;
+        }).collect(Collectors.toList());
+        vaiTroQuyenRepository.saveAll(vaiTroQuyens);
+
+        // 5. Gán vai trò cho tài khoản admin mới tạo
+        NguoiDungVaiTro ndvt = new NguoiDungVaiTro();
+        ndvt.setNguoiDung(admin);
+        ndvt.setVaiTro(savedVaiTro);
+        ndvt.setThoiGianBatDau(LocalDateTime.now());
+        nguoiDungVaiTroRepository.save(ndvt);
+
+        // 6. Sinh mã OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         log.info("============== MÃ OTP ĐĂNG KÝ ĐƠN VỊ DÀNH CHO EMAIL {} ==============", request.getEmailAdmin());
         log.info("Mã OTP: {}", otp);
         log.info("=====================================================================");
 
-        // 4. Lưu mã OTP vào DB (mã hóa BCRYPT)
+        // 7. Lưu mã OTP vào DB (mã hóa BCRYPT)
         MaXacThucOTP otpEntity = new MaXacThucOTP();
         otpEntity.setNguoiDung(admin);
         otpEntity.setIdDonVi(donVi.getId());
@@ -104,6 +147,9 @@ public class DonViServiceImpl implements DonViService {
         // Gửi sự kiện kích hoạt đơn vị qua RabbitMQ để gửi email nền
         MailEvent mailEvent = new MailEvent(request.getEmailAdmin(), "KICH_HOAT_DON_VI", otp);
         rabbitTemplate.convertAndSend("mail.queue", mailEvent);
+
+        // Bắn sự kiện khởi tạo quyền trực tiếp cho tài khoản admin chạy ngầm
+        rabbitTemplate.convertAndSend("tenant.init-admin-permissions.queue", admin.getId());
     }
 
     @Override
@@ -144,6 +190,9 @@ public class DonViServiceImpl implements DonViService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
         donVi.setTrangThai("HOAT_DONG");
         donViRepository.save(donVi);
+
+        // Bắn sự kiện khởi tạo cấu hình mặc định
+        rabbitTemplate.convertAndSend("tenant.init-config.queue", donVi.getId());
     }
 
     @Override
@@ -318,6 +367,34 @@ public class DonViServiceImpl implements DonViService {
                 .thoiGianTao(donVi.getThoiGianTao())
                 .thoiGianCapNhat(donVi.getThoiGianCapNhat())
                 .build();
+    }
+
+    @Override
+    public boolean checkDomain(String domain) {
+        if (domain == null || domain.trim().isEmpty()) {
+            throw new NghiepVuException("Tên miền không được để trống", 400);
+        }
+        return !donViRepository.existsByTenMienHeThongAndThoiGianXoaIsNull(domain.trim());
+    }
+
+    @Override
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "tenant_configs", key = "#id")
+    public void giaHanHopDong(Long id, GiaHanHopDongRequest request) {
+        Long tenantId = DonViContextHolder.getTenantId();
+        if (tenantId != null) {
+            throw new NghiepVuException("Chỉ người dùng hệ thống mới có quyền gia hạn hợp đồng", 403);
+        }
+
+        DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(id)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
+
+        if (request.getNgayHetHanMoi().isBefore(java.time.LocalDate.now())) {
+            throw new NghiepVuException("Ngày hết hạn mới phải ở tương lai", 400);
+        }
+
+        donVi.setThoiGianHetHanHopDong(request.getNgayHetHanMoi());
+        donViRepository.save(donVi);
     }
 }
 

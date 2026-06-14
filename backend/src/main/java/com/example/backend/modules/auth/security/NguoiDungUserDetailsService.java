@@ -1,9 +1,8 @@
 package com.example.backend.modules.auth.security;
 
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.model.Quyen;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.repository.QuyenRepository;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 public class NguoiDungUserDetailsService implements UserDetailsService {
 
     private final NguoiDungRepository nguoiDungRepository;
-    private final QuyenRepository quyenRepository;
+    private final NguoiDungService nguoiDungService;
 
     @Override
     @Transactional(readOnly = true)
@@ -29,11 +28,11 @@ public class NguoiDungUserDetailsService implements UserDetailsService {
         NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhapAndThoiGianXoaIsNull(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng hoặc tài khoản đã bị xóa: " + username));
 
-        // Tự động gom toàn bộ quyền động của User này
-        List<Quyen> quyenList = quyenRepository.findAllByNguoiDungId(nguoiDung.getId());
+        // Tự động gom toàn bộ quyền động của User này qua Cache
+        List<String> quyenList = nguoiDungService.resolveAndCacheUserPermissions(nguoiDung.getId());
         List<GrantedAuthority> authorities = quyenList.stream()
                 // Sử dụng mã quyền (Ví dụ: XEM_TAI_SAN) làm GrantedAuthority
-                .map(quyen -> new SimpleGrantedAuthority(quyen.getMaQuyen()))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
         return new NguoiDungUserDetails(nguoiDung, authorities);

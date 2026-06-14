@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface DonViRepository extends JpaRepository<DonVi, Long>, JpaSpecificationExecutor<DonVi> {
     Optional<DonVi> findByIdAndThoiGianXoaIsNull(Long id);
+    boolean existsByTenMienHeThongAndThoiGianXoaIsNull(String tenMienHeThong);
 }

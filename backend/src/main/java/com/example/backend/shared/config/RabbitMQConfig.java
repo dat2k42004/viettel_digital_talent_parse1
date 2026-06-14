@@ -25,6 +25,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue tenantInitConfigQueue() {
+        return new Queue("tenant.init-config.queue", true);
+    }
+
+    @Bean
+    public Queue tenantInitAdminPermissionsQueue() {
+        return new Queue("tenant.init-admin-permissions.queue", true);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }

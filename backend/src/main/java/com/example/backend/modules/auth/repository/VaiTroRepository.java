@@ -16,6 +16,9 @@ public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecif
     // Nếu idDonVi != null (Đơn vị)
     List<VaiTro> findByIdDonViAndThoiGianXoaIsNull(Long idDonVi);
 
+    List<VaiTro> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, String trangThai);
+    List<VaiTro> findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull(String trangThai);
+
     Optional<VaiTro> findByIdAndThoiGianXoaIsNull(Long id);
 
     boolean existsByMaVaiTroAndIdDonViAndThoiGianXoaIsNull(String maVaiTro, Long idDonVi);

@@ -15,5 +15,6 @@ public interface VaiTroService {
     void capNhatQuyen(Long id, VaiTroQuyenUpdateRequest request);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
     VaiTroResponse layTheoId(Long id);
+    java.util.List<com.example.backend.modules.auth.dto.VaiTroDropdownResponse> layDropdown();
 }
 

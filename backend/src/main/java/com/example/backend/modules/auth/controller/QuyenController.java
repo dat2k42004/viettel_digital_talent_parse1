@@ -24,5 +24,11 @@ public class QuyenController {
         List<QuyenResponse> responses = quyenService.layDanhSachQuyen();
         return ApiResponse.success(responses);
     }
+
+    @GetMapping("/phan-nhom")
+    @PreAuthorize("hasAuthority('XEM_QUYEN')")
+    public ApiResponse<java.util.Map<String, List<QuyenResponse>>> layDanhSachQuyenPhanNhom() {
+        return ApiResponse.success(quyenService.layDanhSachQuyenPhanNhom());
+    }
 }
 

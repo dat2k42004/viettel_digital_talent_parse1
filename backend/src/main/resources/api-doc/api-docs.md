@@ -984,8 +984,6 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   * `200 OK`: Thành công.
   * `400 Bad Request`: Thiếu key hoặc sai thư mục bảo mật.
   * `500 Internal Server Error`: Không thể tạo pre-signed URL từ Cloudflare R2.
-* **Query Parameter**:
-  * `key` (Bắt buộc): Tên key hoặc đường dẫn đầy đủ của file đã lưu trên R2 (Ví dụ: `shared/20260613/uuid_name.png`).
 * **Response**: [ApiResponse](file:///g:/documents/viettel_digital_talent/practice/practice_pharse_1/source_code/backend/src/main/java/com/example/backend/shared/response/ApiResponse.java)<`String`> (Trả về Pre-signed URL truy xuất tệp tin trực tiếp từ Cloudflare R2 có thời hạn sống 5 phút)
   ```json
   {
@@ -994,4 +992,64 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
     "data": "https://itam.f10d418fce8f37155b57fb15f65919a9.r2.cloudflarestorage.com/shared/20260613/uuid_name.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=..."
   }
   ```
+
+---
+
+## 12. Triển khai bổ sung các API Mới (Phòng chống rò rỉ phiên & Tối ưu Dropdown)
+
+### 12.1. Cưỡng chế Đăng xuất / Thu hồi tất cả phiên của một User (Force Logout)
+* **Endpoint**: `POST /api/nguoi-dung/{id}/thu-hoi-phien`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_NGUOI_DUNG`
+* **Logic / Multi-tenant check**: Chỉ cho phép quản trị viên thuộc cùng đơn vị hoặc Super Admin hệ thống thu hồi phiên. Khi thực hiện, toàn bộ phiên đăng nhập hoạt động của người dùng sẽ bị đưa về trạng thái `EXPIRED` trong cơ sở dữ liệu và Access Token tương ứng sẽ bị ghi nhận vào danh sách đen trên Redis (Blacklist) để ngăn chặn việc sử dụng tiếp.
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `403 Forbidden`: Người dùng thuộc đơn vị khác.
+  * `404 Not Found`: Người dùng không tồn tại.
+* **Payload**: Không yêu cầu
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Đã cưỡng chế đăng xuất và hủy toàn bộ phiên làm việc của người dùng thành công"
+  }
+  ```
+
+### 12.2. Lấy danh sách Quyền phân nhóm theo Phân hệ (Get Permissions Grouped)
+* **Endpoint**: `GET /api/quyen/phan-nhom`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_QUYEN`
+* **Caching**: Được cache tập trung trên Redis (`global_permissions_grouped` cache, key `'all'`) vì danh mục quyền tĩnh.
+* **Status Code**:
+  * `200 OK`: Thành công.
+* **Payload**: Không yêu cầu
+* **Response**: Trả về một `Map` cấu trúc nhóm theo tên phân hệ (`NGUOI_DUNG`, `VAI_TRO`, `DON_VI`, `PHONG_BAN`, `VI_TRI`, `CAU_HINH`, `QUYEN`, `OTHERS`), mỗi phân hệ chứa mảng danh sách các quyền hạn rút gọn tương ứng.
+
+### 12.3. Lấy danh sách Vai trò rút gọn cho Dropdown (Get Tenant Role Dropdown)
+* **Endpoint**: `GET /api/vai-tro/dropdown`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_VAI_TRO`
+* **Logic / Multi-tenant check**: Chỉ trả về các vai trò hoạt động thuộc đơn vị hiện tại (nếu Admin đơn vị) hoặc vai trò hệ thống (nếu Super Admin).
+* **Status Code**:
+  * `200 OK`: Thành công.
+* **Payload**: Không yêu cầu
+* **Response**: Trả về danh sách vai trò rút gọn (chỉ gồm `id`, `maVaiTro`, `tenVaiTro` để tối ưu hóa băng thông mạng).
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": [
+      {
+        "id": 1,
+        "maVaiTro": "ADMIN_DV123",
+        "tenVaiTro": "Quản trị viên Đơn vị"
+      }
+    ]
+  }
+  ```
+
 

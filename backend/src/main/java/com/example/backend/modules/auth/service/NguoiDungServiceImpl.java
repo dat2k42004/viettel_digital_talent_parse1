@@ -38,8 +38,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import lombok.extern.slf4j.Slf4j;
+import com.example.backend.modules.auth.model.PhienDangNhap;
+import com.example.backend.modules.auth.repository.PhienDangNhapRepository;
+import com.example.backend.modules.auth.security.JwtTokenProvider;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @Service
+@Slf4j
 public class NguoiDungServiceImpl implements NguoiDungService {
 
     private final NguoiDungRepository nguoiDungRepository;
@@ -48,6 +54,9 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final VaiTroRepository vaiTroRepository;
     private final QuyenRepository quyenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PhienDangNhapRepository phienDangNhapRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final JwtTokenProvider tokenProvider;
 
     public NguoiDungServiceImpl(
             NguoiDungRepository nguoiDungRepository,
@@ -55,13 +64,19 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             NguoiDungQuyenRepository nguoiDungQuyenRepository,
             VaiTroRepository vaiTroRepository,
             QuyenRepository quyenRepository,
-            @org.springframework.context.annotation.Lazy PasswordEncoder passwordEncoder) {
+            @org.springframework.context.annotation.Lazy PasswordEncoder passwordEncoder,
+            PhienDangNhapRepository phienDangNhapRepository,
+            RedisTemplate<String, Object> redisTemplate,
+            JwtTokenProvider tokenProvider) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.nguoiDungVaiTroRepository = nguoiDungVaiTroRepository;
         this.nguoiDungQuyenRepository = nguoiDungQuyenRepository;
         this.vaiTroRepository = vaiTroRepository;
         this.quyenRepository = quyenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.phienDangNhapRepository = phienDangNhapRepository;
+        this.redisTemplate = redisTemplate;
+        this.tokenProvider = tokenProvider;
     }
 
     @Override
@@ -328,5 +343,49 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 }
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void thuHoiPhien(Long id) {
+        NguoiDung targetUser = nguoiDungRepository.findByIdAndThoiGianXoaIsNull(id)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy người dùng", 404));
+
+        Long currentUserIdDonVi = DonViContextHolder.getTenantId();
+        // Kiểm tra cô lập dữ liệu (Multi-tenant check)
+        if (currentUserIdDonVi != null && !currentUserIdDonVi.equals(targetUser.getIdDonVi())) {
+            throw new NghiepVuException("403 Forbidden - Bạn không có quyền thao tác trên người dùng của đơn vị khác", 403);
+        }
+
+        // 1. Tìm toàn bộ danh sách các phiên đang hoạt động của userId này
+        List<PhienDangNhap> activeSessions = phienDangNhapRepository
+                .findByNguoiDungIdAndTrangThaiAndThoiGianXoaIsNull(id, "HOAT_DONG");
+
+        for (PhienDangNhap phien : activeSessions) {
+            // Chuyển trạng thái sang EXPIRED và đánh dấu xóa
+            phien.setTrangThai("EXPIRED");
+            phien.setThoiGianXoa(LocalDateTime.now());
+            phien.setLyDoXoa("Bị cưỡng chế đăng xuất bởi quản trị viên");
+            phienDangNhapRepository.save(phien);
+
+            // 2. Đẩy accessToken vào blacklist trên Redis
+            String accessToken = phien.getTokenTruyCap();
+            if (accessToken != null && tokenProvider.validateToken(accessToken)) {
+                try {
+                    long expirationTime = tokenProvider.getExpirationTimeFromToken(accessToken);
+                    if (expirationTime > 0) {
+                        redisTemplate.opsForValue().set(
+                                "jwt_blacklist:" + accessToken,
+                                "blacklisted",
+                                java.time.Duration.ofMillis(expirationTime)
+                        );
+                    }
+                } catch (Exception e) {
+                    log.error("Lỗi khi thêm access token của user ID {} vào blacklist: {}", id, e.getMessage());
+                }
+            }
+        }
+        
+        log.info("Đã cưỡng chế đăng xuất thành công và vô hiệu hóa {} phiên làm việc của user ID: {}", activeSessions.size(), id);
     }
 }

@@ -3,7 +3,9 @@ package com.example.backend.modules.auth.controller;
 import com.example.backend.modules.auth.dto.VaiTroRequest;
 import com.example.backend.modules.auth.dto.VaiTroResponse;
 import com.example.backend.modules.auth.dto.VaiTroQuyenUpdateRequest;
+import com.example.backend.modules.auth.dto.VaiTroDropdownResponse;
 import com.example.backend.shared.dto.TrangThaiRequest;
+import java.util.List;
 import com.example.backend.modules.auth.service.interfaces.VaiTroService;
 import com.example.backend.shared.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -75,6 +77,12 @@ public class VaiTroController {
     ) {
         vaiTroService.capNhatTrangThai(id, request);
         return ApiResponse.success("Cập nhật trạng thái vai trò thành công");
+    }
+
+    @GetMapping("/dropdown")
+    @PreAuthorize("hasAuthority('XEM_VAI_TRO')")
+    public ApiResponse<List<VaiTroDropdownResponse>> layDropdown() {
+        return ApiResponse.success(vaiTroService.layDropdown());
     }
 }
 

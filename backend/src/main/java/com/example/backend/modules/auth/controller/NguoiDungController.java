@@ -75,5 +75,12 @@ public class NguoiDungController {
         nguoiDungService.capNhatQuyenTrucTiep(id, request);
         return ApiResponse.success("Cập nhật quyền trực tiếp của người dùng thành công");
     }
+
+    @PostMapping("/{id}/thu-hoi-phien")
+    @PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_NGUOI_DUNG')")
+    public ApiResponse<String> thuHoiPhien(@PathVariable Long id) {
+        nguoiDungService.thuHoiPhien(id);
+        return ApiResponse.success("Đã cưỡng chế đăng xuất và hủy toàn bộ phiên làm việc của người dùng thành công");
+    }
 }
 

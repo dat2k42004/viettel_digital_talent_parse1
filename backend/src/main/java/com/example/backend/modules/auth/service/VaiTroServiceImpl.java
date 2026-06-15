@@ -6,6 +6,7 @@ import com.example.backend.modules.auth.dto.QuyenResponse;
 import com.example.backend.modules.auth.dto.VaiTroRequest;
 import com.example.backend.modules.auth.dto.VaiTroResponse;
 import com.example.backend.modules.auth.dto.VaiTroQuyenUpdateRequest;
+import com.example.backend.modules.auth.dto.VaiTroDropdownResponse;
 import com.example.backend.shared.dto.TrangThaiRequest;
 import com.example.backend.modules.auth.model.Quyen;
 import com.example.backend.modules.auth.model.VaiTro;
@@ -209,6 +210,29 @@ public class VaiTroServiceImpl implements VaiTroService {
         }
 
         return mapToResponse(vaiTro);
+    }
+
+    @Override
+    public List<VaiTroDropdownResponse> layDropdown() {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        List<VaiTro> roles;
+        
+        // Multi-tenant check & query
+        if (idDonVi == null) {
+            // Super Admin lấy các vai trò hệ thống
+            roles = vaiTroRepository.findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull("HOAT_DONG");
+        } else {
+            // Admin cấp cơ sở lấy các vai trò của đơn vị mình
+            roles = vaiTroRepository.findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(idDonVi, "HOAT_DONG");
+        }
+
+        return roles.stream()
+                .map(r -> VaiTroDropdownResponse.builder()
+                        .id(r.getId())
+                        .maVaiTro(r.getMaVaiTro())
+                        .tenVaiTro(r.getTenVaiTro())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
 

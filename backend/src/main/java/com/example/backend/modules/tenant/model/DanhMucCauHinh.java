@@ -13,7 +13,7 @@ import lombok.Setter;
 })
 public class DanhMucCauHinh extends BaseEntity {
 
-    @Column(name = "ma_cau_hinh", length = 50)
+    @Column(name = "ma_cau_hinh", length = 50, unique = true)
     private String maCauHinh;
 
     @Column(name = "ten_cau_hinh", length = 150)

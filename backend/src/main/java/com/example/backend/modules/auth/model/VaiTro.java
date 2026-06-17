@@ -11,6 +11,8 @@ import lombok.Setter;
 @Table(name = "vai_tro", indexes = {
     @Index(name = "idx_vai_tro_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa"),
     @Index(name = "idx_vai_tro_ma_don_vi_xoa", columnList = "ma_vai_tro, id_don_vi, thoi_gian_xoa")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_vai_tro_don_vi_ma", columnNames = {"id_don_vi", "ma_vai_tro"})
 })
 public class VaiTro extends BaseEntity {
 

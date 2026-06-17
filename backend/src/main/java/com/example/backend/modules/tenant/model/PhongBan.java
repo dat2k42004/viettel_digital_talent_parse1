@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @Table(name = "phong_ban", indexes = {
     @Index(name = "idx_phong_ban_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa"),
     @Index(name = "idx_phong_ban_ma_don_vi_xoa", columnList = "ma_phong_ban, id_don_vi, thoi_gian_xoa")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_phong_ban_don_vi_ma", columnNames = {"id_don_vi", "ma_phong_ban"})
 })
 public class PhongBan extends BaseEntity {
 

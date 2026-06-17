@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 @Table(name = "vi_tri", indexes = {
         @Index(name = "idx_vi_tri_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa"),
         @Index(name = "idx_vi_tri_ma_don_vi_xoa", columnList = "ma_vi_tri, id_don_vi, thoi_gian_xoa")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_vi_tri_don_vi_ma", columnNames = {"id_don_vi", "ma_vi_tri"})
 })
 public class ViTri extends BaseEntity {
 

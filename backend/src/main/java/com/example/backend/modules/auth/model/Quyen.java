@@ -16,7 +16,7 @@ public class Quyen extends BaseEntity {
     @Column(name = "id_quyen_cha")
     private Long idQuyenCha;
 
-    @Column(name = "ma_quyen", length = 50)
+    @Column(name = "ma_quyen", length = 50, unique = true)
     private String maQuyen;
 
     @Column(name = "ten_quyen", length = 100)

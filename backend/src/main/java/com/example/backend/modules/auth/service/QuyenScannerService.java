@@ -29,19 +29,19 @@ public class QuyenScannerService {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void scanAndSavePermissions() {
-        log.info("Bắt ẩu qut v Ấng bị Quyền từ mở nguồn...");
+        log.info("Bắt đầu quét và đồng bộ Quyền từ mã nguồn...");
         Set<String> authorityNames = new HashSet<>();
 
-        // Qut tắt có cc Bean ức nh dấu @RestController
+        // Quét tất cả các Bean được đánh dấu @RestController
         String[] beanNames = applicationContext.getBeanNamesForAnnotation(RestController.class);
-        
+
         for (String beanName : beanNames) {
             Class<?> beanType = applicationContext.getType(beanName);
             if (beanType != null) {
-                // Qut @PreAuthorize ? cấp ? Class
+                // Quét @PreAuthorize ở cấp độ Class
                 extractAuthorities(beanType.getAnnotation(PreAuthorize.class), authorityNames);
 
-                // Qut @PreAuthorize ? cấp ? Method
+                // Quét @PreAuthorize ở cấp độ Method
                 for (Method method : beanType.getDeclaredMethods()) {
                     extractAuthorities(method.getAnnotation(PreAuthorize.class), authorityNames);
                 }
@@ -53,21 +53,22 @@ public class QuyenScannerService {
             if (!quyenRepository.existsByMaQuyen(maQuyen)) {
                 Quyen quyen = new Quyen();
                 quyen.setMaQuyen(maQuyen);
-                quyen.setTenQuyen(generateTenQuyen(maQuyen)); 
+                quyen.setTenQuyen(generateTenQuyen(maQuyen));
                 quyen.setLoaiQuyen("HE_THONG");
                 quyenRepository.save(quyen);
                 newPermissionsAdded++;
-                log.info("? chn thm Quyền mởi vo DB: {}", maQuyen);
+                log.info("Đã chèn thêm Quyền mới vào DB: {}", maQuyen);
             }
         }
-        
-        log.info("Qut Quyền hon tắt. Thm mởi: {} quyền.", newPermissionsAdded);
+
+        log.info("Quét Quyền hoàn tất. Thêm mới: {} quyền.", newPermissionsAdded);
     }
 
     private void extractAuthorities(PreAuthorize preAuthorize, Set<String> authorityNames) {
         if (preAuthorize != null) {
             String expression = preAuthorize.value();
-            // Regex tìm chuỗi trong ngoặc n cóa hasAuthority, v dự: hasAuthority('XEM_QUYEN')
+            // Regex tìm chuỗi trong ngoặc đơn của hasAuthority, ví dụ:
+            // hasAuthority('XEM_QUYEN')
             Pattern pattern = Pattern.compile("hasAuthority\\(\\s*'([^']+)'\\s*\\)");
             Matcher matcher = pattern.matcher(expression);
             while (matcher.find()) {
@@ -75,10 +76,11 @@ public class QuyenScannerService {
             }
         }
     }
-    
+
     private String generateTenQuyen(String maQuyen) {
         String lower = maQuyen.toLowerCase().replace("_", " ");
-        if(lower.isEmpty()) return maQuyen;
+        if (lower.isEmpty())
+            return maQuyen;
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }
 }

@@ -10,6 +10,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "vai_tro_quyen", indexes = {
     @Index(name = "idx_vai_tro_quyen_vai_tro_quyen", columnList = "id_vai_tro, id_quyen")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_vai_tro_quyen_role_perm", columnNames = {"id_vai_tro", "id_quyen"})
 })
 public class VaiTroQuyen extends BaseEntity {
 

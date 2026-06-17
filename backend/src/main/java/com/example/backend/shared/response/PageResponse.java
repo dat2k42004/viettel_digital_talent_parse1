@@ -13,18 +13,32 @@ import java.util.List;
 @AllArgsConstructor
 public class PageResponse<T> {
     private List<T> content;
-    private long totalElements;
-    private int totalPages;
-    private int page;
-    private int size;
+    private PageInfo page_info;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PageInfo {
+        private int current_page;
+        private int page_size;
+        private long total_elements;
+        private int total_pages;
+        private boolean is_first;
+        private boolean is_last;
+    }
 
     public static <T> PageResponse<T> from(Page<T> page) {
         return PageResponse.<T>builder()
                 .content(page.getContent())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .page(page.getNumber())
-                .size(page.getSize())
+                .page_info(PageInfo.builder()
+                        .current_page(page.getNumber())
+                        .page_size(page.getSize())
+                        .total_elements(page.getTotalElements())
+                        .total_pages(page.getTotalPages())
+                        .is_first(page.isFirst())
+                        .is_last(page.isLast())
+                        .build())
                 .build();
     }
 }

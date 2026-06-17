@@ -1052,4 +1052,918 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   }
   ```
 
+---
 
+## 13. Phân hệ Quản lý tài sản (Asset Module)
+
+### 13.1. Loại tài sản (LoaiTaiSan)
+
+#### 13.1.1. Lấy danh sách Loại tài sản phân trang
+* **Endpoint**: `GET /api/loai-tai-san`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LOAI_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo `maLoai` hoặc `tenLoai`.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Tiêu chí sắp xếp.
+* **Caching**: Được cache tập trung trên Redis (`loai_tai_san_list_cache` cache, key gồm các query parameters).
+* **Response**: Trả về `PageResponse` chứa danh sách Loại tài sản.
+
+#### 13.1.2. Lấy chi tiết Loại tài sản theo ID
+* **Endpoint**: `GET /api/loai-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LOAI_TAI_SAN`
+* **Status Code**: 
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Thực thể đang bị khóa hoặc ngừng hoạt động (trạng thái khác `HOAT_DONG`).
+  * `404 Not Found`: Không tìm thấy loại tài sản.
+* **Caching**: Được cache tập trung trên Redis (`loai_tai_san_cache` cache, key `#id`).
+* **Response**: `ApiResponse` chứa thông tin chi tiết Loại tài sản.
+
+#### 13.1.3. Lấy danh sách Loại tài sản rút gọn cho Dropdown (Select options)
+* **Endpoint**: `GET /api/loai-tai-san/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LOAI_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Response**: `ApiResponse` chứa danh sách các tùy chọn gồm `id` và `ten` của Loại tài sản đang hoạt động (`HOAT_DONG`).
+
+#### 13.1.4. Thêm mới Loại tài sản
+* **Endpoint**: `POST /api/loai-tai-san`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_LOAI_TAI_SAN`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng mã loại tài sản đã tồn tại.
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết loại tài sản trên Redis.
+* **Payload**:
+  ```json
+  {
+    "maLoai": "LTS_LAPTOP (NotBlank)",
+    "tenLoai": "Máy tính xách tay (NotBlank)",
+    "tienToMaThe": "LT",
+    "thoiGianKhauHao": 36,
+    "ghiChu": "Thiết bị CNTT cấp phát cho nhân viên",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Trả về thông tin Loại tài sản vừa tạo.
+
+#### 13.1.5. Cập nhật Loại tài sản
+* **Endpoint**: `PUT /api/loai-tai-san/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_LOAI_TAI_SAN`
+* **Status Code**: `200 OK` (Thành công), `404 Not Found` (Không tìm thấy loại tài sản)
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết loại tài sản trên Redis.
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin Loại tài sản sau cập nhật.
+
+#### 13.1.6. Cập nhật trạng thái Loại tài sản
+* **Endpoint**: `PUT /api/loai-tai-san/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_LOAI_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết loại tài sản trên Redis.
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG (NotBlank)"
+  }
+  ```
+* **Response**: `ApiResponse` thông báo cập nhật thành công.
+
+#### 13.1.7. Xóa mềm Loại tài sản
+* **Endpoint**: `DELETE /api/loai-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_LOAI_TAI_SAN`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết loại tài sản trên Redis.
+* **Response**: `ApiResponse` thông báo xóa mềm thành công (thiết lập lý do là "Người dùng xóa").
+
+---
+
+### 13.2. Hãng sản xuất (HangSanXuat)
+
+#### 13.2.1. Lấy danh sách Hãng sản xuất phân trang
+* **Endpoint**: `GET /api/hang-san-xuat`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_HANG_SAN_XUAT`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo `maHang` hoặc `tenHang`.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Tiêu chí sắp xếp.
+* **Caching**: Được cache tập trung trên Redis (`hang_san_xuat_list_cache` cache, key gồm các query parameters).
+* **Response**: Trả về `PageResponse` chứa danh sách Hãng sản xuất.
+
+#### 13.2.2. Lấy chi tiết Hãng sản xuất theo ID
+* **Endpoint**: `GET /api/hang-san-xuat/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_HANG_SAN_XUAT`
+* **Status Code**: 
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Thực thể đang bị khóa hoặc ngừng hoạt động.
+  * `404 Not Found`: Không tìm thấy hãng sản xuất.
+* **Caching**: Được cache tập trung trên Redis (`hang_san_xuat_cache` cache, key `#id`).
+* **Response**: `ApiResponse` chứa thông tin chi tiết Hãng sản xuất.
+
+#### 13.2.3. Lấy danh sách Hãng sản xuất rút gọn cho Dropdown (Select options)
+* **Endpoint**: `GET /api/hang-san-xuat/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_HANG_SAN_XUAT`
+* **Status Code**: `200 OK`
+* **Response**: `ApiResponse` chứa danh sách các tùy chọn gồm `id` và `ten` của Hãng sản xuất đang hoạt động (`HOAT_DONG`).
+
+#### 13.2.4. Thêm mới Hãng sản xuất
+* **Endpoint**: `POST /api/hang-san-xuat`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_HANG_SAN_XUAT`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng mã hãng sản xuất đã tồn tại.
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết hãng sản xuất trên Redis.
+* **Payload**:
+  ```json
+  {
+    "maHang": "HSX_DELL (NotBlank)",
+    "tenHang": "Dell Technologies (NotBlank)",
+    "websiteHoTro": "https://support.dell.com",
+    "hotlineHoTro": "1800-8109",
+    "emailHoTro": "support@dell.com",
+    "ghiChu": "Nhà cung cấp máy tính, server chính",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Trả về thông tin Hãng sản xuất vừa tạo.
+
+#### 13.2.5. Cập nhật Hãng sản xuất
+* **Endpoint**: `PUT /api/hang-san-xuat/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_HANG_SAN_XUAT`
+* **Status Code**: `200 OK` (Thành công), `404 Not Found` (Không tìm thấy hãng sản xuất)
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết hãng sản xuất trên Redis.
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin Hãng sản xuất sau cập nhật.
+
+#### 13.2.6. Cập nhật trạng thái Hãng sản xuất
+* **Endpoint**: `PUT /api/hang-san-xuat/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_HANG_SAN_XUAT`
+* **Status Code**: `200 OK`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết hãng sản xuất trên Redis.
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG (NotBlank)"
+  }
+  ```
+* **Response**: `ApiResponse` thông báo cập nhật thành công.
+
+#### 13.2.7. Xóa mềm Hãng sản xuất
+* **Endpoint**: `DELETE /api/hang-san-xuat/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_HANG_SAN_XUAT`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết hãng sản xuất trên Redis.
+* **Response**: `ApiResponse` thông báo xóa mềm thành công.
+
+---
+
+### 13.3. Danh mục tài sản (DanhMucTaiSan)
+
+#### 13.3.1. Lấy danh sách Danh mục tài sản phân trang
+* **Endpoint**: `GET /api/danh-muc-tai-san`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_MUC_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo `maDanhMuc` hoặc `tenDanhMuc`.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Tiêu chí sắp xếp.
+* **Caching**: Được cache tập trung trên Redis (`danh_muc_tai_san_list_cache` cache, key gồm các query parameters).
+* **Response**: Trả về `PageResponse` chứa danh sách Danh mục tài sản.
+
+#### 13.3.2. Lấy chi tiết Danh mục tài sản theo ID
+* **Endpoint**: `GET /api/danh-muc-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_MUC_TAI_SAN`
+* **Status Code**: 
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Thực thể đang bị khóa hoặc ngừng hoạt động.
+  * `404 Not Found`: Không tìm thấy danh mục tài sản.
+* **Caching**: Được cache tập trung trên Redis (`danh_muc_tai_san_cache` cache, key `#id`).
+* **Response**: `ApiResponse` chứa thông tin chi tiết Danh mục tài sản.
+
+#### 13.3.3. Lấy danh sách Danh mục tài sản rút gọn cho Dropdown (Select options)
+* **Endpoint**: `GET /api/danh-muc-tai-san/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_MUC_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Response**: `ApiResponse` chứa danh sách các tùy chọn gồm `id` và `ten` của Danh mục tài sản đang hoạt động (`HOAT_DONG`).
+
+#### 13.3.4. Thêm mới Danh mục tài sản
+* **Endpoint**: `POST /api/danh-muc-tai-san`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_DANH_MUC_TAI_SAN`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng mã danh mục tài sản đã tồn tại.
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết danh mục tài sản trên Redis.
+* **Payload**:
+  ```json
+  {
+    "maDanhMuc": "DM_TS_VP (NotBlank)",
+    "tenDanhMuc": "Tài sản văn phòng (NotBlank)",
+    "moTa": "Các tài sản dùng cho hoạt động hành chính văn phòng",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Trả về thông tin Danh mục tài sản vừa tạo.
+
+#### 13.3.5. Cập nhật Danh mục tài sản
+* **Endpoint**: `PUT /api/danh-muc-tai-san/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_DANH_MUC_TAI_SAN`
+* **Status Code**: `200 OK` (Thành công), `404 Not Found` (Không tìm thấy danh mục tài sản)
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết danh mục tài sản trên Redis.
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin Danh mục tài sản sau cập nhật.
+
+#### 13.3.6. Cập nhật trạng thái Danh mục tài sản
+* **Endpoint**: `PUT /api/danh-muc-tai-san/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_DANH_MUC_TAI_SAN`
+* **Status Code**: `200 OK`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết danh mục tài sản trên Redis.
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG (NotBlank)"
+  }
+  ```
+* **Response**: `ApiResponse` thông báo cập nhật thành công.
+
+#### 13.3.7. Xóa mềm Danh mục tài sản
+* **Endpoint**: `DELETE /api/danh-muc-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_DANH_MUC_TAI_SAN`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết danh mục tài sản trên Redis.
+* **Response**: `ApiResponse` thông báo xóa mềm thành công.
+
+---
+
+### 13.4. Mẫu phần cứng (TaiSanPhanCung)
+
+#### 13.4.1. Lấy danh sách Mẫu phần cứng phân trang
+* **Endpoint**: `GET /api/tai-san-phan-cung`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_CUNG`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo `maMau` hoặc `tenMau`.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Tiêu chí sắp xếp.
+* **Caching**: Được cache tập trung trên Redis (`tai_san_phan_cung_list_cache` cache, key gồm các query parameters).
+* **Response**: Trả về `PageResponse` chứa danh sách Mẫu phần cứng.
+
+#### 13.4.2. Lấy chi tiết Mẫu phần cứng theo ID
+* **Endpoint**: `GET /api/tai-san-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_CUNG`
+* **Status Code**: 
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Mẫu phần cứng hiện đang bị khóa hoặc ngừng hoạt động.
+  * `404 Not Found`: Không tìm thấy mẫu phần cứng.
+* **Caching**: Được cache tập trung trên Redis (`tai_san_phan_cung_cache` cache, key `#id`).
+* **Response**: `ApiResponse` chứa thông tin chi tiết Mẫu phần cứng.
+
+#### 13.4.3. Lấy danh sách Mẫu phần cứng rút gọn cho Dropdown
+* **Endpoint**: `GET /api/tai-san-phan-cung/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_CUNG`
+* **Status Code**: `200 OK`
+* **Response**: `ApiResponse` chứa danh sách tùy chọn gợi ý của Mẫu phần cứng đang hoạt động.
+
+#### 13.4.4. Thêm mới Mẫu phần cứng
+* **Endpoint**: `POST /api/tai-san-phan-cung`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_TAI_SAN_PHAN_CUNG`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng mã mẫu đã tồn tại, hoặc không tìm thấy danh mục/loại/hãng liên quan.
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết trên Redis.
+* **Payload**:
+  ```json
+  {
+    "idDanhMucTaiSan": 1,
+    "idLoaiTaiSan": 1,
+    "idHangSanXuat": 1,
+    "maMau": "DELL_LATITUDE_5420 (NotBlank)",
+    "tenMau": "Dell Latitude 5420 i5 (NotBlank)",
+    "hinhAnh": "http://...",
+    "coTheThaoLap": true,
+    "moTa": "Mẫu laptop văn phòng",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Trả về thông tin Mẫu phần cứng vừa tạo.
+
+#### 13.4.5. Cập nhật Mẫu phần cứng
+* **Endpoint**: `PUT /api/tai-san-phan-cung/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_TAI_SAN_PHAN_CUNG`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và chi tiết trên Redis.
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin sau khi cập nhật.
+
+#### 13.4.6. Cập nhật trạng thái Mẫu phần cứng
+* **Endpoint**: `PUT /api/tai-san-phan-cung/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_TAI_SAN_PHAN_CUNG`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG (NotBlank)"
+  }
+  ```
+* **Response**: Thông báo thành công.
+
+#### 13.4.7. Xóa mềm Mẫu phần cứng
+* **Endpoint**: `DELETE /api/tai-san-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_TAI_SAN_PHAN_CUNG`
+* **Response**: Thông báo xóa mềm thành công.
+
+---
+
+### 13.5. Mẫu phần mềm (TaiSanPhanMem)
+
+#### 13.5.1. Lấy danh sách Mẫu phần mềm phân trang
+* **Endpoint**: `GET /api/tai-san-phan-mem`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_MEM`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword`, `trangThai`, `page`, `size`, `sort`
+* **Caching**: Được cache tập trung trên Redis (`tai_san_phan_mem_list_cache`).
+* **Response**: Trả về `PageResponse` danh sách Mẫu phần mềm.
+
+#### 13.5.2. Lấy chi tiết Mẫu phần mềm theo ID
+* **Endpoint**: `GET /api/tai-san-phan-mem/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_MEM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu bị khóa), `404 Not Found`
+* **Caching**: Được cache tập trung trên Redis (`tai_san_phan_mem_cache`, key `#id`).
+* **Response**: `ApiResponse` chi tiết Mẫu phần mềm.
+
+#### 13.5.3. Lấy danh sách Mẫu phần mềm rút gọn cho Dropdown
+* **Endpoint**: `GET /api/tai-san-phan-mem/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TAI_SAN_PHAN_MEM`
+* **Response**: `ApiResponse` danh sách tùy chọn Mẫu phần mềm hoạt động.
+
+#### 13.5.4. Thêm mới Mẫu phần mềm
+* **Endpoint**: `POST /api/tai-san-phan-mem`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_TAI_SAN_PHAN_MEM`
+* **Payload**:
+  ```json
+  {
+    "idDanhMucTaiSan": 1,
+    "idLoaiTaiSan": 2,
+    "idHangSanXuat": 2,
+    "maMau": "WIN_11_PRO (NotBlank)",
+    "tenMau": "Windows 11 Professional (NotBlank)",
+    "hinhAnh": "http://...",
+    "hinhThucTrienKhai": "ON_PREMISE",
+    "nenTangHoTro": "x64",
+    "hinhThucCapPhep": "PERPETUAL",
+    "moTa": "Hệ điều hành Windows 11",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Thông tin Mẫu phần mềm vừa tạo.
+
+#### 13.5.5. Cập nhật Mẫu phần mềm
+* **Endpoint**: `PUT /api/tai-san-phan-mem/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_TAI_SAN_PHAN_MEM`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Thông tin Mẫu phần mềm đã cập nhật.
+
+#### 13.5.6. Cập nhật trạng thái Mẫu phần mềm
+* **Endpoint**: `PUT /api/tai-san-phan-mem/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_TAI_SAN_PHAN_MEM`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**: Thông báo thành công.
+
+#### 13.5.7. Xóa mềm Mẫu phần mềm
+* **Endpoint**: `DELETE /api/tai-san-phan-mem/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_TAI_SAN_PHAN_MEM`
+* **Response**: Thông báo thành công.
+
+---
+
+### 13.6. Thiết bị phần cứng cụ thể (DanhSachThietBiPhanCung)
+
+> [!NOTE]
+> Các API dưới đây được cô lập hoàn toàn theo Đơn vị (Multi-tenant) dựa trên người dùng đăng nhập. `idDonVi` sẽ được hệ thống gán tự động ngầm định từ session token của người dùng.
+
+#### 13.6.1. Lấy danh sách Thiết bị phần cứng phân trang (Advanced Filters)
+* **Endpoint**: `GET /api/thiet-bi-phan-cung`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_CUNG`
+* **Status Code**: `200 OK`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm theo `soSerial` hoặc `maTheTaiSan`.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `tuNgayMua` (tùy chọn): Ngày bắt đầu mua (`YYYY-MM-DD`).
+  * `denNgayMua` (tùy chọn): Ngày kết thúc mua (`YYYY-MM-DD`).
+  * `trangThaiKho` (tùy chọn): Trạng thái kho.
+  * `page`, `size`, `sort`
+* **Caching**: Được cache tập trung trên Redis (`thiet_bi_phan_cung_list_cache`, key phân tách riêng biệt theo từng đơn vị/tenant).
+* **Response**: Trả về `PageResponse` chứa danh sách thiết bị thuộc đơn vị.
+
+#### 13.6.2. Lấy chi tiết Thiết bị phần cứng theo ID
+* **Endpoint**: `GET /api/thiet-bi-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_CUNG`
+* **Status Code**: 
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Thiết bị đang bị khóa hoặc ngừng hoạt động.
+  * `403 Forbidden`: Thiết bị này thuộc đơn vị khác.
+  * `404 Not Found`: Không tìm thấy thiết bị phần cứng.
+* **Caching**: Được cache tập trung trên Redis (`thiet_bi_phan_cung_cache`).
+* **Response**: `ApiResponse` chi tiết thiết bị phần cứng.
+
+#### 13.6.3. Lấy danh sách Thiết bị phần cứng rút gọn cho Dropdown
+* **Endpoint**: `GET /api/thiet-bi-phan-cung/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_CUNG`
+* **Response**: `ApiResponse` danh sách tùy chọn (chứa `id`, `ten` hiển thị dạng `Mã thẻ - Số serial`).
+
+#### 13.6.4. Thêm mới Thiết bị phần cứng
+* **Endpoint**: `POST /api/thiet-bi-phan-cung`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_THIET_BI_PHAN_CUNG`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng `soSerial` hoặc `maTheTaiSan` trong cùng một đơn vị.
+* **Payload**:
+  ```json
+  {
+    "idTaiSanPhanCung": 1,
+    "idNhaCungCap": 1,
+    "soSerial": "S123456789 (NotBlank)",
+    "maTheTaiSan": "ASSET_0001 (NotBlank)",
+    "giaMua": 15000000.00,
+    "thoiGianMua": "2026-01-15",
+    "hanBaoHanhThang": 24,
+    "trangThaiKho": "CAP_PHAT",
+    "viTriKho": "Kho khu A",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Trả về thông tin thiết bị vừa tạo.
+
+#### 13.6.5. Cập nhật Thiết bị phần cứng
+* **Endpoint**: `PUT /api/thiet-bi-phan-cung/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_THIET_BI_PHAN_CUNG`
+* **Status Code**: `200 OK`, `400 Bad Request` (Trùng lặp serial/mã thẻ), `403 Forbidden`, `404 Not Found`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin sau cập nhật.
+
+#### 13.6.6. Cập nhật trạng thái Thiết bị phần cứng
+* **Endpoint**: `PUT /api/thiet-bi-phan-cung/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_CUNG`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**: Thông báo thành công.
+
+#### 13.6.7. Xóa mềm Thiết bị phần cứng
+* **Endpoint**: `DELETE /api/thiet-bi-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_THIET_BI_PHAN_CUNG`
+* **Response**: Thông báo thành công.
+
+---
+
+### 13.7. Key bản quyền phần mềm cụ thể (DanhSachThietBiPhanMem)
+
+> [!NOTE]
+> Các API dưới đây được cô lập theo Đơn vị (Multi-tenant).
+
+#### 13.7.1. Lấy danh sách Key bản quyền phân trang (Advanced Filters)
+* **Endpoint**: `GET /api/thiet-bi-phan-mem`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_MEM`
+* **Query Parameters**:
+  * `keyword` (tìm theo `keyBanQuyen` hoặc `maChungTuMua`).
+  * `trangThai`
+  * `tuNgayMua`, `denNgayMua`
+  * `tuNgayHetHan`, `denNgayHetHan`
+  * `trangThaiKho`
+  * `page`, `size`, `sort`
+* **Caching**: Được cache tập trung trên Redis (`thiet_bi_phan_mem_list_cache`, key phân tách theo tenant).
+* **Response**: Trả về `PageResponse` danh sách key bản quyền thuộc đơn vị.
+
+#### 13.7.2. Lấy chi tiết Key bản quyền theo ID
+* **Endpoint**: `GET /api/thiet-bi-phan-mem/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_MEM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Bị khóa), `403 Forbidden` (Khác đơn vị), `404 Not Found`
+* **Caching**: Được cache trên Redis (`thiet_bi_phan_mem_cache`).
+* **Response**: Chi tiết key bản quyền.
+
+#### 13.7.3. Lấy danh sách Key bản quyền rút gọn cho Dropdown
+* **Endpoint**: `GET /api/thiet-bi-phan-mem/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_THIET_BI_PHAN_MEM`
+* **Response**: Danh sách các key bản quyền hoạt động (`HOAT_DONG`).
+
+#### 13.7.4. Thêm mới Key bản quyền
+* **Endpoint**: `POST /api/thiet-bi-phan-mem`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_THIET_BI_PHAN_MEM`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng `keyBanQuyen` trong cùng một đơn vị.
+* **Payload**:
+  ```json
+  {
+    "idTaiSanPhanMem": 1,
+    "idNhaCungCap": 1,
+    "keyBanQuyen": "XXXX-YYYY-ZZZZ-WWWW (NotBlank)",
+    "maChungTuMua": "PO-2026-0001",
+    "tongSoGhe": 50,
+    "giaMua": 30000000.00,
+    "thoiGianMua": "2026-02-20",
+    "thoiGianHetHan": "2027-02-20",
+    "trangThaiKho": "CAP_PHAT",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Thông tin key bản quyền vừa tạo.
+
+#### 13.7.5. Cập nhật Key bản quyền
+* **Endpoint**: `PUT /api/thiet-bi-phan-mem/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_THIET_BI_PHAN_MEM`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin sau cập nhật.
+
+#### 13.7.6. Cập nhật trạng thái Key bản quyền
+* **Endpoint**: `PUT /api/thiet-bi-phan-mem/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_MEM`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**: Thông báo thành công.
+
+#### 13.7.7. Xóa mềm Key bản quyền
+* **Endpoint**: `DELETE /api/thiet-bi-phan-mem/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_THIET_BI_PHAN_MEM`
+* **Response**: Thông báo thành công.
+
+---
+
+### 13.8. Linh kiện phần cứng cụ thể (LinhKienPhanCung)
+
+> [!NOTE]
+> Các API dưới đây được cô lập theo Đơn vị (Multi-tenant).
+
+#### 13.8.1. Lấy danh sách Linh kiện phần cứng phân trang (Advanced Filters)
+* **Endpoint**: `GET /api/linh-kien-phan-cung`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LINH_KIEN_PHAN_CUNG`
+* **Query Parameters**:
+  * `keyword` (tìm theo `soSerial`).
+  * `trangThai`
+  * `tuNgayMua`, `denNgayMua`
+  * `trangThaiKho`
+  * `page`, `size`, `sort`
+* **Caching**: Được cache tập trung trên Redis (`linh_kien_phan_cung_list_cache`, key phân tách theo tenant).
+* **Response**: Trả về `PageResponse` danh sách linh kiện thuộc đơn vị.
+
+#### 13.8.2. Lấy chi tiết Linh kiện phần cứng theo ID
+* **Endpoint**: `GET /api/linh-kien-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LINH_KIEN_PHAN_CUNG`
+* **Status Code**: `200 OK`, `400 Bad Request` (Bị khóa), `403 Forbidden` (Khác đơn vị), `404 Not Found`
+* **Caching**: Được cache trên Redis (`linh_kien_phan_cung_cache`).
+* **Response**: Chi tiết linh kiện phần cứng.
+
+#### 13.8.3. Lấy danh sách Linh kiện phần cứng rút gọn cho Dropdown
+* **Endpoint**: `GET /api/linh-kien-phan-cung/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_LINH_KIEN_PHAN_CUNG`
+* **Response**: Danh sách các linh kiện đang hoạt động (`HOAT_DONG`).
+
+#### 13.8.4. Thêm mới Linh kiện phần cứng
+* **Endpoint**: `POST /api/linh-kien-phan-cung`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_LINH_KIEN_PHAN_CUNG`
+* **Status Code**:
+  * `200 OK`: Thành công.
+  * `400 Bad Request`: Trùng `soSerial` trong cùng một đơn vị.
+* **Payload**:
+  ```json
+  {
+    "idTaiSanPhanCung": 1,
+    "idNhaCungCap": 1,
+    "soSerial": "RAM8GB-001 (NotBlank)",
+    "giaMua": 1200000.00,
+    "thoiGianMua": "2026-03-01",
+    "hanBaoHanhThang": 36,
+    "trangThaiKho": "TRONG_KHO",
+    "viTriKho": "Kệ A1",
+    "trangThai": "HOAT_DONG"
+  }
+  ```
+* **Response**: Thông tin linh kiện vừa tạo.
+
+#### 13.8.5. Cập nhật Linh kiện phần cứng
+* **Endpoint**: `PUT /api/linh-kien-phan-cung/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_LINH_KIEN_PHAN_CUNG`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin sau cập nhật.
+
+#### 13.8.6. Cập nhật trạng thái Linh kiện phần cứng
+* **Endpoint**: `PUT /api/linh-kien-phan-cung/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_LINH_KIEN_PHAN_CUNG`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**: Thông báo thành công.
+
+#### 13.8.7. Xóa mềm Linh kiện phần cứng
+* **Endpoint**: `DELETE /api/linh-kien-phan-cung/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_LINH_KIEN_PHAN_CUNG`
+* **Response**: Thông báo thành công.
+
+---
+
+### 13.9. Thuộc tính động (Dynamic Attributes)
+
+#### 13.9.1. Lấy danh sách Danh mục thuộc tính động phân trang (Kèm option gợi ý lồng)
+* **Endpoint**: `GET /api/danh-muc-thuoc-tinh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_MUC_THUOC_TINH`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo mã hoặc tên thuộc tính.
+  * `apDungCho` (tùy chọn): `PHAN_CUNG` / `PHAN_MEM` / `LINH_KIEN`.
+  * `page`, `size`, `sort`
+* **Caching**: Được cache tập trung trên Redis (`danh_muc_thuoc_tinh_list_cache` cache, key gồm các query parameters).
+* **Response**: Trả về `PageResponse` danh sách thuộc tính. Mỗi thuộc tính chứa mảng `luaChonGoiY` đã được lọc (chưa bị xóa mềm) và sắp xếp theo `thuTuHienThi` tăng dần.
+
+#### 13.9.2. Lấy chi tiết Danh mục thuộc tính động theo ID (Kèm option gợi ý lồng)
+* **Endpoint**: `GET /api/danh-muc-thuoc-tinh/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_MUC_THUOC_TINH`
+* **Status Code**: `200 OK`, `400 Bad Request` (Bị khóa), `404 Not Found`
+* **Caching**: Được cache trên Redis (`danh_muc_thuoc_tinh_cache` cache, key `#id`).
+* **Response**: Chi tiết danh mục thuộc tính lồng kèm toàn bộ danh sách gợi ý.
+
+#### 13.9.3. Thêm mới Danh mục thuộc tính động và danh sách gợi ý lồng
+* **Endpoint**: `POST /api/danh-muc-thuoc-tinh`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_DANH_MUC_THUOC_TINH`
+* **Payload**:
+  ```json
+  {
+    "maThuocTinh": "RAM_SIZE (NotBlank)",
+    "tenThuocTinh": "Dung lượng RAM (NotBlank)",
+    "kieuDuLieu": "SELECT (NotBlank)",
+    "apDungCho": "PHAN_CUNG (NotBlank)",
+    "batBuocNhap": true,
+    "giaTriMacDinh": "8GB",
+    "trangThai": "HOAT_DONG",
+    "luaChonGoiY": [
+      {
+        "giaTri": "8GB",
+        "trangThai": "HOAT_DONG",
+        "thuTuHienThi": 1
+      },
+      {
+        "giaTri": "16GB",
+        "trangThai": "HOAT_DONG",
+        "thuTuHienThi": 2
+      },
+      {
+        "giaTri": "Khác...",
+        "trangThai": "HOAT_DONG",
+        "thuTuHienThi": 99
+      }
+    ]
+  }
+  ```
+* **Response**: Thông tin thuộc tính lồng kèm gợi ý vừa tạo.
+
+#### 13.9.4. Cập nhật Danh mục thuộc tính động và đồng bộ danh sách gợi ý lồng
+* **Endpoint**: `PUT /api/danh-muc-thuoc-tinh/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_DANH_MUC_THUOC_TINH`
+* **Payload**:
+  ```json
+  {
+    "maThuocTinh": "RAM_SIZE",
+    "tenThuocTinh": "Dung lượng RAM",
+    "kieuDuLieu": "SELECT",
+    "apDungCho": "PHAN_CUNG",
+    "batBuocNhap": true,
+    "giaTriMacDinh": "8GB",
+    "trangThai": "HOAT_DONG",
+    "luaChonGoiY": [
+      {
+        "id": 1,
+        "giaTri": "8GB",
+        "trangThai": "HOAT_DONG",
+        "thuTuHienThi": 1
+      },
+      {
+        "id": null,
+        "giaTri": "32GB",
+        "trangThai": "HOAT_DONG",
+        "thuTuHienThi": 3
+      }
+    ]
+  }
+  ```
+* **Response**: Thông tin thuộc tính sau cập nhật và đồng bộ.
+
+#### 13.9.5. Cập nhật trạng thái Danh mục thuộc tính động
+* **Endpoint**: `PUT /api/danh-muc-thuoc-tinh/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_DANH_MUC_THUOC_TINH`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**: Thông báo cập nhật trạng thái thành công.
+
+#### 13.9.6. Xóa mềm Danh mục thuộc tính động (Đồng thời xóa mềm toàn bộ gợi ý đi kèm)
+* **Endpoint**: `DELETE /api/danh-muc-thuoc-tinh/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_DANH_MUC_THUOC_TINH`
+* **Response**: Thông báo thành công.
+
+#### 13.9.7. Lấy danh sách giá trị thuộc tính thực tế phân trang
+* **Endpoint**: `GET /api/gia-tri-thuoc-tinh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_GIA_TRI_THUOC_TINH`
+* **Query Parameters**:
+  * `id_tai_san` (tùy chọn): ID tài sản cụ thể.
+  * `loai_tai_san` (tùy chọn): `PHAN_CUNG` / `PHAN_MEM` / `LINH_KIEN`.
+  * `page`, `size`, `sort`
+* **Caching**: Được cache trên Redis (`gia_tri_thuoc_tinh_list_cache`, key phân tách theo tenant).
+* **Response**: `PageResponse` chứa danh sách giá trị thuộc tính của thiết bị thuộc đơn vị đang đăng nhập.
+
+#### 13.9.8. Lưu hàng loạt thông số kỹ thuật (Bulk Insert/Update)
+* **Endpoint**: `POST /api/gia-tri-thuoc-tinh/save-bulk`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `LUU_GIA_TRI_THUOC_TINH`
+* **Payload**:
+  ```json
+  {
+    "loaiTaiSan": "PHAN_CUNG (NotBlank)",
+    "idTaiSan": 1,
+    "values": [
+      {
+        "danhMucThuocTinhId": 1,
+        "luaChonId": 2,
+        "giaTri": null
+      },
+      {
+        "danhMucThuocTinhId": 2,
+        "luaChonId": 5, // ID của lựa chọn có giá trị "Khác..."
+        "giaTri": "Giá trị tự nhập tay ở đây"
+      }
+    ]
+  }
+  ```
+* **Response**: Danh sách các giá trị thuộc tính đã lưu thành công.

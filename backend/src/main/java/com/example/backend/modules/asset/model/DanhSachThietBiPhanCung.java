@@ -1,0 +1,50 @@
+package com.example.backend.modules.asset.model;
+
+import com.example.backend.shared.model.BaseEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "danh_sach_thiet_bi_phan_cung")
+public class DanhSachThietBiPhanCung extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tai_san_phan_cung")
+    private TaiSanPhanCung taiSanPhanCung;
+
+    @Column(name = "id_nha_cung_cap")
+    private Long idNhaCungCap;
+
+    @Column(name = "id_don_vi")
+    private Long idDonVi;
+
+    @Column(name = "so_serial", length = 100, unique = true)
+    private String soSerial;
+
+    @Column(name = "ma_the_tai_san", length = 50, unique = true)
+    private String maTheTaiSan;
+
+    @Column(name = "gia_mua", precision = 15, scale = 2)
+    private BigDecimal giaMua;
+
+    @Column(name = "thoi_gian_mua")
+    private LocalDate thoiGianMua;
+
+    @Column(name = "han_bao_hanh_thang")
+    private Integer hanBaoHanhThang;
+
+    @Column(name = "trang_thai_kho", length = 50)
+    private String trangThaiKho;
+
+    @Column(name = "vi_tri_kho", length = 100)
+    private String viTriKho;
+
+    @Column(name = "trang_thai", length = 30)
+    private String trangThai;
+}

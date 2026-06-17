@@ -15,7 +15,7 @@ import java.time.LocalDate;
 })
 public class DonVi extends BaseEntity {
 
-    @Column(name = "ma_don_vi", length = 50)
+    @Column(name = "ma_don_vi", length = 50, unique = true)
     private String maDonVi;
 
     @Column(name = "ten_phap_ly", length = 255)
@@ -24,7 +24,7 @@ public class DonVi extends BaseEntity {
     @Column(name = "ten_thuong_mai", length = 255)
     private String tenThuongMai;
 
-    @Column(name = "ma_so_thue", length = 20)
+    @Column(name = "ma_so_thue", length = 20, unique = true)
     private String maSoThue;
 
     @Column(name = "ma_quoc_gia_dien_thoai", length = 10)
@@ -36,10 +36,10 @@ public class DonVi extends BaseEntity {
     @Column(name = "so_dien_thoai_di_dong", length = 20)
     private String soDienThoaiDiDong;
 
-    @Column(name = "email_chinh_thuc", length = 100)
+    @Column(name = "email_chinh_thuc", length = 100, unique = true)
     private String emailChinhThuc;
 
-    @Column(name = "ten_mien_he_thong", length = 100)
+    @Column(name = "ten_mien_he_thong", length = 100, unique = true)
     private String tenMienHeThong;
 
     @Column(name = "duong_dan_website", length = 255)

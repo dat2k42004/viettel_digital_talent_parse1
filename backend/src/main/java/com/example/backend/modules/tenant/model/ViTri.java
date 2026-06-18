@@ -22,7 +22,7 @@ public class ViTri extends BaseEntity {
     @JoinColumn(name = "id_don_vi")
     private DonVi donVi;
 
-    @Column(name = "ma_vi_tri", length = 50)
+    @Column(name = "ma_vi_tri", length = 50, unique = true)
     private String maViTri;
 
     @Column(name = "ten_vi_tri", length = 150)

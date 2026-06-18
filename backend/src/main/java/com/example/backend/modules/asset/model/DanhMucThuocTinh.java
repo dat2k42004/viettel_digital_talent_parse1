@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +17,13 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "danh_muc_thuoc_tinh")
+@Table(name = "danh_muc_thuoc_tinh", indexes = {
+        @Index(name = "idx_dmtt_xoa", columnList = "thoi_gian_xoa"),
+        @Index(name = "idx_dmtt_ma_xoa", columnList = "ma_thuoc_tinh, thoi_gian_xoa"),
+        @Index(name = "idx_dmtt_ap_dung_xoa", columnList = "ap_dung_cho, thoi_gian_xoa")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_danh_muc_thuoc_tinh_ma", columnNames = { "ma_thuoc_tinh" })
+})
 public class DanhMucThuocTinh extends BaseEntity {
 
     @Column(name = "ma_thuoc_tinh", length = 50, unique = true)

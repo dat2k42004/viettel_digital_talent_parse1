@@ -23,7 +23,7 @@ public class PhongBan extends BaseEntity {
     @JoinColumn(name = "id_don_vi")
     private DonVi donVi;
 
-    @Column(name = "ma_phong_ban", length = 50)
+    @Column(name = "ma_phong_ban", length = 50, unique = true)
     private String maPhongBan;
 
     @Column(name = "ten_phong_ban", length = 150)

@@ -8,7 +8,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "tai_san_phan_cung")
+@Table(name = "tai_san_phan_cung", indexes = {
+        @Index(name = "idx_tspc_xoa", columnList = "thoi_gian_xoa"),
+        @Index(name = "idx_tspc_ma_xoa", columnList = "ma_mau, thoi_gian_xoa"),
+        @Index(name = "idx_tspc_bo_loc_catalog", columnList = "id_danh_muc_tai_san, id_loai_tai_san, id_hang_san_xuat, thoi_gian_xoa")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_tai_san_phan_cung_ma", columnNames = { "ma_mau" })
+})
 public class TaiSanPhanCung extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

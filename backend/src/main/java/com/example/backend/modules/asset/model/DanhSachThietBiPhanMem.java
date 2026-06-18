@@ -11,7 +11,12 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "danh_sach_thiet_bi_phan_mem")
+@Table(name = "danh_sach_thiet_bi_phan_mem", indexes = {
+        @Index(name = "idx_dstbpm_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa"),
+        @Index(name = "idx_dstbpm_don_vi_kho_xoa", columnList = "id_don_vi, trang_thai_kho, thoi_gian_xoa"),
+        @Index(name = "idx_dstbpm_mau_ts_xoa", columnList = "id_tai_san_phan_mem, thoi_gian_xoa"),
+        @Index(name = "idx_dstbpm_ma_ct_don_vi", columnList = "ma_chung_tu_mua, id_don_vi, thoi_gian_xoa")
+})
 public class DanhSachThietBiPhanMem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

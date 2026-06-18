@@ -4,13 +4,21 @@ import com.example.backend.shared.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "hang_san_xuat")
+@Table(name = "hang_san_xuat", indexes = {
+        @Index(name = "idx_hsx_xoa", columnList = "thoi_gian_xoa"),
+        @Index(name = "idx_hsx_ma_xoa", columnList = "ma_hang, thoi_gian_xoa"),
+        @Index(name = "idx_hsx_trang_thai_xoa", columnList = "trang_thai, thoi_gian_xoa")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_hang_san_xuat_ma", columnNames = { "ma_hang" })
+})
 public class HangSanXuat extends BaseEntity {
 
     @Column(name = "ma_hang", length = 50, unique = true)

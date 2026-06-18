@@ -8,8 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "lua_chon_goi_y", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_lcgy_thuoc_tinh_gia_tri", columnNames = {"id_danh_muc_thuoc_tinh", "gia_tri"})
+@Table(name = "lua_chon_goi_y", indexes = {
+        @Index(name = "idx_lcgy_thuoc_tinh_xoa", columnList = "id_danh_muc_thuoc_tinh, thoi_gian_xoa")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_lcgy_thuoc_tinh_gia_tri", columnNames = { "id_danh_muc_thuoc_tinh", "gia_tri" })
 })
 public class LuaChonGoiY extends BaseEntity {
 

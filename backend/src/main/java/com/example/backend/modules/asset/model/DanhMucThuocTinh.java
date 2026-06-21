@@ -8,6 +8,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Index;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,7 +47,8 @@ public class DanhMucThuocTinh extends BaseEntity {
     private String giaTriMacDinh;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private com.example.backend.shared.model.TrangThaiCoBanEnum trangThai;
 
     @OneToMany(mappedBy = "danhMucThuocTinh", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LuaChonGoiY> luaChonGoiY = new ArrayList<>();

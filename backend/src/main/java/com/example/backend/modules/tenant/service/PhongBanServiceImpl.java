@@ -1,6 +1,7 @@
 package com.example.backend.modules.tenant.service;
 
 import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.tenant.dto.PhongBanRequest;
 import com.example.backend.modules.tenant.dto.PhongBanResponse;
@@ -43,7 +44,7 @@ public class PhongBanServiceImpl implements PhongBanService {
         Specification<PhongBan> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
             predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
 
             if (tenPhongBan != null && !tenPhongBan.trim().isEmpty()) {
@@ -70,15 +71,12 @@ public class PhongBanServiceImpl implements PhongBanService {
             throw new NghiepVuException("Chỉ admin đơn vị mới được thêm phòng ban", 403);
         }
 
-        if (phongBanRepository.existsByMaPhongBanAndDonViIdAndThoiGianXoaIsNull(request.getMaPhongBan(), idDonVi)) {
-            throw new NghiepVuException("Mã phòng ban đã tồn tại trong đơn vị", 400);
-        }
-
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn vị", 404));
 
         PhongBan phongBan = new PhongBan();
         phongBan.setDonVi(donVi);
+        phongBan.setMaPhongBan("PB-" + idDonVi + "-" + System.currentTimeMillis());
         capNhatThongTin(phongBan, request);
         phongBan = phongBanRepository.save(phongBan);
 
@@ -91,11 +89,6 @@ public class PhongBanServiceImpl implements PhongBanService {
         Long idDonVi = DonViContextHolder.getTenantId();
         PhongBan phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban", 404));
-
-        if (!phongBan.getMaPhongBan().equals(request.getMaPhongBan()) && 
-            phongBanRepository.existsByMaPhongBanAndDonViIdAndThoiGianXoaIsNull(request.getMaPhongBan(), idDonVi)) {
-            throw new NghiepVuException("Mã phòng ban đã tồn tại trong đơn vị", 400);
-        }
 
         capNhatThongTin(phongBan, request);
         phongBan = phongBanRepository.save(phongBan);
@@ -116,7 +109,6 @@ public class PhongBanServiceImpl implements PhongBanService {
     }
 
     private void capNhatThongTin(PhongBan phongBan, PhongBanRequest request) {
-        phongBan.setMaPhongBan(request.getMaPhongBan());
         phongBan.setTenPhongBan(request.getTenPhongBan());
         phongBan.setTenTiengAnh(request.getTenTiengAnh());
         phongBan.setTenVietTat(request.getTenVietTat());
@@ -127,7 +119,7 @@ public class PhongBanServiceImpl implements PhongBanService {
         phongBan.setHanMucNganSach(request.getHanMucNganSach());
         phongBan.setMaTrungTamChiPhi(request.getMaTrungTamChiPhi());
         phongBan.setMoTaChucNang(request.getMoTaChucNang());
-        phongBan.setTrangThai(request.getTrangThai() != null ? request.getTrangThai() : "HOAT_DONG");
+        phongBan.setTrangThai(request.getTrangThai() != null ? TrangThaiCoBanEnum.fromValue(request.getTrangThai()) : TrangThaiCoBanEnum.HOAT_DONG);
         phongBan.setThoiGianThanhLap(request.getThoiGianThanhLap());
     }
 
@@ -146,7 +138,7 @@ public class PhongBanServiceImpl implements PhongBanService {
                 .hanMucNganSach(phongBan.getHanMucNganSach())
                 .maTrungTamChiPhi(phongBan.getMaTrungTamChiPhi())
                 .moTaChucNang(phongBan.getMoTaChucNang())
-                .trangThai(phongBan.getTrangThai())
+                .trangThai(phongBan.getTrangThai() != null ? phongBan.getTrangThai().getValue() : null)
                 .thoiGianThanhLap(phongBan.getThoiGianThanhLap())
                 .build();
     }
@@ -158,10 +150,11 @@ public class PhongBanServiceImpl implements PhongBanService {
         PhongBan phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban", 404));
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
+        try {
+            phongBan.setTrangThai(TrangThaiCoBanEnum.fromValue(status));
+        } catch (IllegalArgumentException e) {
             throw new NghiepVuException("Trạng thái không hợp lệ", 400);
         }
-        phongBan.setTrangThai(status);
         phongBanRepository.save(phongBan);
     }
 
@@ -177,7 +170,7 @@ public class PhongBanServiceImpl implements PhongBanService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban thuộc đơn vị của bạn", 404));
         }
 
-        if (!"HOAT_DONG".equals(phongBan.getTrangThai())) {
+        if (phongBan.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 

@@ -394,7 +394,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maVaiTro": "ROLE_MOD (NotBlank)",
+    "maVaiTro": "Tự động sinh bởi Backend, không truyền",
     "tenVaiTro": "Điều hành viên (NotBlank)",
     "moTa": "Quản lý nội dung",
     "danhSachIdQuyen": [1, 2]
@@ -691,7 +691,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maPhongBan": "PB_HR (NotBlank)",
+    "maPhongBan": "Tự động sinh bởi Backend, không truyền",
     "tenPhongBan": "Phòng Nhân Sự (NotBlank)",
     "tenTiengAnh": "Human Resources Department",
     "tenVietTat": "HR",
@@ -766,7 +766,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maViTri": "VT_TANG_5 (NotBlank)",
+    "maViTri": "Tự động sinh bởi Backend, không truyền",
     "tenViTri": "Văn phòng Tầng 5 (NotBlank)",
     "tenTiengAnh": "Office Floor 5",
     "loaiViTri": "OFFICE",
@@ -843,7 +843,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maCauHinh": "PASSWORD_EXPIRY_DAYS (NotBlank)",
+    "maCauHinh": "Tự động sinh bởi Backend, không truyền",
     "tenCauHinh": "Thời gian hết hạn mật khẩu (ngày) (NotBlank)",
     "moTaCauHinh": "Thời gian yêu cầu người dùng đổi mật khẩu định kỳ",
     "nhomCauHinh": "SECURITY",
@@ -1106,7 +1106,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maLoai": "LTS_LAPTOP (NotBlank)",
+    "maLoai": "Tự động sinh bởi Backend, không truyền",
     "tenLoai": "Máy tính xách tay (NotBlank)",
     "tienToMaThe": "LT",
     "thoiGianKhauHao": 36,
@@ -1203,7 +1203,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maHang": "HSX_DELL (NotBlank)",
+    "maHang": "Tự động sinh bởi Backend, không truyền",
     "tenHang": "Dell Technologies (NotBlank)",
     "websiteHoTro": "https://support.dell.com",
     "hotlineHoTro": "1800-8109",
@@ -1227,19 +1227,31 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 
 #### 13.2.6. Cập nhật trạng thái Hãng sản xuất
 * **Endpoint**: `PUT /api/hang-san-xuat/{id}/trang-thai`
+* **HTTP Method**: `PUT`
 * **Headers**:
   * `Content-Type`: `application/json`
   * `Authorization`: `Bearer <token>`
-* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_HANG_SAN_XUAT`
-* **Status Code**: `200 OK`
-* **Caching**: Tự động xóa bỏ (`Evict`) cache danh sách và cache chi tiết hãng sản xuất trên Redis.
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_HANG_SAN_XUAT')")`
 * **Payload**:
   ```json
   {
-    "trangThai": "KHOA / HOAT_DONG (NotBlank)"
+    "trangThai": "HOAT_DONG"
   }
   ```
-* **Response**: `ApiResponse` thông báo cập nhật thành công.
+  * **Bảng giải thích giá trị trạng thái (TrangThaiCoBanEnum)**:
+  | Giá trị Enum | Tên hiển thị / Mô tả | Ý nghĩa nghiệp vụ |
+  | :--- | :--- | :--- |
+  | `HOAT_DONG` | Hoạt động | Hãng sản xuất hoạt động bình thường, được phép liên kết dữ liệu mới. |
+  | `KHOA` | Khóa | Hãng sản xuất bị khóa, không cho phép tạo mới các liên kết đến hãng này. |
+
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái hãng sản xuất thành công"
+  }
+  ```
 
 #### 13.2.7. Xóa mềm Hãng sản xuất
 * **Endpoint**: `DELETE /api/hang-san-xuat/{id}`
@@ -1301,7 +1313,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maDanhMuc": "DM_TS_VP (NotBlank)",
+    "maDanhMuc": "Tự động sinh bởi Backend, không truyền",
     "tenDanhMuc": "Tài sản văn phòng (NotBlank)",
     "moTa": "Các tài sản dùng cho hoạt động hành chính văn phòng",
     "trangThai": "HOAT_DONG"
@@ -1399,7 +1411,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
     "idDanhMucTaiSan": 1,
     "idLoaiTaiSan": 1,
     "idHangSanXuat": 1,
-    "maMau": "DELL_LATITUDE_5420 (NotBlank)",
+    "maMau": "Tự động sinh bởi Backend, không truyền",
     "tenMau": "Dell Latitude 5420 i5 (NotBlank)",
     "hinhAnh": "http://...",
     "coTheThaoLap": true,
@@ -1484,7 +1496,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
     "idDanhMucTaiSan": 1,
     "idLoaiTaiSan": 2,
     "idHangSanXuat": 2,
-    "maMau": "WIN_11_PRO (NotBlank)",
+    "maMau": "Tự động sinh bởi Backend, không truyền",
     "tenMau": "Windows 11 Professional (NotBlank)",
     "hinhAnh": "http://...",
     "hinhThucTrienKhai": "ON_PREMISE",
@@ -1584,7 +1596,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
     "idTaiSanPhanCung": 1,
     "idNhaCungCap": 1,
     "soSerial": "S123456789 (NotBlank)",
-    "maTheTaiSan": "ASSET_0001 (NotBlank)",
+    "maTheTaiSan": "Tự động sinh bởi Backend, không truyền",
     "giaMua": 15000000.00,
     "thoiGianMua": "2026-01-15",
     "hanBaoHanhThang": 24,
@@ -1607,17 +1619,32 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 
 #### 13.6.6. Cập nhật trạng thái Thiết bị phần cứng
 * **Endpoint**: `PUT /api/thiet-bi-phan-cung/{id}/trang-thai`
+* **HTTP Method**: `PUT`
 * **Headers**:
   * `Content-Type`: `application/json`
   * `Authorization`: `Bearer <token>`
-* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_CUNG`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_CUNG')")`
 * **Payload**:
   ```json
   {
-    "trangThai": "KHOA / HOAT_DONG"
+    "trangThai": "HOAT_DONG"
   }
   ```
-* **Response**: Thông báo thành công.
+  * **Bảng giải thích giá trị trạng thái (TrangThaiVanHanhEnum)**:
+  | Giá trị Enum | Tên hiển thị / Mô tả | Ý nghĩa nghiệp vụ |
+  | :--- | :--- | :--- |
+  | `HOAT_DONG` | Hoạt động - Trống, sẵn sàng cấp phát | Thiết bị ở trạng thái bình thường, sẵn sàng để bàn giao hoặc sử dụng. |
+  | `KHOA` | Khóa | Thiết bị bị khóa tạm thời hoặc ngừng sử dụng, không thể mang đi cấp phát. |
+  | `CAP_PHAT` | Đang cấp phát | Thiết bị đã được bàn giao cho một đơn vị/phòng ban/nhân viên cụ thể. |
+
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái thiết bị phần cứng thành công"
+  }
+  ```
 
 #### 13.6.7. Xóa mềm Thiết bị phần cứng
 * **Endpoint**: `DELETE /api/thiet-bi-phan-cung/{id}`
@@ -1701,17 +1728,32 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 
 #### 13.7.6. Cập nhật trạng thái Key bản quyền
 * **Endpoint**: `PUT /api/thiet-bi-phan-mem/{id}/trang-thai`
+* **HTTP Method**: `PUT`
 * **Headers**:
   * `Content-Type`: `application/json`
   * `Authorization`: `Bearer <token>`
-* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_MEM`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_MEM')")`
 * **Payload**:
   ```json
   {
-    "trangThai": "KHOA / HOAT_DONG"
+    "trangThai": "HOAT_DONG"
   }
   ```
-* **Response**: Thông báo thành công.
+  * **Bảng giải thích giá trị trạng thái (TrangThaiVanHanhEnum)**:
+  | Giá trị Enum | Tên hiển thị / Mô tả | Ý nghĩa nghiệp vụ |
+  | :--- | :--- | :--- |
+  | `HOAT_DONG` | Hoạt động - Trống, sẵn sàng cấp phát | Key bản quyền ở trạng thái bình thường, sẵn sàng để kích hoạt/cấp phát. |
+  | `KHOA` | Khóa | Key bản quyền bị khóa tạm thời, không cho phép cấp phát mới. |
+  | `CAP_PHAT` | Đang cấp phát | Key bản quyền đang được gán sử dụng cho thiết bị/người dùng. |
+
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái key bản quyền thành công"
+  }
+  ```
 
 #### 13.7.7. Xóa mềm Key bản quyền
 * **Endpoint**: `DELETE /api/thiet-bi-phan-mem/{id}`
@@ -1793,17 +1835,32 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 
 #### 13.8.6. Cập nhật trạng thái Linh kiện phần cứng
 * **Endpoint**: `PUT /api/linh-kien-phan-cung/{id}/trang-thai`
+* **HTTP Method**: `PUT`
 * **Headers**:
   * `Content-Type`: `application/json`
   * `Authorization`: `Bearer <token>`
-* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_LINH_KIEN_PHAN_CUNG`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_LINH_KIEN_PHAN_CUNG')")`
 * **Payload**:
   ```json
   {
-    "trangThai": "KHOA / HOAT_DONG"
+    "trangThai": "HOAT_DONG"
   }
   ```
-* **Response**: Thông báo thành công.
+  * **Bảng giải thích giá trị trạng thái (TrangThaiVanHanhEnum)**:
+  | Giá trị Enum | Tên hiển thị / Mô tả | Ý nghĩa nghiệp vụ |
+  | :--- | :--- | :--- |
+  | `HOAT_DONG` | Hoạt động - Trống, sẵn sàng cấp phát | Linh kiện hoạt động bình thường, sẵn sàng để lắp ráp hoặc bàn giao. |
+  | `KHOA` | Khóa | Linh kiện bị khóa tạm thời, không thể mang đi sử dụng/lắp ráp. |
+  | `CAP_PHAT` | Đang cấp phát | Linh kiện đang được lắp ráp gắn trong thiết bị phần cứng cụ thể. |
+
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái linh kiện phần cứng thành công"
+  }
+  ```
 
 #### 13.8.7. Xóa mềm Linh kiện phần cứng
 * **Endpoint**: `DELETE /api/linh-kien-phan-cung/{id}`
@@ -1814,9 +1871,110 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 
 ---
 
-### 13.9. Thuộc tính động (Dynamic Attributes)
+### 13.9. Lắp ráp và Tháo dỡ linh kiện (LapRapLinhKien)
 
-#### 13.9.1. Lấy danh sách Danh mục thuộc tính động phân trang (Kèm option gợi ý lồng)
+Hệ thống cho phép thực hiện việc lắp ráp linh kiện lẻ vào một thiết bị phần cứng chính (ví dụ: gắn thanh RAM 8GB vào Laptop Dell) và thực hiện tháo dỡ linh kiện ra khi cần bảo dưỡng, thay thế. Mọi lịch sử liên kết tháo lắp đều được ghi nhận phục vụ cho việc kiểm toán.
+
+#### 13.9.1. Lấy danh sách lịch sử lắp ráp linh kiện (Get List Assemblies)
+* **Endpoint**: `GET /api/lap-rap`
+* **HTTP Method**: `GET`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('XEM_LAP_RAP_LINH_KIEN')")`
+* **Query Parameters**:
+  * `thietBiPhanCungId` (tùy chọn): Lọc theo ID thiết bị phần cứng chính.
+  * `linhKienPhanCungId` (tùy chọn): Lọc theo ID linh kiện phần cứng.
+  * `trangThaiLienKet` (tùy chọn): `ACTIVE` (đang liên kết/gắn trên máy) hoặc `INACTIVE` (đã tháo dỡ).
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Tiêu chí sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "thietBiPhanCungId": 1,
+          "soSerialThietBi": "S123456789",
+          "maTheTaiSanThietBi": "ASSET_0001",
+          "linhKienPhanCungId": 5,
+          "soSerialLinhKien": "RAM8GB-001",
+          "thoiGianLap": "2026-06-20T09:00:00",
+          "thoiGianThao": null,
+          "trangThaiLienKet": "ACTIVE",
+          "ghiChu": "Nâng cấp dung lượng RAM cho máy làm đồ họa",
+          "thoiGianTao": "2026-06-20T09:00:00",
+          "thoiGianCapNhat": "2026-06-20T09:00:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 13.9.2. Lắp ráp linh kiện vào thiết bị phần cứng (Assemble Component)
+* **Endpoint**: `POST /api/lap-rap`
+* **HTTP Method**: `POST`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('THEM_LAP_RAP_LINH_KIEN')")`
+* **Payload**:
+  ```json
+  {
+    "thietBiPhanCungId": 1,
+    "linhKienPhanCungId": 5,
+    "ghiChu": "Nâng cấp dung lượng RAM cho máy làm đồ họa"
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "thietBiPhanCungId": 1,
+      "soSerialThietBi": "S123456789",
+      "maTheTaiSanThietBi": "ASSET_0001",
+      "linhKienPhanCungId": 5,
+      "soSerialLinhKien": "RAM8GB-001",
+      "thoiGianLap": "2026-06-20T09:00:00",
+      "thoiGianThao": null,
+      "trangThaiLienKet": "ACTIVE",
+      "ghiChu": "Nâng cấp dung lượng RAM cho máy làm đồ họa",
+      "thoiGianTao": "2026-06-20T09:00:00",
+      "thoiGianCapNhat": "2026-06-20T09:00:00"
+    }
+  }
+  ```
+
+#### 13.9.3. Tháo dỡ linh kiện rời khỏi thiết bị phần cứng (Disassemble Component)
+* **Endpoint**: `PUT /api/lap-rap/{id}/thao-do`
+* **HTTP Method**: `PUT`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('SUA_LAP_RAP_LINH_KIEN')")`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Thực hiện tháo dỡ linh kiện rời ra khỏi thiết bị phần cứng thành công"
+  }
+  ```
+
+---
+
+### 13.10. Thuộc tính động (Dynamic Attributes)
+
+#### 13.10.1. Lấy danh sách Danh mục thuộc tính động phân trang (Kèm option gợi ý lồng)
 * **Endpoint**: `GET /api/danh-muc-thuoc-tinh`
 * **Headers**:
   * `Authorization`: `Bearer <token>`
@@ -1828,7 +1986,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Caching**: Được cache tập trung trên Redis (`danh_muc_thuoc_tinh_list_cache` cache, key gồm các query parameters).
 * **Response**: Trả về `PageResponse` danh sách thuộc tính. Mỗi thuộc tính chứa mảng `luaChonGoiY` đã được lọc (chưa bị xóa mềm) và sắp xếp theo `thuTuHienThi` tăng dần.
 
-#### 13.9.2. Lấy chi tiết Danh mục thuộc tính động theo ID (Kèm option gợi ý lồng)
+#### 13.10.2. Lấy chi tiết Danh mục thuộc tính động theo ID (Kèm option gợi ý lồng)
 * **Endpoint**: `GET /api/danh-muc-thuoc-tinh/{id}`
 * **Headers**:
   * `Authorization`: `Bearer <token>`
@@ -1837,7 +1995,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Caching**: Được cache trên Redis (`danh_muc_thuoc_tinh_cache` cache, key `#id`).
 * **Response**: Chi tiết danh mục thuộc tính lồng kèm toàn bộ danh sách gợi ý.
 
-#### 13.9.3. Thêm mới Danh mục thuộc tính động và danh sách gợi ý lồng
+#### 13.10.3. Thêm mới Danh mục thuộc tính động và danh sách gợi ý lồng
 * **Endpoint**: `POST /api/danh-muc-thuoc-tinh`
 * **Headers**:
   * `Content-Type`: `application/json`
@@ -1846,7 +2004,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Payload**:
   ```json
   {
-    "maThuocTinh": "RAM_SIZE (NotBlank)",
+    "maThuocTinh": "Tự động sinh bởi Backend, không truyền",
     "tenThuocTinh": "Dung lượng RAM (NotBlank)",
     "kieuDuLieu": "SELECT (NotBlank)",
     "apDungCho": "PHAN_CUNG (NotBlank)",
@@ -1874,7 +2032,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   ```
 * **Response**: Thông tin thuộc tính lồng kèm gợi ý vừa tạo.
 
-#### 13.9.4. Cập nhật Danh mục thuộc tính động và đồng bộ danh sách gợi ý lồng
+#### 13.10.4. Cập nhật Danh mục thuộc tính động và đồng bộ danh sách gợi ý lồng
 * **Endpoint**: `PUT /api/danh-muc-thuoc-tinh/{id}`
 * **Headers**:
   * `Content-Type`: `application/json`
@@ -1908,7 +2066,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   ```
 * **Response**: Thông tin thuộc tính sau cập nhật và đồng bộ.
 
-#### 13.9.5. Cập nhật trạng thái Danh mục thuộc tính động
+#### 13.10.5. Cập nhật trạng thái Danh mục thuộc tính động
 * **Endpoint**: `PUT /api/danh-muc-thuoc-tinh/{id}/trang-thai`
 * **Headers**:
   * `Content-Type`: `application/json`
@@ -1922,14 +2080,14 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   ```
 * **Response**: Thông báo cập nhật trạng thái thành công.
 
-#### 13.9.6. Xóa mềm Danh mục thuộc tính động (Đồng thời xóa mềm toàn bộ gợi ý đi kèm)
+#### 13.10.6. Xóa mềm Danh mục thuộc tính động (Đồng thời xóa mềm toàn bộ gợi ý đi kèm)
 * **Endpoint**: `DELETE /api/danh-muc-thuoc-tinh/{id}`
 * **Headers**:
   * `Authorization`: `Bearer <token>`
 * **Quyền (Permission)**: `XOA_DANH_MUC_THUOC_TINH`
 * **Response**: Thông báo thành công.
 
-#### 13.9.7. Lấy danh sách giá trị thuộc tính thực tế phân trang
+#### 13.10.7. Lấy danh sách giá trị thuộc tính thực tế phân trang
 * **Endpoint**: `GET /api/gia-tri-thuoc-tinh`
 * **Headers**:
   * `Authorization`: `Bearer <token>`
@@ -1941,7 +2099,7 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
 * **Caching**: Được cache trên Redis (`gia_tri_thuoc_tinh_list_cache`, key phân tách theo tenant).
 * **Response**: `PageResponse` chứa danh sách giá trị thuộc tính của thiết bị thuộc đơn vị đang đăng nhập.
 
-#### 13.9.8. Lưu hàng loạt thông số kỹ thuật (Bulk Insert/Update)
+#### 13.10.8. Lưu hàng loạt thông số kỹ thuật (Bulk Insert/Update)
 * **Endpoint**: `POST /api/gia-tri-thuoc-tinh/save-bulk`
 * **Headers**:
   * `Content-Type`: `application/json`
@@ -1967,3 +2125,926 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
   }
   ```
 * **Response**: Danh sách các giá trị thuộc tính đã lưu thành công.
+
+---
+
+## 14. Phân hệ Quản lý Vòng đời tài sản (Lifecycle Module)
+
+### 14.1. Lấy danh sách phiếu cấp phát phân trang (Lọc đa tiêu chí)
+* **Endpoint**: `GET /api/phieu-cap-phat`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_CAP_PHAT`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `HOAN_THANH`).
+  * `idPhongBan` (tùy chọn): Lọc theo ID phòng ban nhận.
+  * `tuNgayBanGiao` (tùy chọn): Lọc ngày bàn giao từ (`yyyy-MM-dd`).
+  * `denNgayBanGiao` (tùy chọn): Lọc ngày bàn giao đến (`yyyy-MM-dd`).
+  * `page`, `size`, `sort`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maPhiepCapPhat": "PCP-1718873612000",
+          "idNguoiNhan": 2,
+          "tenNguoiNhan": "Nguyễn Văn B",
+          "idPhongBanNhan": 3,
+          "tenPhongBanNhan": "Phòng Công nghệ thông tin",
+          "idNguoiLap": 1,
+          "tenNguoiLap": "Nguyễn Văn A",
+          "idNguoiPheDuyet": null,
+          "tenNguoiPheDuyet": null,
+          "thoiGianBanGiao": null,
+          "trangThai": "TAO_MOI",
+          "mucDichSuDung": "Cấp phát máy tính cho nhân viên mới",
+          "danhSachTaiSan": [],
+          "thoiGianTao": "2026-06-20T17:15:00",
+          "thoiGianCapNhat": "2026-06-20T17:15:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+### 14.2. Lấy chi tiết phiếu cấp phát theo ID (Kèm chi tiết tài sản & trạng thái thu hồi)
+* **Endpoint**: `GET /api/phieu-cap-phat/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maPhiepCapPhat": "PCP-1718873612000",
+      "idNguoiNhan": 2,
+      "tenNguoiNhan": "Nguyễn Văn B",
+      "idPhongBanNhan": 3,
+      "tenPhongBanNhan": "Phòng Công nghệ thông tin",
+      "idNguoiLap": 1,
+      "tenNguoiLap": "Nguyễn Văn A",
+      "idNguoiPheDuyet": 3,
+      "tenNguoiPheDuyet": "Nguyễn Văn C",
+      "thoiGianBanGiao": "2026-06-20T17:18:00",
+      "trangThai": "HOAN_THANH",
+      "mucDichSuDung": "Cấp phát máy tính cho nhân viên mới",
+      "danhSachTaiSan": [
+        {
+          "idChiTietCapPhat": 1,
+          "idTaiSan": 5,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "loaiTaiSan": "PHAN_CUNG",
+          "tinhTrangLucGiao": "Mới 100%",
+          "trangThaiCapPhat": "DANG_CAP_PHAT",
+          "ghiChu": "Không kèm balo"
+        },
+        {
+          "idChiTietCapPhat": 2,
+          "idTaiSan": 8,
+          "tenTaiSan": "Microsoft Office 2021 Professional",
+          "soSerial": null,
+          "maTheTaiSan": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",
+          "loaiTaiSan": "PHAN_MEM",
+          "tinhTrangLucGiao": null,
+          "trangThaiCapPhat": "DA_THU_HOI",
+          "ghiChu": "Đã thu hồi key khi chuyển phòng ban"
+        }
+      ],
+      "thoiGianTao": "2026-06-20T17:15:00",
+      "thoiGianCapNhat": "2026-06-20T17:18:00"
+    }
+  }
+  ```
+
+### 14.3. Tạo mới phiếu cấp phát tài sản
+* **Endpoint**: `POST /api/phieu-cap-phat`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request`
+* **Payload**:
+  ```json
+  {
+    "idNguoiNhan": 2,
+    "idPhongBanNhan": 3,
+    "mucDichSuDung": "Cấp phát máy tính cho nhân viên mới",
+    "danhSachPhanCung": [
+      {
+        "danhSachThietBiPhanCungId": 5,
+        "tinhTrangLucGiao": "Mới 100%",
+        "phuKienKemTheo": "Sạc Dell 65W",
+        "ghiChu": "Bàn giao kèm hộp"
+      }
+    ],
+    "danhSachPhanMem": [
+      {
+        "danhSachThietBiPhanMemId": 8,
+        "danhSachThietBiPhanCungId": 5,
+        "maKeyKichHoat": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",
+        "ghiChu": "Kích hoạt bằng tài khoản công ty"
+      }
+    ],
+    "danhSachLinhKien": []
+  }
+  ```
+* **Response**: Thông tin phiếu cấp phát chi tiết sau khi tạo mới ở trạng thái `TAO_MOI`.
+
+### 14.4. Cập nhật phiếu cấp phát tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `PUT /api/phieu-cap-phat/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Tạo mới), `404 Not Found`
+* **Payload**: Giống cấu trúc Tạo mới.
+* **Response**: Thông tin phiếu cấp phát sau khi được cập nhật lại danh sách tài sản.
+
+### 14.5. Xóa mềm phiếu cấp phát tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `DELETE /api/phieu-cap-phat/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không phải trạng thái Tạo mới), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm phiếu cấp phát thành công"
+  }
+  ```
+
+### 14.6. Yêu cầu phê duyệt phiếu cấp phát (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-cap-phat/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `YEU_CAU_PHE_DUYET_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Tạo mới hoặc chuyển đổi sai), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt thành công"
+  }
+  ```
+
+### 14.7. Phê duyệt phiếu cấp phát tài sản (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-cap-phat/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Gửi phê duyệt), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt phiếu cấp phát thành công"
+  }
+  ```
+
+### 14.8. Hoàn thành cấp phát tài sản (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-cap-phat/{id}/hoan-thanh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `HOAN_THANH_PHIEU_CAP_PHAT`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Đã phê duyệt), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Hoàn thành cấp phát thành công"
+  }
+  ```
+
+### 14.9. Lấy danh sách phiếu thu hồi phân trang (Lọc đa tiêu chí)
+* **Endpoint**: `GET /api/phieu-thu-hoi`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_THU_HOI_TAI_SAN`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `HOAN_THANH`).
+  * `idPhongBan` (tùy chọn): Lọc theo ID phòng ban trả.
+  * `tuNgay` (tùy chọn): Lọc ngày thu hồi từ (`yyyy-MM-dd`).
+  * `denNgay` (tùy chọn): Lọc ngày thu hồi đến (`yyyy-MM-dd`).
+  * `page`, `size`, `sort`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maPhieuThuHoi": "PTH-1718873612000",
+          "idNhanVienTra": 2,
+          "tenNhanVienTra": "Nguyễn Văn B",
+          "idPhongBanTra": 3,
+          "tenPhongBanTra": "Phòng Công nghệ thông tin",
+          "tenNguoiLap": "Nguyễn Văn A",
+          "tenNguoiPheDuyet": null,
+          "lyDoThuHoi": "Thu hồi thiết bị cũ để nâng cấp",
+          "thoiGianThuHoi": null,
+          "trangThai": "TAO_MOI",
+          "chiTietTaiSan": [],
+          "thoiGianTao": "2026-06-20T17:15:00",
+          "thoiGianCapNhat": "2026-06-20T17:15:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+### 14.10. Lấy chi tiết phiếu thu hồi theo ID (Kèm chi tiết tài sản thu hồi)
+* **Endpoint**: `GET /api/phieu-thu-hoi/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maPhieuThuHoi": "PTH-1718873612000",
+      "idNhanVienTra": 2,
+      "tenNhanVienTra": "Nguyễn Văn B",
+      "idPhongBanTra": 3,
+      "tenPhongBanTra": "Phòng Công nghệ thông tin",
+      "tenNguoiLap": "Nguyễn Văn A",
+      "tenNguoiPheDuyet": "Nguyễn Văn C",
+      "lyDoThuHoi": "Thu hồi thiết bị cũ để nâng cấp",
+      "thoiGianThuHoi": "2026-06-20T17:18:00",
+      "trangThai": "HOAN_THANH",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idChiTietCapPhat": 1,
+          "idTaiSan": 5,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "tinhTrangLucThuHoi": "Cũ, xước nhẹ",
+          "phuKienThuHoi": "Sạc Dell 65W",
+          "thoiGianThuHoi": null,
+          "ghiChu": "Hoạt động bình thường",
+          "loai": "PHAN_CUNG"
+        },
+        {
+          "id": 1,
+          "idChiTietCapPhat": 2,
+          "idTaiSan": 8,
+          "tenTaiSan": "Microsoft Office 2021 Professional",
+          "soSerial": null,
+          "maTheTaiSan": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",
+          "tinhTrangLucThuHoi": null,
+          "phuKienThuHoi": null,
+          "thoiGianThuHoi": "2026-06-20T17:18:00",
+          "ghiChu": "Thu hồi key thành công",
+          "loai": "PHAN_MEM"
+        }
+      ],
+      "thoiGianTao": "2026-06-20T17:15:00",
+      "thoiGianCapNhat": "2026-06-20T17:18:00"
+    }
+  }
+  ```
+
+### 14.11. Lấy danh sách tài sản cấp phát hoạt động của nhân viên (Để thu hồi)
+* **Endpoint**: `GET /api/phieu-thu-hoi/active-allocations`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_THU_HOI_TAI_SAN`
+* **Query Parameters**:
+  * `idNhanVien` (bắt buộc): ID của nhân viên cần lấy danh sách tài sản đang giữ.
+* **Status Code**: `200 OK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "danhSachPhanCung": [
+        {
+          "chiTietCapPhatPhanCungId": 1,
+          "danhSachThietBiPhanCungId": 5,
+          "tenThietBi": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "tinhTrangLucGiao": "Mới 100%",
+          "phuKienKemTheo": "Sạc Dell 65W"
+        }
+      ],
+      "danhSachPhanMem": [
+        {
+          "chiTietCapPhatPhanMemId": 2,
+          "danhSachThietBiPhanMemId": 8,
+          "tenPhanMem": "Microsoft Office 2021 Professional",
+          "keyBanQuyen": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+        }
+      ],
+      "danhSachLinhKien": []
+    }
+  }
+  ```
+
+### 14.12. Tạo mới phiếu thu hồi tài sản
+* **Endpoint**: `POST /api/phieu-thu-hoi`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request`
+* **Payload**:
+  ```json
+  {
+    "idNhanVienTra": 2,
+    "idPhongBanTra": 3,
+    "lyDoThuHoi": "Thu hồi thiết bị cũ để nâng cấp",
+    "danhSachPhanCung": [
+      {
+        "chiTietCapPhatPhanCungId": 1,
+        "tinhTrangLucThuHoi": "Cũ, xước nhẹ",
+        "phuKienThuHoi": "Sạc Dell 65W",
+        "ghiChu": "Không lỗi lầm"
+      }
+    ],
+    "danhSachPhanMem": [
+      {
+        "chiTietCapPhatPhanMemId": 2,
+        "ghiChu": "Thu hồi bản quyền"
+      }
+    ],
+    "danhSachLinhKien": []
+  }
+  ```
+* **Response**: Thông tin phiếu thu hồi chi tiết sau khi tạo mới ở trạng thái `TAO_MOI`.
+
+### 14.13. Cập nhật phiếu thu hồi tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `PUT /api/phieu-thu-hoi/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Tạo mới), `404 Not Found`
+* **Payload**: Giống cấu trúc Tạo mới.
+* **Response**: Thông tin phiếu sau khi được cập nhật lại danh sách tài sản thu hồi.
+
+### 14.14. Xóa mềm phiếu thu hồi tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `DELETE /api/phieu-thu-hoi/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không phải trạng thái Tạo mới), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm phiếu thu hồi tài sản thành công"
+  }
+  ```
+
+### 14.15. Yêu cầu phê duyệt phiếu thu hồi (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-thu-hoi/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `YEU_CAU_PHE_DUYET_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Tạo mới hoặc chuyển đổi sai), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt thành công"
+  }
+  ```
+
+### 14.16. Phê duyệt phiếu thu hồi tài sản (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-thu-hoi/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Gửi phê duyệt), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt phiếu thu hồi tài sản thành công"
+  }
+  ```
+* **Nghiệp vụ ngầm**: Hệ thống tự động gán ID người phê duyệt (`idNguoiPheDuyet`) bằng ID người dùng hiện tại lấy từ phiên đăng nhập.
+
+### 14.17. Hoàn thành thu hồi tài sản (Chuyển đổi trạng thái)
+* **Endpoint**: `PUT /api/phieu-thu-hoi/{id}/hoan-thanh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `HOAN_THANH_PHIEU_THU_HOI_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Không ở trạng thái Đã phê duyệt), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Hoàn thành thu hồi tài sản thành công"
+  }
+  ```
+
+---
+
+## 15. Phân hệ Quản lý Mua sắm (Procurement Module)
+
+### 15.1. Nhà cung cấp (NhaCungCap)
+
+#### 15.1.1. Lấy danh sách Nhà cung cấp phân trang
+* **Endpoint**: `GET /api/nha-cung-cap`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_NHA_CUNG_CAP`
+* **Query Parameters**:
+  * `keyword` (tùy chọn): Tìm kiếm theo mã hoặc tên nhà cung cấp.
+  * `trangThai` (tùy chọn): `HOAT_DONG` hoặc `KHOA`.
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "maNhaCungCap": "NCC_FPT",
+          "idDonVi": 1,
+          "tenNhaCungCap": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+          "maSoThue": "0105772650",
+          "nguoiLienHe": "Nguyễn Văn D",
+          "soDienThoai": "02473006600",
+          "email": "contact@fpt.com.vn",
+          "diaChi": "261-263 Khánh Hội, Phường 5, Quận 4, TP. Hồ Chí Minh",
+          "ghiChu": "Nhà phân phối thiết bị chính",
+          "trangThai": "HOAT_DONG",
+          "thoiGianTao": "2026-06-20T10:00:00",
+          "thoiGianCapNhat": "2026-06-20T10:00:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 15.1.2. Lấy chi tiết Nhà cung cấp theo ID
+* **Endpoint**: `GET /api/nha-cung-cap/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_NHA_CUNG_CAP`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "maNhaCungCap": "NCC_FPT",
+      "idDonVi": 1,
+      "tenNhaCungCap": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+      "maSoThue": "0105772650",
+      "nguoiLienHe": "Nguyễn Văn D",
+      "soDienThoai": "02473006600",
+      "email": "contact@fpt.com.vn",
+      "diaChi": "261-263 Khánh Hội, Phường 5, Quận 4, TP. Hồ Chí Minh",
+      "ghiChu": "Nhà phân phối thiết bị chính",
+      "trangThai": "HOAT_DONG",
+      "thoiGianTao": "2026-06-20T10:00:00",
+      "thoiGianCapNhat": "2026-06-20T10:00:00"
+    }
+  }
+  ```
+
+#### 15.1.3. Lấy danh sách Nhà cung cấp rút gọn cho Dropdown (Select options)
+* **Endpoint**: `GET /api/nha-cung-cap/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_NHA_CUNG_CAP`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": [
+      {
+        "id": 1,
+        "ten": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT"
+      }
+    ]
+  }
+  ```
+
+#### 15.1.4. Thêm mới Nhà cung cấp
+* **Endpoint**: `POST /api/nha-cung-cap`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_NHA_CUNG_CAP`
+* **Payload**:
+  ```json
+  {
+    "maNhaCungCap": "Tự động sinh bởi Backend, không truyền",
+    "tenNhaCungCap": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+    "maSoThue": "0105772650",
+    "nguoiLienHe": "Nguyễn Văn D",
+    "soDienThoai": "02473006600",
+    "email": "contact@fpt.com.vn",
+    "diaChi": "261-263 Khánh Hội, Phường 5, Quận 4, TP. Hồ Chí Minh",
+    "ghiChu": "Nhà phân phối thiết bị chính"
+  }
+  ```
+* **Response**: Trả về thông tin Nhà cung cấp vừa được tạo ở trạng thái mặc định là `HOAT_DONG`.
+
+#### 15.1.5. Cập nhật Nhà cung cấp
+* **Endpoint**: `PUT /api/nha-cung-cap/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_NHA_CUNG_CAP`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin Nhà cung cấp sau cập nhật.
+
+#### 15.1.6. Cập nhật trạng thái Nhà cung cấp
+* **Endpoint**: `PUT /api/nha-cung-cap/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_NHA_CUNG_CAP`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "KHOA / HOAT_DONG"
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái nhà cung cấp thành công"
+  }
+  ```
+
+#### 15.1.7. Xóa mềm Nhà cung cấp
+* **Endpoint**: `DELETE /api/nha-cung-cap/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_NHA_CUNG_CAP`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm nhà cung cấp thành công"
+  }
+  ```
+
+---
+
+### 15.2. Đơn hàng mua sắm (DonHangMuaSam)
+
+#### 15.2.1. Lấy danh sách Đơn hàng mua sắm phân trang
+* **Endpoint**: `GET /api/don-hang-mua-sam`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DON_HANG_MUA_SAM`
+* **Query Parameters**:
+  * `maDonHang` (tùy chọn): Lọc theo mã đơn hàng.
+  * `idNhaCungCap` (tùy chọn): Lọc theo ID nhà cung cấp.
+  * `trangThai` (tùy chọn): Lọc theo trạng thái (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `HOAN_THANH`).
+  * `page`, `size`, `sort`
+* **Response**: Trả về `PageResponse` chứa danh sách đơn hàng mua sắm (không kèm thông tin chi tiết mảng phần cứng/phần mềm).
+
+#### 15.2.2. Lấy chi tiết Đơn hàng mua sắm theo ID
+* **Endpoint**: `GET /api/don-hang-mua-sam/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DON_HANG_MUA_SAM`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "idNhaCungCap": 1,
+      "tenNhaCungCap": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+      "tenNguoiLap": "Nguyễn Văn A",
+      "tenNguoiPheDuyet": "Nguyễn Văn C",
+      "maDonHang": "PO-2026-0001",
+      "soHopDongDinhKem": "HD-FPT-2026-01",
+      "tongTienTruocThue": 150000000.00,
+      "thueVat": 15000000.00,
+      "tongTienSauThue": 165000000.00,
+      "thoiGianGiaoDuKien": "2026-07-01",
+      "trangThai": "TAO_MOI",
+      "ghiChu": "Mua máy tính phục vụ dự án",
+      "thoiGianTao": "2026-06-20T11:00:00",
+      "thoiGianCapNhat": "2026-06-20T11:00:00",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idTaiSan": 5,
+          "tenTaiSan": "Dell Latitude 5420 i5",
+          "soLuongDat": 10,
+          "donGiaDat": 15000000.00,
+          "thanhTien": 150000000.00,
+          "soLuongDaNhap": 0,
+          "ghiChu": "Dell Latitude 5420",
+          "loai": "PHAN_CUNG",
+          "thoiGianTao": "2026-06-20T11:00:00",
+          "thoiGianCapNhat": "2026-06-20T11:00:00"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 15.2.3. Lấy danh sách Đơn hàng mua sắm rút gọn cho Dropdown (Select options)
+* **Endpoint**: `GET /api/don-hang-mua-sam/select-options`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DON_HANG_MUA_SAM`
+* **Response**: Trả về các đơn hàng mua sắm ở trạng thái `DA_PHE_DUYET` thuộc đơn vị hiện tại phục vụ cho việc lập phiếu nhập kho.
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": [
+      {
+        "id": 1,
+        "ten": "PO-2026-0001"
+      }
+    ]
+  }
+  ```
+
+#### 15.2.4. Tạo mới Đơn hàng mua sắm
+* **Endpoint**: `POST /api/don-hang-mua-sam`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_DON_HANG_MUA_SAM`
+* **Payload**:
+  ```json
+  {
+    "idNhaCungCap": 1,
+    "idNguoiLap": 2,
+    "maDonHang": "Tự động sinh bởi Backend, không truyền",
+    "soHopDongDinhKem": "HD-FPT-2026-01",
+    "tongTienTruocThue": 150000000.00,
+    "thueVat": 15000000.00,
+    "tongTienSauThue": 165000000.00,
+    "thoiGianGiaoDuKien": "2026-07-01",
+    "ghiChu": "Mua máy tính phục vụ dự án",
+    "chiTietPhanCung": [
+      {
+        "idTaiSanPhanCung": 5,
+        "soLuongDat": 10,
+        "donGiaDat": 15000000.00,
+        "ghiChu": "Dell Latitude 5420"
+      }
+    ],
+    "chiTietPhanMem": []
+  }
+  ```
+* **Response**: Trả về thông tin Đơn hàng vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 15.2.5. Cập nhật Đơn hàng mua sắm (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `PUT /api/don-hang-mua-sam/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_DON_HANG_MUA_SAM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái Tạo mới), `404 Not Found`
+* **Payload**: Giống cấu trúc Tạo mới.
+* **Response**: Trả về thông tin Đơn hàng sau cập nhật, xóa cứng các chi tiết cũ và tạo lại chi tiết mới.
+
+#### 15.2.6. Xóa mềm Đơn hàng mua sắm (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `DELETE /api/don-hang-mua-sam/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_DON_HANG_MUA_SAM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái Tạo mới), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm đơn hàng mua sắm thành công"
+  }
+  ```
+
+#### 15.2.7. Gửi yêu cầu phê duyệt Đơn hàng mua sắm
+* **Endpoint**: `PUT /api/don-hang-mua-sam/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `YEU_CAU_PHE_DUYET_DON_HANG_MUA_SAM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái `TAO_MOI`), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt đơn hàng mua sắm thành công"
+  }
+  ```
+
+#### 15.2.8. Phê duyệt Đơn hàng mua sắm
+* **Endpoint**: `PUT /api/don-hang-mua-sam/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_DON_HANG_MUA_SAM`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái `GUI_PHE_DUYET`), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt đơn hàng mua sắm thành công"
+  }
+  ```
+* **Nghiệp vụ ngầm**: Hệ thống sẽ tự động gán ID người phê duyệt (`idNguoiPheDuyet`) bằng ID người dùng hiện tại lấy từ phiên đăng nhập.
+
+---
+
+### 15.3. Phiếu nhập tài sản (PhieuNhapTaiSan)
+
+#### 15.3.1. Lấy danh sách Phiếu nhập tài sản phân trang
+* **Endpoint**: `GET /api/phieu-nhap-tai-san`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_NHAP_TAI_SAN`
+* **Query Parameters**:
+  * `maPhieuNhap` (tùy chọn): Lọc theo mã phiếu nhập.
+  * `soHoaDonVat` (tùy chọn): Lọc theo số hóa đơn VAT.
+  * `idDonHangMuaSam` (tùy chọn): Lọc theo ID đơn đặt hàng mua sắm liên kết.
+  * `trangThai` (tùy chọn): Lọc theo trạng thái (`TAO_MOI`, `HOAN_THANH`).
+  * `page`, `size`, `sort`
+* **Response**: Trả về `PageResponse` danh sách phiếu nhập kho (không kèm chi tiết).
+
+#### 15.3.2. Lấy chi tiết Phiếu nhập tài sản theo ID
+* **Endpoint**: `GET /api/phieu-nhap-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_NHAP_TAI_SAN`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "idDonHangMuaSam": 1,
+      "maDonHangMuaSam": "PO-2026-0001",
+      "tenNguoiNhap": "Nguyễn Văn B",
+      "maPhieuNhap": "PN-2026-0001",
+      "soHoaDonVat": "VAT-9992",
+      "maBienBanGiaoHang": "BBGH-01",
+      "thoiGianNhapKho": "2026-06-20T14:00:00",
+      "trangThai": "TAO_MOI",
+      "ghiChu": "Nhập kho đợt 1",
+      "thoiGianTao": "2026-06-20T14:15:00",
+      "thoiGianCapNhat": "2026-06-20T14:15:00",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idTaiSan": 5,
+          "tenTaiSan": "Dell Latitude 5420 i5",
+          "idThietBi": 10,
+          "idChiTietDonHang": 1,
+          "giaNhapThucTe": 15000000.00,
+          "tinhTrangLucNhap": "Mới 100%",
+          "soLuongGheNhap": null,
+          "loai": "PHAN_CUNG",
+          "thoiGianTao": "2026-06-20T14:15:00",
+          "thoiGianCapNhat": "2026-06-20T14:15:00"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 15.3.3. Tạo mới Phiếu nhập tài sản
+* **Endpoint**: `POST /api/phieu-nhap-tai-san`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_NHAP_TAI_SAN`
+* **Payload**:
+  ```json
+  {
+    "idDonHangMuaSam": 1,
+    "idNguoiNhap": 2,
+    "maPhieuNhap": "Tự động sinh bởi Backend, không truyền",
+    "soHoaDonVat": "VAT-9992",
+    "maBienBanGiaoHang": "BBGH-01",
+    "thoiGianNhapKho": "2026-06-20T14:00:00",
+    "ghiChu": "Nhập kho đợt 1",
+    "chiTietPhanCung": [
+      {
+        "idTaiSanPhanCung": 5,
+        "idDanhSachThietBiPhanCung": 10,
+        "idChiTietDonHangPhanCung": 1,
+        "giaNhapThuTe": 15000000.00,
+        "tinhTrangLucNhap": "Mới 100%"
+      }
+    ],
+    "chiTietLinhKien": [],
+    "chiTietPhanMem": []
+  }
+  ```
+* **Response**: Trả về thông tin Phiếu nhập vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 15.3.4. Cập nhật Phiếu nhập tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `PUT /api/phieu-nhap-tai-san/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_PHIEU_NHAP_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái Tạo mới), `404 Not Found`
+* **Payload**: Giống cấu trúc Tạo mới.
+* **Response**: Trả về thông tin Phiếu nhập sau cập nhật, xóa cứng các chi tiết con cũ và tạo lại chi tiết mới.
+
+#### 15.3.5. Xóa mềm Phiếu nhập tài sản (Chỉ khi ở trạng thái Tạo mới)
+* **Endpoint**: `DELETE /api/phieu-nhap-tai-san/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_NHAP_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu không ở trạng thái Tạo mới), `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm phiếu nhập kho tài sản thành công"
+  }
+  ```
+
+#### 15.3.6. Cập nhật trạng thái Phiếu nhập tài sản (Hoàn thành nhập kho)
+* **Endpoint**: `PUT /api/phieu-nhap-tai-san/{id}/trang-thai`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TRANG_THAI_PHIEU_NHAP_TAI_SAN`
+* **Status Code**: `200 OK`, `400 Bad Request` (Nếu chuyển sang trạng thái khác `HOAN_THANH` hoặc sai luồng), `404 Not Found`
+* **Payload**:
+  ```json
+  {
+    "trangThai": "HOAN_THANH"
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Cập nhật trạng thái phiếu nhập kho tài sản thành công"
+  }
+  ```
+* **Nghiệp vụ ngầm**: Khi phiếu nhập tài sản chuyển sang trạng thái `HOAN_THANH` (nhập kho xong), hệ thống sẽ tự động cập nhật đơn hàng mua sắm liên quan (`DonHangMuaSam`) tương ứng thành trạng thái `HOAN_THANH`.

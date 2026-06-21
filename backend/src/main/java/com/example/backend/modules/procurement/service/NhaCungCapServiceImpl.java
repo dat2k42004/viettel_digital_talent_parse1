@@ -7,6 +7,7 @@ import com.example.backend.modules.procurement.model.NhaCungCap;
 import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
 import com.example.backend.modules.procurement.service.interfaces.NhaCungCapService;
 import com.example.backend.shared.dto.TrangThaiRequest;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
@@ -56,7 +57,11 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
 
                if (trangThai != null && !trangThai.trim().isEmpty()) {
-                    predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                    try {
+                         predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                    } catch (IllegalArgumentException e) {
+                         throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+                    }
                }
 
                if (keyword != null && !keyword.trim().isEmpty()) {
@@ -89,7 +94,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
      public List<SelectOption> laySelectOptions() {
           Long currentTenantId = getRequiredTenantId();
           List<NhaCungCap> danhSach = nhaCungCapRepository
-                    .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, "HOAT_DONG");
+                    .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, TrangThaiCoBanEnum.HOAT_DONG);
           return danhSach.stream()
                     .map(ncc -> SelectOption.builder()
                               .id(ncc.getId())
@@ -105,7 +110,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
 
           NhaCungCap ncc = new NhaCungCap();
           ncc.setIdDonVi(currentTenantId);
-          ncc.setMaNhaCungCap(request.getMaNhaCungCap());
+          ncc.setMaNhaCungCap("NCC-" + currentTenantId + "-" + System.currentTimeMillis());
           ncc.setTenNhaCungCap(request.getTenNhaCungCap());
           ncc.setMaSoThue(request.getMaSoThue());
           ncc.setNguoiLienHe(request.getNguoiLienHe());
@@ -113,7 +118,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
           ncc.setEmail(request.getEmail());
           ncc.setDiaChi(request.getDiaChi());
           ncc.setGhiChu(request.getGhiChu());
-          ncc.setTrangThai("HOAT_DONG");
+          ncc.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
 
           return mapToResponse(nhaCungCapRepository.save(ncc));
      }
@@ -126,7 +131,6 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                     .orElseThrow(
                               () -> new NghiepVuException("Không tìm thấy thông tin nhà cung cấp cần chỉnh sửa", 404));
 
-          ncc.setMaNhaCungCap(request.getMaNhaCungCap());
           ncc.setTenNhaCungCap(request.getTenNhaCungCap());
           ncc.setMaSoThue(request.getMaSoThue());
           ncc.setNguoiLienHe(request.getNguoiLienHe());
@@ -146,7 +150,11 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                     .orElseThrow(() -> new NghiepVuException(
                               "Không tìm thấy thông tin nhà cung cấp cần cập nhật trạng thái", 404));
 
-          ncc.setTrangThai(request.getTrangThai());
+          try {
+               ncc.setTrangThai(TrangThaiCoBanEnum.fromValue(request.getTrangThai()));
+          } catch (IllegalArgumentException e) {
+               throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+          }
           nhaCungCapRepository.save(ncc);
      }
 
@@ -174,7 +182,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                     .email(model.getEmail())
                     .diaChi(model.getDiaChi())
                     .ghiChu(model.getGhiChu())
-                    .trangThai(model.getTrangThai())
+                    .trangThai(model.getTrangThai() != null ? model.getTrangThai().getValue() : null)
                     .thoiGianTao(model.getThoiGianTao())
                     .thoiGianCapNhat(model.getThoiGianCapNhat())
                     .build();

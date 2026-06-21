@@ -70,7 +70,11 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
             predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             if (trangThaiKho != null && !trangThaiKho.trim().isEmpty()) {
@@ -105,7 +109,7 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
         Long idDonVi = getRequiredTenantId();
         LinhKienPhanCung linhKien = linhKienRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy linh kiện phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(linhKien.getTrangThai())) {
+        if (linhKien.getTrangThai() != com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG) {
             throw new NghiepVuException("Linh kiện phần cứng hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(linhKien);
@@ -170,11 +174,14 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy linh kiện phần cứng", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiVanHanhEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        linhKien.setTrangThai(status);
+        linhKien.setTrangThai(trangThaiEnum);
         linhKienRepository.save(linhKien);
     }
 
@@ -185,7 +192,7 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
         Specification<LinhKienPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG)
         );
         return linhKienRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -207,7 +214,12 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
         linhKien.setHanBaoHanhThang(request.getHanBaoHanhThang());
         linhKien.setTrangThaiKho(request.getTrangThaiKho() != null ? request.getTrangThaiKho().trim() : null);
         linhKien.setViTriKho(request.getViTriKho() != null ? request.getViTriKho().trim() : null);
-        linhKien.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            linhKien.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private LinhKienPhanCungResponse mapToResponse(LinhKienPhanCung linhKien) {
@@ -224,7 +236,7 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
                 .hanBaoHanhThang(linhKien.getHanBaoHanhThang())
                 .trangThaiKho(linhKien.getTrangThaiKho())
                 .viTriKho(linhKien.getViTriKho())
-                .trangThai(linhKien.getTrangThai())
+                .trangThai(linhKien.getTrangThai() != null ? linhKien.getTrangThai().getValue() : null)
                 .thoiGianTao(linhKien.getThoiGianTao())
                 .thoiGianCapNhat(linhKien.getThoiGianCapNhat())
                 .build();

@@ -1,0 +1,15 @@
+package com.example.backend.modules.lifecycle.repository;
+
+import com.example.backend.modules.lifecycle.model.ChiTietThuHoiLinhKien;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.List;
+
+@Repository
+public interface ChiTietThuHoiLinhKienRepository extends JpaRepository<ChiTietThuHoiLinhKien, Long>, JpaSpecificationExecutor<ChiTietThuHoiLinhKien> {
+    Optional<ChiTietThuHoiLinhKien> findByChiTietCapPhatLinhKienIdAndThoiGianXoaIsNull(Long chiTietCapPhatLinhKienId);
+    List<ChiTietThuHoiLinhKien> findByPhieuThuHoiTaiSanIdAndThoiGianXoaIsNull(Long phieuId);
+}

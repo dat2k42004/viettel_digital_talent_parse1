@@ -72,7 +72,11 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
             predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             if (trangThaiKho != null && !trangThaiKho.trim().isEmpty()) {
@@ -117,7 +121,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy key bản quyền thuộc đơn vị của bạn với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(thietBi.getTrangThai())) {
+        if (thietBi.getTrangThai() != com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG) {
             throw new NghiepVuException("Key bản quyền hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(thietBi);
@@ -182,11 +186,14 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy key bản quyền", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiVanHanhEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        thietBi.setTrangThai(status);
+        thietBi.setTrangThai(trangThaiEnum);
         thietBiPhanMemRepository.save(thietBi);
     }
 
@@ -197,7 +204,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG)
         );
         return thietBiPhanMemRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -220,7 +227,12 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         thietBi.setThoiGianMua(request.getThoiGianMua());
         thietBi.setThoiGianHetHan(request.getThoiGianHetHan());
         thietBi.setTrangThaiKho(request.getTrangThaiKho() != null ? request.getTrangThaiKho().trim() : null);
-        thietBi.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private DanhSachThietBiPhanMemResponse mapToResponse(DanhSachThietBiPhanMem thietBi) {
@@ -238,7 +250,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 .thoiGianMua(thietBi.getThoiGianMua())
                 .thoiGianHetHan(thietBi.getThoiGianHetHan())
                 .trangThaiKho(thietBi.getTrangThaiKho())
-                .trangThai(thietBi.getTrangThai())
+                .trangThai(thietBi.getTrangThai() != null ? thietBi.getTrangThai().getValue() : null)
                 .thoiGianTao(thietBi.getThoiGianTao())
                 .thoiGianCapNhat(thietBi.getThoiGianCapNhat())
                 .build();

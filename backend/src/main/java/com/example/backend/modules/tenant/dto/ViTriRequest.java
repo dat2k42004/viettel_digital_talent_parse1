@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 
 @Data
 public class ViTriRequest {
-    @NotBlank(message = "Mã vị trí không được để trống")
     private String maViTri;
 
     @NotBlank(message = "Tên vị trí không được để trống")

@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
+
 public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long>, JpaSpecificationExecutor<NguoiDung> {
     Optional<NguoiDung> findByTenDangNhapOrEmail(String tenDangNhap, String email);
     Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
@@ -24,7 +26,7 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long>, Jpa
 
     @Modifying
     @Query("UPDATE NguoiDung n SET n.trangThai = :trangThai WHERE n.idDonVi = :idDonVi AND n.thoiGianXoa IS NULL")
-    void updateTrangThaiByIdDonVi(Long idDonVi, String trangThai);
+    void updateTrangThaiByIdDonVi(Long idDonVi, TrangThaiCoBanEnum trangThai);
 
     @Modifying
     @Query("UPDATE NguoiDung n SET n.thoiGianXoa = :thoiGianXoa, n.lyDoXoa = :lyDoXoa WHERE n.idDonVi = :idDonVi AND n.thoiGianXoa IS NULL")

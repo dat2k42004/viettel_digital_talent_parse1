@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 @Data
 public class PhongBanRequest {
-    @NotBlank(message = "Mã phòng ban không được để trống")
     private String maPhongBan;
 
     @NotBlank(message = "Tên phòng ban không được để trống")

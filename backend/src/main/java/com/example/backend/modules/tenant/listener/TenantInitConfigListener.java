@@ -1,6 +1,7 @@
 package com.example.backend.modules.tenant.listener;
 
 import com.example.backend.modules.tenant.model.CauHinhDonVi;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.tenant.model.DanhMucCauHinh;
 import com.example.backend.modules.tenant.model.DonVi;
 import com.example.backend.modules.tenant.repository.CauHinhDonViRepository;
@@ -35,7 +36,7 @@ public class TenantInitConfigListener {
             List<DanhMucCauHinh> catalogList = danhMucCauHinhRepository.findByThoiGianXoaIsNull();
             
             List<CauHinhDonVi> newConfigs = catalogList.stream()
-                    .filter(cat -> "HOAT_DONG".equals(cat.getTrangThai()))
+                    .filter(cat -> cat.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
                     .filter(cat -> !cauHinhDonViRepository.existsByDanhMucCauHinhIdAndDonViIdAndThoiGianXoaIsNull(cat.getId(), idDonVi))
                     .map(cat -> {
                         CauHinhDonVi ch = new CauHinhDonVi();

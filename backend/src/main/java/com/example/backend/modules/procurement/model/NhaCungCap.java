@@ -9,6 +9,10 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
+
 @Getter
 @Setter
 @Entity
@@ -44,5 +48,6 @@ public class NhaCungCap extends BaseEntity {
      private String ghiChu;
 
      @Column(name = "trang_thai", length = 30)
-     private String trangThai;
+     @Enumerated(EnumType.STRING)
+     private TrangThaiCoBanEnum trangThai;
 }

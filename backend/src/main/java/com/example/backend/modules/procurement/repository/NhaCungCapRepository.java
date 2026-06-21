@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.example.backend.modules.procurement.model.NhaCungCap;
 
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
+
 public interface NhaCungCapRepository extends JpaRepository<NhaCungCap, Long>, JpaSpecificationExecutor<NhaCungCap> {
 
      Optional<NhaCungCap> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 
-     List<NhaCungCap> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, String trangThai);
+     List<NhaCungCap> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, TrangThaiCoBanEnum trangThai);
 }

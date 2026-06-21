@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Index;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,5 +39,6 @@ public class LoaiTaiSan extends BaseEntity {
     private String ghiChu;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private com.example.backend.shared.model.TrangThaiCoBanEnum trangThai;
 }

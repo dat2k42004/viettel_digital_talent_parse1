@@ -1,6 +1,7 @@
 package com.example.backend.modules.auth.service;
 
 import com.example.backend.modules.auth.service.interfaces.VaiTroService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.auth.dto.QuyenResponse;
 import com.example.backend.modules.auth.dto.VaiTroRequest;
@@ -46,7 +47,7 @@ public class VaiTroServiceImpl implements VaiTroService {
         Specification<VaiTro> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             // Phân quyền theo Đơn vị (Tenant)
             if (idDonVi == null) {
@@ -75,20 +76,9 @@ public class VaiTroServiceImpl implements VaiTroService {
     public VaiTroResponse themMoi(VaiTroRequest request) {
         Long idDonVi = DonViContextHolder.getTenantId();
         
-        boolean exists;
-        if (idDonVi == null) {
-            exists = vaiTroRepository.existsByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull(request.getMaVaiTro());
-        } else {
-            exists = vaiTroRepository.existsByMaVaiTroAndIdDonViAndThoiGianXoaIsNull(request.getMaVaiTro(), idDonVi);
-        }
-
-        if (exists) {
-            throw new NghiepVuException("Mã vai trả đã tồn tại", 400);
-        }
-
         VaiTro vaiTro = new VaiTro();
         vaiTro.setIdDonVi(idDonVi);
-        vaiTro.setMaVaiTro(request.getMaVaiTro());
+        vaiTro.setMaVaiTro("ROLE-" + (idDonVi == null ? 0 : idDonVi) + "-" + System.currentTimeMillis());
         vaiTro.setTenVaiTro(request.getTenVaiTro());
         vaiTro.setMoTaVaiTro(request.getMoTa());
         vaiTro = vaiTroRepository.save(vaiTro);
@@ -102,19 +92,6 @@ public class VaiTroServiceImpl implements VaiTroService {
     public VaiTroResponse capNhat(Long id, VaiTroRequest request) {
         VaiTro vaiTro = kiemTraTonTaiVaQuyen(id);
 
-        Long idDonVi = DonViContextHolder.getTenantId();
-        boolean exists;
-        if (idDonVi == null) {
-            exists = vaiTroRepository.existsByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull(request.getMaVaiTro());
-        } else {
-            exists = vaiTroRepository.existsByMaVaiTroAndIdDonViAndThoiGianXoaIsNull(request.getMaVaiTro(), idDonVi);
-        }
-        
-        if (exists && !vaiTro.getMaVaiTro().equals(request.getMaVaiTro())) {
-             throw new NghiepVuException("Mã vai trả đã tồn tại", 400);
-        }
-
-        vaiTro.setMaVaiTro(request.getMaVaiTro());
         vaiTro.setTenVaiTro(request.getTenVaiTro());
         vaiTro.setMoTaVaiTro(request.getMoTa());
         vaiTro = vaiTroRepository.save(vaiTro);
@@ -188,10 +165,11 @@ public class VaiTroServiceImpl implements VaiTroService {
     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
         VaiTro vaiTro = kiemTraTonTaiVaQuyen(id);
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
+        try {
+            vaiTro.setTrangThai(TrangThaiCoBanEnum.fromValue(status));
+        } catch (IllegalArgumentException e) {
             throw new NghiepVuException("Trạng thái không hợp lệ", 400);
         }
-        vaiTro.setTrangThai(status);
         vaiTroRepository.save(vaiTro);
     }
 
@@ -201,7 +179,7 @@ public class VaiTroServiceImpl implements VaiTroService {
         VaiTro vaiTro = vaiTroRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy vai trò hoặc vai trò đã bị xóa", 404));
 
-        if (!"HOAT_DONG".equals(vaiTro.getTrangThai())) {
+        if (vaiTro.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Vai trò hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 
@@ -220,10 +198,10 @@ public class VaiTroServiceImpl implements VaiTroService {
         // Multi-tenant check & query
         if (idDonVi == null) {
             // Super Admin lấy các vai trò hệ thống
-            roles = vaiTroRepository.findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull("HOAT_DONG");
+            roles = vaiTroRepository.findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull(TrangThaiCoBanEnum.HOAT_DONG);
         } else {
             // Admin cấp cơ sở lấy các vai trò của đơn vị mình
-            roles = vaiTroRepository.findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(idDonVi, "HOAT_DONG");
+            roles = vaiTroRepository.findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(idDonVi, TrangThaiCoBanEnum.HOAT_DONG);
         }
 
         return roles.stream()

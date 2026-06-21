@@ -49,7 +49,11 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
 
             // Lọc theo trạng thái
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             // Tìm kiếm keyword theo maLoai hoặc tenLoai (LIKE %keyword%)
@@ -74,7 +78,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     public LoaiTaiSanResponse layTheoId(Long id) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(loaiTaiSan.getTrangThai())) {
+        if (loaiTaiSan.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Loại tài sản hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(loaiTaiSan);
@@ -84,12 +88,9 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     @Transactional
     @CacheEvict(value = {"loai_tai_san_cache", "loai_tai_san_list_cache"}, allEntries = true)
     public LoaiTaiSanResponse themMoi(LoaiTaiSanRequest request) {
-        if (loaiTaiSanRepository.existsByMaLoaiAndThoiGianXoaIsNull(request.getMaLoai())) {
-            throw new NghiepVuException("Mã loại tài sản đã tồn tại trong hệ thống", 400);
-        }
-
         LoaiTaiSan loaiTaiSan = new LoaiTaiSan();
         capNhatThongTin(loaiTaiSan, request);
+        loaiTaiSan.setMaLoai("LTS-0-" + System.currentTimeMillis());
         loaiTaiSan = loaiTaiSanRepository.save(loaiTaiSan);
 
         return mapToResponse(loaiTaiSan);
@@ -101,11 +102,6 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     public LoaiTaiSanResponse capNhat(Long id, LoaiTaiSanRequest request) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản để cập nhật", 404));
-
-        if (!loaiTaiSan.getMaLoai().equals(request.getMaLoai()) && 
-            loaiTaiSanRepository.existsByMaLoaiAndThoiGianXoaIsNull(request.getMaLoai())) {
-            throw new NghiepVuException("Mã loại tài sản mới đã tồn tại trong hệ thống", 400);
-        }
 
         capNhatThongTin(loaiTaiSan, request);
         loaiTaiSan = loaiTaiSanRepository.save(loaiTaiSan);
@@ -133,11 +129,14 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        loaiTaiSan.setTrangThai(status);
+        loaiTaiSan.setTrangThai(trangThaiEnum);
         loaiTaiSanRepository.save(loaiTaiSan);
     }
 
@@ -146,7 +145,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     public List<SelectOption> laySelectOptions() {
         Specification<LoaiTaiSan> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
         );
         return loaiTaiSanRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -157,12 +156,16 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     }
 
     private void capNhatThongTin(LoaiTaiSan loaiTaiSan, LoaiTaiSanRequest request) {
-        loaiTaiSan.setMaLoai(request.getMaLoai().trim());
         loaiTaiSan.setTenLoai(request.getTenLoai().trim());
         loaiTaiSan.setTienToMaThe(request.getTienToMaThe() != null ? request.getTienToMaThe().trim() : null);
         loaiTaiSan.setThoiGianKhauHao(request.getThoiGianKhauHao());
         loaiTaiSan.setGhiChu(request.getGhiChu());
-        loaiTaiSan.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            loaiTaiSan.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private LoaiTaiSanResponse mapToResponse(LoaiTaiSan loaiTaiSan) {
@@ -173,7 +176,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
                 .tienToMaThe(loaiTaiSan.getTienToMaThe())
                 .thoiGianKhauHao(loaiTaiSan.getThoiGianKhauHao())
                 .ghiChu(loaiTaiSan.getGhiChu())
-                .trangThai(loaiTaiSan.getTrangThai())
+                .trangThai(loaiTaiSan.getTrangThai() != null ? loaiTaiSan.getTrangThai().getValue() : null)
                 .thoiGianTao(loaiTaiSan.getThoiGianTao())
                 .thoiGianCapNhat(loaiTaiSan.getThoiGianCapNhat())
                 .build();

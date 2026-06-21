@@ -60,13 +60,18 @@ public class DonHangMuaSamController {
           return ApiResponse.success(donHangMuaSamService.capNhat(id, request));
      }
 
-     @PutMapping("/{id}/trang-thai")
-     @PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_DON_HANG_MUA_SAM')")
-     public ApiResponse<String> capNhatTrangThai(
-               @PathVariable Long id,
-               @Valid @RequestBody TrangThaiRequest request) {
-          donHangMuaSamService.capNhatTrangThai(id, request);
-          return ApiResponse.success("Cập nhật trạng thái đơn hàng mua sắm thành công");
+     @PutMapping("/{id}/yeu-cau-phe-duyet")
+     @PreAuthorize("hasAuthority('YEU_CAU_PHE_DUYET_DON_HANG_MUA_SAM')")
+     public ApiResponse<String> yeuCauPheDuyet(@PathVariable Long id) {
+          donHangMuaSamService.yeuCauPheDuyet(id);
+          return ApiResponse.success("Gửi yêu cầu phê duyệt đơn hàng mua sắm thành công");
+     }
+
+     @PutMapping("/{id}/phe-duyet")
+     @PreAuthorize("hasAuthority('PHE_DUYET_DON_HANG_MUA_SAM')")
+     public ApiResponse<String> pheDuyet(@PathVariable Long id) {
+          donHangMuaSamService.pheDuyet(id);
+          return ApiResponse.success("Phê duyệt đơn hàng mua sắm thành công");
      }
 
      @DeleteMapping("/{id}")

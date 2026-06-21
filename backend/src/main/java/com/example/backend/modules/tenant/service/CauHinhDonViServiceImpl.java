@@ -1,6 +1,7 @@
 package com.example.backend.modules.tenant.service;
 
 import com.example.backend.modules.tenant.service.interfaces.CauHinhDonViService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.tenant.dto.CauHinhDonViRequest;
 import com.example.backend.modules.tenant.dto.CauHinhDonViResponse;
@@ -48,7 +49,7 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
             predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
             predicates.add(cb.isNull(root.get("danhMucCauHinh").get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("danhMucCauHinh").get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("danhMucCauHinh").get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("danhMucCauHinh").get("tenCauHinh")), 
@@ -149,7 +150,7 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy cấu hình đơn vị thuộc đơn vị của bạn", 404));
         }
 
-        if (!"HOAT_DONG".equals(entity.getDanhMucCauHinh().getTrangThai())) {
+        if (entity.getDanhMucCauHinh().getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Danh mục cấu hình liên kết hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 
@@ -170,7 +171,7 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
 
         return configs.stream()
                 .filter(c -> c.getDanhMucCauHinh() != null 
-                        && "HOAT_DONG".equals(c.getDanhMucCauHinh().getTrangThai()) 
+                        && c.getDanhMucCauHinh().getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG 
                         && c.getDanhMucCauHinh().getThoiGianXoa() == null)
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

@@ -13,11 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.modules.procurement.dto.ChiTietNhapLinhKienRequest;
-import com.example.backend.modules.procurement.dto.ChiTietNhapLinhKienResponse;
 import com.example.backend.modules.procurement.dto.ChiTietNhapPhanCungRequest;
-import com.example.backend.modules.procurement.dto.ChiTietNhapPhanCungResponse;
 import com.example.backend.modules.procurement.dto.ChiTietNhapPhanMemRequest;
-import com.example.backend.modules.procurement.dto.ChiTietNhapPhanMemResponse;
+import com.example.backend.modules.procurement.dto.ChiTietNhapTaiSanGeneralResponse;
 import com.example.backend.modules.procurement.dto.PhieuNhapTaiSanRequest;
 import com.example.backend.modules.procurement.dto.PhieuNhapTaiSanResponse;
 import com.example.backend.modules.procurement.model.ChiTietDonHangPhanCung;
@@ -35,6 +33,12 @@ import com.example.backend.modules.procurement.repository.ChiTietNhapPhanMemRepo
 import com.example.backend.modules.procurement.repository.DonHangMuaSamRepository;
 import com.example.backend.modules.procurement.repository.PhieuNhapTaiSanRepository;
 import com.example.backend.modules.procurement.service.interfaces.PhieuNhapTaiSanService;
+import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.model.NguoiDung;
+import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
+import com.example.backend.modules.asset.repository.TaiSanPhanMemRepository;
+import com.example.backend.modules.asset.model.TaiSanPhanCung;
+import com.example.backend.modules.asset.model.TaiSanPhanMem;
 import com.example.backend.shared.dto.TrangThaiRequest;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
@@ -55,6 +59,10 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      private final DonHangMuaSamRepository donHangMuaSamRepository;
      private final ChiTietDonHangPhanCungRepository chiTietDonHangPhanCungRepository;
      private final ChiTietDonHangPhanMemRepository chiTietDonHangPhanMemRepository;
+
+     private final NguoiDungRepository nguoiDungRepository;
+     private final TaiSanPhanCungRepository taiSanPhanCungRepository;
+     private final TaiSanPhanMemRepository taiSanPhanMemRepository;
 
      @Override
      @Transactional(readOnly = true)
@@ -86,15 +94,38 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     predicates.add(cb.equal(root.get("donHangMuaSam").get("id"), idDonHangMuaSam));
                }
                if (trangThai != null && !trangThai.trim().isEmpty()) {
-                    predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                    try {
+                         predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
+                    } catch (IllegalArgumentException e) {
+                         throw new NghiepVuException(e.getMessage(), 400);
+                    }
                }
 
                return cb.and(predicates.toArray(new Predicate[0]));
           };
 
           Page<PhieuNhapTaiSan> pageResult = phieuNhapTaiSanRepository.findAll(spec, pageRequest);
-          Page<PhieuNhapTaiSanResponse> responsePage = pageResult.map(this::mapToResponseWithoutDetails);
-          return PageResponse.from(responsePage);
+          
+          // Collect all user IDs to avoid N+1 queries
+          java.util.Set<Long> userIds = new java.util.HashSet<>();
+          for (PhieuNhapTaiSan p : pageResult.getContent()) {
+               if (p.getIdNguoiNhap() != null) {
+                    userIds.add(p.getIdNguoiNhap());
+               }
+          }
+
+          java.util.Map<Long, String> userMap = new java.util.HashMap<>();
+          if (!userIds.isEmpty()) {
+               userMap = nguoiDungRepository.findAllById(userIds).stream()
+                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          }
+
+          final java.util.Map<Long, String> finalUserMap = userMap;
+          List<PhieuNhapTaiSanResponse> responses = pageResult.getContent().stream()
+                    .map(p -> mapToResponseWithoutDetails(p, finalUserMap))
+                    .collect(Collectors.toList());
+
+          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest, pageResult.getTotalElements()));
      }
 
      @Override
@@ -119,12 +150,12 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           pnts.setIdDonVi(currentTenantId);
           pnts.setDonHangMuaSam(dh);
           pnts.setIdNguoiNhap(request.getIdNguoiNhap());
-          pnts.setMaPhieuNhap(request.getMaPhieuNhap());
+          pnts.setMaPhieuNhap("PN-" + currentTenantId + "-" + System.currentTimeMillis());
           pnts.setSoHoaDonVat(request.getSoHoaDonVat());
           pnts.setMaBienBanGiaoHang(request.getMaBienBanGiaoHang());
           pnts.setThoiGianNhapKho(
                     request.getThoiGianNhapKho() != null ? request.getThoiGianNhapKho() : LocalDateTime.now());
-          pnts.setTrangThai("HOAN_THANH");
+          pnts.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI);
           pnts.setGhiChu(request.getGhiChu());
 
           PhieuNhapTaiSan savedPnts = phieuNhapTaiSanRepository.save(pnts);
@@ -196,8 +227,11 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin phiếu nhập kho cần chỉnh sửa",
                               404));
 
+          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+               throw new NghiepVuException("Chỉ được sửa phiếu nhập tài sản khi ở trạng thái Tạo mới (TAO_MOI)", 400);
+          }
+
           pnts.setIdNguoiNhap(request.getIdNguoiNhap());
-          pnts.setMaPhieuNhap(request.getMaPhieuNhap());
           pnts.setSoHoaDonVat(request.getSoHoaDonVat());
           pnts.setMaBienBanGiaoHang(request.getMaBienBanGiaoHang());
           pnts.setThoiGianNhapKho(request.getThoiGianNhapKho());
@@ -208,27 +242,21 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           // Clear dữ liệu mảng con cũ
           List<ChiTietNhapPhanCung> oldPc = chiTietNhapPhanCungRepository
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(savedPnts);
-          oldPc.forEach(pc -> {
-               pc.setThoiGianXoa(LocalDateTime.now());
-               pc.setLyDoXoa("Cập nhật lại phiếu nhập");
-               chiTietNhapPhanCungRepository.save(pc);
-          });
+          if (!oldPc.isEmpty()) {
+               chiTietNhapPhanCungRepository.deleteAll(oldPc);
+          }
 
           List<ChiTietNhapLinhKien> oldLk = chiTietNhapLinhKienRepository
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(savedPnts);
-          oldLk.forEach(lk -> {
-               lk.setThoiGianXoa(LocalDateTime.now());
-               lk.setLyDoXoa("Cập nhật lại phiếu nhập");
-               chiTietNhapLinhKienRepository.save(lk);
-          });
+          if (!oldLk.isEmpty()) {
+               chiTietNhapLinhKienRepository.deleteAll(oldLk);
+          }
 
           List<ChiTietNhapPhanMem> oldPm = chiTietNhapPhanMemRepository
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(savedPnts);
-          oldPm.forEach(pm -> {
-               pm.setThoiGianXoa(LocalDateTime.now());
-               pm.setLyDoXoa("Cập nhật lại phiếu nhập");
-               chiTietNhapPhanMemRepository.save(pm);
-          });
+          if (!oldPm.isEmpty()) {
+               chiTietNhapPhanMemRepository.deleteAll(oldPm);
+          }
 
           // Nạp lại dữ liệu mới từ request tựa như các phần khác của Đạt
           if (request.getChiTietPhanCung() != null) {
@@ -257,8 +285,30 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .orElseThrow(() -> new NghiepVuException(
                               "Không tìm thấy thông tin phiếu nhập cần cập nhật trạng thái", 404));
 
-          pnts.setTrangThai(request.getTrangThai());
+          com.example.backend.shared.model.TrangThaiPhieuEnum targetStatus;
+          try {
+               targetStatus = com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(request.getTrangThai());
+          } catch (IllegalArgumentException e) {
+               throw new NghiepVuException(e.getMessage(), 400);
+          }
+
+          if (targetStatus != com.example.backend.shared.model.TrangThaiPhieuEnum.HOAN_THANH) {
+               throw new NghiepVuException("Phiếu nhập tài sản chỉ có thể cập nhật trạng thái thành HOAN_THANH", 400);
+          }
+
+          if (!pnts.getTrangThai().canTransitionTo(targetStatus)) {
+               throw new NghiepVuException("Không thể chuyển đổi trạng thái từ " + pnts.getTrangThai().getMoTa() + " sang " + targetStatus.getMoTa(), 400);
+          }
+
+          pnts.setTrangThai(targetStatus);
           phieuNhapTaiSanRepository.save(pnts);
+
+          // Cập nhật luôn đơn hàng mua sắm tương ứng thành hoàn thành
+          DonHangMuaSam dh = pnts.getDonHangMuaSam();
+          if (dh != null) {
+               dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.HOAN_THANH);
+               donHangMuaSamRepository.save(dh);
+          }
      }
 
      @Override
@@ -268,23 +318,27 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin phiếu nhập cần xóa", 404));
 
+          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+               throw new NghiepVuException("Chỉ được xóa phiếu nhập tài sản khi ở trạng thái Tạo mới", 400);
+          }
+
           pnts.setThoiGianXoa(LocalDateTime.now());
           pnts.setLyDoXoa("Xóa mềm từ luồng nghiệp vụ kho");
           phieuNhapTaiSanRepository.save(pnts);
      }
 
-     private PhieuNhapTaiSanResponse mapToResponseWithoutDetails(PhieuNhapTaiSan model) {
+     private PhieuNhapTaiSanResponse mapToResponseWithoutDetails(PhieuNhapTaiSan model, java.util.Map<Long, String> userMap) {
           return PhieuNhapTaiSanResponse.builder()
                     .id(model.getId())
                     .idDonVi(model.getIdDonVi())
                     .idDonHangMuaSam(model.getDonHangMuaSam() != null ? model.getDonHangMuaSam().getId() : null)
                     .maDonHangMuaSam(model.getDonHangMuaSam() != null ? model.getDonHangMuaSam().getMaDonHang() : null)
-                    .idNguoiNhap(model.getIdNguoiNhap())
+                    .tenNguoiNhap(model.getIdNguoiNhap() != null ? userMap.get(model.getIdNguoiNhap()) : null)
                     .maPhieuNhap(model.getMaPhieuNhap())
                     .soHoaDonVat(model.getSoHoaDonVat())
                     .maBienBanGiaoHang(model.getMaBienBanGiaoHang())
                     .thoiGianNhapKho(model.getThoiGianNhapKho())
-                    .trangThai(model.getTrangThai())
+                    .trangThai(model.getTrangThai() != null ? model.getTrangThai().getValue() : null)
                     .ghiChu(model.getGhiChu())
                     .thoiGianTao(model.getThoiGianTao())
                     .thoiGianCapNhat(model.getThoiGianCapNhat())
@@ -292,61 +346,124 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      }
 
      private PhieuNhapTaiSanResponse mapToResponseWithDetails(PhieuNhapTaiSan model) {
-          PhieuNhapTaiSanResponse response = mapToResponseWithoutDetails(model);
+          java.util.Set<Long> userIds = new java.util.HashSet<>();
+          if (model.getIdNguoiNhap() != null) {
+               userIds.add(model.getIdNguoiNhap());
+          }
 
-          // Ép kiểu tường minh cho phần tử trong List của Stream để triệt tiêu hoàn toàn
-          // lỗi không thể suy luận kiểu của Java Compiler
-          List<ChiTietNhapPhanCungResponse> pcList = chiTietNhapPhanCungRepository
-                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model).stream()
-                    .map(pc -> ChiTietNhapPhanCungResponse.builder()
-                              .id(pc.getId())
-                              .idTaiSanPhanCung(pc.getIdTaiSanPhanCung())
-                              .idDanhSachThietBiPhanCung(pc.getIdDanhSachThietBiPhanCung())
-                              .idChiTietDonHangPhanCung(
-                                        pc.getChiTietDonHangPhanCung() != null ? pc.getChiTietDonHangPhanCung().getId()
-                                                  : null)
-                              .giaNhapThuTe(pc.getGiaNhapThuTe())
-                              .tinhTrangLucNhap(pc.getTinhTrangLucNhap())
-                              .thoiGianTao(pc.getThoiGianTao())
-                              .thoiGianCapNhat(pc.getThoiGianCapNhat())
-                              .build())
-                    .collect(Collectors.toList());
+          java.util.Map<Long, String> userMap = new java.util.HashMap<>();
+          if (!userIds.isEmpty()) {
+               userMap = nguoiDungRepository.findAllById(userIds).stream()
+                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          }
 
-          List<ChiTietNhapLinhKienResponse> lkList = chiTietNhapLinhKienRepository
-                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model).stream()
-                    .map(lk -> ChiTietNhapLinhKienResponse.builder()
-                              .id(lk.getId())
-                              .idTaiSanPhanCung(lk.getIdTaiSanPhanCung())
-                              .idLinhKienPhanCung(lk.getIdLinhKienPhanCung())
-                              .idChiTietDonHangPhanCung(
-                                        lk.getChiTietDonHangPhanCung() != null ? lk.getChiTietDonHangPhanCung().getId()
-                                                  : null)
-                              .giaNhapThucTe(lk.getGiaNhapThucTe())
-                              .tinhTrangLucNhap(lk.getTinhTrangLucNhap())
-                              .thoiGianTao(lk.getThoiGianTao())
-                              .thoiGianCapNhat(lk.getThoiGianCapNhat())
-                              .build())
-                    .collect(Collectors.toList());
+          PhieuNhapTaiSanResponse response = mapToResponseWithoutDetails(model, userMap);
 
-          List<ChiTietNhapPhanMemResponse> pmList = chiTietNhapPhanMemRepository
-                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model).stream()
-                    .map(pm -> ChiTietNhapPhanMemResponse.builder()
-                              .id(pm.getId())
-                              .idTaiSanPhanMem(pm.getIdTaiSanPhanMem())
-                              .idDanhSachThietBiPhanMem(pm.getIdDanhSachThietBiPhanMem())
-                              .idChiTietDonHangPhanMem(
-                                        pm.getChiTietDonHangPhanMem() != null ? pm.getChiTietDonHangPhanMem().getId()
-                                                  : null)
-                              .soLuongGheNhap(pm.getSoLuongGheNhap())
-                              .giaNhapThucTe(pm.getGiaNhapThucTe())
-                              .thoiGianTao(pm.getThoiGianTao())
-                              .thoiGianCapNhat(pm.getThoiGianCapNhat())
-                              .build())
-                    .collect(Collectors.toList());
+          List<ChiTietNhapTaiSanGeneralResponse> chiTietList = new ArrayList<>();
 
-          response.setChiTietPhanCung(pcList);
-          response.setChiTietLinhKien(lkList);
-          response.setChiTietPhanMem(pmList);
+          // Fetch all items from repositories
+          List<ChiTietNhapPhanCung> pcList = chiTietNhapPhanCungRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+
+          // Collect asset IDs
+          java.util.Set<Long> pcIds = new java.util.HashSet<>();
+          for (ChiTietNhapPhanCung pc : pcList) {
+               if (pc.getIdTaiSanPhanCung() != null) {
+                    pcIds.add(pc.getIdTaiSanPhanCung());
+               }
+          }
+          for (ChiTietNhapLinhKien lk : lkList) {
+               if (lk.getIdTaiSanPhanCung() != null) {
+                    pcIds.add(lk.getIdTaiSanPhanCung());
+               }
+          }
+
+          java.util.Set<Long> pmIds = new java.util.HashSet<>();
+          for (ChiTietNhapPhanMem pm : pmList) {
+               if (pm.getIdTaiSanPhanMem() != null) {
+                    pmIds.add(pm.getIdTaiSanPhanMem());
+               }
+          }
+
+          // Fetch asset names in batch
+          java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
+          if (!pcIds.isEmpty()) {
+               pcNameMap = taiSanPhanCungRepository.findAllById(pcIds).stream()
+                         .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
+          }
+
+          java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
+          if (!pmIds.isEmpty()) {
+               pmNameMap = taiSanPhanMemRepository.findAllById(pmIds).stream()
+                         .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
+          }
+
+          // Map hardware
+          for (ChiTietNhapPhanCung pc : pcList) {
+               chiTietList.add(ChiTietNhapTaiSanGeneralResponse.builder()
+                         .id(pc.getId())
+                         .idTaiSan(pc.getIdTaiSanPhanCung())
+                         .tenTaiSan(pc.getIdTaiSanPhanCung() != null ? pcNameMap.get(pc.getIdTaiSanPhanCung()) : null)
+                         .idThietBi(pc.getIdDanhSachThietBiPhanCung())
+                         .idChiTietDonHang(pc.getChiTietDonHangPhanCung() != null ? pc.getChiTietDonHangPhanCung().getId() : null)
+                         .giaNhapThucTe(pc.getGiaNhapThuTe())
+                         .tinhTrangLucNhap(pc.getTinhTrangLucNhap())
+                         .soLuongGheNhap(null)
+                         .loai("PHAN_CUNG")
+                         .thoiGianTao(pc.getThoiGianTao())
+                         .thoiGianCapNhat(pc.getThoiGianCapNhat())
+                         .build());
+          }
+
+          // Map linh kien
+          for (ChiTietNhapLinhKien lk : lkList) {
+               chiTietList.add(ChiTietNhapTaiSanGeneralResponse.builder()
+                         .id(lk.getId())
+                         .idTaiSan(lk.getIdTaiSanPhanCung())
+                         .tenTaiSan(lk.getIdTaiSanPhanCung() != null ? pcNameMap.get(lk.getIdTaiSanPhanCung()) : null)
+                         .idThietBi(lk.getIdLinhKienPhanCung())
+                         .idChiTietDonHang(lk.getChiTietDonHangPhanCung() != null ? lk.getChiTietDonHangPhanCung().getId() : null)
+                         .giaNhapThucTe(lk.getGiaNhapThucTe())
+                         .tinhTrangLucNhap(lk.getTinhTrangLucNhap())
+                         .soLuongGheNhap(null)
+                         .loai("LINH_KIEN")
+                         .thoiGianTao(lk.getThoiGianTao())
+                         .thoiGianCapNhat(lk.getThoiGianCapNhat())
+                         .build());
+          }
+
+          // Map software
+          for (ChiTietNhapPhanMem pm : pmList) {
+               chiTietList.add(ChiTietNhapTaiSanGeneralResponse.builder()
+                         .id(pm.getId())
+                         .idTaiSan(pm.getIdTaiSanPhanMem())
+                         .tenTaiSan(pm.getIdTaiSanPhanMem() != null ? pmNameMap.get(pm.getIdTaiSanPhanMem()) : null)
+                         .idThietBi(pm.getIdDanhSachThietBiPhanMem())
+                         .idChiTietDonHang(pm.getChiTietDonHangPhanMem() != null ? pm.getChiTietDonHangPhanMem().getId() : null)
+                         .giaNhapThucTe(pm.getGiaNhapThucTe())
+                         .tinhTrangLucNhap(null)
+                         .soLuongGheNhap(pm.getSoLuongGheNhap())
+                         .loai("PHAN_MEM")
+                         .thoiGianTao(pm.getThoiGianTao())
+                         .thoiGianCapNhat(pm.getThoiGianCapNhat())
+                         .build());
+          }
+
+          response.setChiTietTaiSan(chiTietList);
           return response;
+     }
+
+     private String getHoTenNguoiDung(NguoiDung nd) {
+          if (nd == null)
+               return null;
+          StringBuilder sb = new StringBuilder();
+          if (nd.getHoNguoiDung() != null)
+               sb.append(nd.getHoNguoiDung().trim()).append(" ");
+          if (nd.getTenDemNguoiDung() != null)
+               sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
+          if (nd.getTenNguoiDung() != null)
+               sb.append(nd.getTenNguoiDung().trim());
+          return sb.toString().trim();
      }
 }

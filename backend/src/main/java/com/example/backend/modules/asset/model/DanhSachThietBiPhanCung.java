@@ -50,5 +50,6 @@ public class DanhSachThietBiPhanCung extends BaseEntity {
     private String viTriKho;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private com.example.backend.shared.model.TrangThaiVanHanhEnum trangThai;
 }

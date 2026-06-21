@@ -74,7 +74,7 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
     public DanhMucThuocTinhResponse layTheoId(Long id) {
         DanhMucThuocTinh ent = danhMucThuocTinhRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục thuộc tính với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(ent.getTrangThai())) {
+        if (ent.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Danh mục thuộc tính hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(ent);
@@ -84,10 +84,6 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
     @Transactional
     @CacheEvict(value = {"danh_muc_thuoc_tinh_list_cache", "danh_muc_thuoc_tinh_cache"}, allEntries = true)
     public DanhMucThuocTinhResponse themMoi(DanhMucThuocTinhRequest request) {
-        if (danhMucThuocTinhRepository.existsByMaThuocTinhAndThoiGianXoaIsNull(request.getMaThuocTinh())) {
-            throw new NghiepVuException("Mã thuộc tính đã tồn tại trong hệ thống", 400);
-        }
-
         // Kiểm tra trùng lặp option trong payload
         if (request.getLuaChonGoiY() != null && !request.getLuaChonGoiY().isEmpty()) {
             long distinctCount = request.getLuaChonGoiY().stream()
@@ -101,13 +97,14 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
 
         DanhMucThuocTinh ent = new DanhMucThuocTinh();
         capNhatThongTin(ent, request);
+        ent.setMaThuocTinh("DMTT-0-" + System.currentTimeMillis());
 
         // Thêm các lựa chọn gợi ý lồng kèm
         if (request.getLuaChonGoiY() != null) {
             for (DanhMucThuocTinhRequest.LuaChonGoiYSubRequest subOpt : request.getLuaChonGoiY()) {
                 LuaChonGoiY choice = new LuaChonGoiY();
                 choice.setGiaTri(subOpt.getGiaTri().trim());
-                choice.setTrangThai(subOpt.getTrangThai().trim());
+                choice.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(subOpt.getTrangThai().trim()));
                 choice.setThuTuHienThi(subOpt.getThuTuHienThi());
                 ent.addLuaChon(choice);
             }
@@ -123,11 +120,6 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
     public DanhMucThuocTinhResponse capNhat(Long id, DanhMucThuocTinhRequest request) {
         DanhMucThuocTinh ent = danhMucThuocTinhRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục thuộc tính để cập nhật", 404));
-
-        if (!ent.getMaThuocTinh().equals(request.getMaThuocTinh()) &&
-                danhMucThuocTinhRepository.existsByMaThuocTinhAndThoiGianXoaIsNull(request.getMaThuocTinh())) {
-            throw new NghiepVuException("Mã thuộc tính mới đã tồn tại trong hệ thống", 400);
-        }
 
         // Kiểm tra trùng lặp option trong payload
         if (request.getLuaChonGoiY() != null && !request.getLuaChonGoiY().isEmpty()) {
@@ -164,7 +156,11 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy lựa chọn gợi ý cần cập nhật với ID: " + reqOpt.getId(), 404));
                 
                 existingOption.setGiaTri(reqOpt.getGiaTri().trim());
-                existingOption.setTrangThai(reqOpt.getTrangThai().trim());
+                try {
+                    existingOption.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(reqOpt.getTrangThai().trim()));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
                 existingOption.setThuTuHienThi(reqOpt.getThuTuHienThi());
                 existingOption.setThoiGianXoa(null);
                 existingOption.setLyDoXoa(null);
@@ -172,7 +168,11 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
                 // Tạo option mới
                 LuaChonGoiY newOption = new LuaChonGoiY();
                 newOption.setGiaTri(reqOpt.getGiaTri().trim());
-                newOption.setTrangThai(reqOpt.getTrangThai().trim());
+                try {
+                    newOption.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(reqOpt.getTrangThai().trim()));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
                 newOption.setThuTuHienThi(reqOpt.getThuTuHienThi());
                 ent.addLuaChon(newOption);
             }
@@ -211,22 +211,28 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục thuộc tính", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        ent.setTrangThai(status);
+        ent.setTrangThai(trangThaiEnum);
         danhMucThuocTinhRepository.save(ent);
     }
 
     private void capNhatThongTin(DanhMucThuocTinh ent, DanhMucThuocTinhRequest request) {
-        ent.setMaThuocTinh(request.getMaThuocTinh().trim());
         ent.setTenThuocTinh(request.getTenThuocTinh().trim());
         ent.setKieuDuLieu(request.getKieuDuLieu().trim());
         ent.setApDungCho(request.getApDungCho().trim());
         ent.setBatBuocNhap(request.getBatBuocNhap());
         ent.setGiaTriMacDinh(request.getGiaTriMacDinh() != null ? request.getGiaTriMacDinh().trim() : null);
-        ent.setTrangThai(request.getTrangThai().trim());
+        try {
+            ent.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(request.getTrangThai().trim()));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private DanhMucThuocTinhResponse mapToResponse(DanhMucThuocTinh ent) {
@@ -245,7 +251,7 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
                 .apDungCho(ent.getApDungCho())
                 .batBuocNhap(ent.getBatBuocNhap())
                 .giaTriMacDinh(ent.getGiaTriMacDinh())
-                .trangThai(ent.getTrangThai())
+                .trangThai(ent.getTrangThai() != null ? ent.getTrangThai().getValue() : null)
                 .thoiGianTao(ent.getThoiGianTao())
                 .thoiGianCapNhat(ent.getThoiGianCapNhat())
                 .luaChonGoiY(choices)
@@ -257,7 +263,7 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
                 .id(ent.getId())
                 .idDanhMucThuocTinh(ent.getDanhMucThuocTinh().getId())
                 .giaTri(ent.getGiaTri())
-                .trangThai(ent.getTrangThai())
+                .trangThai(ent.getTrangThai() != null ? ent.getTrangThai().getValue() : null)
                 .thuTuHienThi(ent.getThuTuHienThi())
                 .thoiGianTao(ent.getThoiGianTao())
                 .thoiGianCapNhat(ent.getThoiGianCapNhat())

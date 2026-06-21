@@ -1,6 +1,7 @@
 package com.example.backend.modules.auth.service;
 
 import com.example.backend.modules.auth.service.interfaces.XacThucService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 import com.example.backend.modules.auth.dto.XacThucResponse;
 import com.example.backend.modules.auth.dto.DangNhapRequest;
@@ -77,7 +78,7 @@ public class XacThucServiceImpl implements XacThucService {
         NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhapAndThoiGianXoaIsNull(request.getUsername())
                 .orElseThrow(() -> new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401));
 
-        if (!"HOAT_DONG".equals(nguoiDung.getTrangThai())) {
+        if (nguoiDung.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động", 401);
         }
 
@@ -193,7 +194,7 @@ public class XacThucServiceImpl implements XacThucService {
         phienDangNhapRepository.save(phienCu);
 
         NguoiDung user = phienCu.getNguoiDung();
-        if (user == null || !"HOAT_DONG".equals(user.getTrangThai()) || user.getThoiGianXoa() != null) {
+        if (user == null || user.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG || user.getThoiGianXoa() != null) {
             throw new NghiepVuException("Tài khoản người dùng đã bị khóa hoặc xóa", 401);
         }
 
@@ -240,7 +241,7 @@ public class XacThucServiceImpl implements XacThucService {
         NguoiDung user = nguoiDungRepository.findByEmailAndThoiGianXoaIsNull(request.getEmail())
                 .orElseThrow(() -> new NghiepVuException("Email không tồn tại trong hệ thống hoặc tài khoản đã bị xóa", 404));
 
-        if (!"HOAT_DONG".equals(user.getTrangThai())) {
+        if (user.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Tài khoản liên kết với email này hiện đang bị khóa", 400);
         }
 
@@ -326,7 +327,7 @@ public class XacThucServiceImpl implements XacThucService {
                 .email(nguoiDung.getEmail())
                 .soDienThoai(nguoiDung.getSoDienThoai())
                 .danhDaiDienUrl(nguoiDung.getDanhDaiDienUrl())
-                .trangThai(nguoiDung.getTrangThai())
+                .trangThai(nguoiDung.getTrangThai() != null ? nguoiDung.getTrangThai().getValue() : null)
                 .danhSachVaiTro(danhSachVaiTro)
                 .build();
     }
@@ -375,7 +376,7 @@ public class XacThucServiceImpl implements XacThucService {
                 .tenNguoiDaiDien(donVi.getTenNguoiDaiDien())
                 .tenDemNguoiDaiDien(donVi.getTenDemNguoiDaiDien())
                 .chucVuNguoiDaiDien(donVi.getChucVuNguoiDaiDien())
-                .trangThai(donVi.getTrangThai())
+                .trangThai(donVi.getTrangThai() != null ? donVi.getTrangThai().getValue() : null)
                 .thoiGianThanhLap(donVi.getThoiGianThanhLap())
                 .thoiGianBatDauHopDong(donVi.getThoiGianBatDauHopDong())
                 .thoiGianHetHanHopDong(donVi.getThoiGianHetHanHopDong())

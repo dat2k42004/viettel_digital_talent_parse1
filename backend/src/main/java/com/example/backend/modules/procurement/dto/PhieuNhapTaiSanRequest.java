@@ -17,7 +17,6 @@ public class PhieuNhapTaiSanRequest {
 
      private Long idNguoiNhap;
 
-     @NotBlank(message = "Mã phiếu nhập không được để trống")
      @Size(max = 50, message = "Mã phiếu nhập không được vượt quá 50 ký tự")
      private String maPhieuNhap;
 

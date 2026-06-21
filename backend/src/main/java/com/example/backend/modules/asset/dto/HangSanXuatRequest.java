@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class HangSanXuatRequest {
 
-    @NotBlank(message = "Mã hãng không được để trống")
     @Size(max = 50, message = "Mã hãng không vượt quá 50 ký tự")
     private String maHang;
 

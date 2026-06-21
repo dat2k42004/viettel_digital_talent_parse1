@@ -3,6 +3,7 @@ package com.example.backend.modules.tenant.listener;
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.auth.model.NguoiDungQuyen;
 import com.example.backend.modules.auth.model.Quyen;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.auth.repository.NguoiDungQuyenRepository;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
 import com.example.backend.modules.auth.repository.QuyenRepository;
@@ -33,7 +34,7 @@ public class TenantAdminPermissionsListener {
             NguoiDung admin = nguoiDungRepository.findByIdAndThoiGianXoaIsNull(adminUserId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng Admin với ID: " + adminUserId));
 
-            List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", "HOAT_DONG");
+            List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", TrangThaiCoBanEnum.HOAT_DONG);
             
             nguoiDungQuyenRepository.deleteByNguoiDungId(adminUserId);
 

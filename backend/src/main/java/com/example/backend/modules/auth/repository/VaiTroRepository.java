@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
+
 public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecificationExecutor<VaiTro> {
     // Nếu idDonVi = null (Hệ thống)
     List<VaiTro> findByIdDonViIsNullAndThoiGianXoaIsNull();
@@ -16,8 +18,8 @@ public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecif
     // Nếu idDonVi != null (Đơn vị)
     List<VaiTro> findByIdDonViAndThoiGianXoaIsNull(Long idDonVi);
 
-    List<VaiTro> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, String trangThai);
-    List<VaiTro> findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull(String trangThai);
+    List<VaiTro> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, TrangThaiCoBanEnum trangThai);
+    List<VaiTro> findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull(TrangThaiCoBanEnum trangThai);
 
     Optional<VaiTro> findByIdAndThoiGianXoaIsNull(Long id);
 
@@ -26,7 +28,7 @@ public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecif
 
     @Modifying
     @Query("UPDATE VaiTro v SET v.trangThai = :trangThai WHERE v.idDonVi = :idDonVi AND v.thoiGianXoa IS NULL")
-    void updateTrangThaiByIdDonVi(Long idDonVi, String trangThai);
+    void updateTrangThaiByIdDonVi(Long idDonVi, TrangThaiCoBanEnum trangThai);
 
     @Modifying
     @Query("UPDATE VaiTro v SET v.thoiGianXoa = :thoiGianXoa, v.lyDoXoa = :lyDoXoa WHERE v.idDonVi = :idDonVi AND v.thoiGianXoa IS NULL")

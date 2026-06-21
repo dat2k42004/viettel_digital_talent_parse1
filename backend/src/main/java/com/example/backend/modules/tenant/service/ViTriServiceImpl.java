@@ -1,6 +1,7 @@
 package com.example.backend.modules.tenant.service;
 
 import com.example.backend.modules.tenant.service.interfaces.ViTriService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.tenant.dto.ViTriRequest;
 import com.example.backend.modules.tenant.dto.ViTriResponse;
@@ -43,7 +44,7 @@ public class ViTriServiceImpl implements ViTriService {
         Specification<ViTri> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
             predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
 
             if (tenViTri != null && !tenViTri.trim().isEmpty()) {
@@ -74,15 +75,12 @@ public class ViTriServiceImpl implements ViTriService {
             throw new NghiepVuException("Chỉ admin đơn vị mới được thêm vị trả", 403);
         }
 
-        if (viTriRepository.existsByMaViTriAndDonViIdAndThoiGianXoaIsNull(request.getMaViTri(), idDonVi)) {
-            throw new NghiepVuException("Mã vị trả đã tồn tại trong đơn vị", 400);
-        }
-
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn vị", 404));
 
         ViTri viTri = new ViTri();
         viTri.setDonVi(donVi);
+        viTri.setMaViTri("VT-" + idDonVi + "-" + System.currentTimeMillis());
         capNhatThongTin(viTri, request);
         viTri = viTriRepository.save(viTri);
 
@@ -95,11 +93,6 @@ public class ViTriServiceImpl implements ViTriService {
         Long idDonVi = DonViContextHolder.getTenantId();
         ViTri viTri = viTriRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy vị trả", 404));
-
-        if (!viTri.getMaViTri().equals(request.getMaViTri()) && 
-            viTriRepository.existsByMaViTriAndDonViIdAndThoiGianXoaIsNull(request.getMaViTri(), idDonVi)) {
-            throw new NghiepVuException("Mã vị trả đã tồn tại trong đơn vị", 400);
-        }
 
         capNhatThongTin(viTri, request);
         viTri = viTriRepository.save(viTri);
@@ -120,7 +113,6 @@ public class ViTriServiceImpl implements ViTriService {
     }
 
     private void capNhatThongTin(ViTri viTri, ViTriRequest request) {
-        viTri.setMaViTri(request.getMaViTri());
         viTri.setTenViTri(request.getTenViTri());
         viTri.setTenTiengAnh(request.getTenTiengAnh());
         viTri.setLoaiViTri(request.getLoaiViTri());
@@ -133,7 +125,7 @@ public class ViTriServiceImpl implements ViTriService {
         viTri.setCoHeThongPccc(request.getCoHeThongPccc());
         viTri.setCoKiemSoatCua(request.getCoKiemSoatCua());
         viTri.setMoTaChiTiet(request.getMoTaChiTiet());
-        viTri.setTrangThai(request.getTrangThai() != null ? request.getTrangThai() : "HOAT_DONG");
+        viTri.setTrangThai(request.getTrangThai() != null ? TrangThaiCoBanEnum.fromValue(request.getTrangThai()) : TrangThaiCoBanEnum.HOAT_DONG);
     }
 
     private ViTriResponse mapToResponse(ViTri viTri) {
@@ -153,7 +145,7 @@ public class ViTriServiceImpl implements ViTriService {
                 .coHeThongPccc(viTri.getCoHeThongPccc())
                 .coKiemSoatCua(viTri.getCoKiemSoatCua())
                 .moTaChiTiet(viTri.getMoTaChiTiet())
-                .trangThai(viTri.getTrangThai())
+                .trangThai(viTri.getTrangThai() != null ? viTri.getTrangThai().getValue() : null)
                 .build();
     }
 
@@ -164,10 +156,11 @@ public class ViTriServiceImpl implements ViTriService {
         ViTri viTri = viTriRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy vị trí", 404));
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
+        try {
+            viTri.setTrangThai(TrangThaiCoBanEnum.fromValue(status));
+        } catch (IllegalArgumentException e) {
             throw new NghiepVuException("Trạng thái không hợp lệ", 400);
         }
-        viTri.setTrangThai(status);
         viTriRepository.save(viTri);
     }
 
@@ -183,7 +176,7 @@ public class ViTriServiceImpl implements ViTriService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy vị trí thuộc đơn vị của bạn", 404));
         }
 
-        if (!"HOAT_DONG".equals(viTri.getTrangThai())) {
+        if (viTri.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Vị trí hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 

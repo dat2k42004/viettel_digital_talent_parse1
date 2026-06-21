@@ -5,6 +5,7 @@ import com.example.backend.modules.auth.repository.VaiTroRepository;
 import com.example.backend.modules.tenant.repository.PhongBanRepository;
 import com.example.backend.modules.tenant.repository.ViTriRepository;
 import com.example.backend.shared.dto.TenantStatusEvent;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -29,10 +30,11 @@ public class TenantStatusListener {
         log.info("Nhận sự kiện cập nhật trạng thái đơn vị ID: {} -> {}", idDonVi, trangThai);
 
         try {
-            nguoiDungRepository.updateTrangThaiByIdDonVi(idDonVi, trangThai);
-            phongBanRepository.updateTrangThaiByDonViId(idDonVi, trangThai);
-            viTriRepository.updateTrangThaiByDonViId(idDonVi, trangThai);
-            vaiTroRepository.updateTrangThaiByIdDonVi(idDonVi, trangThai);
+            TrangThaiCoBanEnum statusEnum = TrangThaiCoBanEnum.fromValue(trangThai);
+            nguoiDungRepository.updateTrangThaiByIdDonVi(idDonVi, statusEnum);
+            phongBanRepository.updateTrangThaiByDonViId(idDonVi, statusEnum);
+            viTriRepository.updateTrangThaiByDonViId(idDonVi, statusEnum);
+            vaiTroRepository.updateTrangThaiByIdDonVi(idDonVi, statusEnum);
 
             log.info("Hoàn tất cascade cập nhật trạng thái cho các thực thể thuộc đơn vị ID: {}", idDonVi);
         } catch (Exception e) {

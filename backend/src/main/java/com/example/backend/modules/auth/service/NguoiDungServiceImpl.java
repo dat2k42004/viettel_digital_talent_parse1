@@ -1,6 +1,7 @@
 package com.example.backend.modules.auth.service;
 
 import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.auth.dto.NguoiDungRequest;
 import com.example.backend.modules.auth.dto.NguoiDungResponse;
@@ -86,7 +87,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         Specification<NguoiDung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             // Phân quyền theo Đơn vị (Tenant) - Super Admin xem toàn bộ, Tenant Admin xem theo Đơn vị
             if (idDonVi != null) {
@@ -140,7 +141,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         nguoiDung.setEmail(request.getEmail());
         nguoiDung.setSoDienThoai(request.getSoDienThoai());
         nguoiDung.setDanhDaiDienUrl(request.getDanhDaiDienUrl());
-        nguoiDung.setTrangThai("HOAT_DONG");
+        nguoiDung.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
 
         nguoiDung = nguoiDungRepository.save(nguoiDung);
 
@@ -249,7 +250,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 .email(nguoiDung.getEmail())
                 .soDienThoai(nguoiDung.getSoDienThoai())
                 .danhDaiDienUrl(nguoiDung.getDanhDaiDienUrl())
-                .trangThai(nguoiDung.getTrangThai())
+                .trangThai(nguoiDung.getTrangThai() != null ? nguoiDung.getTrangThai().getValue() : null)
                 .danhSachVaiTro(danhSachVaiTro)
                 .danhSachQuyen(danhSachQuyen)
                 .danhSachQuyenPhanGiai(danhSachQuyenPhanGiai)
@@ -262,10 +263,11 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     public void capNhatTrangThai(Long id, NguoiDungTrangThaiRequest request) {
         NguoiDung nguoiDung = kiemTraTonTaiVaQuyen(id);
         String trangThai = request.getTrangThai();
-        if (!"HOAT_DONG".equals(trangThai) && !"KHOA".equals(trangThai)) {
+        try {
+            nguoiDung.setTrangThai(TrangThaiCoBanEnum.fromValue(trangThai));
+        } catch (IllegalArgumentException e) {
             throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
         }
-        nguoiDung.setTrangThai(trangThai);
         nguoiDungRepository.save(nguoiDung);
     }
 
@@ -302,7 +304,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         NguoiDung nguoiDung = nguoiDungRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy người dùng hoặc người dùng đã bị xóa", 404));
 
-        if (!"HOAT_DONG".equals(nguoiDung.getTrangThai())) {
+        if (nguoiDung.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Tài khoản người dùng hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 

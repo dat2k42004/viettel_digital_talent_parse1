@@ -1,6 +1,7 @@
 package com.example.backend.modules.tenant.service;
 
 import com.example.backend.modules.tenant.service.interfaces.DanhMucCauHinhService;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 import com.example.backend.modules.tenant.dto.DanhMucCauHinhRequest;
 import com.example.backend.modules.tenant.dto.DanhMucCauHinhResponse;
@@ -39,7 +40,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
         Specification<DanhMucCauHinh> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("tenCauHinh")), "%" + tenCauHinh.trim().toLowerCase() + "%"));
@@ -63,12 +64,9 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
     public DanhMucCauHinhResponse themMoi(DanhMucCauHinhRequest request) {
         KiemTraQuyenHeThong();
 
-        if (danhMucCauHinhRepository.existsByMaCauHinhAndThoiGianXoaIsNull(request.getMaCauHinh())) {
-            throw new NghiepVuException("Mã cấu hình đã tồn tại", 400);
-        }
-
         DanhMucCauHinh entity = new DanhMucCauHinh();
         capNhatThongTin(entity, request);
+        entity.setMaCauHinh("DMCH-0-" + System.currentTimeMillis());
         entity = danhMucCauHinhRepository.save(entity);
 
         return mapToResponse(entity);
@@ -82,11 +80,6 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
 
         DanhMucCauHinh entity = danhMucCauHinhRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục cấu hình", 404));
-
-        if (!entity.getMaCauHinh().equals(request.getMaCauHinh()) && 
-            danhMucCauHinhRepository.existsByMaCauHinhAndThoiGianXoaIsNull(request.getMaCauHinh())) {
-            throw new NghiepVuException("Mã cấu hình đã tồn tại", 400);
-        }
 
         capNhatThongTin(entity, request);
         entity = danhMucCauHinhRepository.save(entity);
@@ -115,13 +108,12 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
     }
 
     private void capNhatThongTin(DanhMucCauHinh entity, DanhMucCauHinhRequest request) {
-        entity.setMaCauHinh(request.getMaCauHinh());
         entity.setTenCauHinh(request.getTenCauHinh());
         entity.setMoTaCauHinh(request.getMoTaCauHinh());
         entity.setNhomCauHinh(request.getNhomCauHinh());
         entity.setLoaiDuLieu(request.getLoaiDuLieu());
         entity.setGiaTriMacDinh(request.getGiaTriMacDinh());
-        entity.setTrangThai(request.getTrangThai() != null ? request.getTrangThai() : "HOAT_DONG");
+        entity.setTrangThai(request.getTrangThai() != null ? TrangThaiCoBanEnum.fromValue(request.getTrangThai()) : TrangThaiCoBanEnum.HOAT_DONG);
     }
 
     private DanhMucCauHinhResponse mapToResponse(DanhMucCauHinh entity) {
@@ -133,7 +125,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
                 .nhomCauHinh(entity.getNhomCauHinh())
                 .loaiDuLieu(entity.getLoaiDuLieu())
                 .giaTriMacDinh(entity.getGiaTriMacDinh())
-                .trangThai(entity.getTrangThai())
+                .trangThai(entity.getTrangThai() != null ? entity.getTrangThai().getValue() : null)
                 .build();
     }
 
@@ -142,7 +134,7 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
         DanhMucCauHinh entity = danhMucCauHinhRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục cấu hình hoặc danh mục đã bị xóa", 404));
 
-        if (!"HOAT_DONG".equals(entity.getTrangThai())) {
+        if (entity.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Danh mục cấu hình hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 

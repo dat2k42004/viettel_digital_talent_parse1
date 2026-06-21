@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
@@ -18,8 +19,13 @@ public class DonHangMuaSamResponse {
      private Long idDonVi;
      private Long idNhaCungCap;
      private String tenNhaCungCap;
-     private Long idNguoiLap;
-     private Long idNguoiPheDuyet;
+
+     @Schema(description = "Tên người lập đơn hàng")
+     private String tenNguoiLap;
+
+     @Schema(description = "Tên người phê duyệt đơn hàng")
+     private String tenNguoiPheDuyet;
+
      private String maDonHang;
      private String soHopDongDinhKem;
      private BigDecimal tongTienTruocThue;
@@ -31,6 +37,6 @@ public class DonHangMuaSamResponse {
      private LocalDateTime thoiGianTao;
      private LocalDateTime thoiGianCapNhat;
 
-     private List<ChiTietDonHangPhanCungResponse> chiTietPhanCung;
-     private List<ChiTietDonHangPhanMemResponse> chiTietPhanMem;
+     @Schema(description = "Danh sách chi tiết tài sản của đơn hàng mua sắm")
+     private List<ChiTietDonHangGeneralResponse> chiTietTaiSan;
 }

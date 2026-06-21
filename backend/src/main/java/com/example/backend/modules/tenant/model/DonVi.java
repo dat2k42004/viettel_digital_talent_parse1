@@ -76,7 +76,8 @@ public class DonVi extends BaseEntity {
     private String chucVuNguoiDaiDien;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private com.example.backend.shared.model.TrangThaiCoBanEnum trangThai;
 
     @Column(name = "thoi_gian_thanh_lap")
     private LocalDate thoiGianThanhLap;

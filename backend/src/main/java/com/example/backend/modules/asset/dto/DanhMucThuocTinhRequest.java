@@ -21,7 +21,6 @@ import java.util.List;
 @Schema(description = "Yêu cầu tạo/cập nhật danh mục thuộc tính")
 public class DanhMucThuocTinhRequest {
 
-    @NotBlank(message = "Mã thuộc tính không được để trống")
     @Size(max = 50, message = "Mã thuộc tính không vượt quá 50 ký tự")
     @Schema(description = "Mã thuộc tính duy nhất", example = "RAM_SIZE")
     private String maThuocTinh;

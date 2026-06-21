@@ -27,7 +27,6 @@ public class DanhSachThietBiPhanCungRequest {
     @Size(max = 100, message = "Số Serial không vượt quá 100 ký tự")
     private String soSerial;
 
-    @NotBlank(message = "Mã thẻ tài sản không được để trống")
     @Size(max = 50, message = "Mã thẻ tài sản không vượt quá 50 ký tự")
     private String maTheTaiSan;
 

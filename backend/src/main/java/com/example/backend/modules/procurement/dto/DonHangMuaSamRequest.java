@@ -19,7 +19,6 @@ public class DonHangMuaSamRequest {
      private Long idNguoiLap;
      private Long idNguoiPheDuyet;
 
-     @NotBlank(message = "Mã đơn hàng không được để trống")
      @Size(max = 50, message = "Mã đơn hàng không được vượt quá 50 ký tự")
      private String maDonHang;
 

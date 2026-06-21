@@ -14,5 +14,5 @@ public interface DonHangMuaSamRepository
           extends JpaRepository<DonHangMuaSam, Long>, JpaSpecificationExecutor<DonHangMuaSam> {
      Optional<DonHangMuaSam> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 
-     List<DonHangMuaSam> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, String trangThai);
+     List<DonHangMuaSam> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, com.example.backend.shared.model.TrangThaiPhieuEnum trangThai);
 }

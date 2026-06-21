@@ -20,7 +20,9 @@ public interface DonHangMuaSamService {
 
      DonHangMuaSamResponse capNhat(Long id, DonHangMuaSamRequest request);
 
-     void capNhatTrangThai(Long id, TrangThaiRequest request);
+     void yeuCauPheDuyet(Long id);
+
+     void pheDuyet(Long id);
 
      void xoaMem(Long id);
 }

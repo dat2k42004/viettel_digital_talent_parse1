@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DanhMucTaiSanRequest {
 
-    @NotBlank(message = "Mã danh mục không được để trống")
     @Size(max = 50, message = "Mã danh mục không vượt quá 50 ký tự")
     private String maDanhMuc;
 

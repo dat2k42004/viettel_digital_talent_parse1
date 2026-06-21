@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoaiTaiSanRequest {
 
-    @NotBlank(message = "Mã loại không được để trống")
     @Size(max = 50, message = "Mã loại không vượt quá 50 ký tự")
     private String maLoai;
 

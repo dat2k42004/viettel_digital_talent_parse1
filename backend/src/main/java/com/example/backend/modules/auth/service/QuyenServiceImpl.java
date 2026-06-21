@@ -1,7 +1,7 @@
 package com.example.backend.modules.auth.service;
 
 import com.example.backend.modules.auth.service.interfaces.QuyenService;
-
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.auth.dto.QuyenResponse;
 import com.example.backend.modules.auth.model.Quyen;
 import com.example.backend.modules.auth.repository.QuyenRepository;
@@ -34,7 +34,7 @@ public class QuyenServiceImpl implements QuyenService {
     public Map<String, List<QuyenResponse>> layDanhSachQuyenPhanNhom() {
         List<Quyen> activePermissions = quyenRepository.findByThoiGianXoaIsNull();
         return activePermissions.stream()
-                .filter(q -> "HOAT_DONG".equals(q.getTrangThai())) // Lọc chỉ quyền đang hoạt động
+                .filter(q -> q.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG) // Lọc chỉ quyền đang hoạt động
                 .collect(Collectors.groupingBy(
                         q -> extractModule(q.getMaQuyen()),
                         Collectors.mapping(this::mapToResponse, Collectors.toList())

@@ -1,9 +1,8 @@
 package com.example.backend.modules.procurement.service;
 
 import com.example.backend.modules.procurement.dto.ChiTietDonHangPhanCungRequest;
-import com.example.backend.modules.procurement.dto.ChiTietDonHangPhanCungResponse;
 import com.example.backend.modules.procurement.dto.ChiTietDonHangPhanMemRequest;
-import com.example.backend.modules.procurement.dto.ChiTietDonHangPhanMemResponse;
+import com.example.backend.modules.procurement.dto.ChiTietDonHangGeneralResponse;
 import com.example.backend.modules.procurement.dto.DonHangMuaSamRequest;
 import com.example.backend.modules.procurement.dto.DonHangMuaSamResponse;
 import com.example.backend.modules.procurement.dto.SelectOption;
@@ -16,6 +15,12 @@ import com.example.backend.modules.procurement.repository.ChiTietDonHangPhanMemR
 import com.example.backend.modules.procurement.repository.DonHangMuaSamRepository;
 import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
 import com.example.backend.modules.procurement.service.interfaces.DonHangMuaSamService;
+import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.model.NguoiDung;
+import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
+import com.example.backend.modules.asset.repository.TaiSanPhanMemRepository;
+import com.example.backend.modules.asset.model.TaiSanPhanCung;
+import com.example.backend.modules.asset.model.TaiSanPhanMem;
 import com.example.backend.shared.dto.TrangThaiRequest;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
@@ -28,6 +33,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,6 +49,9 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      private final ChiTietDonHangPhanCungRepository chiTietDonHangPhanCungRepository;
      private final ChiTietDonHangPhanMemRepository chiTietDonHangPhanMemRepository;
      private final NhaCungCapRepository nhaCungCapRepository;
+     private final NguoiDungRepository nguoiDungRepository;
+     private final TaiSanPhanCungRepository taiSanPhanCungRepository;
+     private final TaiSanPhanMemRepository taiSanPhanMemRepository;
 
      @Override
      @Transactional(readOnly = true)
@@ -70,16 +80,42 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     predicates.add(cb.equal(root.get("nhaCungCap").get("id"), idNhaCungCap));
                }
 
-               if (trangThai != null && !trangThai.trim().isEmpty()) {
-                    predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
-               }
+                if (trangThai != null && !trangThai.trim().isEmpty()) {
+                     try {
+                          predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
+                     } catch (IllegalArgumentException e) {
+                          throw new NghiepVuException(e.getMessage(), 400);
+                     }
+                }
 
                return cb.and(predicates.toArray(new Predicate[0]));
           };
 
           Page<DonHangMuaSam> pageResult = donHangMuaSamRepository.findAll(spec, pageRequest);
-          Page<DonHangMuaSamResponse> responsePage = pageResult.map(this::mapToResponseWithoutDetails);
-          return PageResponse.from(responsePage);
+          
+          // Collect all user IDs to avoid N+1 queries
+          java.util.Set<Long> userIds = new java.util.HashSet<>();
+          for (DonHangMuaSam dh : pageResult.getContent()) {
+               if (dh.getIdNguoiLap() != null) {
+                    userIds.add(dh.getIdNguoiLap());
+               }
+               if (dh.getIdNguoiPheDuyet() != null) {
+                    userIds.add(dh.getIdNguoiPheDuyet());
+               }
+          }
+
+          java.util.Map<Long, String> userMap = new java.util.HashMap<>();
+          if (!userIds.isEmpty()) {
+               userMap = nguoiDungRepository.findAllById(userIds).stream()
+                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          }
+
+          final java.util.Map<Long, String> finalUserMap = userMap;
+          List<DonHangMuaSamResponse> responses = pageResult.getContent().stream()
+                    .map(dh -> mapToResponseWithoutDetails(dh, finalUserMap))
+                    .collect(Collectors.toList());
+
+          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest, pageResult.getTotalElements()));
      }
 
      @Override
@@ -96,8 +132,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Transactional(readOnly = true)
      public List<SelectOption> laySelectOptions() {
           Long currentTenantId = DonViContextHolder.getTenantId();
-          List<DonHangMuaSam> danhSach = donHangMuaSamRepository
-                    .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, "HOAT_DONG");
+           List<DonHangMuaSam> danhSach = donHangMuaSamRepository
+                     .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
           return danhSach.stream()
                     .map(dh -> SelectOption.builder()
                               .id(dh.getId())
@@ -121,14 +157,14 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           dh.setNhaCungCap(ncc);
           dh.setIdNguoiLap(request.getIdNguoiLap());
           dh.setIdNguoiPheDuyet(request.getIdNguoiPheDuyet());
-          dh.setMaDonHang(request.getMaDonHang());
+          dh.setMaDonHang("PO-" + currentTenantId + "-" + System.currentTimeMillis());
           dh.setSoHopDongDinhKem(request.getSoHopDongDinhKem());
           dh.setTongTienTruocThue(request.getTongTienTruocThue());
           dh.setThueVat(request.getThueVat());
           dh.setTongTienSauThue(request.getTongTienSauThue());
           dh.setThoiGianGiaoDuKien(request.getThoiGianGiaoDuKien());
           dh.setGhiChu(request.getGhiChu());
-          dh.setTrangThai("CHO_PHE_DUYET");
+           dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI);
 
           DonHangMuaSam savedDh = donHangMuaSamRepository.save(dh);
 
@@ -171,9 +207,9 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm cần chỉnh sửa",
                               404));
 
-          if (!"CHO_PHE_DUYET".equals(dh.getTrangThai())) {
-               throw new NghiepVuException("Chỉ được sửa đơn hàng khi ở trạng thái CHO_PHE_DUYET", 400);
-          }
+           if (dh.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+                throw new NghiepVuException("Chỉ được sửa đơn hàng khi ở trạng thái Tạo mới (TAO_MOI)", 400);
+           }
 
           NhaCungCap ncc = nhaCungCapRepository
                     .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdNhaCungCap(), currentTenantId)
@@ -181,7 +217,6 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
           dh.setNhaCungCap(ncc);
           dh.setIdNguoiLap(request.getIdNguoiLap());
-          dh.setMaDonHang(request.getMaDonHang());
           dh.setSoHopDongDinhKem(request.getSoHopDongDinhKem());
           dh.setTongTienTruocThue(request.getTongTienTruocThue());
           dh.setThueVat(request.getThueVat());
@@ -194,18 +229,14 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           // Xóa các chi tiết cũ để nạp lại theo cơ chế Aggregate Root phẳng
           List<ChiTietDonHangPhanCung> oldPcList = chiTietDonHangPhanCungRepository
                     .findByDonHangMuaSamAndThoiGianXoaIsNull(savedDh);
-          for (ChiTietDonHangPhanCung pc : oldPcList) {
-               pc.setThoiGianXoa(LocalDateTime.now());
-               pc.setLyDoXoa("Cập nhật lại danh sách chi tiết đơn hàng");
-               chiTietDonHangPhanCungRepository.save(pc);
+          if (!oldPcList.isEmpty()) {
+               chiTietDonHangPhanCungRepository.deleteAll(oldPcList);
           }
 
           List<ChiTietDonHangPhanMem> oldPmList = chiTietDonHangPhanMemRepository
                     .findByDonHangMuaSamAndThoiGianXoaIsNull(savedDh);
-          for (ChiTietDonHangPhanMem pm : oldPmList) {
-               pm.setThoiGianXoa(LocalDateTime.now());
-               pm.setLyDoXoa("Cập nhật lại danh sách chi tiết đơn hàng");
-               chiTietDonHangPhanMemRepository.save(pm);
+          if (!oldPmList.isEmpty()) {
+               chiTietDonHangPhanMemRepository.deleteAll(oldPmList);
           }
 
           // Thêm mới lại danh sách chi tiết từ Request
@@ -242,13 +273,41 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
      @Override
      @Transactional
-     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
+     public void yeuCauPheDuyet(Long id) {
           Long currentTenantId = DonViContextHolder.getTenantId();
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
-                    .orElseThrow(() -> new NghiepVuException(
-                              "Không tìm thấy thông tin đơn hàng mua sắm cần cập nhật trạng thái", 404));
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
 
-          dh.setTrangThai(request.getTrangThai());
+          if (!dh.getTrangThai().canTransitionTo(com.example.backend.shared.model.TrangThaiPhieuEnum.GUI_PHE_DUYET)) {
+               throw new NghiepVuException("Không thể gửi yêu cầu phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(), 400);
+          }
+
+          dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.GUI_PHE_DUYET);
+          donHangMuaSamRepository.save(dh);
+     }
+
+     @Override
+     @Transactional
+     public void pheDuyet(Long id) {
+          Long currentTenantId = DonViContextHolder.getTenantId();
+          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+          Long userId = null;
+          if (authentication != null && authentication.getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
+               userId = userDetails.getNguoiDung().getId();
+          }
+          if (userId == null) {
+               throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
+          }
+
+          DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
+
+          if (!dh.getTrangThai().canTransitionTo(com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET)) {
+               throw new NghiepVuException("Không thể phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(), 400);
+          }
+
+          dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
+          dh.setIdNguoiPheDuyet(userId);
           donHangMuaSamRepository.save(dh);
      }
 
@@ -259,26 +318,30 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm cần xóa", 404));
 
+          if (dh.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+               throw new NghiepVuException("Chỉ được xóa đơn hàng khi ở trạng thái Tạo mới", 400);
+          }
+
           dh.setThoiGianXoa(LocalDateTime.now());
           dh.setLyDoXoa("Xóa mềm từ luồng chức năng quản lý hệ thống");
           donHangMuaSamRepository.save(dh);
      }
 
-     private DonHangMuaSamResponse mapToResponseWithoutDetails(DonHangMuaSam model) {
+     private DonHangMuaSamResponse mapToResponseWithoutDetails(DonHangMuaSam model, java.util.Map<Long, String> userMap) {
           return DonHangMuaSamResponse.builder()
                     .id(model.getId())
                     .idDonVi(model.getIdDonVi())
                     .idNhaCungCap(model.getNhaCungCap() != null ? model.getNhaCungCap().getId() : null)
                     .tenNhaCungCap(model.getNhaCungCap() != null ? model.getNhaCungCap().getTenNhaCungCap() : null)
-                    .idNguoiLap(model.getIdNguoiLap())
-                    .idNguoiPheDuyet(model.getIdNguoiPheDuyet())
+                    .tenNguoiLap(model.getIdNguoiLap() != null ? userMap.get(model.getIdNguoiLap()) : null)
+                    .tenNguoiPheDuyet(model.getIdNguoiPheDuyet() != null ? userMap.get(model.getIdNguoiPheDuyet()) : null)
                     .maDonHang(model.getMaDonHang())
                     .soHopDongDinhKem(model.getSoHopDongDinhKem())
                     .tongTienTruocThue(model.getTongTienTruocThue())
                     .thueVat(model.getThueVat())
                     .tongTienSauThue(model.getTongTienSauThue())
                     .thoiGianGiaoDuKien(model.getThoiGianGiaoDuKien())
-                    .trangThai(model.getTrangThai())
+                    .trangThai(model.getTrangThai() != null ? model.getTrangThai().getValue() : null)
                     .ghiChu(model.getGhiChu())
                     .thoiGianTao(model.getThoiGianTao())
                     .thoiGianCapNhat(model.getThoiGianCapNhat())
@@ -286,40 +349,100 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      }
 
      private DonHangMuaSamResponse mapToResponseWithDetails(DonHangMuaSam model) {
-          DonHangMuaSamResponse response = mapToResponseWithoutDetails(model);
+          java.util.Set<Long> userIds = new java.util.HashSet<>();
+          if (model.getIdNguoiLap() != null) {
+               userIds.add(model.getIdNguoiLap());
+          }
+          if (model.getIdNguoiPheDuyet() != null) {
+               userIds.add(model.getIdNguoiPheDuyet());
+          }
 
-          List<ChiTietDonHangPhanCungResponse> pcList = chiTietDonHangPhanCungRepository
-                    .findByDonHangMuaSamAndThoiGianXoaIsNull(model).stream()
-                    .map(pc -> ChiTietDonHangPhanCungResponse.builder()
+          java.util.Map<Long, String> userMap = new java.util.HashMap<>();
+          if (!userIds.isEmpty()) {
+               userMap = nguoiDungRepository.findAllById(userIds).stream()
+                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          }
+
+          DonHangMuaSamResponse response = mapToResponseWithoutDetails(model, userMap);
+
+          List<ChiTietDonHangGeneralResponse> chiTietList = new ArrayList<>();
+
+          // 1. Map hardware details
+          List<ChiTietDonHangPhanCung> pcList = chiTietDonHangPhanCungRepository
+                    .findByDonHangMuaSamAndThoiGianXoaIsNull(model);
+          if (!pcList.isEmpty()) {
+               java.util.Set<Long> pcIds = pcList.stream()
+                         .map(ChiTietDonHangPhanCung::getIdTaiSanPhanCung)
+                         .filter(java.util.Objects::nonNull)
+                         .collect(Collectors.toSet());
+               java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
+               if (!pcIds.isEmpty()) {
+                    pcNameMap = taiSanPhanCungRepository.findAllById(pcIds).stream()
+                              .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
+               }
+
+               for (ChiTietDonHangPhanCung pc : pcList) {
+                    chiTietList.add(ChiTietDonHangGeneralResponse.builder()
                               .id(pc.getId())
-                              .idTaiSanPhanCung(pc.getIdTaiSanPhanCung())
+                              .idTaiSan(pc.getIdTaiSanPhanCung())
+                              .tenTaiSan(pc.getIdTaiSanPhanCung() != null ? pcNameMap.get(pc.getIdTaiSanPhanCung()) : null)
                               .soLuongDat(pc.getSoLuongDat())
                               .donGiaDat(pc.getDonGiaDat())
                               .thanhTien(pc.getThanhTien())
                               .soLuongDaNhap(pc.getSoLuongDaNhap())
                               .ghiChu(pc.getGhiChu())
+                              .loai("PHAN_CUNG")
                               .thoiGianTao(pc.getThoiGianTao())
                               .thoiGianCapNhat(pc.getThoiGianCapNhat())
-                              .build())
-                    .collect(Collectors.toList());
+                              .build());
+               }
+          }
 
-          List<ChiTietDonHangPhanMemResponse> pmList = chiTietDonHangPhanMemRepository
-                    .findByDonHangMuaSamAndThoiGianXoaIsNull(model).stream()
-                    .map(pm -> ChiTietDonHangPhanMemResponse.builder()
+          // 2. Map software details
+          List<ChiTietDonHangPhanMem> pmList = chiTietDonHangPhanMemRepository
+                    .findByDonHangMuaSamAndThoiGianXoaIsNull(model);
+          if (!pmList.isEmpty()) {
+               java.util.Set<Long> pmIds = pmList.stream()
+                         .map(ChiTietDonHangPhanMem::getIdTaiSanPhanMem)
+                         .filter(java.util.Objects::nonNull)
+                         .collect(Collectors.toSet());
+               java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
+               if (!pmIds.isEmpty()) {
+                    pmNameMap = taiSanPhanMemRepository.findAllById(pmIds).stream()
+                              .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
+               }
+
+               for (ChiTietDonHangPhanMem pm : pmList) {
+                    chiTietList.add(ChiTietDonHangGeneralResponse.builder()
                               .id(pm.getId())
-                              .idTaiSanPhanMem(pm.getIdTaiSanPhanMem())
+                              .idTaiSan(pm.getIdTaiSanPhanMem())
+                              .tenTaiSan(pm.getIdTaiSanPhanMem() != null ? pmNameMap.get(pm.getIdTaiSanPhanMem()) : null)
                               .soLuongDat(pm.getSoLuongDat())
                               .donGiaDat(pm.getDonGiaDat())
                               .thanhTien(pm.getThanhTien())
                               .soLuongDaNhap(pm.getSoLuongDaNhap())
                               .ghiChu(pm.getGhiChu())
+                              .loai("PHAN_MEM")
                               .thoiGianTao(pm.getThoiGianTao())
                               .thoiGianCapNhat(pm.getThoiGianCapNhat())
-                              .build())
-                    .collect(Collectors.toList());
+                              .build());
+               }
+          }
 
-          response.setChiTietPhanCung(pcList);
-          response.setChiTietPhanMem(pmList);
+          response.setChiTietTaiSan(chiTietList);
           return response;
+     }
+
+     private String getHoTenNguoiDung(NguoiDung nd) {
+          if (nd == null)
+               return null;
+          StringBuilder sb = new StringBuilder();
+          if (nd.getHoNguoiDung() != null)
+               sb.append(nd.getHoNguoiDung().trim()).append(" ");
+          if (nd.getTenDemNguoiDung() != null)
+               sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
+          if (nd.getTenNguoiDung() != null)
+               sb.append(nd.getTenNguoiDung().trim());
+          return sb.toString().trim();
      }
 }

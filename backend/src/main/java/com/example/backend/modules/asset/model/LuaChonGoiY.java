@@ -23,7 +23,8 @@ public class LuaChonGoiY extends BaseEntity {
     private String giaTri;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private com.example.backend.shared.model.TrangThaiCoBanEnum trangThai;
 
     @Column(name = "thu_tu_hien_thi")
     private Integer thuTuHienThi;

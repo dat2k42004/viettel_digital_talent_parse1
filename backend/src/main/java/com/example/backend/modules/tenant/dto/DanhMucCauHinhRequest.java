@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class DanhMucCauHinhRequest {
-    @NotBlank(message = "Mã cấu hình không được để trống")
     private String maCauHinh;
 
     @NotBlank(message = "Tên cấu hình không được để trống")

@@ -18,14 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/danh-muc-thuoc-tinh")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "DanhMucThuocTinh", description = "API Quản lý Danh mục Thuộc tính động theo mô hình Aggregate Root")
 public class DanhMucThuocTinhController {
 
     private final DanhMucThuocTinhService danhMucThuocTinhService;
 
     @GetMapping
     @PreAuthorize("hasAuthority('XEM_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Lấy danh sách Danh mục Thuộc tính động phân trang (Kèm option gợi ý lồng)")
     public ApiResponse<PageResponse<DanhMucThuocTinhResponse>> layDanhSach(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String apDungCho,
@@ -38,21 +36,18 @@ public class DanhMucThuocTinhController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('XEM_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Lấy chi tiết Danh mục Thuộc tính động theo ID (Kèm option gợi ý lồng)")
     public ApiResponse<DanhMucThuocTinhResponse> layTheoId(@PathVariable Long id) {
         return ApiResponse.success(danhMucThuocTinhService.layTheoId(id));
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('THEM_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Thêm mới Danh mục Thuộc tính động và các gợi ý đi kèm")
     public ApiResponse<DanhMucThuocTinhResponse> themMoi(@Valid @RequestBody DanhMucThuocTinhRequest request) {
         return ApiResponse.success(danhMucThuocTinhService.themMoi(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('SUA_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Cập nhật Danh mục Thuộc tính động và đồng bộ các gợi ý")
     public ApiResponse<DanhMucThuocTinhResponse> capNhat(
             @PathVariable Long id,
             @Valid @RequestBody DanhMucThuocTinhRequest request
@@ -62,7 +57,6 @@ public class DanhMucThuocTinhController {
 
     @PutMapping("/{id}/trang-thai")
     @PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Cập nhật trạng thái Danh mục Thuộc tính động")
     public ApiResponse<String> capNhatTrangThai(
             @PathVariable Long id,
             @Valid @RequestBody TrangThaiRequest request
@@ -73,7 +67,6 @@ public class DanhMucThuocTinhController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('XOA_DANH_MUC_THUOC_TINH')")
-    @Operation(summary = "Xóa mềm Danh mục Thuộc tính động")
     public ApiResponse<String> xoaMem(@PathVariable Long id) {
         danhMucThuocTinhService.xoaMem(id);
         return ApiResponse.success("Xóa mềm danh mục thuộc tính thành công");

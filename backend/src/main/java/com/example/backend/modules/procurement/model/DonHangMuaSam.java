@@ -54,7 +54,8 @@ public class DonHangMuaSam extends BaseEntity {
      private LocalDate thoiGianGiaoDuKien;
 
      @Column(name = "trang_thai", length = 30)
-     private String trangThai;
+     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+     private com.example.backend.shared.model.TrangThaiPhieuEnum trangThai;
 
      @Column(name = "ghi_chu", columnDefinition = "TEXT")
      private String ghiChu;

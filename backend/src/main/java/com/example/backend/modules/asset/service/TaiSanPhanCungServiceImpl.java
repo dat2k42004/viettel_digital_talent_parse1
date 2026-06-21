@@ -55,7 +55,11 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -79,7 +83,7 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
     public TaiSanPhanCungResponse layTheoId(Long id) {
         TaiSanPhanCung taiSanPhanCung = taiSanPhanCungRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần cứng với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(taiSanPhanCung.getTrangThai())) {
+        if (taiSanPhanCung.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Mẫu tài sản phần cứng hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(taiSanPhanCung);
@@ -89,12 +93,9 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
     @Transactional
     @CacheEvict(value = {"tai_san_phan_cung_cache", "tai_san_phan_cung_list_cache"}, allEntries = true)
     public TaiSanPhanCungResponse themMoi(TaiSanPhanCungRequest request) {
-        if (taiSanPhanCungRepository.existsByMaMauAndThoiGianXoaIsNull(request.getMaMau())) {
-            throw new NghiepVuException("Mã mẫu tài sản phần cứng đã tồn tại trong hệ thống", 400);
-        }
-
         TaiSanPhanCung taiSanPhanCung = new TaiSanPhanCung();
         capNhatThongTin(taiSanPhanCung, request);
+        taiSanPhanCung.setMaMau("TSPC-0-" + System.currentTimeMillis());
         taiSanPhanCung = taiSanPhanCungRepository.save(taiSanPhanCung);
 
         return mapToResponse(taiSanPhanCung);
@@ -106,11 +107,6 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
     public TaiSanPhanCungResponse capNhat(Long id, TaiSanPhanCungRequest request) {
         TaiSanPhanCung taiSanPhanCung = taiSanPhanCungRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần cứng để cập nhật", 404));
-
-        if (!taiSanPhanCung.getMaMau().equals(request.getMaMau()) &&
-                taiSanPhanCungRepository.existsByMaMauAndThoiGianXoaIsNull(request.getMaMau())) {
-            throw new NghiepVuException("Mã mẫu tài sản phần cứng mới đã tồn tại trong hệ thống", 400);
-        }
 
         capNhatThongTin(taiSanPhanCung, request);
         taiSanPhanCung = taiSanPhanCungRepository.save(taiSanPhanCung);
@@ -138,11 +134,14 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần cứng", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        taiSanPhanCung.setTrangThai(status);
+        taiSanPhanCung.setTrangThai(trangThaiEnum);
         taiSanPhanCungRepository.save(taiSanPhanCung);
     }
 
@@ -151,7 +150,7 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
     public List<SelectOption> laySelectOptions() {
         Specification<TaiSanPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
         );
         return taiSanPhanCungRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -172,12 +171,16 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
         entity.setDanhMucTaiSan(dm);
         entity.setLoaiTaiSan(lts);
         entity.setHangSanXuat(hsx);
-        entity.setMaMau(request.getMaMau().trim());
         entity.setTenMau(request.getTenMau().trim());
         entity.setHinhAnh(request.getHinhAnh());
         entity.setCoTheThaoLap(request.getCoTheThaoLap());
         entity.setMoTa(request.getMoTa());
-        entity.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            entity.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private TaiSanPhanCungResponse mapToResponse(TaiSanPhanCung entity) {
@@ -194,7 +197,7 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
                 .hinhAnh(entity.getHinhAnh())
                 .coTheThaoLap(entity.getCoTheThaoLap())
                 .moTa(entity.getMoTa())
-                .trangThai(entity.getTrangThai())
+                .trangThai(entity.getTrangThai() != null ? entity.getTrangThai().getValue() : null)
                 .thoiGianTao(entity.getThoiGianTao())
                 .thoiGianCapNhat(entity.getThoiGianCapNhat())
                 .build();

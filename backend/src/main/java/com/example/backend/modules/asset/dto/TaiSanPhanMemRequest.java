@@ -23,7 +23,6 @@ public class TaiSanPhanMemRequest {
     @NotNull(message = "Hãng sản xuất không được để trống")
     private Long idHangSanXuat;
 
-    @NotBlank(message = "Mã mẫu không được để trống")
     @Size(max = 50, message = "Mã mẫu không vượt quá 50 ký tự")
     private String maMau;
 

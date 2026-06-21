@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
+
 public interface QuyenRepository extends JpaRepository<Quyen, Long> {
 
     @Query("SELECT DISTINCT q FROM Quyen q " +
@@ -17,6 +19,6 @@ public interface QuyenRepository extends JpaRepository<Quyen, Long> {
     List<Quyen> findAllByNguoiDungId(@Param("userId") Long userId);
 
     boolean existsByMaQuyen(String maQuyen);
-    List<Quyen> findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull(String loaiQuyen, String trangThai);
+    List<Quyen> findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull(String loaiQuyen, TrangThaiCoBanEnum trangThai);
     List<Quyen> findByThoiGianXoaIsNull();
 }

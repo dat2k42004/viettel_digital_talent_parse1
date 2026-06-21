@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class NhaCungCapRequest {
 
-     @NotBlank(message = "Mã nhà cung cấp không được để trống")
      @Size(max = 50, message = "Mã nhà cung cấp không được vượt quá 50 ký tự")
      private String maNhaCungCap;
 

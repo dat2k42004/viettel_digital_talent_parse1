@@ -49,7 +49,11 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
 
             // Lọc theo trạng thái
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             // Tìm kiếm keyword theo maHang hoặc tenHang (LIKE %keyword%)
@@ -74,7 +78,7 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
     public HangSanXuatResponse layTheoId(Long id) {
         HangSanXuat hangSanXuat = hangSanXuatRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy hãng sản xuất với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(hangSanXuat.getTrangThai())) {
+        if (hangSanXuat.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Hãng sản xuất hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(hangSanXuat);
@@ -84,12 +88,9 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
     @Transactional
     @CacheEvict(value = {"hang_san_xuat_cache", "hang_san_xuat_list_cache"}, allEntries = true)
     public HangSanXuatResponse themMoi(HangSanXuatRequest request) {
-        if (hangSanXuatRepository.existsByMaHangAndThoiGianXoaIsNull(request.getMaHang())) {
-            throw new NghiepVuException("Mã hãng sản xuất đã tồn tại trong hệ thống", 400);
-        }
-
         HangSanXuat hangSanXuat = new HangSanXuat();
         capNhatThongTin(hangSanXuat, request);
+        hangSanXuat.setMaHang("HSX-0-" + System.currentTimeMillis());
         hangSanXuat = hangSanXuatRepository.save(hangSanXuat);
 
         return mapToResponse(hangSanXuat);
@@ -101,11 +102,6 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
     public HangSanXuatResponse capNhat(Long id, HangSanXuatRequest request) {
         HangSanXuat hangSanXuat = hangSanXuatRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy hãng sản xuất để cập nhật", 404));
-
-        if (!hangSanXuat.getMaHang().equals(request.getMaHang()) && 
-            hangSanXuatRepository.existsByMaHangAndThoiGianXoaIsNull(request.getMaHang())) {
-            throw new NghiepVuException("Mã hãng sản xuất mới đã tồn tại trong hệ thống", 400);
-        }
 
         capNhatThongTin(hangSanXuat, request);
         hangSanXuat = hangSanXuatRepository.save(hangSanXuat);
@@ -133,11 +129,14 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy hãng sản xuất", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        hangSanXuat.setTrangThai(status);
+        hangSanXuat.setTrangThai(trangThaiEnum);
         hangSanXuatRepository.save(hangSanXuat);
     }
 
@@ -146,7 +145,7 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
     public List<SelectOption> laySelectOptions() {
         Specification<HangSanXuat> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
         );
         return hangSanXuatRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -157,13 +156,17 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
     }
 
     private void capNhatThongTin(HangSanXuat hangSanXuat, HangSanXuatRequest request) {
-        hangSanXuat.setMaHang(request.getMaHang().trim());
         hangSanXuat.setTenHang(request.getTenHang().trim());
         hangSanXuat.setWebsiteHoTro(request.getWebsiteHoTro() != null ? request.getWebsiteHoTro().trim() : null);
         hangSanXuat.setHotlineHoTro(request.getHotlineHoTro() != null ? request.getHotlineHoTro().trim() : null);
         hangSanXuat.setEmailHoTro(request.getEmailHoTro() != null ? request.getEmailHoTro().trim() : null);
         hangSanXuat.setGhiChu(request.getGhiChu());
-        hangSanXuat.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            hangSanXuat.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private HangSanXuatResponse mapToResponse(HangSanXuat hangSanXuat) {
@@ -175,7 +178,7 @@ public class HangSanXuatServiceImpl implements HangSanXuatService {
                 .hotlineHoTro(hangSanXuat.getHotlineHoTro())
                 .emailHoTro(hangSanXuat.getEmailHoTro())
                 .ghiChu(hangSanXuat.getGhiChu())
-                .trangThai(hangSanXuat.getTrangThai())
+                .trangThai(hangSanXuat.getTrangThai() != null ? hangSanXuat.getTrangThai().getValue() : null)
                 .thoiGianTao(hangSanXuat.getThoiGianTao())
                 .thoiGianCapNhat(hangSanXuat.getThoiGianCapNhat())
                 .build();

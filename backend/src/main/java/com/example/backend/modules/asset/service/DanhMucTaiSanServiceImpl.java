@@ -49,7 +49,11 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
 
             // Lọc theo trạng thái
             if (trangThai != null && !trangThai.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("trangThai"), trangThai.trim()));
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    throw new NghiepVuException(e.getMessage(), 400);
+                }
             }
 
             // Tìm kiếm keyword theo maDanhMuc hoặc tenDanhMuc (LIKE %keyword%)
@@ -74,7 +78,7 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
     public DanhMucTaiSanResponse layTheoId(Long id) {
         DanhMucTaiSan danhMucTaiSan = danhMucTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục tài sản với ID: " + id, 404));
-        if (!"HOAT_DONG".equals(danhMucTaiSan.getTrangThai())) {
+        if (danhMucTaiSan.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Danh mục tài sản hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
         return mapToResponse(danhMucTaiSan);
@@ -84,12 +88,9 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
     @Transactional
     @CacheEvict(value = {"danh_muc_tai_san_cache", "danh_muc_tai_san_list_cache"}, allEntries = true)
     public DanhMucTaiSanResponse themMoi(DanhMucTaiSanRequest request) {
-        if (danhMucTaiSanRepository.existsByMaDanhMucAndThoiGianXoaIsNull(request.getMaDanhMuc())) {
-            throw new NghiepVuException("Mã danh mục tài sản đã tồn tại trong hệ thống", 400);
-        }
-
         DanhMucTaiSan danhMucTaiSan = new DanhMucTaiSan();
         capNhatThongTin(danhMucTaiSan, request);
+        danhMucTaiSan.setMaDanhMuc("DMTS-0-" + System.currentTimeMillis());
         danhMucTaiSan = danhMucTaiSanRepository.save(danhMucTaiSan);
 
         return mapToResponse(danhMucTaiSan);
@@ -101,11 +102,6 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
     public DanhMucTaiSanResponse capNhat(Long id, DanhMucTaiSanRequest request) {
         DanhMucTaiSan danhMucTaiSan = danhMucTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục tài sản để cập nhật", 404));
-
-        if (!danhMucTaiSan.getMaDanhMuc().equals(request.getMaDanhMuc()) && 
-            danhMucTaiSanRepository.existsByMaDanhMucAndThoiGianXoaIsNull(request.getMaDanhMuc())) {
-            throw new NghiepVuException("Mã danh mục tài sản mới đã tồn tại trong hệ thống", 400);
-        }
 
         capNhatThongTin(danhMucTaiSan, request);
         danhMucTaiSan = danhMucTaiSanRepository.save(danhMucTaiSan);
@@ -133,11 +129,14 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy danh mục tài sản", 404));
 
         String status = request.getTrangThai();
-        if (!"HOAT_DONG".equals(status) && !"KHOA".equals(status)) {
-            throw new NghiepVuException("Trạng thái không hợp lệ. Chỉ chấp nhận HOAT_DONG hoặc KHOA", 400);
+        com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;
+        try {
+            trangThaiEnum = com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(status);
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
         }
 
-        danhMucTaiSan.setTrangThai(status);
+        danhMucTaiSan.setTrangThai(trangThaiEnum);
         danhMucTaiSanRepository.save(danhMucTaiSan);
     }
 
@@ -146,7 +145,7 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
     public List<SelectOption> laySelectOptions() {
         Specification<DanhMucTaiSan> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), "HOAT_DONG")
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
         );
         return danhMucTaiSanRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
@@ -157,10 +156,14 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
     }
 
     private void capNhatThongTin(DanhMucTaiSan danhMucTaiSan, DanhMucTaiSanRequest request) {
-        danhMucTaiSan.setMaDanhMuc(request.getMaDanhMuc().trim());
         danhMucTaiSan.setTenDanhMuc(request.getTenDanhMuc().trim());
         danhMucTaiSan.setMoTa(request.getMoTa());
-        danhMucTaiSan.setTrangThai(request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG");
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
+        try {
+            danhMucTaiSan.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(statusStr));
+        } catch (IllegalArgumentException e) {
+            throw new NghiepVuException(e.getMessage(), 400);
+        }
     }
 
     private DanhMucTaiSanResponse mapToResponse(DanhMucTaiSan danhMucTaiSan) {
@@ -169,7 +172,7 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
                 .maDanhMuc(danhMucTaiSan.getMaDanhMuc())
                 .tenDanhMuc(danhMucTaiSan.getTenDanhMuc())
                 .moTa(danhMucTaiSan.getMoTa())
-                .trangThai(danhMucTaiSan.getTrangThai())
+                .trangThai(danhMucTaiSan.getTrangThai() != null ? danhMucTaiSan.getTrangThai().getValue() : null)
                 .thoiGianTao(danhMucTaiSan.getThoiGianTao())
                 .thoiGianCapNhat(danhMucTaiSan.getThoiGianCapNhat())
                 .build();

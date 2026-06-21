@@ -21,6 +21,7 @@ import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.tenant.dto.DonViUpdateRequest;
 import com.example.backend.modules.tenant.dto.DonViTrangThaiRequest;
 import com.example.backend.modules.tenant.dto.GiaHanHopDongRequest;
+import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.tenant.model.DonVi;
 import com.example.backend.modules.tenant.repository.DonViRepository;
 import com.example.backend.modules.tenant.repository.PhongBanRepository;
@@ -81,12 +82,12 @@ public class DonViServiceImpl implements DonViService {
 
         // 1. Tạo Đơn Vị (Tenant)
         DonVi donVi = new DonVi();
-        donVi.setMaDonVi("DV" + System.currentTimeMillis());
+        donVi.setMaDonVi("DV-0-" + System.currentTimeMillis());
         donVi.setTenPhapLy(request.getTenPhapLy());
         donVi.setTenMienHeThong(request.getTenMienHeThong().trim());
         donVi.setMaSoThue(request.getMaSoThue());
         donVi.setTenNguoiDaiDien(request.getTenNguoiDaiDien());
-        donVi.setTrangThai("CHO_XAC_THUC");
+        donVi.setTrangThai(TrangThaiCoBanEnum.CHO_XAC_THUC);
         donVi = donViRepository.save(donVi);
 
         // 2. Tạo Tài khoản Admin Đơn Vị
@@ -96,7 +97,7 @@ public class DonViServiceImpl implements DonViService {
         admin.setMatKhau(passwordEncoder.encode(request.getMatKhauAdmin()));
         admin.setTenNguoiDung(request.getTenAdmin());
         admin.setEmail(request.getEmailAdmin());
-        admin.setTrangThai("CHO_XAC_THUC");
+        admin.setTrangThai(TrangThaiCoBanEnum.CHO_XAC_THUC);
         admin = nguoiDungRepository.save(admin);
 
         // 3. Tạo vai trò Admin Đơn Vị cụ thể cho đơn vị này (độc lập, không trùng lặp)
@@ -106,11 +107,11 @@ public class DonViServiceImpl implements DonViService {
         vaiTro.setTenVaiTro("Admin Đơn vị " + donVi.getTenPhapLy());
         vaiTro.setMoTaVaiTro("Vai trò quản trị tối cao của đơn vị " + donVi.getTenPhapLy());
         vaiTro.setLaHeThong(false);
-        vaiTro.setTrangThai("HOAT_DONG");
+        vaiTro.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
         final VaiTro savedVaiTro = vaiTroRepository.save(vaiTro);
 
         // 4. Gán các quyền có loại là QUYEN_DON_VI cho vai trò này
-        List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", "HOAT_DONG");
+        List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", TrangThaiCoBanEnum.HOAT_DONG);
         List<VaiTroQuyen> vaiTroQuyens = corporatePermissions.stream().map(q -> {
             VaiTroQuyen vq = new VaiTroQuyen();
             vq.setVaiTro(savedVaiTro);
@@ -183,12 +184,12 @@ public class DonViServiceImpl implements DonViService {
         maXacThucOTPRepository.save(otpEntity);
 
         NguoiDung admin = otpEntity.getNguoiDung();
-        admin.setTrangThai("HOAT_DONG");
+        admin.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
         nguoiDungRepository.save(admin);
 
-        DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
+         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
-        donVi.setTrangThai("HOAT_DONG");
+        donVi.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
         donViRepository.save(donVi);
 
         // Bắn sự kiện khởi tạo cấu hình mặc định
@@ -205,7 +206,7 @@ public class DonViServiceImpl implements DonViService {
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
 
-        if (!"HOAT_DONG".equals(donVi.getTrangThai())) {
+        if (donVi.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Đơn vị hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
 
@@ -222,7 +223,7 @@ public class DonViServiceImpl implements DonViService {
         Specification<DonVi> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), "HOAT_DONG"));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             if (ten != null && !ten.trim().isEmpty()) {
                 String likePattern = "%" + ten.trim().toLowerCase() + "%";
@@ -302,7 +303,7 @@ public class DonViServiceImpl implements DonViService {
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
 
-        donVi.setTrangThai(trangThai);
+        donVi.setTrangThai(TrangThaiCoBanEnum.fromValue(trangThai));
         donViRepository.save(donVi);
 
         // Đẩy sự kiện cascade cập nhật sang các thực thể phụ thuộc qua RabbitMQ
@@ -360,7 +361,7 @@ public class DonViServiceImpl implements DonViService {
                 .tenNguoiDaiDien(donVi.getTenNguoiDaiDien())
                 .tenDemNguoiDaiDien(donVi.getTenDemNguoiDaiDien())
                 .chucVuNguoiDaiDien(donVi.getChucVuNguoiDaiDien())
-                .trangThai(donVi.getTrangThai())
+                .trangThai(donVi.getTrangThai() != null ? donVi.getTrangThai().getValue() : null)
                 .thoiGianThanhLap(donVi.getThoiGianThanhLap())
                 .thoiGianBatDauHopDong(donVi.getThoiGianBatDauHopDong())
                 .thoiGianHetHanHopDong(donVi.getThoiGianHetHanHopDong())

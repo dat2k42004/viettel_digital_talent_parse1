@@ -26,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,11 +58,11 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
             String trangThaiKho,
             int page,
             int size,
-            String sort
-    ) {
+            String sort) {
         Long idDonVi = getRequiredTenantId();
         String[] sortParts = sort.split(",");
-        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
         String sortBy = sortParts[0];
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
@@ -71,7 +74,8 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {
-                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
+                    predicates.add(cb.equal(root.get("trangThai"),
+                            com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
                 } catch (IllegalArgumentException e) {
                     throw new NghiepVuException(e.getMessage(), 400);
                 }
@@ -100,8 +104,51 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         };
 
         Page<DanhSachThietBiPhanCung> pageResult = thietBiPhanCungRepository.findAll(spec, pageRequest);
-        Page<DanhSachThietBiPhanCungResponse> responsePage = pageResult.map(this::mapToResponse);
-        return PageResponse.from(responsePage);
+
+        // GIẢI QUYẾT N+1: Gom toàn bộ ID Mẫu tài sản phần cứng có trong trang kết quả
+        // hiện tại
+        Set<Long> mauIds = pageResult.getContent().stream()
+                .filter(t -> t.getTaiSanPhanCung() != null)
+                .map(t -> t.getTaiSanPhanCung().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, TaiSanPhanCung> mauMap = new HashMap<>();
+        if (!mauIds.isEmpty()) {
+            mauMap = taiSanPhanCungRepository.findAllById(mauIds).stream()
+                    .collect(Collectors.toMap(TaiSanPhanCung::getId, java.util.function.Function.identity()));
+        }
+
+        final Map<Long, TaiSanPhanCung> finalMauMap = mauMap;
+
+        // Map khớp nối trực tiếp trên RAM, bắn duy nhất 1 câu SQL gom cụm thay vì lặp
+        // vòng SELECT
+        List<DanhSachThietBiPhanCungResponse> content = pageResult.getContent().stream()
+                .map(t -> {
+                    TaiSanPhanCung mau = t.getTaiSanPhanCung() != null ? finalMauMap.get(t.getTaiSanPhanCung().getId())
+                            : null;
+                    return DanhSachThietBiPhanCungResponse.builder()
+                            .id(t.getId())
+                            .idTaiSanPhanCung(mau != null ? mau.getId() : null)
+                            .tenTaiSanPhanCung(mau != null ? mau.getTenMau() : null)
+                            .maMauTaiSanPhanCung(mau != null ? mau.getMaMau() : null)
+                            .idNhaCungCap(t.getIdNhaCungCap())
+                            .idDonVi(t.getIdDonVi())
+                            .soSerial(t.getSoSerial())
+                            .maTheTaiSan(t.getMaTheTaiSan())
+                            .giaMua(t.getGiaMua())
+                            .thoiGianMua(t.getThoiGianMua())
+                            .hanBaoHanhThang(t.getHanBaoHanhThang())
+                            .trangThaiKho(t.getTrangThaiKho())
+                            .viTriKho(t.getViTriKho())
+                            .trangThai(t.getTrangThai() != null ? t.getTrangThai().getValue() : null)
+                            .thoiGianTao(t.getThoiGianTao())
+                            .thoiGianCapNhat(t.getThoiGianCapNhat())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.from(
+                new org.springframework.data.domain.PageImpl<>(content, pageRequest, pageResult.getTotalElements()));
     }
 
     @Override
@@ -110,7 +157,8 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
     public DanhSachThietBiPhanCungResponse layTheoId(Long id) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
+                .orElseThrow(() -> new NghiepVuException(
+                        "Không tìm thấy thiết bị phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
         if (thietBi.getTrangThai() != com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG) {
             throw new NghiepVuException("Thiết bị phần cứng hiện đang bị khóa hoặc ngừng hoạt động", 400);
         }
@@ -119,7 +167,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache" }, allEntries = true)
     public DanhSachThietBiPhanCungResponse themMoi(DanhSachThietBiPhanCungRequest request) {
         Long idDonVi = getRequiredTenantId();
 
@@ -138,14 +186,15 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache" }, allEntries = true)
     public DanhSachThietBiPhanCungResponse capNhat(Long id, DanhSachThietBiPhanCungRequest request) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần cứng để cập nhật", 404));
 
         if (!thietBi.getSoSerial().equals(request.getSoSerial()) &&
-                thietBiPhanCungRepository.existsBySoSerialAndIdDonViAndThoiGianXoaIsNull(request.getSoSerial(), idDonVi)) {
+                thietBiPhanCungRepository.existsBySoSerialAndIdDonViAndThoiGianXoaIsNull(request.getSoSerial(),
+                        idDonVi)) {
             throw new NghiepVuException("Số Serial mới đã tồn tại trong đơn vị", 400);
         }
 
@@ -157,7 +206,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache" }, allEntries = true)
     public void xoaMem(Long id) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
@@ -170,7 +219,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache" }, allEntries = true)
     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
@@ -195,8 +244,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG)
-        );
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
         return thietBiPhanCungRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
@@ -230,7 +278,8 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
                 .id(thietBi.getId())
                 .idTaiSanPhanCung(thietBi.getTaiSanPhanCung() != null ? thietBi.getTaiSanPhanCung().getId() : null)
                 .tenTaiSanPhanCung(thietBi.getTaiSanPhanCung() != null ? thietBi.getTaiSanPhanCung().getTenMau() : null)
-                .maMauTaiSanPhanCung(thietBi.getTaiSanPhanCung() != null ? thietBi.getTaiSanPhanCung().getMaMau() : null)
+                .maMauTaiSanPhanCung(
+                        thietBi.getTaiSanPhanCung() != null ? thietBi.getTaiSanPhanCung().getMaMau() : null)
                 .idNhaCungCap(thietBi.getIdNhaCungCap())
                 .idDonVi(thietBi.getIdDonVi())
                 .soSerial(thietBi.getSoSerial())

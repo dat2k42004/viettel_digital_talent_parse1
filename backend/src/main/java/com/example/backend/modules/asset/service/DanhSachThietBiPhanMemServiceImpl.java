@@ -26,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,8 +113,47 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         };
 
         Page<DanhSachThietBiPhanMem> pageResult = thietBiPhanMemRepository.findAll(spec, pageRequest);
-        Page<DanhSachThietBiPhanMemResponse> responsePage = pageResult.map(this::mapToResponse);
-        return PageResponse.from(responsePage);
+        
+        // GIẢI QUYẾT N+1: Gom toàn bộ ID Mẫu tài sản phần mềm có trong trang kết quả hiện tại
+        Set<Long> mauIds = pageResult.getContent().stream()
+                .filter(t -> t.getTaiSanPhanMem() != null)
+                .map(t -> t.getTaiSanPhanMem().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, TaiSanPhanMem> mauMap = new HashMap<>();
+        if (!mauIds.isEmpty()) {
+            mauMap = taiSanPhanMemRepository.findAllById(mauIds).stream()
+                    .collect(Collectors.toMap(TaiSanPhanMem::getId, java.util.function.Function.identity()));
+        }
+
+        final Map<Long, TaiSanPhanMem> finalMauMap = mauMap;
+
+        // Khớp nối trực tiếp trên RAM, loại bỏ Lazy Load getter lặp
+        List<DanhSachThietBiPhanMemResponse> content = pageResult.getContent().stream()
+                .map(t -> {
+                    TaiSanPhanMem mau = t.getTaiSanPhanMem() != null ? finalMauMap.get(t.getTaiSanPhanMem().getId()) : null;
+                    return DanhSachThietBiPhanMemResponse.builder()
+                            .id(t.getId())
+                            .idTaiSanPhanMem(mau != null ? mau.getId() : null)
+                            .tenTaiSanPhanMem(mau != null ? mau.getTenMau() : null)
+                            .maMauTaiSanPhanMem(mau != null ? mau.getMaMau() : null)
+                            .idNhaCungCap(t.getIdNhaCungCap())
+                            .idDonVi(t.getIdDonVi())
+                            .keyBanQuyen(t.getKeyBanQuyen())
+                            .maChungTuMua(t.getMaChungTuMua())
+                            .tongSoGhe(t.getTongSoGhe())
+                            .giaMua(t.getGiaMua())
+                            .thoiGianMua(t.getThoiGianMua())
+                            .thoiGianHetHan(t.getThoiGianHetHan())
+                            .trangThaiKho(t.getTrangThaiKho())
+                            .trangThai(t.getTrangThai() != null ? t.getTrangThai().getValue() : null)
+                            .thoiGianTao(t.getThoiGianTao())
+                            .thoiGianCapNhat(t.getThoiGianCapNhat())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.from(new org.springframework.data.domain.PageImpl<>(content, pageRequest, pageResult.getTotalElements()));
     }
 
     @Override

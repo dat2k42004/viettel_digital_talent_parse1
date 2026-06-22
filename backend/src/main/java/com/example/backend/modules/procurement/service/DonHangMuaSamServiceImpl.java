@@ -80,28 +80,31 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     predicates.add(cb.equal(root.get("nhaCungCap").get("id"), idNhaCungCap));
                }
 
-                if (trangThai != null && !trangThai.trim().isEmpty()) {
-                     try {
-                          predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
-                     } catch (IllegalArgumentException e) {
-                          throw new NghiepVuException(e.getMessage(), 400);
-                     }
-                }
+               if (trangThai != null && !trangThai.trim().isEmpty()) {
+                    try {
+                         predicates.add(cb.equal(root.get("trangThai"),
+                                   com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
+                    } catch (IllegalArgumentException e) {
+                         throw new NghiepVuException(e.getMessage(), 400);
+                    }
+               }
 
                return cb.and(predicates.toArray(new Predicate[0]));
           };
 
           Page<DonHangMuaSam> pageResult = donHangMuaSamRepository.findAll(spec, pageRequest);
-          
-          // Collect all user IDs to avoid N+1 queries
+
+          // 1. Gom cả userIds và nccIds để triệt tiêu tận gốc N+1
           java.util.Set<Long> userIds = new java.util.HashSet<>();
+          java.util.Set<Long> nccIds = new java.util.HashSet<>();
+
           for (DonHangMuaSam dh : pageResult.getContent()) {
-               if (dh.getIdNguoiLap() != null) {
+               if (dh.getIdNguoiLap() != null)
                     userIds.add(dh.getIdNguoiLap());
-               }
-               if (dh.getIdNguoiPheDuyet() != null) {
+               if (dh.getIdNguoiPheDuyet() != null)
                     userIds.add(dh.getIdNguoiPheDuyet());
-               }
+               if (dh.getNhaCungCap() != null)
+                    nccIds.add(dh.getNhaCungCap().getId());
           }
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
@@ -110,12 +113,31 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                          .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
           }
 
+          // Kéo thông tin Nhà cung cấp lên RAM trong 1 câu SQL duy nhất
+          java.util.Map<Long, String> nccMap = new java.util.HashMap<>();
+          if (!nccIds.isEmpty()) {
+               nccMap = nhaCungCapRepository.findAllById(nccIds).stream()
+                         .collect(Collectors.toMap(NhaCungCap::getId, NhaCungCap::getTenNhaCungCap));
+          }
+
           final java.util.Map<Long, String> finalUserMap = userMap;
+          final java.util.Map<Long, String> finalNccMap = nccMap;
+
+          // Map siêu tốc trên RAM
           List<DonHangMuaSamResponse> responses = pageResult.getContent().stream()
-                    .map(dh -> mapToResponseWithoutDetails(dh, finalUserMap))
+                    .map(dh -> {
+                         DonHangMuaSamResponse res = mapToResponseWithoutDetails(dh, finalUserMap);
+                         // Gán trực tiếp tên nhà cung cấp đã nạp trên RAM, không gọi lazy load qua
+                         // getter nữa
+                         if (dh.getNhaCungCap() != null) {
+                              res.setTenNhaCungCap(finalNccMap.get(dh.getNhaCungCap().getId()));
+                         }
+                         return res;
+                    })
                     .collect(Collectors.toList());
 
-          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest, pageResult.getTotalElements()));
+          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest,
+                    pageResult.getTotalElements()));
      }
 
      @Override
@@ -132,8 +154,9 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Transactional(readOnly = true)
      public List<SelectOption> laySelectOptions() {
           Long currentTenantId = DonViContextHolder.getTenantId();
-           List<DonHangMuaSam> danhSach = donHangMuaSamRepository
-                     .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
+          List<DonHangMuaSam> danhSach = donHangMuaSamRepository
+                    .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId,
+                              com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
           return danhSach.stream()
                     .map(dh -> SelectOption.builder()
                               .id(dh.getId())
@@ -164,7 +187,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           dh.setTongTienSauThue(request.getTongTienSauThue());
           dh.setThoiGianGiaoDuKien(request.getThoiGianGiaoDuKien());
           dh.setGhiChu(request.getGhiChu());
-           dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI);
+          dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI);
 
           DonHangMuaSam savedDh = donHangMuaSamRepository.save(dh);
 
@@ -207,9 +230,9 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm cần chỉnh sửa",
                               404));
 
-           if (dh.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
-                throw new NghiepVuException("Chỉ được sửa đơn hàng khi ở trạng thái Tạo mới (TAO_MOI)", 400);
-           }
+          if (dh.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+               throw new NghiepVuException("Chỉ được sửa đơn hàng khi ở trạng thái Tạo mới (TAO_MOI)", 400);
+          }
 
           NhaCungCap ncc = nhaCungCapRepository
                     .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdNhaCungCap(), currentTenantId)
@@ -279,7 +302,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
 
           if (!dh.getTrangThai().canTransitionTo(com.example.backend.shared.model.TrangThaiPhieuEnum.GUI_PHE_DUYET)) {
-               throw new NghiepVuException("Không thể gửi yêu cầu phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(), 400);
+               throw new NghiepVuException(
+                         "Không thể gửi yêu cầu phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(), 400);
           }
 
           dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.GUI_PHE_DUYET);
@@ -292,7 +316,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           Long currentTenantId = DonViContextHolder.getTenantId();
           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
           Long userId = null;
-          if (authentication != null && authentication.getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
+          if (authentication != null && authentication
+                    .getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
                userId = userDetails.getNguoiDung().getId();
           }
           if (userId == null) {
@@ -303,7 +328,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
 
           if (!dh.getTrangThai().canTransitionTo(com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET)) {
-               throw new NghiepVuException("Không thể phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(), 400);
+               throw new NghiepVuException("Không thể phê duyệt đơn hàng ở trạng thái: " + dh.getTrangThai().getMoTa(),
+                         400);
           }
 
           dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
@@ -327,14 +353,16 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           donHangMuaSamRepository.save(dh);
      }
 
-     private DonHangMuaSamResponse mapToResponseWithoutDetails(DonHangMuaSam model, java.util.Map<Long, String> userMap) {
+     private DonHangMuaSamResponse mapToResponseWithoutDetails(DonHangMuaSam model,
+               java.util.Map<Long, String> userMap) {
           return DonHangMuaSamResponse.builder()
                     .id(model.getId())
                     .idDonVi(model.getIdDonVi())
                     .idNhaCungCap(model.getNhaCungCap() != null ? model.getNhaCungCap().getId() : null)
                     .tenNhaCungCap(model.getNhaCungCap() != null ? model.getNhaCungCap().getTenNhaCungCap() : null)
                     .tenNguoiLap(model.getIdNguoiLap() != null ? userMap.get(model.getIdNguoiLap()) : null)
-                    .tenNguoiPheDuyet(model.getIdNguoiPheDuyet() != null ? userMap.get(model.getIdNguoiPheDuyet()) : null)
+                    .tenNguoiPheDuyet(
+                              model.getIdNguoiPheDuyet() != null ? userMap.get(model.getIdNguoiPheDuyet()) : null)
                     .maDonHang(model.getMaDonHang())
                     .soHopDongDinhKem(model.getSoHopDongDinhKem())
                     .tongTienTruocThue(model.getTongTienTruocThue())
@@ -385,7 +413,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     chiTietList.add(ChiTietDonHangGeneralResponse.builder()
                               .id(pc.getId())
                               .idTaiSan(pc.getIdTaiSanPhanCung())
-                              .tenTaiSan(pc.getIdTaiSanPhanCung() != null ? pcNameMap.get(pc.getIdTaiSanPhanCung()) : null)
+                              .tenTaiSan(pc.getIdTaiSanPhanCung() != null ? pcNameMap.get(pc.getIdTaiSanPhanCung())
+                                        : null)
                               .soLuongDat(pc.getSoLuongDat())
                               .donGiaDat(pc.getDonGiaDat())
                               .thanhTien(pc.getThanhTien())
@@ -416,7 +445,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     chiTietList.add(ChiTietDonHangGeneralResponse.builder()
                               .id(pm.getId())
                               .idTaiSan(pm.getIdTaiSanPhanMem())
-                              .tenTaiSan(pm.getIdTaiSanPhanMem() != null ? pmNameMap.get(pm.getIdTaiSanPhanMem()) : null)
+                              .tenTaiSan(
+                                        pm.getIdTaiSanPhanMem() != null ? pmNameMap.get(pm.getIdTaiSanPhanMem()) : null)
                               .soLuongDat(pm.getSoLuongDat())
                               .donGiaDat(pm.getDonGiaDat())
                               .thanhTien(pm.getThanhTien())

@@ -95,7 +95,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                }
                if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {
-                         predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
+                         predicates.add(cb.equal(root.get("trangThai"),
+                                   com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
                     } catch (IllegalArgumentException e) {
                          throw new NghiepVuException(e.getMessage(), 400);
                     }
@@ -105,7 +106,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           };
 
           Page<PhieuNhapTaiSan> pageResult = phieuNhapTaiSanRepository.findAll(spec, pageRequest);
-          
+
           // Collect all user IDs to avoid N+1 queries
           java.util.Set<Long> userIds = new java.util.HashSet<>();
           for (PhieuNhapTaiSan p : pageResult.getContent()) {
@@ -125,7 +126,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .map(p -> mapToResponseWithoutDetails(p, finalUserMap))
                     .collect(Collectors.toList());
 
-          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest, pageResult.getTotalElements()));
+          return PageResponse.from(new org.springframework.data.domain.PageImpl<>(responses, pageRequest,
+                    pageResult.getTotalElements()));
      }
 
      @Override
@@ -173,7 +175,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     pc.setIdTaiSanPhanCung(pcReq.getIdTaiSanPhanCung());
                     pc.setIdDanhSachThietBiPhanCung(pcReq.getIdDanhSachThietBiPhanCung());
                     pc.setChiTietDonHangPhanCung(ctdhPc);
-                    pc.setGiaNhapThuTe(pcReq.getGiaNhapThuTe());
+                    pc.setGiaNhapThucTe(pcReq.getGiaNhapThuTe());
                     pc.setTinhTrangLucNhap(pcReq.getTinhTrangLucNhap());
                     chiTietNhapPhanCungRepository.save(pc);
                }
@@ -268,7 +270,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     pc.setIdTaiSanPhanCung(pcReq.getIdTaiSanPhanCung());
                     pc.setIdDanhSachThietBiPhanCung(pcReq.getIdDanhSachThietBiPhanCung());
                     pc.setChiTietDonHangPhanCung(ctdhPc);
-                    pc.setGiaNhapThuTe(pcReq.getGiaNhapThuTe());
+                    pc.setGiaNhapThucTe(pcReq.getGiaNhapThuTe());
                     pc.setTinhTrangLucNhap(pcReq.getTinhTrangLucNhap());
                     chiTietNhapPhanCungRepository.save(pc);
                }
@@ -297,7 +299,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           }
 
           if (!pnts.getTrangThai().canTransitionTo(targetStatus)) {
-               throw new NghiepVuException("Không thể chuyển đổi trạng thái từ " + pnts.getTrangThai().getMoTa() + " sang " + targetStatus.getMoTa(), 400);
+               throw new NghiepVuException("Không thể chuyển đổi trạng thái từ " + pnts.getTrangThai().getMoTa()
+                         + " sang " + targetStatus.getMoTa(), 400);
           }
 
           pnts.setTrangThai(targetStatus);
@@ -327,7 +330,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           phieuNhapTaiSanRepository.save(pnts);
      }
 
-     private PhieuNhapTaiSanResponse mapToResponseWithoutDetails(PhieuNhapTaiSan model, java.util.Map<Long, String> userMap) {
+     private PhieuNhapTaiSanResponse mapToResponseWithoutDetails(PhieuNhapTaiSan model,
+               java.util.Map<Long, String> userMap) {
           return PhieuNhapTaiSanResponse.builder()
                     .id(model.getId())
                     .idDonVi(model.getIdDonVi())
@@ -362,9 +366,12 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           List<ChiTietNhapTaiSanGeneralResponse> chiTietList = new ArrayList<>();
 
           // Fetch all items from repositories
-          List<ChiTietNhapPhanCung> pcList = chiTietNhapPhanCungRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
-          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
-          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository.findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+          List<ChiTietNhapPhanCung> pcList = chiTietNhapPhanCungRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
+          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(model);
 
           // Collect asset IDs
           java.util.Set<Long> pcIds = new java.util.HashSet<>();
@@ -406,8 +413,10 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                          .idTaiSan(pc.getIdTaiSanPhanCung())
                          .tenTaiSan(pc.getIdTaiSanPhanCung() != null ? pcNameMap.get(pc.getIdTaiSanPhanCung()) : null)
                          .idThietBi(pc.getIdDanhSachThietBiPhanCung())
-                         .idChiTietDonHang(pc.getChiTietDonHangPhanCung() != null ? pc.getChiTietDonHangPhanCung().getId() : null)
-                         .giaNhapThucTe(pc.getGiaNhapThuTe())
+                         .idChiTietDonHang(
+                                   pc.getChiTietDonHangPhanCung() != null ? pc.getChiTietDonHangPhanCung().getId()
+                                             : null)
+                         .giaNhapThucTe(pc.getGiaNhapThucTe())
                          .tinhTrangLucNhap(pc.getTinhTrangLucNhap())
                          .soLuongGheNhap(null)
                          .loai("PHAN_CUNG")
@@ -423,7 +432,9 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                          .idTaiSan(lk.getIdTaiSanPhanCung())
                          .tenTaiSan(lk.getIdTaiSanPhanCung() != null ? pcNameMap.get(lk.getIdTaiSanPhanCung()) : null)
                          .idThietBi(lk.getIdLinhKienPhanCung())
-                         .idChiTietDonHang(lk.getChiTietDonHangPhanCung() != null ? lk.getChiTietDonHangPhanCung().getId() : null)
+                         .idChiTietDonHang(
+                                   lk.getChiTietDonHangPhanCung() != null ? lk.getChiTietDonHangPhanCung().getId()
+                                             : null)
                          .giaNhapThucTe(lk.getGiaNhapThucTe())
                          .tinhTrangLucNhap(lk.getTinhTrangLucNhap())
                          .soLuongGheNhap(null)
@@ -440,7 +451,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                          .idTaiSan(pm.getIdTaiSanPhanMem())
                          .tenTaiSan(pm.getIdTaiSanPhanMem() != null ? pmNameMap.get(pm.getIdTaiSanPhanMem()) : null)
                          .idThietBi(pm.getIdDanhSachThietBiPhanMem())
-                         .idChiTietDonHang(pm.getChiTietDonHangPhanMem() != null ? pm.getChiTietDonHangPhanMem().getId() : null)
+                         .idChiTietDonHang(
+                                   pm.getChiTietDonHangPhanMem() != null ? pm.getChiTietDonHangPhanMem().getId() : null)
                          .giaNhapThucTe(pm.getGiaNhapThucTe())
                          .tinhTrangLucNhap(null)
                          .soLuongGheNhap(pm.getSoLuongGheNhap())

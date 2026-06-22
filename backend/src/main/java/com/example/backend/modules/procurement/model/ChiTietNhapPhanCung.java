@@ -28,7 +28,7 @@ public class ChiTietNhapPhanCung extends BaseEntity {
      private ChiTietDonHangPhanCung chiTietDonHangPhanCung;
 
      @Column(name = "gia_nhap_thu_te", precision = 15, scale = 2)
-     private BigDecimal giaNhapThuTe;
+     private BigDecimal giaNhapThucTe;
 
      @Column(name = "tinh_trang_luc_nhap", length = 100)
      private String tinhTrangLucNhap;

@@ -25,11 +25,14 @@ import com.example.backend.modules.asset.model.DanhSachThietBiPhanMem;
 import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
 import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
 import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
+import com.example.backend.shared.dto.TongHopPhieuKiemKeEvent;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -68,6 +71,8 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
      private final DanhSachThietBiPhanCungRepository danhSachThietBiPhanCungRepository;
      private final LinhKienPhanCungRepository linhKienPhanCungRepository;
      private final DanhSachThietBiPhanMemRepository danhSachThietBiPhanMemRepository;
+
+     private final RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -370,34 +375,41 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
           p.setTrangThai(TrangThaiPhieuKiemKeEnum.XAC_NHAN);
           phieuKiemKeRepository.save(p);
 
-          // Tự động kiểm tra điều kiện đóng Đợt kiểm kê tổng vĩnh viễn (HOAN_THANH)
-          DotKiemKe dkk = p.getDotKiemKe();
-          if (dkk != null) {
-               List<PhieuKiemKe> allTickets = phieuKiemKeRepository.findByDotKiemKeIdAndThoiGianXoaIsNull(dkk.getId());
-               boolean clearAll = allTickets.stream()
-                         .allMatch(x -> x.getTrangThai() == TrangThaiPhieuKiemKeEnum.XAC_NHAN);
+          TongHopPhieuKiemKeEvent event = new TongHopPhieuKiemKeEvent(id, tenantId);
 
-               if (clearAll) {
-                    dkk.setTrangThai(TrangThaiKiemKeEnum.HOAN_THANH);
-                    dkk.setThoiGianChotSoLieu(LocalDateTime.now());
+          rabbitTemplate.convertAndSend("inventory.dot-kiem-ke-aggregate.queue", event);
 
-                    // Tính toán dữ liệu kết toán tổng hợp chi phí/số lượng chênh lệch thực tế dồn
-                    // lên đợt tổng
-                    int systemTotal = 0;
-                    int actualTotal = 0;
+          // // Tự động kiểm tra điều kiện đóng Đợt kiểm kê tổng vĩnh viễn (HOAN_THANH)
+          // DotKiemKe dkk = p.getDotKiemKe();
+          // if (dkk != null) {
+          // List<PhieuKiemKe> allTickets =
+          // phieuKiemKeRepository.findByDotKiemKeIdAndThoiGianXoaIsNull(dkk.getId());
+          // boolean clearAll = allTickets.stream()
+          // .allMatch(x -> x.getTrangThai() == TrangThaiPhieuKiemKeEnum.XAC_NHAN);
 
-                    for (PhieuKiemKe ticket : allTickets) {
-                         List<ChiTietKiemKePhanCung> list = chiTietKiemKeThietBiRepository
-                                   .findByPhieuKiemKeIdAndThoiGianXoaIsNull(ticket.getId());
-                         systemTotal += list.size();
-                         actualTotal += list.stream().filter(x -> "KHOP".equalsIgnoreCase(x.getKetLuan())).count();
-                    }
+          // if (clearAll) {
+          // dkk.setTrangThai(TrangThaiKiemKeEnum.HOAN_THANH);
+          // dkk.setThoiGianChotSoLieu(LocalDateTime.now());
 
-                    dkk.setTongTaiSanHeThong(systemTotal);
-                    dkk.setTongTaiSanThucTe(actualTotal);
-                    dotKiemKeRepository.save(dkk);
-               }
-          }
+          // // Tính toán dữ liệu kết toán tổng hợp chi phí/số lượng chênh lệch thực tế
+          // dồn
+          // // lên đợt tổng
+          // int systemTotal = 0;
+          // int actualTotal = 0;
+
+          // for (PhieuKiemKe ticket : allTickets) {
+          // List<ChiTietKiemKePhanCung> list = chiTietKiemKeThietBiRepository
+          // .findByPhieuKiemKeIdAndThoiGianXoaIsNull(ticket.getId());
+          // systemTotal += list.size();
+          // actualTotal += list.stream().filter(x ->
+          // "KHOP".equalsIgnoreCase(x.getKetLuan())).count();
+          // }
+
+          // dkk.setTongTaiSanHeThong(systemTotal);
+          // dkk.setTongTaiSanThucTe(actualTotal);
+          // dotKiemKeRepository.save(dkk);
+          // }
+          // }
      }
 
      @Override

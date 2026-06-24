@@ -25,10 +25,13 @@ public class NguoiDungController {
     public ApiResponse<PageResponse<NguoiDungResponse>> layDanhSach(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String trangThai,
+            @RequestParam(required = false) Long idPhongBan,
+            @RequestParam(required = false) String chucVu,
+            @RequestParam(required = false) String maNguoiDung,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return ApiResponse.success(nguoiDungService.layDanhSach(search, trangThai, page, size));
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse
+                .success(nguoiDungService.layDanhSach(search, trangThai, idPhongBan, chucVu, maNguoiDung, page, size));
     }
 
     @GetMapping("/{id}")
@@ -60,8 +63,7 @@ public class NguoiDungController {
     @PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_NGUOI_DUNG')")
     public ApiResponse<String> capNhatTrangThai(
             @PathVariable Long id,
-            @Valid @RequestBody NguoiDungTrangThaiRequest request
-    ) {
+            @Valid @RequestBody NguoiDungTrangThaiRequest request) {
         nguoiDungService.capNhatTrangThai(id, request);
         return ApiResponse.success("Cập nhật trạng thái người dùng thành công");
     }
@@ -70,8 +72,7 @@ public class NguoiDungController {
     @PreAuthorize("hasAuthority('CAP_NHAT_QUYEN_NGUOI_DUNG')")
     public ApiResponse<String> capNhatQuyen(
             @PathVariable Long id,
-            @Valid @RequestBody NguoiDungQuyenUpdateRequest request
-    ) {
+            @Valid @RequestBody NguoiDungQuyenUpdateRequest request) {
         nguoiDungService.capNhatQuyenTrucTiep(id, request);
         return ApiResponse.success("Cập nhật quyền trực tiếp của người dùng thành công");
     }
@@ -83,4 +84,3 @@ public class NguoiDungController {
         return ApiResponse.success("Đã cưỡng chế đăng xuất và hủy toàn bộ phiên làm việc của người dùng thành công");
     }
 }
-

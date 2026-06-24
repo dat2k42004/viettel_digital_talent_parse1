@@ -35,6 +35,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue dotKiemKeAggregateQueue() {
+        return new Queue("inventory.dot-kiem-ke-aggregate.queue", true);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }

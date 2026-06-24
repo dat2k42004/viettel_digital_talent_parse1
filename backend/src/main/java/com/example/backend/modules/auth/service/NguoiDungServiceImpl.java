@@ -86,19 +86,55 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     }
 
     @Override
-    public PageResponse<NguoiDungResponse> layDanhSach(String search, String trangThai, int page, int size) {
+    @Transactional(readOnly = true)
+    public PageResponse<NguoiDungResponse> layDanhSach(
+            String search,
+            String trangThai,
+            Long idPhongBan,
+            String chucVu,
+            String maNguoiDung,
+            int page,
+            int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
 
         Specification<NguoiDung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
-            // Phân quyền theo Đơn vị (Tenant) - Super Admin xem toàn bộ, Tenant Admin xem theo Đơn vị
+            // Bộ lọc cơ bản: Loại bỏ tài sản/tài khoản đã bị xóa mềm
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+
+            // Phân quyền cô lập dữ liệu theo Đơn vị (Tenant Isolation)
             if (idDonVi != null) {
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
 
+            // SỬA CHUẨN NGHIỆP VỤ: Lọc động theo trạng thái truyền vào thay vì hardcode
+            // HOAT_DONG
+            if (StringUtils.hasText(trangThai)) {
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    // Bỏ qua hoặc xử lý lỗi nếu chuỗi định dạng không khớp Enum
+                }
+            }
+
+            // BỔ SUNG: Bộ lọc theo mã phòng ban thuộc tính nguyên thủy trong model
+            // NguoiDung
+            if (idPhongBan != null) {
+                predicates.add(cb.equal(root.get("idPhongBan"), idPhongBan));
+            }
+
+            // BỔ SUNG: Bộ lọc theo chức vụ thuộc tính nguyên thủy trong model NguoiDung
+            if (StringUtils.hasText(chucVu)) {
+                predicates.add(cb.like(cb.lower(root.get("chucVu")), "%" + chucVu.trim().toLowerCase() + "%"));
+            }
+
+            // BỔ SUNG: Bộ lọc theo mã định danh người dùng duy nhất
+            if (StringUtils.hasText(maNguoiDung)) {
+                predicates.add(cb.equal(cb.lower(root.get("maNguoiDung")), maNguoiDung.trim().toLowerCase()));
+            }
+
+            // Bộ lọc tìm kiếm nhanh theo từ khóa chuỗi phẳng
             if (search != null && !search.trim().isEmpty()) {
                 String likePattern = "%" + search.trim().toLowerCase() + "%";
                 predicates.add(cb.or(
@@ -106,16 +142,18 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                         cb.like(cb.lower(root.get("tenNguoiDung")), likePattern),
                         cb.like(cb.lower(root.get("hoNguoiDung")), likePattern),
                         cb.like(cb.lower(root.get("tenDemNguoiDung")), likePattern),
-                        cb.like(cb.lower(root.get("email")), likePattern)
-                ));
+                        cb.like(cb.lower(root.get("email")), likePattern),
+                        cb.like(cb.lower(root.get("soDienThoai")), likePattern)));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<NguoiDung> pageResult = nguoiDungRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
-        
-        // Tránh lỗi hiệu năng N+1 queries khi lấy thông tin tên phòng ban
+        // Thực hiện phân trang và truy vấn dữ liệu từ Repository
+        Page<NguoiDung> pageResult = nguoiDungRepository.findAll(spec,
+                PageRequest.of(page, size, Sort.by("id").descending()));
+
+        // Giải quyết triệt để lỗi hiệu năng N+1 queries khi map tên phòng ban trên RAM
         List<Long> idPhongBanList = pageResult.getContent().stream()
                 .map(NguoiDung::getIdPhongBan)
                 .filter(java.util.Objects::nonNull)
@@ -124,9 +162,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
         java.util.Map<Long, String> mapPhongBan = new java.util.HashMap<>();
         if (!idPhongBanList.isEmpty()) {
-            phongBanRepository.findAllById(idPhongBanList).forEach(pb -> 
-                mapPhongBan.put(pb.getId(), pb.getTenPhongBan())
-            );
+            phongBanRepository.findAllById(idPhongBanList)
+                    .forEach(pb -> mapPhongBan.put(pb.getId(), pb.getTenPhongBan()));
         }
 
         Page<NguoiDungResponse> responsePage = pageResult.map(nguoiDung -> {
@@ -307,7 +344,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                     .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc đã bị xóa", 400));
         } else {
             phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(idPhongBan, idDonVi)
-                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc không thuộc đơn vị của bạn", 400));
+                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc không thuộc đơn vị của bạn",
+                            400));
         }
         if (phongBan.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
@@ -386,14 +424,16 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             return;
         }
 
-        org.springframework.security.core.Authentication authentication = 
-                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        if (authentication != null && authentication
+                .getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
             Long currentUserIdDonVi = userDetails.getNguoiDung().getIdDonVi();
-            
+
             // Nếu Current User là "Admin cấp cơ sở" (idDonVi != null)
             if (currentUserIdDonVi != null) {
-                // Kiểm tra xem trong các vai trò được gán có vai trò nào là của Super Admin (idDonVi == null) không
+                // Kiểm tra xem trong các vai trò được gán có vai trò nào là của Super Admin
+                // (idDonVi == null) không
                 List<VaiTro> vaiTroList = vaiTroRepository.findAllById(idVaiTroList);
                 for (VaiTro vaiTro : vaiTroList) {
                     if (vaiTro.getIdDonVi() == null) {
@@ -413,7 +453,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         Long currentUserIdDonVi = DonViContextHolder.getTenantId();
         // Kiểm tra cô lập dữ liệu (Multi-tenant check)
         if (currentUserIdDonVi != null && !currentUserIdDonVi.equals(targetUser.getIdDonVi())) {
-            throw new NghiepVuException("403 Forbidden - Bạn không có quyền thao tác trên người dùng của đơn vị khác", 403);
+            throw new NghiepVuException("403 Forbidden - Bạn không có quyền thao tác trên người dùng của đơn vị khác",
+                    403);
         }
 
         // 1. Tìm toàn bộ danh sách các phiên đang hoạt động của userId này
@@ -436,15 +477,15 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                         redisTemplate.opsForValue().set(
                                 "jwt_blacklist:" + accessToken,
                                 "blacklisted",
-                                java.time.Duration.ofMillis(expirationTime)
-                        );
+                                java.time.Duration.ofMillis(expirationTime));
                     }
                 } catch (Exception e) {
                     log.error("Lỗi khi thêm access token của user ID {} vào blacklist: {}", id, e.getMessage());
                 }
             }
         }
-        
-        log.info("Đã cưỡng chế đăng xuất thành công và vô hiệu hóa {} phiên làm việc của user ID: {}", activeSessions.size(), id);
+
+        log.info("Đã cưỡng chế đăng xuất thành công và vô hiệu hóa {} phiên làm việc của user ID: {}",
+                activeSessions.size(), id);
     }
 }

@@ -14,6 +14,8 @@ import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +38,7 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
 
      private final DotKiemKeRepository dotKiemKeRepository;
      private final NguoiDungRepository nguoiDungRepository;
+     private final RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -161,7 +164,6 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
           dkk.setTrangThai(TrangThaiKiemKeEnum.DA_PHE_DUYET);
           dkk.setIdNguoiPheDuyet(userId);
           dkk.setThoiGianThucHien(LocalDateTime.now());
-          dotKiemKeRepository.save(dkk);
      }
 
      @Override

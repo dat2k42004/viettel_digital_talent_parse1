@@ -11,12 +11,16 @@ import lombok.Setter;
 @Table(name = "nguoi_dung", indexes = {
     @Index(name = "idx_nguoi_dung_ten_dang_nhap", columnList = "ten_dang_nhap, thoi_gian_xoa"),
     @Index(name = "idx_nguoi_dung_email", columnList = "email, thoi_gian_xoa"),
-    @Index(name = "idx_nguoi_dung_don_vi", columnList = "id_don_vi, thoi_gian_xoa")
+    @Index(name = "idx_nguoi_dung_don_vi", columnList = "id_don_vi, thoi_gian_xoa"),
+    @Index(name = "idx_nguoi_dung_phong_ban", columnList = "id_phong_ban, thoi_gian_xoa")
 })
 public class NguoiDung extends BaseEntity {
 
     @Column(name = "id_don_vi")
     private Long idDonVi;
+
+    @Column(name = "id_phong_ban")
+    private Long idPhongBan;
 
     @Column(name = "ma_nguoi_dung", length = 50, unique = true)
     private String maNguoiDung;

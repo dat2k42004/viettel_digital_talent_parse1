@@ -10,6 +10,8 @@ import java.util.List;
 public class NguoiDungResponse {
     private Long id;
     private Long idDonVi;
+    private Long idPhongBan;
+    private String tenPhongBan;
     private String tenDangNhap;
     private String hoNguoiDung;
     private String tenDemNguoiDung;

@@ -19,6 +19,8 @@ import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
 import com.example.backend.modules.auth.repository.NguoiDungQuyenRepository;
 import com.example.backend.modules.auth.repository.VaiTroRepository;
 import com.example.backend.modules.auth.repository.QuyenRepository;
+import com.example.backend.modules.tenant.model.PhongBan;
+import com.example.backend.modules.tenant.repository.PhongBanRepository;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
@@ -58,6 +60,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final PhienDangNhapRepository phienDangNhapRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider tokenProvider;
+    private final PhongBanRepository phongBanRepository;
 
     public NguoiDungServiceImpl(
             NguoiDungRepository nguoiDungRepository,
@@ -68,7 +71,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             @org.springframework.context.annotation.Lazy PasswordEncoder passwordEncoder,
             PhienDangNhapRepository phienDangNhapRepository,
             RedisTemplate<String, Object> redisTemplate,
-            JwtTokenProvider tokenProvider) {
+            JwtTokenProvider tokenProvider,
+            PhongBanRepository phongBanRepository) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.nguoiDungVaiTroRepository = nguoiDungVaiTroRepository;
         this.nguoiDungQuyenRepository = nguoiDungQuyenRepository;
@@ -78,6 +82,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         this.phienDangNhapRepository = phienDangNhapRepository;
         this.redisTemplate = redisTemplate;
         this.tokenProvider = tokenProvider;
+        this.phongBanRepository = phongBanRepository;
     }
 
     @Override
@@ -109,7 +114,25 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         };
 
         Page<NguoiDung> pageResult = nguoiDungRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id").descending()));
-        Page<NguoiDungResponse> responsePage = pageResult.map(this::mapToResponse);
+        
+        // Tránh lỗi hiệu năng N+1 queries khi lấy thông tin tên phòng ban
+        List<Long> idPhongBanList = pageResult.getContent().stream()
+                .map(NguoiDung::getIdPhongBan)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        java.util.Map<Long, String> mapPhongBan = new java.util.HashMap<>();
+        if (!idPhongBanList.isEmpty()) {
+            phongBanRepository.findAllById(idPhongBanList).forEach(pb -> 
+                mapPhongBan.put(pb.getId(), pb.getTenPhongBan())
+            );
+        }
+
+        Page<NguoiDungResponse> responsePage = pageResult.map(nguoiDung -> {
+            String tenPhongBan = nguoiDung.getIdPhongBan() != null ? mapPhongBan.get(nguoiDung.getIdPhongBan()) : null;
+            return mapToResponse(nguoiDung, tenPhongBan);
+        });
         return PageResponse.from(responsePage);
     }
 
@@ -129,9 +152,11 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         }
 
         Long idDonVi = DonViContextHolder.getTenantId();
+        validatePhongBan(request.getIdPhongBan(), idDonVi);
 
         NguoiDung nguoiDung = new NguoiDung();
         nguoiDung.setIdDonVi(idDonVi);
+        nguoiDung.setIdPhongBan(request.getIdPhongBan());
         nguoiDung.setTenDangNhap(request.getTenDangNhap());
         nguoiDung.setMatKhau(passwordEncoder.encode(request.getMatKhau()));
         nguoiDung.setHoNguoiDung(request.getHoNguoiDung());
@@ -165,6 +190,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             throw new NghiepVuException("Email đã được sử dụng", 400);
         }
 
+        validatePhongBan(request.getIdPhongBan(), nguoiDung.getIdDonVi());
+
         nguoiDung.setTenDangNhap(request.getTenDangNhap());
         if (StringUtils.hasText(request.getMatKhau())) {
             nguoiDung.setMatKhau(passwordEncoder.encode(request.getMatKhau()));
@@ -176,6 +203,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         nguoiDung.setEmail(request.getEmail());
         nguoiDung.setSoDienThoai(request.getSoDienThoai());
         nguoiDung.setDanhDaiDienUrl(request.getDanhDaiDienUrl());
+        nguoiDung.setIdPhongBan(request.getIdPhongBan());
 
         nguoiDung = nguoiDungRepository.save(nguoiDung);
 
@@ -219,6 +247,16 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     }
 
     private NguoiDungResponse mapToResponse(NguoiDung nguoiDung) {
+        String tenPhongBan = null;
+        if (nguoiDung.getIdPhongBan() != null) {
+            tenPhongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdPhongBan())
+                    .map(PhongBan::getTenPhongBan)
+                    .orElse(null);
+        }
+        return mapToResponse(nguoiDung, tenPhongBan);
+    }
+
+    private NguoiDungResponse mapToResponse(NguoiDung nguoiDung, String tenPhongBan) {
         List<VaiTroResponse> danhSachVaiTro = nguoiDungVaiTroRepository.findByNguoiDungId(nguoiDung.getId()).stream()
                 .map(nv -> VaiTroResponse.builder()
                         .id(nv.getVaiTro().getId())
@@ -242,6 +280,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         return NguoiDungResponse.builder()
                 .id(nguoiDung.getId())
                 .idDonVi(nguoiDung.getIdDonVi())
+                .idPhongBan(nguoiDung.getIdPhongBan())
+                .tenPhongBan(tenPhongBan)
                 .tenDangNhap(nguoiDung.getTenDangNhap())
                 .hoNguoiDung(nguoiDung.getHoNguoiDung())
                 .tenDemNguoiDung(nguoiDung.getTenDemNguoiDung())
@@ -255,6 +295,23 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 .danhSachQuyen(danhSachQuyen)
                 .danhSachQuyenPhanGiai(danhSachQuyenPhanGiai)
                 .build();
+    }
+
+    private void validatePhongBan(Long idPhongBan, Long idDonVi) {
+        if (idPhongBan == null) {
+            return;
+        }
+        PhongBan phongBan;
+        if (idDonVi == null) {
+            phongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(idPhongBan)
+                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc đã bị xóa", 400));
+        } else {
+            phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(idPhongBan, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc không thuộc đơn vị của bạn", 400));
+        }
+        if (phongBan.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
+            throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
     }
 
     @Override

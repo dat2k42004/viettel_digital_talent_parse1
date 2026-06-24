@@ -24,7 +24,9 @@ import com.example.backend.modules.auth.repository.MaXacThucOTPRepository;
 import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.auth.security.JwtTokenProvider;
 import com.example.backend.modules.tenant.model.DonVi;
+import com.example.backend.modules.tenant.model.PhongBan;
 import com.example.backend.modules.tenant.repository.DonViRepository;
+import com.example.backend.modules.tenant.repository.PhongBanRepository;
 import com.example.backend.modules.tenant.repository.CauHinhDonViRepository;
 import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.tenant.dto.CauHinhDonViResponse;
@@ -71,6 +73,7 @@ public class XacThucServiceImpl implements XacThucService {
     private final RabbitTemplate rabbitTemplate;
     private final NguoiDungService nguoiDungService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PhongBanRepository phongBanRepository;
 
     @Override
     @Transactional
@@ -84,8 +87,7 @@ public class XacThucServiceImpl implements XacThucService {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
             NguoiDungUserDetails userDetails = (NguoiDungUserDetails) authentication.getPrincipal();
             String accessToken = tokenProvider.generateAccessToken(userDetails);
@@ -105,9 +107,8 @@ public class XacThucServiceImpl implements XacThucService {
 
             // Phát sự kiện đăng nhập thành công
             eventPublisher.publishEvent(new DangNhapEvent(
-                    nguoiDung, request.getUsername(), "THANH_CONG", 
-                    httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
-            ));
+                    nguoiDung, request.getUsername(), "THANH_CONG",
+                    httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")));
 
             return XacThucResponse.builder()
                     .accessToken(accessToken)
@@ -120,9 +121,8 @@ public class XacThucServiceImpl implements XacThucService {
         } catch (Exception e) {
             // Phát sự kiện đăng nhập thất bại
             eventPublisher.publishEvent(new DangNhapEvent(
-                    null, request.getUsername(), "THAT_BAI", 
-                    httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")
-            ));
+                    null, request.getUsername(), "THAT_BAI",
+                    httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")));
             if (e instanceof NghiepVuException) {
                 throw (NghiepVuException) e;
             }
@@ -137,16 +137,16 @@ public class XacThucServiceImpl implements XacThucService {
             accessToken = accessToken.substring(7);
         }
 
-        // 1. Đẩy accessToken vào blacklist trên Redis với TTL bằng thời gian sống còn lại của token
+        // 1. Đẩy accessToken vào blacklist trên Redis với TTL bằng thời gian sống còn
+        // lại của token
         if (accessToken != null && tokenProvider.validateToken(accessToken)) {
             try {
                 long expirationTime = tokenProvider.getExpirationTimeFromToken(accessToken);
                 if (expirationTime > 0) {
                     redisTemplate.opsForValue().set(
-                            "jwt_blacklist:" + accessToken, 
-                            "blacklisted", 
-                            java.time.Duration.ofMillis(expirationTime)
-                    );
+                            "jwt_blacklist:" + accessToken,
+                            "blacklisted",
+                            java.time.Duration.ofMillis(expirationTime));
                     log.info("Access Token đã được đưa vào blacklist thành công.");
                 }
             } catch (Exception e) {
@@ -156,7 +156,8 @@ public class XacThucServiceImpl implements XacThucService {
 
         // 2. Vô hiệu hóa refresh token trong DB
         if (org.springframework.util.StringUtils.hasText(refreshToken)) {
-            Optional<PhienDangNhap> phienOpt = phienDangNhapRepository.findByTokenLamMoiAndThoiGianXoaIsNull(refreshToken);
+            Optional<PhienDangNhap> phienOpt = phienDangNhapRepository
+                    .findByTokenLamMoiAndThoiGianXoaIsNull(refreshToken);
             if (phienOpt.isPresent()) {
                 PhienDangNhap phien = phienOpt.get();
                 phien.setTrangThai("EXPIRED");
@@ -204,7 +205,8 @@ public class XacThucServiceImpl implements XacThucService {
             throw new NghiepVuException("Tên đăng nhập không khớp", 401);
         }
 
-        // Tự động load lại User Details & Authorities giống loadUserByUsername qua Cache
+        // Tự động load lại User Details & Authorities giống loadUserByUsername qua
+        // Cache
         List<String> userPermissions = nguoiDungService.resolveAndCacheUserPermissions(user.getId());
         List<org.springframework.security.core.GrantedAuthority> authorities = userPermissions.stream()
                 .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
@@ -239,7 +241,8 @@ public class XacThucServiceImpl implements XacThucService {
     @Transactional
     public void guiOtpQuenMatKhau(QuenMatKhauRequest request) {
         NguoiDung user = nguoiDungRepository.findByEmailAndThoiGianXoaIsNull(request.getEmail())
-                .orElseThrow(() -> new NghiepVuException("Email không tồn tại trong hệ thống hoặc tài khoản đã bị xóa", 404));
+                .orElseThrow(() -> new NghiepVuException("Email không tồn tại trong hệ thống hoặc tài khoản đã bị xóa",
+                        404));
 
         if (user.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
             throw new NghiepVuException("Tài khoản liên kết với email này hiện đang bị khóa", 400);
@@ -307,8 +310,8 @@ public class XacThucServiceImpl implements XacThucService {
     }
 
     private NguoiDungResponse mapToNguoiDungResponse(NguoiDung nguoiDung) {
-        List<com.example.backend.modules.auth.dto.VaiTroResponse> danhSachVaiTro = 
-                nguoiDungVaiTroRepository.findByNguoiDungId(nguoiDung.getId()).stream()
+        List<com.example.backend.modules.auth.dto.VaiTroResponse> danhSachVaiTro = nguoiDungVaiTroRepository
+                .findByNguoiDungId(nguoiDung.getId()).stream()
                 .map(nv -> com.example.backend.modules.auth.dto.VaiTroResponse.builder()
                         .id(nv.getVaiTro().getId())
                         .maVaiTro(nv.getVaiTro().getMaVaiTro())
@@ -316,9 +319,18 @@ public class XacThucServiceImpl implements XacThucService {
                         .build())
                 .collect(Collectors.toList());
 
+        String tenPhongBan = null;
+        if (nguoiDung.getIdPhongBan() != null) {
+            tenPhongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdPhongBan())
+                    .map(PhongBan::getTenPhongBan)
+                    .orElse(null);
+        }
+
         return NguoiDungResponse.builder()
                 .id(nguoiDung.getId())
                 .idDonVi(nguoiDung.getIdDonVi())
+                .idPhongBan(nguoiDung.getIdPhongBan())
+                .tenPhongBan(tenPhongBan)
                 .tenDangNhap(nguoiDung.getTenDangNhap())
                 .hoNguoiDung(nguoiDung.getHoNguoiDung())
                 .tenDemNguoiDung(nguoiDung.getTenDemNguoiDung())
@@ -353,7 +365,8 @@ public class XacThucServiceImpl implements XacThucService {
     }
 
     private DonViResponse mapToDonViResponse(DonVi donVi) {
-        if (donVi == null) return null;
+        if (donVi == null)
+            return null;
         return DonViResponse.builder()
                 .id(donVi.getId())
                 .maDonVi(donVi.getMaDonVi())

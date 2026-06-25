@@ -19,6 +19,10 @@ import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +53,10 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      private final LinhKienPhanCungRepository linhKienPhanCungRepository;
      private final NguoiDungRepository nguoiDungRepository;
      private final PhongBanRepository phongBanRepository;
+
+     @Autowired
+     @Lazy
+     private RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -524,32 +532,44 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           phieuVirtual.setThoiGianBanGiao(LocalDateTime.now());
           PhieuCapPhatTaiSan savedVirtualPhieu = phieuCapPhatTaiSanRepository.save(phieuVirtual);
 
-          // 6.1: Khép vòng đời phần cứng cũ và sinh ngầm phần cứng mới cho người nhận
+          // đẩy sự kiện xuống queue để thực hiện cập nhật bao cáo cấp phát
           for (ChiTietDieuChuyenPhanCung pc : pcDetails) {
                if (pc.getTrangThaiNhan() == null || pc.getTrangThaiNhan().trim().isEmpty()) {
                     pc.setTrangThaiNhan("Đã nhận bàn giao thiết bị phần cứng từ điều chuyển");
                }
                chiTietDieuChuyenPhanCungRepository.save(pc);
 
-               // Chuyển lý do xóa mềm của người gửi thành trạng thái đóng chu kỳ sở hữu vĩnh
-               // viễn
                if (pc.getChiTietCapPhatPhanCung() != null) {
                     ChiTietCapPhatPhanCung cpOld = pc.getChiTietCapPhatPhanCung();
-                    cpOld.setLyDoXoa(
-                              "Đã hoàn tất đóng chu kỳ sở hữu cũ và sang tên sang nhân viên tiếp nhận mới thông qua điều chuyển");
+                    cpOld.setLyDoXoa("Đã hoàn tất đóng chu kỳ sở hữu cũ thông qua điều chuyển");
                     chiTietCapPhatPhanCungRepository.save(cpOld);
                }
 
-               // INSERT tự động dòng chi tiết cấp phát mới trỏ về phiếu ảo vừa sinh ra
                ChiTietCapPhatPhanCung cpNew = new ChiTietCapPhatPhanCung();
                cpNew.setPhieuCapPhatTaiSan(savedVirtualPhieu);
                cpNew.setDanhSachThietBiPhanCungId(pc.getDanhSachThietBiPhanCungId());
-               cpNew.setTinhTrangLucGiao(pc.getTrangThaiNhan()); // Kế thừa tình trạng đầu nhận đối soát
+               cpNew.setTinhTrangLucGiao(pc.getTrangThaiNhan());
                cpNew.setGhiChu("Kế thừa tự động từ mã phiếu điều chuyển hệ thống: " + phieu.getMaPhieuDieuChuyen());
                chiTietCapPhatPhanCungRepository.save(cpNew);
+
+               // BẮN SỰ KIỆN ĐIỀU CHUYỂN PHẦN CỨNG SANG HÀNG ĐỢI
+               com.example.backend.shared.dto.BienDongCapPhatEvent eventBus = com.example.backend.shared.dto.BienDongCapPhatEvent
+                         .builder()
+                         .idDonVi(tenantId)
+                         .idTaiSanCuThe(pc.getDanhSachThietBiPhanCungId())
+                         .loaiTaiSan("PHAN_CUNG")
+                         .idPhongBanCu(phieu.getIdPhongBanChuyen())
+                         .idPhongBanMoi(phieu.getIdPhongBanNhan())
+                         .idNhanVienTiepNhan(phieu.getIdNguoiNhan())
+                         .idChungTuGoc(phieu.getId())
+                         .maChungTuGoc(phieu.getMaPhieuDieuChuyen())
+                         .tinhTrangBanGiao(pc.getTrangThaiNhan())
+                         .hanhDong(com.example.backend.shared.dto.HanhDongCapPhatEnum.DIEU_CHUYEN)
+                         .build();
+               rabbitTemplate.convertAndSend("inventory.bien-dong-cap-phat.queue", eventBus);
           }
 
-          // 6.2: Khép vòng đời linh kiện cũ và sinh ngầm linh kiện mới cho người nhận
+          // 6.2: Điều chuyển linh kiện rời và phát hành thông điệp
           for (ChiTietDieuChuyenLinhKien lk : lkDetails) {
                if (lk.getTrangThaiNhan() == null || lk.getTrangThaiNhan().trim().isEmpty()) {
                     lk.setTrangThaiNhan("Đã nhận bàn giao linh kiện từ điều chuyển");
@@ -558,17 +578,32 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
 
                if (lk.getChiTietCapPhatLinhKien() != null) {
                     ChiTietCapPhatLinhKien cpOld = lk.getChiTietCapPhatLinhKien();
-                    cpOld.setLyDoXoa(
-                              "Đã hoàn tất chu kỳ sở hữu cũ và sang tên sang nhân viên tiếp nhận mới thông qua điều chuyển");
+                    cpOld.setLyDoXoa("Đã hoàn tất chu kỳ sở hữu cũ thông qua điều chuyển");
                     chiTietCapPhatLinhKienRepository.save(cpOld);
                }
 
                ChiTietCapPhatLinhKien cpNew = new ChiTietCapPhatLinhKien();
                cpNew.setPhieuCapPhatTaiSan(savedVirtualPhieu);
                cpNew.setLinhKienPhanCungId(lk.getLinhKienPhanCungId());
-               cpNew.setTinhTrangLucGiao(lk.getTrangThaiNhan()); // Kế thừa tình trạng đối soát
+               cpNew.setTinhTrangLucGiao(lk.getTrangThaiNhan());
                cpNew.setGhiChu("Kế thừa tự động từ mã phiếu điều chuyển hệ thống: " + phieu.getMaPhieuDieuChuyen());
                chiTietCapPhatLinhKienRepository.save(cpNew);
+
+               // BẮN SỰ KIỆN ĐIỀU CHUYỂN LINH KIỆN SANG HÀNG ĐỢI
+               com.example.backend.shared.dto.BienDongCapPhatEvent eventBus = com.example.backend.shared.dto.BienDongCapPhatEvent
+                         .builder()
+                         .idDonVi(tenantId)
+                         .idTaiSanCuThe(lk.getLinhKienPhanCungId())
+                         .loaiTaiSan("LINH_KIEN")
+                         .idPhongBanCu(phieu.getIdPhongBanChuyen())
+                         .idPhongBanMoi(phieu.getIdPhongBanNhan())
+                         .idNhanVienTiepNhan(phieu.getIdNguoiNhan())
+                         .idChungTuGoc(phieu.getId())
+                         .maChungTuGoc(phieu.getMaPhieuDieuChuyen())
+                         .tinhTrangBanGiao(lk.getTrangThaiNhan())
+                         .hanhDong(com.example.backend.shared.dto.HanhDongCapPhatEnum.DIEU_CHUYEN)
+                         .build();
+               rabbitTemplate.convertAndSend("inventory.bien-dong-cap-phat.queue", eventBus);
           }
 
           phieu.setTrangThai(TrangThaiPhieuEnum.HOAN_THANH);

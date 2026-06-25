@@ -22,6 +22,10 @@ import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +60,10 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
+
+    @Autowired
+    @Lazy
+    private RabbitTemplate rabbitTemplate;
 
     private final NguoiDungRepository nguoiDungRepository;
     private final PhongBanRepository phongBanRepository;
@@ -252,7 +260,6 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
             throw new NghiepVuException("Không thể phê duyệt phiếu ở trạng thái: " + phieu.getTrangThai().getMoTa(),
                     400);
         }
-
         phieu.setTrangThai(TrangThaiPhieuEnum.DA_PHE_DUYET);
         phieu.setIdNguoiPheDuyet(userId);
         phieuCapPhatTaiSanRepository.save(phieu);
@@ -273,6 +280,66 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
         phieu.setTrangThai(TrangThaiPhieuEnum.HOAN_THANH);
         phieu.setThoiGianBanGiao(LocalDateTime.now());
         phieuCapPhatTaiSanRepository.save(phieu);
+
+        // đẩy sự kiện xuống queue để cập nhật báo cáo cấp phát
+        List<ChiTietCapPhatPhanCung> pcList = chiTietCapPhatPhanCungRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatPhanCung pc : pcList) {
+            com.example.backend.shared.dto.BienDongCapPhatEvent eventBus = com.example.backend.shared.dto.BienDongCapPhatEvent
+                    .builder()
+                    .idDonVi(tenantId)
+                    .idTaiSanCuThe(pc.getDanhSachThietBiPhanCungId())
+                    .loaiTaiSan("PHAN_CUNG")
+                    .idPhongBanCu(null) // Cấp phát mới từ kho bãi vật lý nên phòng ban cũ là null
+                    .idPhongBanMoi(phieu.getIdPhongBanNhan())
+                    .idNhanVienTiepNhan(phieu.getIdNguoiNhan())
+                    .idChungTuGoc(phieu.getId())
+                    .maChungTuGoc(phieu.getMaPhiepCapPhat())
+                    .tinhTrangBanGiao(pc.getTinhTrangLucGiao() != null ? pc.getTinhTrangLucGiao() : "Bình thường")
+                    .hanhDong(com.example.backend.shared.dto.HanhDongCapPhatEnum.CAP_PHAT)
+                    .build();
+            rabbitTemplate.convertAndSend("inventory.bien-dong-cap-phat.queue", eventBus);
+        }
+
+        // 2. Quét mảng chi tiết key bản quyền phần mềm bàn giao
+        List<ChiTietCapPhatPhanMem> pmList = chiTietCapPhatPhanMemRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatPhanMem pm : pmList) {
+            com.example.backend.shared.dto.BienDongCapPhatEvent eventBus = com.example.backend.shared.dto.BienDongCapPhatEvent
+                    .builder()
+                    .idDonVi(tenantId)
+                    .idTaiSanCuThe(pm.getDanhSachThietBiPhanMemId())
+                    .loaiTaiSan("PHAN_MEM")
+                    .idPhongBanCu(null)
+                    .idPhongBanMoi(phieu.getIdPhongBanNhan())
+                    .idNhanVienTiepNhan(phieu.getIdNguoiNhan())
+                    .idChungTuGoc(phieu.getId())
+                    .maChungTuGoc(phieu.getMaPhiepCapPhat())
+                    .tinhTrangBanGiao("Kích hoạt key bản quyền")
+                    .hanhDong(com.example.backend.shared.dto.HanhDongCapPhatEnum.CAP_PHAT)
+                    .build();
+            rabbitTemplate.convertAndSend("inventory.bien-dong-cap-phat.queue", eventBus);
+        }
+
+        // 3. Quét mảng chi tiết linh kiện rời bàn giao lắp ráp
+        List<ChiTietCapPhatLinhKien> lkList = chiTietCapPhatLinhKienRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatLinhKien lk : lkList) {
+            com.example.backend.shared.dto.BienDongCapPhatEvent eventBus = com.example.backend.shared.dto.BienDongCapPhatEvent
+                    .builder()
+                    .idDonVi(tenantId)
+                    .idTaiSanCuThe(lk.getLinhKienPhanCungId())
+                    .loaiTaiSan("LINH_KIEN")
+                    .idPhongBanCu(null)
+                    .idPhongBanMoi(phieu.getIdPhongBanNhan())
+                    .idNhanVienTiepNhan(phieu.getIdNguoiNhan())
+                    .idChungTuGoc(phieu.getId())
+                    .maChungTuGoc(phieu.getMaPhiepCapPhat())
+                    .tinhTrangBanGiao(lk.getTinhTrangLucGiao() != null ? lk.getTinhTrangLucGiao() : "Bình thường")
+                    .hanhDong(com.example.backend.shared.dto.HanhDongCapPhatEnum.CAP_PHAT)
+                    .build();
+            rabbitTemplate.convertAndSend("inventory.bien-dong-cap-phat.queue", eventBus);
+        }
     }
 
     private void validateAssetPresence(PhieuCapPhatTaiSanRequest request) {

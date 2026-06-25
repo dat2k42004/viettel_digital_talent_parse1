@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -63,6 +66,10 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      private final NguoiDungRepository nguoiDungRepository;
      private final TaiSanPhanCungRepository taiSanPhanCungRepository;
      private final TaiSanPhanMemRepository taiSanPhanMemRepository;
+
+     @Autowired
+     @Lazy
+     private RabbitTemplate rabbitTemplate;
 
      @Override
      @Transactional(readOnly = true)
@@ -311,6 +318,73 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           if (dh != null) {
                dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.HOAN_THANH);
                donHangMuaSamRepository.save(dh);
+          }
+
+          // đẩy sự kiện đi cập nhật báo cáo tồn kho
+          List<ChiTietNhapPhanCung> pcList = chiTietNhapPhanCungRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapPhanCung pc : pcList) {
+               if (pc.getIdDanhSachThietBiPhanCung() != null) {
+                    com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                              .builder()
+                              .idDonVi(currentTenantId)
+                              .idTaiSanCuThe(pc.getIdDanhSachThietBiPhanCung())
+                              .loaiTaiSan("PHAN_CUNG")
+                              .idViTriKho(1L) // Mặc định ID phân khu kho bãi tiếp nhận (ví dụ: 1L) hoặc bổ sung trường
+                                              // idViTri từ Request
+                              .viTriKhoChiTiet(
+                                        pc.getTinhTrangLucNhap() != null ? pc.getTinhTrangLucNhap() : "Mới nhập kho")
+                              .trangThaiMoi("SAN_SANG")
+                              .idChungTuGoc(pnts.getId())
+                              .maChungTuGoc(pnts.getMaPhieuNhap())
+                              .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.NHAP_KHO)
+                              .build();
+
+                    rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
+               }
+          }
+
+          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapLinhKien lk : lkList) {
+               if (lk.getIdLinhKienPhanCung() != null) {
+                    com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                              .builder()
+                              .idDonVi(currentTenantId)
+                              .idTaiSanCuThe(lk.getIdLinhKienPhanCung())
+                              .loaiTaiSan("LINH_KIEN")
+                              .idViTriKho(1L)
+                              .viTriKhoChiTiet(
+                                        lk.getTinhTrangLucNhap() != null ? lk.getTinhTrangLucNhap() : "Linh kiện mới")
+                              .trangThaiMoi("SAN_SANG")
+                              .idChungTuGoc(pnts.getId())
+                              .maChungTuGoc(pnts.getMaPhieuNhap())
+                              .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.NHAP_KHO)
+                              .build();
+
+                    rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
+               }
+          }
+
+          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapPhanMem pm : pmList) {
+               if (pm.getIdDanhSachThietBiPhanMem() != null) {
+                    com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                              .builder()
+                              .idDonVi(currentTenantId)
+                              .idTaiSanCuThe(pm.getIdDanhSachThietBiPhanMem())
+                              .loaiTaiSan("PHAN_MEM")
+                              .idViTriKho(1L)
+                              .viTriKhoChiTiet("Kích hoạt bản quyền")
+                              .trangThaiMoi("SAN_SANG")
+                              .idChungTuGoc(pnts.getId())
+                              .maChungTuGoc(pnts.getMaPhieuNhap())
+                              .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.NHAP_KHO)
+                              .build();
+
+                    rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
+               }
           }
      }
 

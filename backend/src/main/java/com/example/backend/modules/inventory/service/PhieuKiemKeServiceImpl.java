@@ -33,6 +33,8 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -72,7 +74,9 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
      private final LinhKienPhanCungRepository linhKienPhanCungRepository;
      private final DanhSachThietBiPhanMemRepository danhSachThietBiPhanMemRepository;
 
-     private final RabbitTemplate rabbitTemplate;
+     @Autowired
+     @Lazy
+     private RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();

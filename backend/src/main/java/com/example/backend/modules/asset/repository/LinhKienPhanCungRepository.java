@@ -8,8 +8,13 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface LinhKienPhanCungRepository extends JpaRepository<LinhKienPhanCung, Long>, JpaSpecificationExecutor<LinhKienPhanCung> {
+public interface LinhKienPhanCungRepository
+        extends JpaRepository<LinhKienPhanCung, Long>, JpaSpecificationExecutor<LinhKienPhanCung> {
     Optional<LinhKienPhanCung> findByIdAndThoiGianXoaIsNull(Long id);
+
     Optional<LinhKienPhanCung> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
+
     boolean existsBySoSerialAndIdDonViAndThoiGianXoaIsNull(String soSerial, Long idDonVi);
+
+    long countByThoiGianXoaIsNull();
 }

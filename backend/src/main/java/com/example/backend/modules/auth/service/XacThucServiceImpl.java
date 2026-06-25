@@ -35,11 +35,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
+
 import com.example.backend.modules.auth.event.DangNhapEvent;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.example.backend.shared.dto.MailEvent;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,7 +74,11 @@ public class XacThucServiceImpl implements XacThucService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
-    private final RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    @Lazy
+    private RabbitTemplate rabbitTemplate;
+
     private final NguoiDungService nguoiDungService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final PhongBanRepository phongBanRepository;

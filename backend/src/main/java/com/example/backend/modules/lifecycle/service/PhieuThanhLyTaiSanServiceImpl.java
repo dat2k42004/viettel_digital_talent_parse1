@@ -20,6 +20,10 @@ import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +52,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
      private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
      private final LinhKienPhanCungRepository linhKienPhanCungRepository;
      private final NguoiDungRepository nguoiDungRepository;
+
+     @Autowired
+     @Lazy
+     private RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -521,19 +529,36 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                throw new NghiepVuException("Trạng thái phiếu không hợp lệ để hoàn tất", 400);
           }
 
-          // Cập nhật THỜI GIAN XÓA làm mốc chính xác để tìm kiếm sau này
           List<ChiTietThanhLyPhanCung> pcList = chiTietThanhLyPhanCungRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+
+          // đẩy sự kiện xuống queue để thực hiện cập nhật báo cáo tồn kho
           for (ChiTietThanhLyPhanCung ct : pcList) {
                if (ct.getDanhSachThietBiPhanCungId() != null) {
                     thietBiPhanCungRepository.findById(ct.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
-                         tb.setThoiGianXoa(LocalDateTime.now()); // Khóa vĩnh viễn mốc thời gian xóa mới
+                         tb.setThoiGianXoa(LocalDateTime.now());
                          tb.setLyDoXoa("Đã thanh lý xuất kho vĩnh viễn");
                          thietBiPhanCungRepository.save(tb);
+
+                         // Phát hành gói tin thanh lý phần cứng ra hàng đợi ngầm
+                         com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                                   .builder()
+                                   .idDonVi(tenantId)
+                                   .idTaiSanCuThe(tb.getId())
+                                   .loaiTaiSan("PHAN_CUNG")
+                                   .idViTriKho(null) // Gán null vì tài sản đã rời hoàn toàn khỏi hệ thống kho bãi
+                                   .viTriKhoChiTiet("Xuất bán / Tiêu hủy")
+                                   .trangThaiMoi("DA_THANH_LY")
+                                   .idChungTuGoc(phieu.getId())
+                                   .maChungTuGoc(phieu.getMaPhieuThanhLy())
+                                   .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.THANH_LY)
+                                   .build();
+                         rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
                     });
                }
           }
 
+          // 2. Cập nhật mốc xóa mới cho Phần Mềm và bắn Event
           List<ChiTietThanhLyPhanMem> pmList = chiTietThanhLyPhanMemRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyPhanMem ct : pmList) {
@@ -542,10 +567,26 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                          pm.setThoiGianXoa(LocalDateTime.now());
                          pm.setLyDoXoa("Đã hủy bản quyền/thanh lý vĩnh viễn");
                          thietBiPhanMemRepository.save(pm);
+
+                         // Phát hành gói tin hủy bản quyền phần mềm
+                         com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                                   .builder()
+                                   .idDonVi(tenantId)
+                                   .idTaiSanCuThe(pm.getId())
+                                   .loaiTaiSan("PHAN_MEM")
+                                   .idViTriKho(null)
+                                   .viTriKhoChiTiet("Hủy kích hoạt key")
+                                   .trangThaiMoi("DA_THANH_LY")
+                                   .idChungTuGoc(phieu.getId())
+                                   .maChungTuGoc(phieu.getMaPhieuThanhLy())
+                                   .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.THANH_LY)
+                                   .build();
+                         rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
                     });
                }
           }
 
+          // 3. Cập nhật mốc xóa mới cho Linh Kiện và bắn Event
           List<ChiTietThanhLyLinhKien> lkList = chiTietThanhLyLinhKienRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyLinhKien ct : lkList) {
@@ -554,10 +595,24 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                          lk.setThoiGianXoa(LocalDateTime.now());
                          lk.setLyDoXoa("Đã thanh lý hủy linh kiện vĩnh viễn");
                          linhKienPhanCungRepository.save(lk);
+
+                         // Phát hành gói tin tiêu hủy linh kiện rời
+                         com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
+                                   .builder()
+                                   .idDonVi(tenantId)
+                                   .idTaiSanCuThe(lk.getId())
+                                   .loaiTaiSan("LINH_KIEN")
+                                   .idViTriKho(null)
+                                   .viTriKhoChiTiet("Tiêu hủy vật lý")
+                                   .trangThaiMoi("DA_THANH_LY")
+                                   .idChungTuGoc(phieu.getId())
+                                   .maChungTuGoc(phieu.getMaPhieuThanhLy())
+                                   .hanhDong(com.example.backend.shared.dto.HanhDongTonKhoEnum.THANH_LY)
+                                   .build();
+                         rabbitTemplate.convertAndSend("inventory.bien-dong-ton-kho.queue", eventBus);
                     });
                }
           }
-
           phieu.setTrangThai(TrangThaiPhieuEnum.HOAN_THANH);
           phieu.setThoiGianThanhLy(LocalDateTime.now()); // Đồng bộ trường thoiGianThanhLy của Entity mới cậu cấp
           phieuThanhLyTaiSanRepository.save(phieu);

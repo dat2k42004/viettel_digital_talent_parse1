@@ -10,9 +10,18 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class RabbitMQConfig {
+
+    // private final AsyncConfig asyncConfig;
+    // private final AmqpAdmin amqpAdmin;
+
+    // RabbitMQConfig(AmqpAdmin amqpAdmin, AsyncConfig asyncConfig) {
+    // this.amqpAdmin = amqpAdmin;
+    // this.asyncConfig = asyncConfig;
+    // }
 
     @Bean
     public Queue mailQueue() {
@@ -40,11 +49,27 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue bienDongTonKho() {
+        return new Queue("inventory.bien-dong-ton-kho.queue", true);
+    }
+
+    @Bean
+    public Queue bienDongCapPhat() {
+        return new Queue("inventory.bien-dong-cap-phat.queue", true);
+    }
+
+    @Bean
+    public Queue bienDongBaoTri() {
+        return new Queue("inventory.bien-dong-bao-tri.queue", true);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
+    @Lazy
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());

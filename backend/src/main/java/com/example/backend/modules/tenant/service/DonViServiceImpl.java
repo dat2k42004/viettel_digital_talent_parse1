@@ -40,6 +40,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+
 import com.example.backend.shared.dto.MailEvent;
 import com.example.backend.shared.dto.TenantStatusEvent;
 import jakarta.persistence.criteria.Predicate;
@@ -62,7 +65,10 @@ public class DonViServiceImpl implements DonViService {
     private final ViTriRepository viTriRepository;
     private final VaiTroRepository vaiTroRepository;
     private final CauHinhDonViRepository cauHinhDonViRepository;
-    private final RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    @Lazy
+    private RabbitTemplate rabbitTemplate;
     private final QuyenRepository quyenRepository;
     private final VaiTroQuyenRepository vaiTroQuyenRepository;
     private final NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
@@ -111,7 +117,8 @@ public class DonViServiceImpl implements DonViService {
         final VaiTro savedVaiTro = vaiTroRepository.save(vaiTro);
 
         // 4. Gán các quyền có loại là QUYEN_DON_VI cho vai trò này
-        List<Quyen> corporatePermissions = quyenRepository.findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", TrangThaiCoBanEnum.HOAT_DONG);
+        List<Quyen> corporatePermissions = quyenRepository
+                .findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", TrangThaiCoBanEnum.HOAT_DONG);
         List<VaiTroQuyen> vaiTroQuyens = corporatePermissions.stream().map(q -> {
             VaiTroQuyen vq = new VaiTroQuyen();
             vq.setVaiTro(savedVaiTro);
@@ -144,7 +151,7 @@ public class DonViServiceImpl implements DonViService {
         otpEntity.setTrangThai("HIEU_LUC");
         otpEntity.setThoiGianHetHan(LocalDateTime.now().plusMinutes(15));
         maXacThucOTPRepository.save(otpEntity);
-        
+
         // Gửi sự kiện kích hoạt đơn vị qua RabbitMQ để gửi email nền
         MailEvent mailEvent = new MailEvent(request.getEmailAdmin(), "KICH_HOAT_DON_VI", otp);
         rabbitTemplate.convertAndSend("mail.queue", mailEvent);
@@ -187,7 +194,7 @@ public class DonViServiceImpl implements DonViService {
         admin.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
         nguoiDungRepository.save(admin);
 
-         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
+        DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
         donVi.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
         donViRepository.save(donVi);
@@ -214,7 +221,8 @@ public class DonViServiceImpl implements DonViService {
     }
 
     @Override
-    public PageResponse<DonViResponse> layDanhSach(String ten, String maDonVi, String trangThai, String maSoThue, int page, int size) {
+    public PageResponse<DonViResponse> layDanhSach(String ten, String maDonVi, String trangThai, String maSoThue,
+            int page, int size) {
         Long tenantId = DonViContextHolder.getTenantId();
         if (tenantId != null) {
             throw new NghiepVuException("Chỉ người dùng hệ thống mới có quyền xem danh sách đơn vị", 403);
@@ -229,8 +237,7 @@ public class DonViServiceImpl implements DonViService {
                 String likePattern = "%" + ten.trim().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("tenPhapLy")), likePattern),
-                        cb.like(cb.lower(root.get("tenThuongMai")), likePattern)
-                ));
+                        cb.like(cb.lower(root.get("tenThuongMai")), likePattern)));
             }
 
             if (maDonVi != null && !maDonVi.trim().isEmpty()) {
@@ -338,7 +345,8 @@ public class DonViServiceImpl implements DonViService {
     }
 
     private DonViResponse mapToResponse(DonVi donVi) {
-        if (donVi == null) return null;
+        if (donVi == null)
+            return null;
         return DonViResponse.builder()
                 .id(donVi.getId())
                 .maDonVi(donVi.getMaDonVi())
@@ -398,4 +406,3 @@ public class DonViServiceImpl implements DonViService {
         donViRepository.save(donVi);
     }
 }
-

@@ -24,10 +24,10 @@ public class PhienDangNhap extends BaseEntity {
     @Column(name = "id_don_vi")
     private Long idDonVi;
 
-    @Column(name = "token_truy_cap", columnDefinition = "TEXT")
+    @Column(name = "token_truy_cap", length = 512)
     private String tokenTruyCap;
 
-    @Column(name = "token_lam_moi", columnDefinition = "TEXT")
+    @Column(name = "token_lam_moi", length = 512)
     private String tokenLamMoi;
 
     @Column(name = "dia_chi_ip", length = 45)

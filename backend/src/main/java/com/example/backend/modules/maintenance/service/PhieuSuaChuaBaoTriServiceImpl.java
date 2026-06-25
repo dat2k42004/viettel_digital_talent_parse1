@@ -15,14 +15,16 @@ import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.procurement.model.NhaCungCap;
 import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
 import com.example.backend.shared.exception.NghiepVuException;
-import com.example.backend.modules.maintenance.model.TrangThaiThucHienEnum;
 import com.example.backend.shared.model.TrangThaiVanHanhEnum;
-import com.example.backend.modules.maintenance.model.TrangThaiPhieuSuaChuaBaoTriEnum;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -53,6 +55,10 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
      private final TaiSanPhanCungRepository taiSanPhanCungRepository;
      private final NhaCungCapRepository nhaCungCapRepository;
      private final NguoiDungRepository nguoiDungRepository;
+
+     @Autowired
+     @Lazy
+     private RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -460,6 +466,54 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           if (tatCaDaThuLaiComplete) {
                phieu.setTrangThai(TrangThaiPhieuSuaChuaBaoTriEnum.HOAN_THANH);
                phieu.setThoiGianHoanThanhThucTe(LocalDateTime.now());
+
+               // >>> BẮT ĐẦU ĐOẠN CHÈN CODE BẮN SỰ KIỆN BẢO TRÌ CHẠY NGẦM <<<
+               int soNgayGianDoan = 0;
+               if (phieu.getThoiGianBatDau() != null && phieu.getThoiGianHoanThanhThucTe() != null) {
+                    soNgayGianDoan = (int) java.time.temporal.ChronoUnit.DAYS.between(
+                              phieu.getThoiGianBatDau(), phieu.getThoiGianHoanThanhThucTe());
+                    if (soNgayGianDoan < 0)
+                         soNgayGianDoan = 0;
+               }
+
+               // 1. Duyệt loạt thiết bị nghiệm thu thành công để bắn sang hàng đợi báo cáo
+               for (ChiTietBaoTriThietBi tb : activeTb) {
+                    com.example.backend.shared.dto.BienDongBaoTriEvent eventBus = com.example.backend.shared.dto.BienDongBaoTriEvent
+                              .builder()
+                              .idDonVi(tenantId)
+                              .idTaiSanCuThe(tb.getIdDanhSachThietBiPhanCung())
+                              .loaiTaiSan("PHAN_CUNG")
+                              .idPhieuSuaChua(phieu.getId())
+                              .maPhieuSuaChua(phieu.getMaPhieuSuaChua())
+                              .chiPhiThucTe(tb.getChiPhi())
+                              .thoiGianGianDoan(soNgayGianDoan)
+                              .noiDungKhacPhuc(tb.getPhuongAnXuLy() != null ? tb.getPhuongAnXuLy()
+                                        : "Sửa chữa thiết bị phần cứng")
+                              .hanhDong(com.example.backend.shared.dto.HanhDongBaoTriEnum.GHI_NHAN_BAO_TRI)
+                              .build();
+
+                    rabbitTemplate.convertAndSend("inventory.bien-dong-bao-tri.queue", eventBus);
+               }
+
+               // 2. Duyệt loạt linh kiện nghiệm thu thành công để bắn sang hàng đợi báo cáo
+               for (ChiTietBaoTriLinhKien lk : activeLk) {
+                    com.example.backend.shared.dto.BienDongBaoTriEvent eventBus = com.example.backend.shared.dto.BienDongBaoTriEvent
+                              .builder()
+                              .idDonVi(tenantId)
+                              .idTaiSanCuThe(lk.getIdLinhKienPhanCung())
+                              .loaiTaiSan("LINH_KIEN")
+                              .idPhieuSuaChua(phieu.getId())
+                              .maPhieuSuaChua(phieu.getMaPhieuSuaChua())
+                              .chiPhiThucTe(lk.getChiPhi())
+                              .thoiGianGianDoan(soNgayGianDoan)
+                              .noiDungKhacPhuc(lk.getPhuongAnXuLy() != null ? lk.getPhuongAnXuLy()
+                                        : "Sửa chữa cấu phần linh kiện")
+                              .hanhDong(com.example.backend.shared.dto.HanhDongBaoTriEnum.GHI_NHAN_BAO_TRI)
+                              .build();
+
+                    rabbitTemplate.convertAndSend("inventory.bien-dong-bao-tri.queue", eventBus);
+               }
+               // >>> KẾT THÚC ĐOẠN CHÈN CODE BẮN SỰ KIỆN <<<
           } else if (coItNhatMotCaiDaGuiDi) {
                phieu.setTrangThai(TrangThaiPhieuSuaChuaBaoTriEnum.DANG_THUC_HIEN);
           }

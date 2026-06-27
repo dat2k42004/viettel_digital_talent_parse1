@@ -53,4 +53,7 @@ public class DanhSachThietBiPhanMem extends BaseEntity {
     @Column(name = "trang_thai", length = 30)
     @Enumerated(EnumType.STRING)
     private com.example.backend.shared.model.TrangThaiVanHanhEnum trangThai;
+
+    @Column(name = "thoi_gian_het_han_ban_quyen")
+    private LocalDate thoiGianHetHanBanQuyen;
 }

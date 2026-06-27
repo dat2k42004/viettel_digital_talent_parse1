@@ -342,6 +342,59 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
         }
     }
 
+    @Override
+    @Transactional
+    public void tuChoiPheDuyet(Long id, String lyDoTuChoi) {
+        Long idDonVi = getRequiredTenantId();
+        PhieuCapPhatTaiSan phieu = phieuCapPhatTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
+                .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu cấp phát", 404));
+
+        if (phieu.getTrangThai() != TrangThaiPhieuEnum.GUI_PHE_DUYET) {
+            throw new NghiepVuException("Chỉ được từ chối phê duyệt phiếu ở trạng thái Gửi phê duyệt", 400);
+        }
+
+        phieu.setTrangThai(TrangThaiPhieuEnum.TU_CHOI);
+        phieu.setLyDoTuChoi(lyDoTuChoi);
+        phieuCapPhatTaiSanRepository.save(phieu);
+
+        // Khôi phục trạng thái vận hành của các thiết bị phần cứng, phần mềm, linh kiện
+        // 1. Phần cứng
+        List<ChiTietCapPhatPhanCung> danhSachPhanCung = chiTietCapPhatPhanCungRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatPhanCung pc : danhSachPhanCung) {
+            if (pc.getDanhSachThietBiPhanCungId() != null) {
+                thietBiPhanCungRepository.findById(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                    tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
+                    thietBiPhanCungRepository.save(tb);
+                });
+            }
+        }
+
+        // 2. Phần mềm
+        List<ChiTietCapPhatPhanMem> danhSachPhanMem = chiTietCapPhatPhanMemRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatPhanMem pm : danhSachPhanMem) {
+            if (pm.getDanhSachThietBiPhanMemId() != null) {
+                thietBiPhanMemRepository.findById(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                    tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
+                    thietBiPhanMemRepository.save(tb);
+                });
+            }
+        }
+
+        // 3. Linh kiện
+        List<ChiTietCapPhatLinhKien> danhSachLinhKien = chiTietCapPhatLinhKienRepository
+                .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+        for (ChiTietCapPhatLinhKien lk : danhSachLinhKien) {
+            if (lk.getLinhKienPhanCungId() != null) {
+                linhKienPhanCungRepository.findById(lk.getLinhKienPhanCungId()).ifPresent(linhKien -> {
+                    linhKien.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
+                    linhKienPhanCungRepository.save(linhKien);
+                });
+            }
+        }
+    }
+
     private void validateAssetPresence(PhieuCapPhatTaiSanRequest request) {
         int totalSize = 0;
         if (request.getDanhSachPhanCung() != null) {

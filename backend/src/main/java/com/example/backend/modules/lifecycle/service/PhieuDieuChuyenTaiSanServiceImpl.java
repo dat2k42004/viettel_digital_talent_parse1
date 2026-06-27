@@ -611,6 +611,48 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           phieuDieuChuyenTaiSanRepository.save(phieu);
      }
 
+     @Override
+     @Transactional
+     public void tuChoiPheDuyet(Long id, String lyDoTuChoi) {
+          Long idDonVi = getRequiredTenantId();
+          PhieuDieuChuyenTaiSan phieu = phieuDieuChuyenTaiSanRepository
+                    .findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu điều chuyển tài sản", 404));
+
+          if (phieu.getTrangThai() != TrangThaiPhieuEnum.GUI_PHE_DUYET) {
+               throw new NghiepVuException("Chỉ được từ chối phê duyệt phiếu ở trạng thái Gửi phê duyệt", 400);
+          }
+
+          phieu.setTrangThai(TrangThaiPhieuEnum.TU_CHOI);
+          phieu.setLyDoTuChoi(lyDoTuChoi);
+          phieuDieuChuyenTaiSanRepository.save(phieu);
+
+          // Khôi phục các dòng cấp phát cũ bị xóa mềm trở lại hoạt động bình thường
+          // 1. Phần cứng
+          List<ChiTietDieuChuyenPhanCung> danhSachPhanCung = chiTietDieuChuyenPhanCungRepository
+                    .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+          for (ChiTietDieuChuyenPhanCung pc : danhSachPhanCung) {
+               if (pc.getChiTietCapPhatPhanCung() != null) {
+                    ChiTietCapPhatPhanCung cp = pc.getChiTietCapPhatPhanCung();
+                    cp.setThoiGianXoa(null);
+                    cp.setLyDoXoa(null);
+                    chiTietCapPhatPhanCungRepository.save(cp);
+               }
+          }
+
+          // 2. Linh kiện
+          List<ChiTietDieuChuyenLinhKien> danhSachLinhKien = chiTietDieuChuyenLinhKienRepository
+                    .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
+          for (ChiTietDieuChuyenLinhKien lk : danhSachLinhKien) {
+               if (lk.getChiTietCapPhatLinhKien() != null) {
+                    ChiTietCapPhatLinhKien cp = lk.getChiTietCapPhatLinhKien();
+                    cp.setThoiGianXoa(null);
+                    cp.setLyDoXoa(null);
+                    chiTietCapPhatLinhKienRepository.save(cp);
+               }
+          }
+     }
+
      private PhieuDieuChuyenTaiSanResponse mapToResponse(PhieuDieuChuyenTaiSan phieu, boolean includeDetails) {
           Set<Long> userIds = new HashSet<>();
           Set<Long> pbIds = new HashSet<>();

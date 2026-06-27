@@ -7,7 +7,8 @@ public enum TrangThaiPhieuEnum {
     TAO_MOI("TAO_MOI", "Tạo mới"),
     GUI_PHE_DUYET("GUI_PHE_DUYET", "Gửi phê duyệt"),
     DA_PHE_DUYET("DA_PHE_DUYET", "Đã phê duyệt"),
-    HOAN_THANH("HOAN_THANH", "Hoàn thành");
+    HOAN_THANH("HOAN_THANH", "Hoàn thành"),
+    TU_CHOI("TU_CHOI", "Từ chối");
 
     private final String value;
     private final String moTa;
@@ -34,10 +35,11 @@ public enum TrangThaiPhieuEnum {
             case TAO_MOI:
                 return nextStatus == GUI_PHE_DUYET || nextStatus == HOAN_THANH;
             case GUI_PHE_DUYET:
-                return nextStatus == DA_PHE_DUYET;
+                return nextStatus == DA_PHE_DUYET || nextStatus == TU_CHOI;
             case DA_PHE_DUYET:
                 return nextStatus == HOAN_THANH;
             case HOAN_THANH:
+            case TU_CHOI:
                 return false;
             default:
                 return false;

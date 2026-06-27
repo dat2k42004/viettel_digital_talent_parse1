@@ -11,4 +11,6 @@ public interface DonViRepository extends JpaRepository<DonVi, Long>, JpaSpecific
     boolean existsByTenMienHeThongAndThoiGianXoaIsNull(String tenMienHeThong);
 
     long countByThoiGianXoaIsNull();
+
+    java.util.List<DonVi> findByThoiGianXoaIsNull();
 }

@@ -42,4 +42,7 @@ public class PhieuCapPhatTaiSan extends BaseEntity {
 
     @Column(name = "muc_dich_su_dung", columnDefinition = "TEXT")
     private String mucDichSuDung;
+
+    @Column(name = "ly_do_tu_choi", columnDefinition = "TEXT")
+    private String lyDoTuChoi;
 }

@@ -29,6 +29,7 @@ import com.example.backend.shared.dto.TongHopPhieuKiemKeEvent;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
+import com.example.backend.modules.notification.service.interfaces.EmailThongBaoService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
 
      private final PhieuKiemKeRepository phieuKiemKeRepository;
@@ -73,6 +75,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
      private final DanhSachThietBiPhanCungRepository danhSachThietBiPhanCungRepository;
      private final LinhKienPhanCungRepository linhKienPhanCungRepository;
      private final DanhSachThietBiPhanMemRepository danhSachThietBiPhanMemRepository;
+     private final EmailThongBaoService emailThongBaoService;
 
      @Autowired
      @Lazy
@@ -322,6 +325,11 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
           if (dkk != null && dkk.getTrangThai() == TrangThaiKiemKeEnum.DA_PHE_DUYET) {
                dkk.setTrangThai(TrangThaiKiemKeEnum.DANG_THUC_HIEN);
                dotKiemKeRepository.save(dkk);
+               try {
+                    emailThongBaoService.nhacNhoTruongPhongKiemKe(dkk.getId());
+               } catch (Exception e) {
+                    log.error("Lỗi khi tự động gửi mail thông báo đợt kiểm kê cho trưởng phòng: {}", e.getMessage(), e);
+               }
           }
 
           phieuKiemKeRepository.save(p);

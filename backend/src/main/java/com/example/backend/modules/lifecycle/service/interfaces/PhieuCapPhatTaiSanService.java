@@ -30,4 +30,6 @@ public interface PhieuCapPhatTaiSanService {
     void pheDuyet(Long id);
 
     void hoanThanh(Long id);
+
+    void tuChoiPheDuyet(Long id, String lyDoTuChoi);
 }

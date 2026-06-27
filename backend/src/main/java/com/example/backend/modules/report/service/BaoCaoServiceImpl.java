@@ -306,35 +306,124 @@ public class BaoCaoServiceImpl implements BaoCaoService {
           kiemTraRangBuocThoiGian(request);
           Long idDonVi = DonViContextHolder.getTenantId();
 
-          if (!"xlsx".equalsIgnoreCase(dinhDangFile)) {
-               throw new NghiepVuException("Hệ thống hiện tại chỉ hỗ trợ xuất bản báo cáo tĩnh định dạng Excel (.xlsx)",
-                         400);
+          boolean laExcel = "xlsx".equalsIgnoreCase(dinhDangFile);
+          boolean laPdf = "pdf".equalsIgnoreCase(dinhDangFile);
+
+          if (!laExcel && !laPdf) {
+               throw new NghiepVuException("Hệ thống chỉ hỗ trợ xuất file báo cáo định dạng Excel (.xlsx) hoặc PDF (.pdf)", 400);
           }
 
+          String tenDonVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
+                    .map(DonVi::getTenThuongMai)
+                    .orElse("Đơn vị");
+
           try {
-               // Phân loại xử lý trích xuất mảng dữ liệu dựa theo mã tham số bộ lọc đầu vào
                if (request.getIdViTri() != null) {
-                    // 1. Kết xuất Excel cho phân hệ Tồn Kho
-                    List<BaoCaoTonKho> dataTonKho = baoCaoTonKhoRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-                    return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper
-                              .taoTemplateTonKho(dataTonKho);
+                    // 1. Phân hệ Tồn Kho
+                    Specification<BaoCaoTonKho> spec = (root, query, cb) -> {
+                         List<Predicate> predicates = new ArrayList<>();
+                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         predicates.add(cb.isNull(root.get("thoiGianXoa")));
+
+                         if (request.getIdViTri() != null) {
+                              predicates.add(cb.equal(root.get("idViTri"), request.getIdViTri()));
+                         }
+                         if (request.getTuNgay() != null) {
+                              predicates.add(cb.greaterThanOrEqualTo(root.get("thoiGianCapNhat"), request.getTuNgay().atStartOfDay()));
+                         }
+                         if (request.getDenNgay() != null) {
+                              predicates.add(cb.lessThanOrEqualTo(root.get("thoiGianCapNhat"), request.getDenNgay().atTime(LocalTime.MAX)));
+                         }
+                         if (request.getTuKhoaTimKiem() != null && !request.getTuKhoaTimKiem().trim().isEmpty()) {
+                              String pattern = "%" + request.getTuKhoaTimKiem().trim().toLowerCase() + "%";
+                              Join<BaoCaoTonKho, ChiTietTonKho> joinChiTiet = root.join("danhSachChiTiet", JoinType.LEFT);
+                              predicates.add(cb.or(
+                                        cb.like(cb.lower(joinChiTiet.get("soSerial")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("maTheTaiSan")), pattern),
+                                        cb.like(cb.lower(root.get("tenTaiSanDanhMuc")), pattern)
+                              ));
+                              query.distinct(true);
+                         }
+                         return cb.and(predicates.toArray(new Predicate[0]));
+                    };
+                    List<BaoCaoTonKho> dataTonKho = baoCaoTonKhoRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+                    if (laExcel) {
+                         return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper.taoTemplateTonKho(dataTonKho);
+                    } else {
+                         return com.example.backend.modules.report.util.BaoCaoPdfTemplateHelper.taoTemplateTonKhoPdf(dataTonKho, tenDonVi);
+                    }
 
                } else if (request.getIdPhongBan() != null) {
-                    // 2. Kết xuất Excel cho phân hệ Cấp Phát Sử Dụng
-                    List<BaoCaoCapPhat> dataCapPhat = baoCaoCapPhatRepository
-                              .findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-                    return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper
-                              .taoTemplateCapPhat(dataCapPhat);
+                    // 2. Phân hệ Cấp Phát Sử Dụng
+                    Specification<BaoCaoCapPhat> spec = (root, query, cb) -> {
+                         List<Predicate> predicates = new ArrayList<>();
+                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         predicates.add(cb.isNull(root.get("thoiGianXoa")));
+
+                         if (request.getIdPhongBan() != null) {
+                              predicates.add(cb.equal(root.get("idPhongBan"), request.getIdPhongBan()));
+                         }
+                         if (request.getTuNgay() != null) {
+                              predicates.add(cb.greaterThanOrEqualTo(root.get("thoiGianCapNhat"), request.getTuNgay().atStartOfDay()));
+                         }
+                         if (request.getDenNgay() != null) {
+                              predicates.add(cb.lessThanOrEqualTo(root.get("thoiGianCapNhat"), request.getDenNgay().atTime(LocalTime.MAX)));
+                         }
+                         if (request.getTuKhoaTimKiem() != null && !request.getTuKhoaTimKiem().trim().isEmpty()) {
+                              String pattern = "%" + request.getTuKhoaTimKiem().trim().toLowerCase() + "%";
+                              Join<BaoCaoCapPhat, ChiTietSuDung> joinChiTiet = root.join("danhSachChiTiet", JoinType.LEFT);
+                              predicates.add(cb.or(
+                                        cb.like(cb.lower(joinChiTiet.get("soSerial")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("maTheTaiSan")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("maChungTuGoc")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("hoTenNhanVienTiepNhan")), pattern)
+                              ));
+                              query.distinct(true);
+                         }
+                         return cb.and(predicates.toArray(new Predicate[0]));
+                    };
+                    List<BaoCaoCapPhat> dataCapPhat = baoCaoCapPhatRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+                    if (laExcel) {
+                         return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper.taoTemplateCapPhat(dataCapPhat);
+                    } else {
+                         return com.example.backend.modules.report.util.BaoCaoPdfTemplateHelper.taoTemplateCapPhatPdf(dataCapPhat, tenDonVi);
+                    }
 
                } else {
-                    // 3. Mặc định kết xuất Excel phân hệ Chi Phí Bảo Sửa Tài Sản
-                    List<BaoCaoBaoTri> dataBaoTri = baoCaoBaoTriRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-                    return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper
-                              .taoTemplateBaoTri(dataBaoTri);
+                    // 3. Phân hệ Chi Phí Bảo Sửa Tài Sản
+                    Specification<BaoCaoBaoTri> spec = (root, query, cb) -> {
+                         List<Predicate> predicates = new ArrayList<>();
+                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         predicates.add(cb.isNull(root.get("thoiGianXoa")));
+
+                         if (request.getTuNgay() != null) {
+                              predicates.add(cb.greaterThanOrEqualTo(root.get("thoiGianCapNhat"), request.getTuNgay().atStartOfDay()));
+                         }
+                         if (request.getDenNgay() != null) {
+                              predicates.add(cb.lessThanOrEqualTo(root.get("thoiGianCapNhat"), request.getDenNgay().atTime(LocalTime.MAX)));
+                         }
+                         if (request.getTuKhoaTimKiem() != null && !request.getTuKhoaTimKiem().trim().isEmpty()) {
+                              String pattern = "%" + request.getTuKhoaTimKiem().trim().toLowerCase() + "%";
+                              Join<BaoCaoBaoTri, ChiTietBaoTri> joinChiTiet = root.join("danhSachChiTiet", JoinType.LEFT);
+                              predicates.add(cb.or(
+                                        cb.like(cb.lower(joinChiTiet.get("soSerial")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("maTheTaiSan")), pattern),
+                                        cb.like(cb.lower(joinChiTiet.get("maPhieuSuaChua")), pattern)
+                              ));
+                              query.distinct(true);
+                         }
+                         return cb.and(predicates.toArray(new Predicate[0]));
+                    };
+                    List<BaoCaoBaoTri> dataBaoTri = baoCaoBaoTriRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+                    if (laExcel) {
+                         return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper.taoTemplateBaoTri(dataBaoTri);
+                    } else {
+                         return com.example.backend.modules.report.util.BaoCaoPdfTemplateHelper.taoTemplateBaoTriPdf(dataBaoTri, tenDonVi);
+                    }
                }
-          } catch (IOException  e) {
-               log.error("Gãy luồng xử lý nạp dữ liệu vào file Excel Template báo cáo: {}", e.getMessage(), e);
-               throw new NghiepVuException("Lỗi hệ thống trong quá trình sinh file Excel văn bản dữ liệu", 500);
+          } catch (IOException e) {
+               log.error("Lỗi khi kết xuất file báo cáo dạng Excel/PDF: {}", e.getMessage(), e);
+               throw new NghiepVuException("Lỗi hệ thống trong quá trình sinh file văn bản dữ liệu", 500);
           }
      }
 

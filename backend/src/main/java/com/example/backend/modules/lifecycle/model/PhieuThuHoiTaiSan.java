@@ -42,4 +42,7 @@ public class PhieuThuHoiTaiSan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 30)
     private TrangThaiPhieuEnum trangThai;
+
+    @Column(name = "ly_do_tu_choi", columnDefinition = "TEXT")
+    private String lyDoTuChoi;
 }

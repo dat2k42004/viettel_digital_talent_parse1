@@ -89,4 +89,14 @@ public class PhieuThuHoiTaiSanController {
         phieuThuHoiTaiSanService.hoanThanh(id);
         return ApiResponse.success("Hoàn thành thu hồi tài sản thành công");
     }
+
+    @PutMapping("/{id}/tu-choi")
+    @PreAuthorize("hasAuthority('THAO_TAC_TAI_SAN')")
+    public ApiResponse<String> tuChoiPheDuyet(
+            @PathVariable Long id,
+            @RequestParam String lyDoTuChoi
+    ) {
+        phieuThuHoiTaiSanService.tuChoiPheDuyet(id, lyDoTuChoi);
+        return ApiResponse.success("Từ chối phê duyệt phiếu thu hồi thành công");
+    }
 }

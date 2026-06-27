@@ -39,4 +39,13 @@ public class EmailService {
                 + "Trân trọng,\nBan quản trị hệ thống.");
         mailSender.send(message);
     }
+
+    public void guiEmailDonGian(String toEmail, String tieuDe, String noiDung) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject(tieuDe);
+        message.setText(noiDung);
+        mailSender.send(message);
+    }
 }

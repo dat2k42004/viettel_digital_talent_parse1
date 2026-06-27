@@ -43,7 +43,7 @@ public class LapRapLinhKienController {
      @ResponseStatus(HttpStatus.CREATED)
      @PreAuthorize("hasAuthority('THEM_LAP_RAP_LINH_KIEN')")
      @ApiResponses(value = {
-               @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "21", description = "Thao tác liên kết thành công", content = @Content(schema = @Schema(implementation = LapRapLinhKienResponse.class))),
+               @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Thao tác liên kết thành công", content = @Content(schema = @Schema(implementation = LapRapLinhKienResponse.class))),
                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Linh kiện không ở trạng thái sẵn sàng TRONG_KHO")
      })
      public ApiResponse<LapRapLinhKienResponse> themMoi(@Valid @RequestBody LapRapLinhKienRequest request) {

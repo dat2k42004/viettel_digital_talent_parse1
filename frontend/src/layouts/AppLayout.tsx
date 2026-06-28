@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Button, Dropdown, Avatar, Space,
   Typography, Breadcrumb, theme, Badge, Modal, Form, Input, Descriptions, message, Tag, ConfigProvider, Tooltip
@@ -13,7 +13,7 @@ import {
   ToolOutlined, ScanOutlined, BarChartOutlined, SettingOutlined,
   KeyOutlined, SolutionOutlined, SunOutlined, MoonOutlined
 } from '@ant-design/icons';
-import { authStore, VAI_TRO_DEMO, QUYEN } from '../stores/AuthStore';
+import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 
 const { Header, Sider, Content } = Layout;
@@ -27,6 +27,8 @@ export const AppLayout: React.FC = observer(() => {
 
   // Trạng thái giao diện tối (Dark Mode)
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+
 
   // Trạng thái hiển thị Modals
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -135,17 +137,7 @@ export const AppLayout: React.FC = observer(() => {
       : null,
   ].filter(Boolean) as MenuProps['items'];
 
-  // Role Selector Dropdown options (Tiếng Việt)
-  const vaiTroItems: MenuProps['items'] = Object.keys(VAI_TRO_DEMO).map(
-    (ten) => ({
-      key: ten,
-      label: ten,
-      onClick: () => {
-        authStore.doiVaiTro(ten);
-        message.success(`Đã chuyển đổi sang vai trò mô phỏng: ${ten}`);
-      },
-    }),
-  );
+
 
   // Avatar Dropdown Menu (Tiếng Việt)
   const avatarMenuItems: MenuProps['items'] = [
@@ -276,17 +268,7 @@ export const AppLayout: React.FC = observer(() => {
                 />
               </Tooltip>
 
-              {/* Bộ chuyển đổi vai trò mô phỏng (Tiếng Việt) */}
-              <Dropdown menu={{ items: vaiTroItems }} trigger={['click']}>
-                <Button
-                  size="small"
-                  type="dashed"
-                  icon={<SwapOutlined />}
-                  danger
-                >
-                  Vai trò: {authStore.danhSachQuyenHan.join(' | ') || 'Không có quyền'}
-                </Button>
-              </Dropdown>
+
 
               <Dropdown menu={{ items: avatarMenuItems }} trigger={['click']}>
                 <Space style={{ cursor: 'pointer' }}>

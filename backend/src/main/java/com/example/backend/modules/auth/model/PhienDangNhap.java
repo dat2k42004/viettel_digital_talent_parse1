@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "phien_dang_nhap", indexes = {
-        @Index(name = "idx_phien_token_truy_cap", columnList = "token_truy_cap, thoi_gian_xoa"),
-        @Index(name = "idx_phien_token_lam_moi", columnList = "token_lam_moi, thoi_gian_xoa"),
+        @Index(name = "idx_phien_token_truy_cap", columnList = "token_truy_cap(255), thoi_gian_xoa"),
+        @Index(name = "idx_phien_token_lam_moi", columnList = "token_lam_moi(255), thoi_gian_xoa"),
         @Index(name = "idx_phien_nguoi_dung", columnList = "id_nguoi_dung, thoi_gian_xoa")
 })
 public class PhienDangNhap extends BaseEntity {
@@ -24,10 +24,10 @@ public class PhienDangNhap extends BaseEntity {
     @Column(name = "id_don_vi")
     private Long idDonVi;
 
-    @Column(name = "token_truy_cap", length = 512)
+    @Column(name = "token_truy_cap", length = 2048)
     private String tokenTruyCap;
 
-    @Column(name = "token_lam_moi", length = 512)
+    @Column(name = "token_lam_moi", length = 2048)
     private String tokenLamMoi;
 
     @Column(name = "dia_chi_ip", length = 45)
@@ -39,7 +39,7 @@ public class PhienDangNhap extends BaseEntity {
     @Column(name = "he_dieu_hanh", length = 50)
     private String heDieuHanh;
 
-    @Column(name = "trinh_duyet", length = 50)
+    @Column(name = "trinh_duyet", length = 255)
     private String trinhDuyet;
 
     @Column(name = "thong_tin_thiet_bi", columnDefinition = "TEXT")

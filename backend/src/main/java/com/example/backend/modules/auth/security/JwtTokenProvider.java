@@ -35,15 +35,10 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtAccessExpiration);
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("userId", userDetails.getNguoiDung().getId())
                 .claim("tenantId", userDetails.getIdDonVi())
-                .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())

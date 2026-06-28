@@ -327,6 +327,19 @@ public class XacThucServiceImpl implements XacThucService {
                         .build())
                 .collect(Collectors.toList());
 
+        List<com.example.backend.modules.auth.dto.QuyenResponse> danhSachQuyen = nguoiDungQuyenRepository
+                .findByNguoiDungId(nguoiDung.getId()).stream()
+                .map(nq -> com.example.backend.modules.auth.dto.QuyenResponse.builder()
+                        .id(nq.getQuyen().getId())
+                        .maQuyen(nq.getQuyen().getMaQuyen())
+                        .tenQuyen(nq.getQuyen().getTenQuyen())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<String> danhSachQuyenPhanGiai = quyenRepository.findAllByNguoiDungId(nguoiDung.getId()).stream()
+                .map(com.example.backend.modules.auth.model.Quyen::getMaQuyen)
+                .collect(Collectors.toList());
+
         String tenPhongBan = null;
         if (nguoiDung.getIdPhongBan() != null) {
             tenPhongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdPhongBan())
@@ -349,6 +362,8 @@ public class XacThucServiceImpl implements XacThucService {
                 .danhDaiDienUrl(nguoiDung.getDanhDaiDienUrl())
                 .trangThai(nguoiDung.getTrangThai() != null ? nguoiDung.getTrangThai().getValue() : null)
                 .danhSachVaiTro(danhSachVaiTro)
+                .danhSachQuyen(danhSachQuyen)
+                .danhSachQuyenPhanGiai(danhSachQuyenPhanGiai)
                 .build();
     }
 

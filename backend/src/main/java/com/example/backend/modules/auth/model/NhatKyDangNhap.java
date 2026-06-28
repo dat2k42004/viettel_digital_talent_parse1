@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "nhat_ky_dang_nhap", indexes = {
-    @Index(name = "idx_nk_dang_nhap_nguoi_dung", columnList = "id_nguoi_dung"),
-    @Index(name = "idx_nk_dang_nhap_don_vi", columnList = "id_don_vi")
+        @Index(name = "idx_nk_dang_nhap_nguoi_dung", columnList = "id_nguoi_dung"),
+        @Index(name = "idx_nk_dang_nhap_don_vi", columnList = "id_don_vi")
 })
 public class NhatKyDangNhap extends BaseEntity {
 
@@ -36,7 +36,7 @@ public class NhatKyDangNhap extends BaseEntity {
     @Column(name = "he_dieu_hanh", length = 50)
     private String heDieuHanh;
 
-    @Column(name = "trinh_duyet", length = 50)
+    @Column(name = "trinh_duyet", length = 255)
     private String trinhDuyet;
 
     @Column(name = "thong_tin_thiet_bi", columnDefinition = "TEXT")

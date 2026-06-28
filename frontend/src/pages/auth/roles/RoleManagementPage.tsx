@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message } from 'antd';
-import { PlusOutlined, EditOutlined, SafetyOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Modal, Descriptions, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, SafetyOutlined, SearchOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { observer } from 'mobx-react-lite';
 import { QuyenHanGuard } from '../../../components/protected/QuyenHanGuard';
-import { layDanhSach1, themMoi1, capNhat1, capNhatQuyen } from '../../../api-generated/endpoints/vai-tro-controller/vai-tro-controller';
+import { layDanhSach1, themMoi1, capNhat1, capNhatQuyen, layTheoId1, xoaMem1 } from '../../../api-generated/endpoints/vai-tro-controller/vai-tro-controller';
 import { layDanhSachQuyenPhanNhom } from '../../../api-generated/endpoints/quyen-controller/quyen-controller';
 import type { VaiTroResponse } from '../../../api-generated/models/vaiTroResponse';
 import type { QuyenResponse } from '../../../api-generated/models/quyenResponse';
@@ -28,7 +28,31 @@ export const RoleManagementPage: React.FC = observer(() => {
   // Trạng thái các Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<VaiTroResponse | null>(null);
+  const [detailRole, setDetailRole] = useState<VaiTroResponse | null>(null);
+
+  const handleOpenDetail = async (id: number) => {
+    try {
+      const res = await layTheoId1(id);
+      if (res.data) {
+        setDetailRole(res.data);
+        setIsDetailModalOpen(true);
+      }
+    } catch (e: any) {
+      message.error(e?.message || 'Không thể tải thông tin chi tiết vai trò!');
+    }
+  };
+
+  const handleXoaVaiTro = async (id: number) => {
+    try {
+      await xoaMem1(id);
+      message.success('Xóa vai trò thành công!');
+      taiDuLieu(currentPage, pageSize, searchText);
+    } catch (e: any) {
+      message.error(e?.message || 'Không thể xóa vai trò!');
+    }
+  };
 
   // Tải dữ liệu ban đầu
   useEffect(() => {
@@ -138,6 +162,10 @@ export const RoleManagementPage: React.FC = observer(() => {
       key: 'hanhDong',
       render: (_: any, record: VaiTroResponse) => (
         <Space>
+          <Tooltip title="Xem chi tiết vai trò">
+            <Button size="small" icon={<EyeOutlined />} onClick={() => record.id && handleOpenDetail(record.id)} />
+          </Tooltip>
+
           <QuyenHanGuard quyenYeuCau="SUA_VAI_TRO">
             <Tooltip title="Chỉnh sửa vai trò">
               <Button size="small" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)} />
@@ -150,6 +178,21 @@ export const RoleManagementPage: React.FC = observer(() => {
                 Phân quyền
               </Button>
             </Tooltip>
+          </QuyenHanGuard>
+
+          <QuyenHanGuard quyenYeuCau="XOA_VAI_TRO">
+            <Popconfirm
+              title="Xác nhận xóa vai trò?"
+              description="Bạn có chắc chắn muốn xóa vai trò này không?"
+              onConfirm={() => record.id && handleXoaVaiTro(record.id)}
+              okText="Xác nhận"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Tooltip title="Xóa vai trò">
+                <Button size="small" danger icon={<DeleteOutlined />} />
+              </Tooltip>
+            </Popconfirm>
           </QuyenHanGuard>
         </Space>
       ),
@@ -216,6 +259,42 @@ export const RoleManagementPage: React.FC = observer(() => {
         maTranQuyen={maTranQuyen}
         onSave={handleSaveMatrixQuyen}
       />
+
+      <Modal
+        title="Chi tiết vai trò chức năng"
+        open={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setIsDetailModalOpen(false)}>
+            Đóng
+          </Button>
+        ]}
+        width={650}
+      >
+        {detailRole && (
+          <Descriptions bordered column={1} size="small" style={{ marginTop: 16 }}>
+            <Descriptions.Item label="Mã định danh vai trò">
+              <Tag color="purple">{detailRole.maVaiTro}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tên vai trò hiển thị">
+              <strong>{detailRole.tenVaiTro}</strong>
+            </Descriptions.Item>
+            <Descriptions.Item label="Mô tả">
+              {detailRole.moTa || 'Không có mô tả'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Đơn vị gán">
+              <Tag color="orange">Đơn vị {detailRole.idDonVi}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Quyền hạn của vai trò">
+              <Space wrap>
+                {detailRole.danhSachQuyen?.map(q => (
+                  <Tag color="cyan" key={q.id}>{q.tenQuyen} ({q.maQuyen})</Tag>
+                )) || <Text type="secondary">Chưa cấu hình quyền</Text>}
+              </Space>
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
     </div>
   );
 });

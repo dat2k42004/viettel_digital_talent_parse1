@@ -85,6 +85,16 @@ Với các API lấy danh sách có phân trang, phần `data` sẽ có cấu tr
             "maVaiTro": "USER",
             "tenVaiTro": "Người dùng"
           }
+        ],
+        "danhSachQuyen": [
+          {
+            "id": 1,
+            "maQuyen": "XEM_NGUOI_DUNG",
+            "tenQuyen": "Xem người dùng"
+          }
+        ],
+        "danhSachQuyenPhanGiai": [
+          "XEM_NGUOI_DUNG"
         ]
       }
     }
@@ -2579,6 +2589,411 @@ Hệ thống cho phép thực hiện việc lắp ráp linh kiện lẻ vào m�
   }
   ```
 
+### 14.18. Phiếu điều chuyển tài sản (PhieuDieuChuyenTaiSan)
+
+#### 14.18.1. Lấy danh sách Phiếu điều chuyển tài sản phân trang
+* **Endpoint**: `GET /api/phieu-dieu-chuyen`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_DIEU_CHUYEN`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `HOAN_THANH`, `TU_CHOI`).
+  * `idNguoiChuyen` (tùy chọn): ID nhân viên bàn giao.
+  * `idNguoiNhan` (tùy chọn): ID nhân viên tiếp nhận.
+  * `tuNgay` (tùy chọn): Bắt đầu khoảng thời gian bàn giao (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Kết thúc khoảng thời gian bàn giao (`YYYY-MM-DD`).
+  * `page` (mặc định 0): Trang hiện tại.
+  * `size` (mặc định 10): Số phần tử trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maPhieuDieuChuyen": "DC-2026-0001",
+          "idNguoiChuyen": 2,
+          "tenNguoiChuyen": "Nguyễn Văn B",
+          "idPhongBanChuyen": 1,
+          "tenPhongBanChuyen": "Phòng Công nghệ thông tin",
+          "idNguoiNhan": 3,
+          "tenNguoiNhan": "Nguyễn Văn C",
+          "idPhongBanNhan": 2,
+          "tenPhongBanNhan": "Phòng Kỹ thuật",
+          "tenNguoiLap": "Nguyễn Văn B",
+          "tenNguoiPheDuyet": "Nguyễn Văn A",
+          "lyDoDieuChuyen": "Điều động thiết bị phục vụ dự án mới",
+          "thoiGianBanGiao": "2026-06-21T09:00:00",
+          "trangThai": "TAO_MOI",
+          "thoiGianTao": "2026-06-21T08:30:00",
+          "thoiGianCapNhat": "2026-06-21T08:30:00",
+          "chiTietTaiSan": []
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 14.18.2. Lấy chi tiết Phiếu điều chuyển tài sản theo ID
+* **Endpoint**: `GET /api/phieu-dieu-chuyen/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_DIEU_CHUYEN`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maPhieuDieuChuyen": "DC-2026-0001",
+      "idNguoiChuyen": 2,
+      "tenNguoiChuyen": "Nguyễn Văn B",
+      "idPhongBanChuyen": 1,
+      "tenPhongBanChuyen": "Phòng Công nghệ thông tin",
+      "idNguoiNhan": 3,
+      "tenNguoiNhan": "Nguyễn Văn C",
+      "idPhongBanNhan": 2,
+      "tenPhongBanNhan": "Phòng Kỹ thuật",
+      "tenNguoiLap": "Nguyễn Văn B",
+      "tenNguoiPheDuyet": "Nguyễn Văn A",
+      "lyDoDieuChuyen": "Điều động thiết bị phục vụ dự án mới",
+      "thoiGianBanGiao": "2026-06-21T09:00:00",
+      "trangThai": "TAO_MOI",
+      "thoiGianTao": "2026-06-21T08:30:00",
+      "thoiGianCapNhat": "2026-06-21T08:30:00",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idTaiSan": 5,
+          "chiTietCapPhatId": 12,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "trangThaiXuat": "Bình thường, trầy xước nhẹ",
+          "trangThaiNhan": null,
+          "loai": "PHAN_CUNG",
+          "ghiChu": "Bàn giao kèm sạc zin"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 14.18.3. Thêm mới Phiếu điều chuyển tài sản
+* **Endpoint**: `POST /api/phieu-dieu-chuyen`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_DIEU_CHUYEN`
+* **Payload**:
+  ```json
+  {
+    "idNguoiChuyen": 2,
+    "idPhongBanChuyen": 1,
+    "idNguoiNhan": 3,
+    "idPhongBanNhan": 2,
+    "lyDoDieuChuyen": "Điều động thiết bị phục vụ dự án mới",
+    "danhSachPhanCung": [
+      {
+        "chiTietCapPhatPhanCungId": 12,
+        "trangThaiXuat": "Bình thường, trầy xước nhẹ",
+        "ghiChu": "Bàn giao kèm sạc zin"
+      }
+    ],
+    "danhSachLinhKien": []
+  }
+  ```
+* **Response**: Trả về thông tin phiếu điều chuyển vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 14.18.4. Cập nhật Phiếu điều chuyển tài sản
+* **Endpoint**: `PUT /api/phieu-dieu-chuyen/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_PHIEU_DIEU_CHUYEN`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 14.18.5. Xóa mềm Phiếu điều chuyển tài sản
+* **Endpoint**: `DELETE /api/phieu-dieu-chuyen/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_DIEU_CHUYEN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm hoặc hủy bỏ phiếu điều chuyển tài sản thành công"
+  }
+  ```
+
+#### 14.18.6. Gửi yêu cầu phê duyệt Phiếu điều chuyển tài sản
+* **Endpoint**: `PUT /api/phieu-dieu-chuyen/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `YEU_CAU_PHE_DUYET_DIEU_CHUYEN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt thành công"
+  }
+  ```
+
+#### 14.18.7. Phê duyệt Phiếu điều chuyển tài sản
+* **Endpoint**: `PUT /api/phieu-dieu-chuyen/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_DIEU_CHUYEN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt phiếu điều chuyển thành công"
+  }
+  ```
+
+#### 14.18.8. Từ chối phê duyệt Phiếu điều chuyển tài sản
+* **Endpoint**: `PUT /api/phieu-dieu-chuyen/{id}/tu-choi`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Query Parameters**:
+  * `lyDoTuChoi` (bắt buộc): Lý do không phê duyệt phiếu điều chuyển.
+* **Quyền (Permission)**: `THAO_TAC_TAI_SAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Từ chối phê duyệt phiếu điều chuyển thành công"
+  }
+  ```
+
+#### 14.18.9. Hoàn thành Phiếu điều chuyển tài sản
+* **Endpoint**: `PUT /api/phieu-dieu-chuyen/{id}/hoan-thanh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `HOAN_THANH_DIEU_CHUYEN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xác nhận hoàn thành chu kỳ điều chuyển tài sản thành công"
+  }
+  ```
+
+---
+
+### 14.19. Phiếu thanh lý tài sản (PhieuThanhLyTaiSan)
+
+#### 14.19.1. Lấy danh sách Phiếu thanh lý tài sản phân trang
+* **Endpoint**: `GET /api/phieu-thanh-ly`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_THANH_LY`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `HOAN_THANH`, `TU_CHOI`).
+  * `tuNgay` (tùy chọn): Từ ngày thanh lý (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày thanh lý (`YYYY-MM-DD`).
+  * `page` (mặc định 0): Trang hiện tại.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maPhieuThanhLy": "TL-2026-0001",
+          "tenNguoiLap": "Nguyễn Văn B",
+          "tenNguoiPheDuyet": "Nguyễn Văn A",
+          "hinhThucThanhLy": "BAN_PHE_LIEU",
+          "tongTienThuHoi": 500000.00,
+          "thoiGianThanhLy": "2026-06-22T10:00:00",
+          "trangThaiLucGiao": "Hỏng màn hình, cũ nát",
+          "lyDoThanhLy": "Hết khấu hao và không thể sửa chữa",
+          "trangThai": "TAO_MOI",
+          "thoiGianTao": "2026-06-22T09:30:00",
+          "thoiGianCapNhat": "2026-06-22T09:30:00",
+          "chiTietTaiSan": []
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 14.19.2. Lấy chi tiết Phiếu thanh lý tài sản theo ID
+* **Endpoint**: `GET /api/phieu-thanh-ly/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_PHIEU_THANH_LY`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maPhieuThanhLy": "TL-2026-0001",
+      "tenNguoiLap": "Nguyễn Văn B",
+      "tenNguoiPheDuyet": "Nguyễn Văn A",
+      "hinhThucThanhLy": "BAN_PHE_LIEU",
+      "tongTienThuHoi": 500000.00,
+      "thoiGianThanhLy": "2026-06-22T10:00:00",
+      "trangThaiLucGiao": "Hỏng màn hình, cũ nát",
+      "lyDoThanhLy": "Hết khấu hao và không thể sửa chữa",
+      "trangThai": "TAO_MOI",
+      "thoiGianTao": "2026-06-22T09:30:00",
+      "thoiGianCapNhat": "2026-06-22T09:30:00",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idTaiSan": 5,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "tienThuHoi": 500000.00,
+          "lýDoChiTiet": "Hỏng bo mạch chính",
+          "loai": "PHAN_CUNG",
+          "ghiChu": "Đã tháo ổ cứng bảo mật thông tin"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 14.19.3. Thêm mới Phiếu thanh lý tài sản
+* **Endpoint**: `POST /api/phieu-thanh-ly`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_PHIEU_THANH_LY`
+* **Payload**:
+  ```json
+  {
+    "hinhThucThanhLy": "BAN_PHE_LIEU",
+    "tongTienThuHoi": 500000.00,
+    "trangThaiLucGiao": "Hỏng màn hình, cũ nát",
+    "lyDoThanhLy": "Hết khấu hao và không thể sửa chữa",
+    "danhSachPhanCung": [
+      {
+        "idThietBiPhanCung": 5,
+        "tienThuHoi": 500000.00,
+        "ghiChu": "Đã tháo ổ cứng bảo mật thông tin"
+      }
+    ],
+    "danhSachPhanMem": [],
+    "danhSachLinhKien": []
+  }
+  ```
+* **Response**: Trả về thông tin phiếu thanh lý vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 14.19.4. Cập nhật Phiếu thanh lý tài sản
+* **Endpoint**: `PUT /api/phieu-thanh-ly/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `SUA_PHIEU_THANH_LY`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 14.19.5. Xóa mềm Phiếu thanh lý tài sản
+* **Endpoint**: `DELETE /api/phieu-thanh-ly/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_THANH_LY`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm phiếu thanh lý thành công"
+  }
+  ```
+
+#### 14.19.6. Gửi yêu cầu phê duyệt Phiếu thanh lý tài sản
+* **Endpoint**: `PUT /api/phieu-thanh-ly/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `YEU_CAU_PHE_DUYET_THANH_LY`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt thành công"
+  }
+  ```
+
+#### 14.19.7. Phê duyệt Phiếu thanh lý tài sản
+* **Endpoint**: `PUT /api/phieu-thanh-ly/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_THANH_LY`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt phiếu thanh lý thành công"
+  }
+  ```
+
+#### 14.19.8. Từ chối phê duyệt Phiếu thanh lý tài sản
+* **Endpoint**: `PUT /api/phieu-thanh-ly/{id}/tu-choi`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Query Parameters**:
+  * `lyDoTuChoi` (bắt buộc): Lý do không phê duyệt phiếu thanh lý.
+* **Quyền (Permission)**: `THAO_TAC_TAI_SAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Từ chối phê duyệt phiếu thanh lý thành công"
+  }
+  ```
+
+#### 14.19.9. Hoàn thành Phiếu thanh lý tài sản
+* **Endpoint**: `PUT /api/phieu-thanh-ly/{id}/hoan-thanh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `HOAN_THANH_THANH_LY`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Hoàn thành thanh lý thành công"
+  }
+  ```
+
 ---
 
 ## 15. Phân hệ Quản lý Mua sắm (Procurement Module)
@@ -3048,3 +3463,1119 @@ Hệ thống cho phép thực hiện việc lắp ráp linh kiện lẻ vào m�
   }
   ```
 * **Nghiệp vụ ngầm**: Khi phiếu nhập tài sản chuyển sang trạng thái `HOAN_THANH` (nhập kho xong), hệ thống sẽ tự động cập nhật đơn hàng mua sắm liên quan (`DonHangMuaSam`) tương ứng thành trạng thái `HOAN_THANH`.
+
+---
+
+## 16. Phân hệ Sửa chữa & Bảo trì (Maintenance Module)
+
+### 16.1. Kế hoạch bảo trì định kỳ (KeHoachBaoTriDinhKy)
+
+#### 16.1.1. Lấy danh sách Kế hoạch bảo trì định kỳ phân trang
+* **Endpoint**: `GET /api/ke-hoach-bao-tri`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_SACH_KHBTDK`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`).
+  * `tuNgay` (tùy chọn): Từ ngày bắt đầu kế hoạch (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày bắt đầu kế hoạch (`YYYY-MM-DD`).
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maKeHoach": "KHBT-2026-0001",
+          "tenKeHoach": "Bảo trì định kỳ hệ thống máy chủ Q2/2026",
+          "tenNguoiLap": "Nguyễn Văn B",
+          "tenNguoiPheDuyet": "Nguyễn Văn A",
+          "chuKyLap": "HANG_QUY",
+          "thoiGianBatDauKeHoach": "2026-07-01",
+          "thoiGianKetThucKeHoach": "2026-07-15",
+          "thoiGianLanCuoi": null,
+          "thoiGianLanTiep": null,
+          "chiPhiDuKien": 15000000.00,
+          "trangThai": "TAO_MOI",
+          "noiDungBaoTri": "Vệ sinh, tra keo tản nhiệt và nâng cấp RAM máy chủ",
+          "thoiGianTao": "2026-06-25T10:00:00",
+          "thoiGianCapNhat": "2026-06-25T10:00:00",
+          "chiTietPhanVi": []
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 16.1.2. Lấy chi tiết Kế hoạch bảo trì định kỳ theo ID
+* **Endpoint**: `GET /api/ke-hoach-bao-tri/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_CHI_TIET_KHBTDK`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maKeHoach": "KHBT-2026-0001",
+      "tenKeHoach": "Bảo trì định kỳ hệ thống máy chủ Q2/2026",
+      "tenNguoiLap": "Nguyễn Văn B",
+      "tenNguoiPheDuyet": "Nguyễn Văn A",
+      "chuKyLap": "HANG_QUY",
+      "thoiGianBatDauKeHoach": "2026-07-01",
+      "thoiGianKetThucKeHoach": "2026-07-15",
+      "thoiGianLanCuoi": null,
+      "thoiGianLanTiep": null,
+      "chiPhiDuKien": 15000000.00,
+      "trangThai": "TAO_MOI",
+      "noiDungBaoTri": "Vệ sinh, tra keo tản nhiệt và nâng cấp RAM máy chủ",
+      "thoiGianTao": "2026-06-25T10:00:00",
+      "thoiGianCapNhat": "2026-06-25T10:00:00",
+      "chiTietPhanVi": [
+        {
+          "id": 1,
+          "idTaiSanPhanCung": 5,
+          "maMauTaiSan": "MTSC-DELL-5420",
+          "tenMauTaiSan": "Laptop Dell Latitude 5420"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 16.1.3. Thêm mới Kế hoạch bảo trì định kỳ
+* **Endpoint**: `POST /api/ke-hoach-bao-tri`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_MOI_KHBTDK`
+* **Payload**:
+  ```json
+  {
+    "tenKeHoach": "Bảo trì định kỳ hệ thống máy chủ Q2/2026",
+    "chuKyLap": "HANG_QUY",
+    "thoiGianBatDauKeHoach": "2026-07-01",
+    "thoiGianKetThucKeHoach": "2026-07-15",
+    "chiPhiDuKien": 15000000.00,
+    "noiDungBaoTri": "Vệ sinh, tra keo tản nhiệt và nâng cấp RAM máy chủ",
+    "danhSachChiTiet": [
+      {
+        "idTaiSanPhanCung": 5
+      }
+    ]
+  }
+  ```
+* **Response**: Trả về thông tin kế hoạch bảo trì định kỳ vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 16.1.4. Cập nhật Kế hoạch bảo trì định kỳ
+* **Endpoint**: `PUT /api/ke-hoach-bao-tri/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_KHBTDK`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 16.1.5. Xóa mềm Kế hoạch bảo trì định kỳ
+* **Endpoint**: `DELETE /api/ke-hoach-bao-tri/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_KHBTDK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm kế hoạch bảo trì định kỳ hệ thống thành công"
+  }
+  ```
+
+#### 16.1.6. Gửi yêu cầu phê duyệt Kế hoạch bảo trì định kỳ
+* **Endpoint**: `PUT /api/ke-hoach-bao-tri/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `GUI_PHE_DUYET_KHBTDK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt kế hoạch bảo trì định kỳ thành công"
+  }
+  ```
+
+#### 16.1.7. Phê duyệt Kế hoạch bảo trì định kỳ
+* **Endpoint**: `PUT /api/ke-hoach-bao-tri/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_KHBTDK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt thông qua kế hoạch bảo trì định kỳ thành công"
+  }
+  ```
+
+---
+
+### 16.2. Phiếu sửa chữa bảo trì (PhieuSuaChuaBaoTri)
+
+#### 16.2.1. Lấy danh sách Phiếu sửa chữa bảo trì phân trang
+* **Endpoint**: `GET /api/phieu-sua-chua-bao-tri`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_SACH_PHIEU_SUA_CHUA_BAO_TRI`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`, `DANG_SUA_CHUA`, `HOAN_THANH`).
+  * `tuNgay` (tùy chọn): Từ ngày lập phiếu (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày lập phiếu (`YYYY-MM-DD`).
+  * `page` (mặc định 0): Trang hiện tại.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "keHoachBaoTriId": 1,
+          "maPhieuSuaChua": "PSC-2026-0001",
+          "tenNguoiLap": "Nguyễn Văn B",
+          "tenNguoiPheDuyet": "Nguyễn Văn A",
+          "thoiGianLapPhieu": "2026-06-26T08:00:00",
+          "thoiGianBatDau": "2026-07-01T09:00:00",
+          "thoiGianHoanThanhDuKien": "2026-07-10T17:00:00",
+          "thoiGianHoanThanhThucTe": null,
+          "tongChiPhiThucHien": 0.00,
+          "trangThai": "TAO_MOI",
+          "ghiChu": "Phiếu thực thi cho kế hoạch bảo trì Q2",
+          "thoiGianTao": "2026-06-26T08:15:00",
+          "thoiGianCapNhat": "2026-06-26T08:15:00",
+          "chiTietTaiSan": []
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 16.2.2. Lấy chi tiết Phiếu sửa chữa bảo trì theo ID
+* **Endpoint**: `GET /api/phieu-sua-chua-bao-tri/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_CHI_TIET_PHIEU_SUA_CHUA_BAO_TRI`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "keHoachBaoTriId": 1,
+      "maPhieuSuaChua": "PSC-2026-0001",
+      "tenNguoiLap": "Nguyễn Văn B",
+      "tenNguoiPheDuyet": "Nguyễn Văn A",
+      "thoiGianLapPhieu": "2026-06-26T08:00:00",
+      "thoiGianBatDau": "2026-07-01T09:00:00",
+      "thoiGianHoanThanhDuKien": "2026-07-10T17:00:00",
+      "thoiGianHoanThanhThucTe": null,
+      "tongChiPhiThucHien": 0.00,
+      "trangThai": "TAO_MOI",
+      "ghiChu": "Phiếu thực thi cho kế hoạch bảo trì Q2",
+      "thoiGianTao": "2026-06-26T08:15:00",
+      "thoiGianCapNhat": "2026-06-26T08:15:00",
+      "chiTietTaiSan": [
+        {
+          "id": 1,
+          "idTaiSanGoc": 10,
+          "tenMauTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "loaiHinhXuLy": "SUA_CHUA_BAO_TRI",
+          "idNhaCungCap": 1,
+          "tenNhaCungCap": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+          "trangThaiThucHien": "CHUA_XU_LY",
+          "tinhTrangThietBi": "Quạt kêu to, nóng máy",
+          "phuongAnXuLy": null,
+          "idLinhKienThayThe": null,
+          "chiPhi": 500000.00,
+          "loai": "THIET_BI"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 16.2.3. Thêm mới Phiếu sửa chữa bảo trì
+* **Endpoint**: `POST /api/phieu-sua-chua-bao-tri`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_MOI_PHIEU_SUA_CHUA_BAO_TRI`
+* **Payload**:
+  ```json
+  {
+    "keHoachBaoTriId": 1,
+    "thoiGianBatDau": "2026-07-01T09:00:00",
+    "thoiGianHoanThanhDuKien": "2026-07-10T17:00:00",
+    "ghiChu": "Phiếu thực thi cho kế hoạch bảo trì Q2",
+    "danhSachThietBi": [
+      {
+        "idDanhSachThietBiPhanCung": 10,
+        "loaiHinhXuLy": "SUA_CHUA_BAO_TRI",
+        "idNhaCungCap": 1,
+        "tinhTrangThietBi": "Quạt kêu to, nóng máy",
+        "chiPhi": 500000.00
+      }
+    ],
+    "danhSachLinhKien": []
+  }
+  ```
+* **Response**: Trả về thông tin phiếu sửa chữa bảo trì vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 16.2.4. Cập nhật Phiếu sửa chữa bảo trì
+* **Endpoint**: `PUT /api/phieu-sua-chua-bao-tri/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_PHIEU_SUA_CHUA_BAO_TRI`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 16.2.5. Xóa mềm Phiếu sửa chữa bảo trì
+* **Endpoint**: `DELETE /api/phieu-sua-chua-bao-tri/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_SUA_CHUA_BAO_TRI`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm dữ liệu chứng từ phiếu sửa chữa bảo trì thành công"
+  }
+  ```
+
+#### 16.2.6. Gửi yêu cầu phê duyệt Phiếu sửa chữa bảo trì
+* **Endpoint**: `PUT /api/phieu-sua-chua-bao-tri/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `GUI_PHE_DUYET_PHIEU_SUA_CHUA_BAO_TRI`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt quy trình sửa chữa thành công"
+  }
+  ```
+
+#### 16.2.7. Phê duyệt Phiếu sửa chữa bảo trì
+* **Endpoint**: `PUT /api/phieu-sua-chua-bao-tri/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_PHIEU_SUA_CHUA_BAO_TRI`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt thông qua phiếu sửa chữa bảo trì tài sản thành công"
+  }
+  ```
+
+#### 16.2.8. Cập nhật tiến độ thực hiện chi tiết
+* **Endpoint**: `PUT /api/phieu-sua-chua-bao-tri/{id}/cap-nhat-tien-do`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_TIEN_DO_PSCBT`
+* **Payload**:
+  ```json
+  [
+    {
+      "idChiTiet": 1,
+      "loaiChiTiet": "THIET_BI",
+      "trangThaiThucHienMoi": "DA_THU_LAI",
+      "phuongAnXuLy": "Đã làm sạch quạt tản nhiệt và thay keo tản nhiệt mới",
+      "chiPhiThucTe": 450000.00,
+      "idLinhKienThayThe": null
+    }
+  ]
+  ```
+  }
+  ```
+
+---
+
+## 17. Phân hệ Kiểm kê tài sản (Inventory Audit Module)
+
+### 17.1. Đợt kiểm kê tài sản (DotKiemKe)
+
+#### 17.1.1. Lấy danh sách Đợt kiểm kê phân trang
+* **Endpoint**: `GET /api/dot-kiem-ke`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_SACH_DKK`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái đợt kiểm kê (`TAO_MOI`, `GUI_PHE_DUYET`, `DA_PHE_DUYET`).
+  * `tuNgay` (tùy chọn): Từ ngày bắt đầu dự kiến (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày bắt đầu dự kiến (`YYYY-MM-DD`).
+  * `page` (mặc định 0): Số trang.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+  * `sort` (mặc định `id,desc`): Sắp xếp.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "maDotKiemKe": "DKK-2026-0001",
+          "tenDotKiemKe": "Kiểm kê tổng sản năm 2026",
+          "tenNguoiLap": "Nguyễn Văn B",
+          "tenNguoiPheDuyet": "Nguyễn Văn A",
+          "thoiGianBatDauDuKien": "2026-07-01",
+          "thoiGianKetThucDuKien": "2026-07-31",
+          "thoiGianThucHien": null,
+          "thoiGianChotSoLieu": null,
+          "trangThai": "TAO_MOI",
+          "tongTaiSanHeThong": 100,
+          "tongTaiSanThucTe": null,
+          "thoiGianTao": "2026-06-25T11:00:00",
+          "thoiGianCapNhat": "2026-06-25T11:00:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 17.1.2. Lấy chi tiết Đợt kiểm kê theo ID
+* **Endpoint**: `GET /api/dot-kiem-ke/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_CHI_TIET_DKK`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "maDotKiemKe": "DKK-2026-0001",
+      "tenDotKiemKe": "Kiểm kê tổng sản năm 2026",
+      "tenNguoiLap": "Nguyễn Văn B",
+      "tenNguoiPheDuyet": "Nguyễn Văn A",
+      "thoiGianBatDauDuKien": "2026-07-01",
+      "thoiGianKetThucDuKien": "2026-07-31",
+      "thoiGianThucHien": null,
+      "thoiGianChotSoLieu": null,
+      "trangThai": "TAO_MOI",
+      "tongTaiSanHeThong": 100,
+      "tongTaiSanThucTe": null,
+      "thoiGianTao": "2026-06-25T11:00:00",
+      "thoiGianCapNhat": "2026-06-25T11:00:00"
+    }
+  }
+  ```
+
+#### 17.1.3. Thêm mới Đợt kiểm kê
+* **Endpoint**: `POST /api/dot-kiem-ke`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_MOI_DKK`
+* **Payload**:
+  ```json
+  {
+    "tenDotKiemKe": "Kiểm kê tổng sản năm 2026",
+    "thoiGianBatDauDuKien": "2026-07-01",
+    "thoiGianKetThucDuKien": "2026-07-31"
+  }
+  ```
+* **Response**: Trả về thông tin đợt kiểm kê vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI`.
+
+#### 17.1.4. Cập nhật Đợt kiểm kê
+* **Endpoint**: `PUT /api/dot-kiem-ke/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_DKK`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 17.1.5. Xóa mềm Đợt kiểm kê
+* **Endpoint**: `DELETE /api/dot-kiem-ke/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_DKK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm chiến dịch đợt kiểm kê tài sản thành công"
+  }
+  ```
+
+#### 17.1.6. Gửi yêu cầu phê duyệt Đợt kiểm kê
+* **Endpoint**: `PUT /api/dot-kiem-ke/{id}/yeu-cau-phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `GUI_PHE_DUYET_DKK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Gửi yêu cầu phê duyệt đợt kiểm kê tài sản thành công"
+  }
+  ```
+
+#### 17.1.7. Phê duyệt Đợt kiểm kê
+* **Endpoint**: `PUT /api/dot-kiem-ke/{id}/phe-duyet`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `PHE_DUYET_DKK`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt thông qua đợt kiểm kê tài sản thành công"
+  }
+  ```
+
+---
+
+### 17.2. Phiếu kiểm kê phòng ban (PhieuKiemKe)
+
+#### 17.2.1. Lấy danh sách Phiếu kiểm kê phân trang
+* **Endpoint**: `GET /api/phieu-kiem-ke`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_SACH_PHIEU_KIEM_KE`
+* **Query Parameters**:
+  * `trangThai` (tùy chọn): Lọc theo trạng thái phiếu (`TAO_MOI`, `DANG_KIEM_KE`, `CHO_NGHIEM_THU`, `HOAN_THANH`).
+  * `idPhongBan` (tùy chọn): ID phòng ban thực hiện kiểm kê.
+  * `tuNgay` (tùy chọn): Bắt đầu từ ngày kiểm kê (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày kiểm kê (`YYYY-MM-DD`).
+  * `page`, `size`, `sort`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "dotKiemKeId": 1,
+          "maDotKiemKe": "DKK-2026-0001",
+          "tenDotKiemKe": "Kiểm kê tổng sản năm 2026",
+          "maPhieuKiemKe": "PKK-2026-CNTT",
+          "idPhongBanKiemKe": 1,
+          "tenPhongBan": "Phòng Công nghệ thông tin",
+          "tenNhanVienKiemKe": "Nguyễn Văn B",
+          "trangThai": "TAO_MOI",
+          "thoiGianThucHien": null,
+          "thoiGianTao": "2026-06-26T10:00:00",
+          "danhSachChiTiet": []
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 17.2.2. Lấy chi tiết Phiếu kiểm kê theo ID
+* **Endpoint**: `GET /api/phieu-kiem-ke/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_CHI_TIET_PHIEU_KIEM_KE`
+* **Status Code**: `200 OK`, `404 Not Found`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "id": 1,
+      "idDonVi": 1,
+      "dotKiemKeId": 1,
+      "maDotKiemKe": "DKK-2026-0001",
+      "tenDotKiemKe": "Kiểm kê tổng sản năm 2026",
+      "maPhieuKiemKe": "PKK-2026-CNTT",
+      "idPhongBanKiemKe": 1,
+      "tenPhongBan": "Phòng Công nghệ thông tin",
+      "tenNhanVienKiemKe": "Nguyễn Văn B",
+      "trangThai": "TAO_MOI",
+      "thoiGianThucHien": null,
+      "thoiGianTao": "2026-06-26T10:00:00",
+      "danhSachChiTiet": [
+        {
+          "id": 1,
+          "idTaiSanGoc": 10,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "daKiemKeThucTe": false,
+          "tinhTrangHoacBanQuyen": "Mới 95%",
+          "viTriHoacThietBiCaiDat": "Phòng CNTT - Tầng 2",
+          "ketLuan": null,
+          "ghiChu": null,
+          "loaiTaiSan": "THIET_BI"
+        }
+      ]
+    }
+  }
+  ```
+
+#### 17.2.3. Thêm mới Phiếu kiểm kê
+* **Endpoint**: `POST /api/phieu-kiem-ke`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_MOI_PHIEU_KIEM_KE`
+* **Payload**:
+  ```json
+  {
+    "dotKiemKeId": 1,
+    "idPhongBanKiemKe": 1,
+    "idKhoKiemKe": null
+  }
+  ```
+* **Response**: Trả về thông tin phiếu kiểm kê phòng ban vừa tạo ở trạng thái mặc định ban đầu là `TAO_MOI` kèm danh sách chi tiết tự động nạp từ hệ thống.
+
+#### 17.2.4. Cập nhật Phiếu kiểm kê
+* **Endpoint**: `PUT /api/phieu-kiem-ke/{id}`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `CAP_NHAT_PHIEU_KIEM_KE`
+* **Payload**: Giống cấu trúc Thêm mới.
+* **Response**: Trả về thông tin chi tiết sau khi cập nhật.
+
+#### 17.2.5. Xóa mềm Phiếu kiểm kê
+* **Endpoint**: `DELETE /api/phieu-kiem-ke/{id}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XOA_PHIEU_KIEM_KE`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Xóa mềm phiếu kiểm kê phòng ban thành công"
+  }
+  ```
+
+#### 17.2.6. Thực hiện ghi nhận đối soát kiểm kê hiện trường
+* **Endpoint**: `PUT /api/phieu-kiem-ke/{id}/thuc-hien-kiem-ke`
+* **Headers**:
+  * `Content-Type`: `application/json`
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THUC_HIEN_KIEM_KE_TAI_SAN`
+* **Payload**:
+  ```json
+  {
+    "isSubmit": true,
+    "danhSachThietBi": [
+      {
+        "idChiTiet": 1,
+        "tinhTrangThucTe": "Mới 90%, trầy xước vỏ nhẹ",
+        "ketLuan": "KHOP",
+        "ghiChu": "Không phát hiện lỗi phần cứng",
+        "idNhanVienSuDungThucTe": 2
+      }
+    ],
+    "danhSachLinhKien": [],
+    "danhSachPhanMem": []
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Ghi nhận số liệu đối soát hiện trường thành công"
+  }
+  ```
+
+#### 17.2.7. Theo dõi tiến độ kiểm kê của các phòng ban trong đợt
+* **Endpoint**: `GET /api/phieu-kiem-ke/tien-do/{dotKiemKeId}`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_TIEN_DO_KIEM_KE_DON_VI`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": [
+      {
+        "idPhieuKiemKe": 1,
+        "idPhongBan": 1,
+        "tenPhongBan": "Phòng Công nghệ thông tin",
+        "trangThaiPhieu": "DANG_KIEM_KE",
+        "soLuongDaKiem": 5,
+        "tongSoLuongTaiSan": 15
+      }
+    ]
+  }
+  ```
+
+#### 17.2.8. Phê duyệt xác nhận nghiệm thu kết quả kiểm kê phòng ban
+* **Endpoint**: `PUT /api/phieu-kiem-ke/{id}/xac-nhan-hoan-thanh`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XAC_NHAN_KET_QUA_KIEM_KE_PHONG_BAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Phê duyệt xác nhận nghiệm thu kết quả kiểm kê phòng ban thành công"
+  }
+  ```
+
+#### 17.2.9. API bổ trợ: Lấy danh sách tài sản hiện tại thuộc phòng ban
+* **Endpoint**: `GET /api/phieu-kiem-ke/bo-tro/taisantheophong`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_DANH_SACH_PHIEU_KIEM_KE`
+* **Query Parameters**:
+  * `idPhongBan` (bắt buộc): ID phòng ban cần kết xuất danh sách tài sản đang sở hữu.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "idPhongBan": 1,
+      "danhSachPhanCung": [
+        {
+          "idTaiSanGoc": 10,
+          "tenTaiSan": "Laptop Dell Latitude 5420",
+          "soSerial": "DELL5420-SN123",
+          "maTheTaiSan": "TS-PC-0001",
+          "viTriHienTai": "Phòng CNTT - Tầng 2",
+          "tenNguoiDangSoHuu": "Nguyễn Văn B",
+          "loaiTaiSan": "PHAN_CUNG"
+        }
+      ],
+      "danhSachLinhKien": [],
+      "danhSachPhanMem": []
+    }
+  }
+  ```
+
+#### 17.2.10. API bổ trợ: Lấy danh sách các đợt kiểm kê đang kích hoạt
+* **Endpoint**: `GET /api/phieu-kiem-ke/bo-tro/dotkiemkekichhoat`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `THEM_MOI_PHIEU_KIEM_KE`
+  }
+  ```
+
+---
+
+## 18. Phân hệ Báo cáo & Dashboard (Report & Dashboard Module)
+
+### 18.1. Báo cáo (BaoCao)
+
+#### 18.1.1. Lấy báo cáo tồn kho phân trang
+* **Endpoint**: `GET /api/bao-cao/ton-kho`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO`
+* **Query Parameters**:
+  * `idPhongBan` (tùy chọn): Lọc theo ID phòng ban quản lý kho/vị trí.
+  * `idViTri` (tùy chọn): Lọc theo ID vị trí vật lý.
+  * `tuNgay` (tùy chọn): Từ ngày cập nhật (`YYYY-MM-DD`).
+  * `denNgay` (tùy chọn): Đến ngày cập nhật (`YYYY-MM-DD`).
+  * `tuKhoaTimKiem` (tùy chọn): Tìm kiếm theo mã Asset Tag hoặc số Serial.
+  * `page` (mặc định 0), `size` (mặc định 10)
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "idViTri": 1,
+          "tenViTri": "Kho Tổng A",
+          "idTaiSanDanhMuc": 5,
+          "tenTaiSanDanhMuc": "Laptop Dell Latitude 5420",
+          "maTaiSanDanhMuc": "MTSC-DELL-5420",
+          "loaiTaiSan": "PHAN_CUNG",
+          "soLuongTonKho": 10,
+          "thoiGianCapNhat": "2026-06-25T10:00:00",
+          "danhSachChiTiet": [
+            {
+              "id": 1,
+              "soSerial": "DELL5420-SN123",
+              "maTheTaiSan": "TS-PC-0001",
+              "trangThai": "SAN_SANG",
+              "nguoiSoHuuHienTai": null
+            }
+          ]
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 18.1.2. Lấy báo cáo cấp phát phân trang
+* **Endpoint**: `GET /api/bao-cao/cap-phat`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO`
+* **Query Parameters**:
+  * `idPhongBan` (tùy chọn): Lọc theo phòng ban được cấp phát.
+  * `idViTri` (tùy chọn), `tuNgay` (tùy chọn), `denNgay` (tùy chọn), `tuKhoaTimKiem` (tùy chọn)
+  * `page`, `size`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "idPhongBan": 1,
+          "tenPhongBan": "Phòng Công nghệ thông tin",
+          "idTaiSanDanhMuc": 5,
+          "tenTaiSanDanhMuc": "Laptop Dell Latitude 5420",
+          "maTaiSanDanhMuc": "MTSC-DELL-5420",
+          "loaiTaiSan": "PHAN_CUNG",
+          "soLuongCap": 5,
+          "tongGiaTriCap": 75000000.00,
+          "thoiGianCapNhat": "2026-06-25T10:00:00",
+          "danhSachChiTiet": [
+            {
+              "id": 1,
+              "soSerial": "DELL5420-SN123",
+              "maTheTaiSan": "TS-PC-0001",
+              "nguoiDangDung": "Nguyễn Văn B",
+              "giaTriUocTinh": 15000000.00
+            }
+          ]
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 18.1.3. Lấy báo cáo bảo trì phân trang
+* **Endpoint**: `GET /api/bao-cao/bao-tri`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO`
+* **Query Parameters**:
+  * `idPhongBan` (tùy chọn), `idViTri` (tùy chọn), `tuNgay` (tùy chọn), `denNgay` (tùy chọn), `tuKhoaTimKiem` (tùy chọn)
+  * `page`, `size`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idDonVi": 1,
+          "idTaiSanDanhMuc": 5,
+          "tenTaiSanDanhMuc": "Laptop Dell Latitude 5420",
+          "maTaiSanDanhMuc": "MTSC-DELL-5420",
+          "loaiTaiSan": "PHAN_CUNG",
+          "soLuong": 2,
+          "tongChiPhi": 1000000.00,
+          "tongThoiGian": 15,
+          "thoiGianCapNhat": "2026-06-25T10:00:00",
+          "danhSachChiTiet": [
+            {
+              "id": 1,
+              "soSerial": "DELL5420-SN123",
+              "maTheTaiSan": "TS-PC-0001",
+              "chiPhi": 500000.00,
+              "nguyenNhan": "Vệ sinh định kỳ"
+            }
+          ]
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 18.1.4. Lấy tổng hợp toàn sản cho Super Admin phân trang
+* **Endpoint**: `GET /api/bao-cao/toan-san`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_QUAN_TRI_TOAN_SAN`
+* **Query Parameters**:
+  * `page` (mặc định 0), `size` (mặc định 10)
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "idDonVi": 1,
+          "tenDonVi": "Tổng công ty Viettel Digital",
+          "tongSoLuongPhanCung": 150,
+          "tongSoLuongPhanMem": 30,
+          "tongGiaTriUocTinhVnd": 2500000000.00
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+    }
+  }
+  ```
+
+#### 18.1.5. Xuất file báo cáo (Excel/PDF) cho Đơn vị
+* **Endpoint**: `GET /api/bao-cao/xuat-file`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO`
+* **Query Parameters**:
+  * `loaiBaoCao` (bắt buộc): `TON_KHO`, `CAP_PHAT` hoặc `BAO_TRI`.
+  * `dinhDangFile` (bắt buộc): `xlsx` hoặc `pdf`.
+  * `idPhongBan` (tùy chọn), `idViTri` (tùy chọn), `tuNgay` (tùy chọn), `denNgay` (tùy chọn), `tuKhoaTimKiem` (tùy chọn)
+* **Response**: Nhị phân file (Attachment).
+  * `Content-Disposition`: `attachment; filename=bao_cao_<timestamp>.<extension>`
+  * `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` (đối với xlsx) hoặc `application/pdf` (đối với pdf).
+
+#### 18.1.6. Xuất file báo cáo toàn sản (Excel) cho Super Admin
+* **Endpoint**: `GET /api/bao-cao/toan-san/xuat-file`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_QUAN_TRI_TOAN_SAN`
+* **Response**: Nhị phân file Excel (Attachment).
+  * `Content-Disposition`: `attachment; filename=bao_cao_toan_san_<timestamp>.xlsx`
+  * `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+
+---
+
+### 18.2. Dashboard thống kê (Dashboard)
+
+#### 18.2.1. Lấy thống kê tổng quan của Đơn vị
+* **Endpoint**: `GET /api/dashboard/don-vi`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "idDonVi": 1,
+      "tongSoLuongThietBi": 150,
+      "tongGiaTriTaiSanVnd": 2250000000.00,
+      "soLuongYeuCauCapPhatChoDuyet": 3,
+      "soLuongYeuCauBaoHongChoDuyet": 1,
+      "bieuDoTyLeTrangThai": {
+        "SAN_SANG": 20,
+        "DANG_SU_DUNG": 120,
+        "BAO_TRI": 8,
+        "HONG": 2
+      },
+      "bieuDoPhanBoPhongBan": {
+        "Phòng CNTT": 60,
+        "Phòng Kế toán": 40,
+        "Phòng Kỹ thuật": 50
+      }
+    }
+  }
+  ```
+
+#### 18.2.2. Lấy thống kê toàn sản của Super Admin
+* **Endpoint**: `GET /api/dashboard/toan-san`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_QUAN_TRI_TOAN_SAN`
+* **Response**: Trả về bản đồ dữ liệu tổng hợp về tổng số đơn vị, tổng số tài sản, tổng giá trị toàn hệ thống và các biểu đồ so sánh giữa các đơn vị (tenant).
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "tongSoDonVi": 5,
+      "tongSoTaiSanHeThong": 1200,
+      "tongGiaTriHeThongVnd": 18500000000.00,
+      "danhSachPhanBoTheoDonVi": [
+        {
+          "tenDonVi": "Viettel Digital",
+          "soLuong": 350,
+          "giaTri": 5200000000.00
+        }
+      ]
+  }
+  ```
+
+---
+
+## 19. Nhật ký thao tác hệ thống (System Activity Log)
+
+### 19.1. Lấy danh sách nhật ký thao tác phân trang
+* **Endpoint**: `GET /api/nhat-ky-thao-tac`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: Yêu cầu quản trị viên hệ thống (Public nội bộ hoặc Admin)
+* **Query Parameters**:
+  * `idTaiKhoanThaoTac` (tùy chọn): ID người dùng thực hiện thao tác.
+  * `phuongThucApi` (tùy chọn): Phương thức HTTP (`GET`, `POST`, `PUT`, `DELETE`).
+  * `thucTheTacDong` (tùy chọn): Tên bảng hoặc thực thể bị tác động.
+  * `tuNgay` (tùy chọn): Định dạng ISO Date Time (`YYYY-MM-DDTHH:mm:ss`).
+  * `denNgay` (tùy chọn): Định dạng ISO Date Time (`YYYY-MM-DDTHH:mm:ss`).
+  * `page` (mặc định 0): Trang hiện tại.
+  * `size` (mặc định 10): Số bản ghi trên trang.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": {
+      "content": [
+        {
+          "id": 1,
+          "idTaiKhoanThaoTac": 2,
+          "phuongThucApi": "PUT",
+          "endpointApi": "/api/tai-san-phan-cung/5",
+          "thucTheTacDong": "TaiSanPhanCung",
+          "idBanGhi": 5,
+          "duLieuTruoc": "{\"id\":5,\"ten\":\"Laptop Dell\",\"giaTri\":15000000}",
+          "duLieuSau": "{\"id\":5,\"ten\":\"Laptop Dell Latitude\",\"giaTri\":16000000}",
+          "diaChiIp": "192.168.1.5",
+          "thoiGianThaoTac": "2026-06-28T14:30:00"
+        }
+      ],
+      "totalElements": 1,
+      "totalPages": 1,
+      "page": 0,
+      "size": 10
+  }
+  ```
+
+---
+
+## 20. Gửi Email thông báo (Email Notification)
+
+### 20.1. Kích hoạt quét và gửi email nhắc nhở chứng từ tồn đọng
+* **Endpoint**: `GET /api/thong-bao/nhac-nho-chung-tu`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO` hoặc `XEM_QUAN_TRI_TOAN_SAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Đã kích hoạt quét và gửi email nhắc nhở chứng từ tồn đọng"
+  }
+  ```
+
+### 20.2. Kích hoạt quét và gửi email cảnh báo tài sản sắp hết hạn
+* **Endpoint**: `GET /api/thong-bao/canh-bao-het-han`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO` hoặc `XEM_QUAN_TRI_TOAN_SAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Đã kích hoạt quét và gửi email cảnh báo tài sản sắp hết hạn"
+  }
+  ```
+
+### 20.3. Kích hoạt quét và gửi email nhắc nhở đợt kiểm kê đang thực hiện
+* **Endpoint**: `GET /api/thong-bao/nhac-nho-kiem-ke`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO` hoặc `XEM_QUAN_TRI_TOAN_SAN`
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Đã kích hoạt quét và gửi email nhắc nhở đợt kiểm kê đang thực hiện"
+  }
+  ```
+
+### 20.4. Kích hoạt gửi email nhắc nhở đợt kiểm kê cụ thể
+* **Endpoint**: `GET /api/thong-bao/nhac-nho-kiem-ke-cu-the`
+* **Headers**:
+  * `Authorization`: `Bearer <token>`
+* **Quyền (Permission)**: `XEM_BAO_CAO` hoặc `XEM_QUAN_TRI_TOAN_SAN`
+* **Query Parameters**:
+  * `idDotKiemKe` (bắt buộc): ID của đợt kiểm kê cần nhắc nhở các trưởng phòng.
+* **Response**:
+  ```json
+  {
+    "code": 200,
+    "message": "Success",
+    "data": "Đã kích hoạt gửi email nhắc nhở đợt kiểm kê cụ thể"
+  }
+  ```

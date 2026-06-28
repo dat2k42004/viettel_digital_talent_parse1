@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { observer } from 'mobx-react-lite';
 import AppLayout from './layouts/AppLayout';
@@ -18,7 +18,10 @@ import { authStore } from './stores/AuthStore';
 import './App.css';
 
 const ProtectedRoute = observer(({ children }: { children: React.ReactNode }) => {
-  // Cho phép đi qua trực tiếp để trải nghiệm hệ thống không cần tài khoản đăng nhập
+  const token = localStorage.getItem('accessToken');
+  if (!authStore.isAuthenticated && !token) {
+    return <Navigate to="/login" replace />;
+  }
   return <>{children}</>;
 });
 
@@ -83,19 +86,20 @@ export const App = observer(() => {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
+      authStore.dangXuat();
       setLoading(false);
       return;
     }
 
-    // Tự động gọi API /api/auth/me nếu có token, nếu không thì giữ nguyên chế độ mock admin sandbox
+    // Tự động gọi API /api/auth/me để khôi phục phiên làm việc khi F5 trình duyệt
     getMyProfile()
       .then((res) => {
         if (res.data) {
           authStore.napHoSoCaNhan(res.data);
         }
       })
-      .catch(() => {
-        // Bỏ qua lỗi kết nối API để tránh bị log out ngoài ý muốn
+      .catch((err) => {
+        console.error('Không thể cập nhật hồ sơ cá nhân khi F5:', err);
       })
       .finally(() => {
         setLoading(false);

@@ -13,44 +13,14 @@ export const QUYEN = {
 
 export type QuyenHanKey = (typeof QUYEN)[keyof typeof QUYEN] | string;
 
-// Preset các vai trò ảo phục vụ demo Role Selector Widget
-export const VAI_TRO_DEMO: Record<string, string[]> = {
-  'Super Admin': [QUYEN.XEM_QUAN_TRI_TOAN_SAN, QUYEN.XEM_BAO_CAO, QUYEN.XEM_NGUOI_DUNG, QUYEN.XEM_VAI_TRO, QUYEN.XEM_QUYEN],
-  Admin: [QUYEN.XEM_BAO_CAO, QUYEN.THAO_TAC_TAI_SAN, QUYEN.XEM_NGUOI_DUNG, QUYEN.XEM_VAI_TRO, QUYEN.XEM_QUYEN],
-  Staff: [QUYEN.THAO_TAC_TAI_SAN],
-  'End User': [],
-};
+
 
 class AuthStore {
-  isAuthenticated: boolean = true;
-  tenNguoiDung: string = 'Nguyen Van Admin';
+  isAuthenticated: boolean = false;
+  tenNguoiDung: string = '';
   maDonVi: string = '1';
-  danhSachQuyenHan: string[] = [
-    'XEM_QUAN_TRI_TOAN_SAN',
-    'XEM_BAO_CAO',
-    'XEM_NGUOI_DUNG',
-    'XEM_VAI_TRO',
-    'XEM_QUYEN',
-    'THAO_TAC_TAI_SAN'
-  ];
-  currentUserProfile: NguoiDungResponse | null = {
-    tenDangNhap: 'admin',
-    hoNguoiDung: 'Nguyen',
-    tenDemNguoiDung: 'Van',
-    tenNguoiDung: 'Admin',
-    email: 'admin@itam-system.com',
-    soDienThoai: '0988888888',
-    chucVu: 'Quản trị hệ thống',
-    tenPhongBan: 'Phòng CNTT',
-    danhSachQuyenPhanGiai: [
-      'XEM_QUAN_TRI_TOAN_SAN',
-      'XEM_BAO_CAO',
-      'XEM_NGUOI_DUNG',
-      'XEM_VAI_TRO',
-      'XEM_QUYEN',
-      'THAO_TAC_TAI_SAN'
-    ]
-  };
+  danhSachQuyenHan: string[] = [];
+  currentUserProfile: NguoiDungResponse | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -58,6 +28,34 @@ class AuthStore {
     if (savedTenant) {
       this.maDonVi = savedTenant;
     }
+    
+    // Restore profile and permissions from localStorage on refresh
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        this.currentUserProfile = profile;
+        this.isAuthenticated = true;
+        const parts = [profile.hoNguoiDung, profile.tenDemNguoiDung, profile.tenNguoiDung];
+        this.tenNguoiDung = parts.filter(Boolean).join(' ') || profile.tenDangNhap || '';
+        this.maDonVi = String(profile.idDonVi ?? '1');
+        this.danhSachQuyenHan = profile.danhSachQuyenPhanGiai ?? [];
+      } catch (e) {
+        console.error('Failed to parse cached profile', e);
+      }
+    }
+  }
+
+  get laSuperAdmin(): boolean {
+    return this.danhSachQuyenHan.includes('XEM_QUAN_TRI_TOAN_SAN');
+  }
+
+  get laAdminDonVi(): boolean {
+    return this.danhSachQuyenHan.includes('XEM_NGUOI_DUNG') && !this.danhSachQuyenHan.includes('XEM_QUAN_TRI_TOAN_SAN');
+  }
+
+  get laNhanVien(): boolean {
+    return !this.laSuperAdmin && !this.laAdminDonVi;
   }
 
   // Kiểm tra 1 hoặc nhiều quyền (OR logic — có ít nhất 1 quyền khớp là hợp lệ)
@@ -66,11 +64,11 @@ class AuthStore {
     return ds.some((q) => this.danhSachQuyenHan.includes(q));
   }
 
-  // Cập nhật vai trò ảo phục vụ mục đích demo nhanh trên UI
-  doiVaiTro(tenVaiTro: string) {
-    this.danhSachQuyenHan = VAI_TRO_DEMO[tenVaiTro] ?? [];
+  // Cập nhật mảng quyền hạn trực tiếp từ danh sách quyền của Vai trò lấy từ BE
+  doiVaiTroTrucTiep(quyenHanMoi: string[]) {
+    this.danhSachQuyenHan = quyenHanMoi;
     if (this.currentUserProfile) {
-      this.currentUserProfile.danhSachQuyenPhanGiai = this.danhSachQuyenHan;
+      this.currentUserProfile.danhSachQuyenPhanGiai = quyenHanMoi;
     }
   }
 
@@ -90,6 +88,9 @@ class AuthStore {
     
     this.maDonVi = String(profile.idDonVi ?? '1');
     this.danhSachQuyenHan = profile.danhSachQuyenPhanGiai ?? [];
+    
+    // Cache the profile to survive page reload (F5)
+    localStorage.setItem('userProfile', JSON.stringify(profile));
   }
 
   dangNhapThanhCong(token: string, refreshToken: string, tenantId: string) {
@@ -108,6 +109,7 @@ class AuthStore {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('tenantId');
+    localStorage.removeItem('userProfile');
   }
 }
 

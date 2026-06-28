@@ -75,7 +75,7 @@ export const LoginPage: React.FC = () => {
         <Form
           form={form}
           name="login_form"
-          initialValues={{ tenDangNhap: 'admin' }}
+          initialValues={{ tenDangNhap: '' }}
           onFinish={handleDangNhap}
           layout="vertical"
         >

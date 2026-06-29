@@ -106,34 +106,6 @@ public class DonViServiceImpl implements DonViService {
         admin.setTrangThai(TrangThaiCoBanEnum.CHO_XAC_THUC);
         admin = nguoiDungRepository.save(admin);
 
-        // 3. Tạo vai trò Admin Đơn Vị cụ thể cho đơn vị này (độc lập, không trùng lặp)
-        VaiTro vaiTro = new VaiTro();
-        vaiTro.setIdDonVi(donVi.getId());
-        vaiTro.setMaVaiTro("ADMIN_" + donVi.getMaDonVi());
-        vaiTro.setTenVaiTro("Admin Đơn vị " + donVi.getTenPhapLy());
-        vaiTro.setMoTaVaiTro("Vai trò quản trị tối cao của đơn vị " + donVi.getTenPhapLy());
-        vaiTro.setLaHeThong(false);
-        vaiTro.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
-        final VaiTro savedVaiTro = vaiTroRepository.save(vaiTro);
-
-        // 4. Gán các quyền có loại là QUYEN_DON_VI cho vai trò này
-        List<Quyen> corporatePermissions = quyenRepository
-                .findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull("QUYEN_DON_VI", TrangThaiCoBanEnum.HOAT_DONG);
-        List<VaiTroQuyen> vaiTroQuyens = corporatePermissions.stream().map(q -> {
-            VaiTroQuyen vq = new VaiTroQuyen();
-            vq.setVaiTro(savedVaiTro);
-            vq.setQuyen(q);
-            return vq;
-        }).collect(Collectors.toList());
-        vaiTroQuyenRepository.saveAll(vaiTroQuyens);
-
-        // 5. Gán vai trò cho tài khoản admin mới tạo
-        NguoiDungVaiTro ndvt = new NguoiDungVaiTro();
-        ndvt.setNguoiDung(admin);
-        ndvt.setVaiTro(savedVaiTro);
-        ndvt.setThoiGianBatDau(LocalDateTime.now());
-        nguoiDungVaiTroRepository.save(ndvt);
-
         // 6. Sinh mã OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         log.info("============== MÃ OTP ĐĂNG KÝ ĐƠN VỊ DÀNH CHO EMAIL {} ==============", request.getEmailAdmin());
@@ -155,9 +127,6 @@ public class DonViServiceImpl implements DonViService {
         // Gửi sự kiện kích hoạt đơn vị qua RabbitMQ để gửi email nền
         MailEvent mailEvent = new MailEvent(request.getEmailAdmin(), "KICH_HOAT_DON_VI", otp);
         rabbitTemplate.convertAndSend("mail.queue", mailEvent);
-
-        // Bắn sự kiện khởi tạo quyền trực tiếp cho tài khoản admin chạy ngầm
-        rabbitTemplate.convertAndSend("tenant.init-admin-permissions.queue", admin.getId());
     }
 
     @Override
@@ -191,12 +160,12 @@ public class DonViServiceImpl implements DonViService {
         maXacThucOTPRepository.save(otpEntity);
 
         NguoiDung admin = otpEntity.getNguoiDung();
-        admin.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
+        admin.setTrangThai(TrangThaiCoBanEnum.KHOA);
         nguoiDungRepository.save(admin);
 
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
-        donVi.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
+        donVi.setTrangThai(TrangThaiCoBanEnum.KHOA);
         donViRepository.save(donVi);
 
         // Bắn sự kiện khởi tạo cấu hình mặc định
@@ -224,14 +193,22 @@ public class DonViServiceImpl implements DonViService {
     public PageResponse<DonViResponse> layDanhSach(String ten, String maDonVi, String trangThai, String maSoThue,
             int page, int size) {
         Long tenantId = DonViContextHolder.getTenantId();
-        if (tenantId != null) {
-            throw new NghiepVuException("Chỉ người dùng hệ thống mới có quyền xem danh sách đơn vị", 403);
-        }
 
         Specification<DonVi> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+
+            if (tenantId != null) {
+                predicates.add(cb.equal(root.get("id"), tenantId));
+            }
+
+            if (trangThai != null && !trangThai.trim().isEmpty()) {
+                try {
+                    predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                } catch (IllegalArgumentException e) {
+                    // Ignore
+                }
+            }
 
             if (ten != null && !ten.trim().isEmpty()) {
                 String likePattern = "%" + ten.trim().toLowerCase() + "%";

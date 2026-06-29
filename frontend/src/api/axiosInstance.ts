@@ -9,16 +9,19 @@ export const axiosInstance = axios.create({
   timeout: 15000,
 });
 
-// Interceptor ngầm: tự gắn Bearer Token + X-Tenant-ID vào mọi request
 axiosInstance.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken');
-  // Đúng tên header theo BaoMatConfig.java: X-Tenant-ID
-  const tenantId = localStorage.getItem('tenantId') ?? '1';
+  const tenantId = localStorage.getItem('tenantId');
 
   if (accessToken) {
     config.headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  config.headers['X-Tenant-ID'] = tenantId;
+
+  // Chỉ gửi X-Tenant-ID nếu người dùng thuộc một Đơn vị cụ thể
+  // Nếu là Super Admin (tenantId rỗng hoặc null/"null"), không gửi header này đi
+  if (tenantId && tenantId !== 'null' && tenantId !== 'undefined' && tenantId.trim() !== '') {
+    config.headers['X-Tenant-ID'] = tenantId;
+  }
 
   return config;
 }, (error) => {

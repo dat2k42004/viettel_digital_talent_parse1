@@ -62,7 +62,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
             int size,
             String sort
     ) {
-        Long idDonVi = getRequiredTenantId();
+        Long idDonVi = DonViContextHolder.getTenantId();
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         String sortBy = sortParts[0];
@@ -72,7 +72,9 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {

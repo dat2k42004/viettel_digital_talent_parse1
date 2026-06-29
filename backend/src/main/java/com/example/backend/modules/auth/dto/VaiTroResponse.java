@@ -13,5 +13,8 @@ public class VaiTroResponse {
     private String maVaiTro;
     private String tenVaiTro;
     private String moTa;
+    private String trangThai;
+    private Boolean laHeThong;
+    private Integer capDoUuTien;
     private List<QuyenResponse> danhSachQuyen;
 }

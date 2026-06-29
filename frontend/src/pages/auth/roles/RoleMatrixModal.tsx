@@ -31,14 +31,6 @@ export const RoleMatrixModal: React.FC<RoleMatrixModalProps> = ({
     }
   }, [open, selectedRole]);
 
-  const handleCheckboxChange = (id: number, checked: boolean) => {
-    if (checked) {
-      setSelectedPermissionIds(prev => [...prev, id]);
-    } else {
-      setSelectedPermissionIds(prev => prev.filter(item => item !== id));
-    }
-  };
-
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -57,37 +49,73 @@ export const RoleMatrixModal: React.FC<RoleMatrixModalProps> = ({
       confirmLoading={loading}
       okText="Lưu cấu hình"
       cancelText="Hủy bỏ"
-      width={650}
+      width={700}
     >
       <Paragraph type="secondary" style={{ marginTop: 12 }}>
         Lựa chọn phân chia quyền năng hệ thống theo nhóm chức năng. Tích chọn để trao quyền và bỏ tích để thu hồi quyền ngay lập tức.
       </Paragraph>
 
       <Collapse defaultActiveKey={Object.keys(maTranQuyen)} style={{ marginTop: 16, maxHeight: 400, overflowY: 'auto' }}>
-        {Object.entries(maTranQuyen).map(([tenNhom, danhSachQuyenCon]) => (
-          <Collapse.Panel
-            header={<Text strong style={{ textTransform: 'uppercase' }}>Phân hệ {tenNhom}</Text>}
-            key={tenNhom}
-          >
-            <Row gutter={[16, 8]}>
-              {danhSachQuyenCon.map((quyen: QuyenResponse) => {
-                if (!quyen.id) return null;
-                return (
-                  <Col span={12} key={quyen.id}>
-                    <Checkbox
-                      checked={selectedPermissionIds.includes(quyen.id)}
-                      onChange={(e) => quyen.id && handleCheckboxChange(quyen.id, e.target.checked)}
-                    >
-                      <Tooltip title={quyen.maQuyen}>
-                        <span>{quyen.tenQuyen || quyen.maQuyen}</span>
-                      </Tooltip>
-                    </Checkbox>
-                  </Col>
-                );
-              })}
-            </Row>
-          </Collapse.Panel>
-        ))}
+        {Object.entries(maTranQuyen).map(([tenNhom, danhSachQuyenCon]) => {
+          const checkedChildren = danhSachQuyenCon.filter(p => selectedPermissionIds.includes(p.id!));
+          const isParentChecked = checkedChildren.length > 0;
+          const isAllChecked = checkedChildren.length === danhSachQuyenCon.length;
+
+          return (
+            <Collapse.Panel
+              header={
+                <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-block' }}>
+                  <Checkbox
+                    checked={isParentChecked}
+                    indeterminate={isParentChecked && !isAllChecked}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (checked) {
+                        // Chọn toàn bộ quyền con
+                        const toAdd = danhSachQuyenCon.map(p => p.id!).filter(id => !selectedPermissionIds.includes(id));
+                        setSelectedPermissionIds(prev => [...prev, ...toAdd]);
+                      } else {
+                        // Bỏ chọn toàn bộ quyền con
+                        const toRemove = danhSachQuyenCon.map(p => p.id!);
+                        setSelectedPermissionIds(prev => prev.filter(id => !toRemove.includes(id)));
+                      }
+                    }}
+                  >
+                    <Text strong style={{ textTransform: 'uppercase', color: '#1677ff' }}>
+                      Phân hệ {tenNhom}
+                    </Text>
+                  </Checkbox>
+                </div>
+              }
+              key={tenNhom}
+            >
+              <Row gutter={[16, 12]}>
+                {danhSachQuyenCon.map((quyen: QuyenResponse) => {
+                  if (!quyen.id) return null;
+                  return (
+                    <Col span={12} key={quyen.id}>
+                      <Checkbox
+                        checked={selectedPermissionIds.includes(quyen.id)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          if (checked) {
+                            setSelectedPermissionIds(prev => [...prev, quyen.id!]);
+                          } else {
+                            setSelectedPermissionIds(prev => prev.filter(id => id !== quyen.id!));
+                          }
+                        }}
+                      >
+                        <Tooltip title={quyen.maQuyen}>
+                          <span>{quyen.tenQuyen || quyen.maQuyen}</span>
+                        </Tooltip>
+                      </Checkbox>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </Collapse.Panel>
+          );
+        })}
       </Collapse>
     </Modal>
   );

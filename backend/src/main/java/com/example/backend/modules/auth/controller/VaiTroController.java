@@ -29,8 +29,7 @@ public class VaiTroController {
             @RequestParam(required = false) String maVaiTro,
             @RequestParam(required = false) String trangThai,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         return ApiResponse.success(vaiTroService.layDanhSach(tenVaiTro, maVaiTro, trangThai, page, size));
     }
 
@@ -63,8 +62,7 @@ public class VaiTroController {
     @PreAuthorize("hasAuthority('CAP_NHAT_QUYEN_VAI_TRO')")
     public ApiResponse<String> capNhatQuyen(
             @PathVariable Long id,
-            @Valid @RequestBody VaiTroQuyenUpdateRequest request
-    ) {
+            @Valid @RequestBody VaiTroQuyenUpdateRequest request) {
         vaiTroService.capNhatQuyen(id, request);
         return ApiResponse.success("Cập nhật danh sách quyền của vai trò thành công");
     }
@@ -73,8 +71,7 @@ public class VaiTroController {
     @PreAuthorize("hasAuthority('CAP_NHAT_TRANG_THAI_VAI_TRO')")
     public ApiResponse<String> capNhatTrangThai(
             @PathVariable Long id,
-            @Valid @RequestBody TrangThaiRequest request
-    ) {
+            @Valid @RequestBody TrangThaiRequest request) {
         vaiTroService.capNhatTrangThai(id, request);
         return ApiResponse.success("Cập nhật trạng thái vai trò thành công");
     }
@@ -85,4 +82,3 @@ public class VaiTroController {
         return ApiResponse.success(vaiTroService.layDropdown());
     }
 }
-

@@ -122,7 +122,7 @@ public class LapRapLinhKienServiceImpl implements LapRapLinhKienService {
           String sortBy = sortParts[0];
 
           PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
-          Long currentTenantId = getRequiredTenantId();
+          Long currentTenantId = DonViContextHolder.getTenantId();
 
           Specification<LapRapLinhKien> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
@@ -131,7 +131,9 @@ public class LapRapLinhKienServiceImpl implements LapRapLinhKienService {
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                // Cô lập Multi-tenant bảo mật tuyệt đối dữ liệu đơn vị
-               predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               if (currentTenantId != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               }
 
                // Lọc theo ID thiết bị
                if (thietBiPhanCungId != null) {

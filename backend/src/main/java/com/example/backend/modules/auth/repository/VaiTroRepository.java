@@ -20,6 +20,7 @@ public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecif
 
     List<VaiTro> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, TrangThaiCoBanEnum trangThai);
     List<VaiTro> findByIdDonViIsNullAndTrangThaiAndThoiGianXoaIsNull(TrangThaiCoBanEnum trangThai);
+    List<VaiTro> findByTrangThaiAndThoiGianXoaIsNull(TrangThaiCoBanEnum trangThai);
 
     Optional<VaiTro> findByIdAndThoiGianXoaIsNull(Long id);
 

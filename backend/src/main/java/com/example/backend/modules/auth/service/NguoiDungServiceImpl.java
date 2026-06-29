@@ -61,6 +61,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider tokenProvider;
     private final PhongBanRepository phongBanRepository;
+    private final com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository;
+    private final org.springframework.cache.CacheManager cacheManager;
 
     public NguoiDungServiceImpl(
             NguoiDungRepository nguoiDungRepository,
@@ -72,7 +74,9 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             PhienDangNhapRepository phienDangNhapRepository,
             RedisTemplate<String, Object> redisTemplate,
             JwtTokenProvider tokenProvider,
-            PhongBanRepository phongBanRepository) {
+            PhongBanRepository phongBanRepository,
+            com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository,
+            org.springframework.cache.CacheManager cacheManager) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.nguoiDungVaiTroRepository = nguoiDungVaiTroRepository;
         this.nguoiDungQuyenRepository = nguoiDungQuyenRepository;
@@ -83,6 +87,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         this.redisTemplate = redisTemplate;
         this.tokenProvider = tokenProvider;
         this.phongBanRepository = phongBanRepository;
+        this.vaiTroQuyenRepository = vaiTroQuyenRepository;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -194,6 +200,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         NguoiDung nguoiDung = new NguoiDung();
         nguoiDung.setIdDonVi(idDonVi);
         nguoiDung.setIdPhongBan(request.getIdPhongBan());
+        nguoiDung.setMaNguoiDung("ND-" + (idDonVi == null ? 0 : idDonVi) + "-" + System.currentTimeMillis());
         nguoiDung.setTenDangNhap(request.getTenDangNhap());
         nguoiDung.setMatKhau(passwordEncoder.encode(request.getMatKhau()));
         nguoiDung.setHoNguoiDung(request.getHoNguoiDung());
@@ -270,14 +277,46 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             }).collect(Collectors.toList());
             nguoiDungVaiTroRepository.saveAll(list);
         }
+        dongBoQuyenNguoiDung(nguoiDung);
+    }
+
+    private void dongBoQuyenNguoiDung(NguoiDung nguoiDung) {
+        nguoiDungQuyenRepository.deleteByNguoiDungId(nguoiDung.getId());
+        List<NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository.findByNguoiDungId(nguoiDung.getId());
+        
+        // Evict user permissions cache
+        if (cacheManager != null && cacheManager.getCache("user_permissions") != null) {
+            cacheManager.getCache("user_permissions").evict(nguoiDung.getId());
+        }
+
+        if (userRoles.isEmpty()) {
+            return;
+        }
+
+        List<Long> roleIds = userRoles.stream().map(ur -> ur.getVaiTro().getId()).collect(Collectors.toList());
+        List<com.example.backend.modules.auth.model.VaiTroQuyen> rolePermissions = vaiTroQuyenRepository.findByVaiTroIdIn(roleIds);
+
+        List<Quyen> uniquePermissions = rolePermissions.stream()
+                .map(com.example.backend.modules.auth.model.VaiTroQuyen::getQuyen)
+                .filter(q -> q.getThoiGianXoa() == null && q.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<NguoiDungQuyen> userPerms = uniquePermissions.stream().map(q -> {
+            NguoiDungQuyen nq = new NguoiDungQuyen();
+            nq.setNguoiDung(nguoiDung);
+            nq.setQuyen(q);
+            return nq;
+        }).collect(Collectors.toList());
+
+        nguoiDungQuyenRepository.saveAll(userPerms);
     }
 
     private NguoiDung kiemTraTonTaiVaQuyen(Long id) {
         NguoiDung nguoiDung = nguoiDungRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy người dùng", 404));
         Long idDonVi = DonViContextHolder.getTenantId();
-        if ((idDonVi == null && nguoiDung.getIdDonVi() != null) ||
-                (idDonVi != null && !idDonVi.equals(nguoiDung.getIdDonVi()))) {
+        if (idDonVi != null && !idDonVi.equals(nguoiDung.getIdDonVi())) {
             throw new NghiepVuException("Bạn không có quyền thao tác trên người dùng này", 403);
         }
         return nguoiDung;
@@ -319,6 +358,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 .idDonVi(nguoiDung.getIdDonVi())
                 .idPhongBan(nguoiDung.getIdPhongBan())
                 .tenPhongBan(tenPhongBan)
+                .maNguoiDung(nguoiDung.getMaNguoiDung())
                 .tenDangNhap(nguoiDung.getTenDangNhap())
                 .hoNguoiDung(nguoiDung.getHoNguoiDung())
                 .tenDemNguoiDung(nguoiDung.getTenDemNguoiDung())
@@ -487,5 +527,20 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
         log.info("Đã cưỡng chế đăng xuất thành công và vô hiệu hóa {} phiên làm việc của user ID: {}",
                 activeSessions.size(), id);
+    }
+
+    @jakarta.annotation.PostConstruct
+    @Transactional
+    public void initCleanup() {
+        try {
+            log.info("Bắt đầu đồng bộ làm sạch quyền cho toàn bộ người dùng hệ thống...");
+            List<NguoiDung> users = nguoiDungRepository.findAll();
+            for (NguoiDung user : users) {
+                dongBoQuyenNguoiDung(user);
+            }
+            log.info("Đã đồng bộ làm sạch quyền thành công cho {} người dùng.", users.size());
+        } catch (Exception e) {
+            log.error("Lỗi khi chạy dọn dẹp đồng bộ quyền người dùng lúc khởi động: {}", e.getMessage());
+        }
     }
 }

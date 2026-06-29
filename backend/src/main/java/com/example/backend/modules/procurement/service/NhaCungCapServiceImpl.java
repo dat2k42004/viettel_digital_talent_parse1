@@ -48,13 +48,15 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
           String sortBy = sortParts[0];
 
           PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
-          Long currentTenantId = getRequiredTenantId();
+          Long currentTenantId = DonViContextHolder.getTenantId();
 
           Specification<NhaCungCap> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
 
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
-               predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               if (currentTenantId != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               }
 
                if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {

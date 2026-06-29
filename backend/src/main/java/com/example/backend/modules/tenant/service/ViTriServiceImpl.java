@@ -37,15 +37,23 @@ public class ViTriServiceImpl implements ViTriService {
     @Override
     public PageResponse<ViTriResponse> layDanhSach(String tenViTri, String maViTri, String trangThai, String loaiViTri, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
-        if (idDonVi == null) {
-            throw new NghiepVuException("Chỉ admin đơn vị mới được xem vị trí", 403);
-        }
 
         Specification<ViTri> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
-            predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+            
+            if (idDonVi == null) {
+                if (trangThai != null && !trangThai.trim().isEmpty()) {
+                    try {
+                        predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                    } catch (IllegalArgumentException e) {
+                        // Ignore
+                    }
+                }
+            } else {
+                predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+                predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+            }
 
             if (tenViTri != null && !tenViTri.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("tenViTri")), "%" + tenViTri.trim().toLowerCase() + "%"));

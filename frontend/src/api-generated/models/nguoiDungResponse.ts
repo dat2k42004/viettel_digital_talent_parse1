@@ -13,6 +13,7 @@ export interface NguoiDungResponse {
   idDonVi?: number;
   idPhongBan?: number;
   tenPhongBan?: string;
+  maNguoiDung?: string;
   tenDangNhap?: string;
   hoNguoiDung?: string;
   tenDemNguoiDung?: string;

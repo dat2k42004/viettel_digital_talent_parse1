@@ -7,12 +7,13 @@ import java.util.List;
 
 @Data
 public class VaiTroRequest {
-    private String maVaiTro;
 
     @NotBlank(message = "Tên vai trò không được để trống")
     private String tenVaiTro;
 
     private String moTa;
+
+    private Long idDonVi;
 
     private List<Long> danhSachIdQuyen;
 }

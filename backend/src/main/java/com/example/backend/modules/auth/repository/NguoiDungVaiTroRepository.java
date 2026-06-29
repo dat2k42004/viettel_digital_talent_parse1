@@ -14,4 +14,5 @@ public interface NguoiDungVaiTroRepository extends JpaRepository<NguoiDungVaiTro
     void deleteByNguoiDungId(@Param("nguoiDungId") Long nguoiDungId);
 
     List<NguoiDungVaiTro> findByNguoiDungId(Long nguoiDungId);
+    List<NguoiDungVaiTro> findByVaiTroId(Long vaiTroId);
 }

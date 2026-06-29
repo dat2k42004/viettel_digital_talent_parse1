@@ -59,7 +59,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
             int page,
             int size,
             String sort) {
-        Long idDonVi = getRequiredTenantId();
+        Long idDonVi = DonViContextHolder.getTenantId();
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
@@ -70,7 +70,9 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {

@@ -87,7 +87,9 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                List<Predicate> predicates = new ArrayList<>();
 
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
-               predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               if (currentTenantId != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), currentTenantId));
+               }
 
                if (maPhieuNhap != null && !maPhieuNhap.trim().isEmpty()) {
                     predicates.add(

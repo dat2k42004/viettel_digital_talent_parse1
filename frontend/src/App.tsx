@@ -10,11 +10,18 @@ import LifecyclePage from './pages/lifecycle/LifecyclePage';
 import MaintenancePage from './pages/maintenance/MaintenancePage';
 import InventoryPage from './pages/inventory/InventoryPage';
 import ReportPage from './pages/report/ReportPage';
-import TenantPage from './pages/tenant/TenantPage';
 import UserManagementPage from './pages/auth/users/UserManagementPage';
 import RoleManagementPage from './pages/auth/roles/RoleManagementPage';
 import { getMyProfile } from './api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 import { authStore } from './stores/AuthStore';
+import DangKyDonViPage from './pages/tenant/donvi/DangKyDonViPage';
+import DonViManagementPage from './pages/tenant/donvi/DonViManagementPage';
+import DangKyPage from './pages/tenant/donvi/DangKyPage';
+import XacThucOtpPage from './pages/tenant/donvi/XacThucOtpPage';
+import PhongBanManagementPage from './pages/tenant/phongban/PhongBanManagementPage';
+import ViTriManagementPage from './pages/tenant/vitri/ViTriManagementPage';
+import DanhMucCauHinhPage from './pages/tenant/danhmuc/DanhMucCauHinhPage';
+import CauHinhDonViPage from './pages/tenant/cauhinhdonvi/CauHinhDonViPage';
 import './App.css';
 
 const ProtectedRoute = observer(({ children }: { children: React.ReactNode }) => {
@@ -25,11 +32,47 @@ const ProtectedRoute = observer(({ children }: { children: React.ReactNode }) =>
   return <>{children}</>;
 });
 
+const GuestRoute = observer(({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem('accessToken');
+  if (authStore.isAuthenticated || token) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+});
+
 const router = createBrowserRouter([
   // Tuyến đường tự do bên ngoài
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <GuestRoute>
+        <LoginPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/dang-ky-don-vi',
+    element: (
+      <GuestRoute>
+        <DangKyDonViPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/dang-ky',
+    element: (
+      <GuestRoute>
+        <DangKyPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/xac-thuc-otp',
+    element: (
+      <GuestRoute>
+        <XacThucOtpPage />
+      </GuestRoute>
+    ),
   },
   // Tuyến đường nội bộ bọc qua bộ bảo vệ ProtectedRoute và AppLayout
   {
@@ -65,16 +108,32 @@ const router = createBrowserRouter([
         element: <ReportPage />,
       },
       {
-        path: 'tenants',
-        element: <TenantPage />,
-      },
-      {
-        path: 'nguoi-dung',
+        path: 'nguoi-dung/nguoi-dung',
         element: <UserManagementPage />,
       },
       {
-        path: 'vai-tro',
+        path: 'nguoi-dung/vai-tro',
         element: <RoleManagementPage />,
+      },
+      {
+        path: 'don-vi/don-vi',
+        element: <DonViManagementPage />,
+      },
+      {
+        path: 'don-vi/phong-ban',
+        element: <PhongBanManagementPage />,
+      },
+      {
+        path: 'don-vi/vi-tri',
+        element: <ViTriManagementPage />,
+      },
+      {
+        path: 'don-vi/danh-muc',
+        element: <DanhMucCauHinhPage />,
+      },
+      {
+        path: 'don-vi/cau-hinh',
+        element: <CauHinhDonViPage />,
       },
     ],
   },

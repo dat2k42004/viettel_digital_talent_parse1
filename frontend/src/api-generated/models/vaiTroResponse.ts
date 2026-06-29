@@ -13,5 +13,8 @@ export interface VaiTroResponse {
   maVaiTro?: string;
   tenVaiTro?: string;
   moTa?: string;
+  trangThai?: string;
+  laHeThong?: boolean;
+  capDoUuTien?: number;
   danhSachQuyen?: QuyenResponse[];
 }

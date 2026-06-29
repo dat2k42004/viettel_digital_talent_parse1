@@ -15,4 +15,5 @@ public interface VaiTroQuyenRepository extends JpaRepository<VaiTroQuyen, Long> 
     void deleteByVaiTroId(@Param("vaiTroId") Long vaiTroId);
 
     List<VaiTroQuyen> findByVaiTroId(Long vaiTroId);
+    List<VaiTroQuyen> findByVaiTroIdIn(List<Long> vaiTroIds);
 }

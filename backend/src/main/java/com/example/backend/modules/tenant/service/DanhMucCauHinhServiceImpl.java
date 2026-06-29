@@ -40,7 +40,6 @@ public class DanhMucCauHinhServiceImpl implements DanhMucCauHinhService {
         Specification<DanhMucCauHinh> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
 
             if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("tenCauHinh")), "%" + tenCauHinh.trim().toLowerCase() + "%"));

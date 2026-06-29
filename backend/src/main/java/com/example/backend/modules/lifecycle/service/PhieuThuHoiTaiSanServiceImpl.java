@@ -79,7 +79,7 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
             int page,
             int size,
             String sort) {
-        Long tenantId = getRequiredTenantId();
+        Long tenantId = DonViContextHolder.getTenantId();
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
@@ -91,7 +91,9 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
         Specification<PhieuThuHoiTaiSan> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), tenantId));
+            if (tenantId != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), tenantId));
+            }
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {

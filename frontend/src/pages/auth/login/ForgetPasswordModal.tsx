@@ -15,7 +15,7 @@ interface ForgetPasswordModalProps {
 export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, onCancel }) => {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState('');
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<QuenMatKhauRequest & DatLaiMatKhauRequest>();
   const [loading, setLoading] = useState(false);
 
   const handleGuiOtp = async (values: QuenMatKhauRequest) => {

@@ -7,8 +7,8 @@
  */
 
 export interface VaiTroRequest {
-  maVaiTro?: string;
   tenVaiTro: string;
   moTa?: string;
+  idDonVi?: number;
   danhSachIdQuyen?: number[];
 }

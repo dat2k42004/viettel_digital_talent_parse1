@@ -12,6 +12,7 @@ public class NguoiDungResponse {
     private Long idDonVi;
     private Long idPhongBan;
     private String tenPhongBan;
+    private String maNguoiDung;
     private String tenDangNhap;
     private String hoNguoiDung;
     private String tenDemNguoiDung;

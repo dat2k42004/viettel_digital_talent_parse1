@@ -40,9 +40,6 @@ public class GiaTriThuocTinhServiceImpl implements GiaTriThuocTinhService {
     @Cacheable(value = "gia_tri_thuoc_tinh_list_cache", key = "{#idTaiSan, #loaiTaiSan, #page, #size, T(com.example.backend.shared.tenant.DonViContextHolder).getTenantId()}")
     public PageResponse<GiaTriThuocTinhResponse> layDanhSach(Long idTaiSan, String loaiTaiSan, int page, int size, String sort) {
         Long idDonVi = DonViContextHolder.getTenantId();
-        if (idDonVi == null) {
-            throw new NghiepVuException("Không xác định được đơn vị (Tenant ID) của người dùng", 403);
-        }
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -53,7 +50,9 @@ public class GiaTriThuocTinhServiceImpl implements GiaTriThuocTinhService {
         Specification<GiaTriThuocTinh> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
 
             if (idTaiSan != null) {
                 predicates.add(cb.equal(root.get("idTaiSan"), idTaiSan));

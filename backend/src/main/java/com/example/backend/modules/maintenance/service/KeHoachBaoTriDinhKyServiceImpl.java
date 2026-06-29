@@ -244,7 +244,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
      @Transactional(readOnly = true)
      public PageResponse<KeHoachBaoTriDinhKyResponse> layDanhSach(String trangThai, LocalDate tuNgay, LocalDate denNgay,
                int page, int size, String sort) {
-          Long tenantId = getRequiredTenantId();
+          Long tenantId = DonViContextHolder.getTenantId();
           String[] sortParts = sort.split(",");
           Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
                     : Sort.Direction.DESC;
@@ -253,7 +253,9 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
           Specification<KeHoachBaoTriDinhKy> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
-               predicates.add(cb.equal(root.get("idDonVi"), tenantId));
+               if (tenantId != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), tenantId));
+               }
 
                if (trangThai != null && !trangThai.trim().isEmpty()) {
                     if ("HET_BAN_HANH".equalsIgnoreCase(trangThai) || "HET_HAN".equalsIgnoreCase(trangThai)) {

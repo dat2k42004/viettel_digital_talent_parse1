@@ -9,6 +9,7 @@ interface UserFormModalProps {
   onCancel: () => void;
   selectedUser: NguoiDungResponse | null;
   danhSachVaiTro: VaiTroDropdownResponse[];
+  danhSachPhongBan: any[];
   onSave: (values: NguoiDungRequest) => Promise<void>;
 }
 
@@ -17,15 +18,17 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   onCancel,
   selectedUser,
   danhSachVaiTro,
+  danhSachPhongBan,
   onSave
 }) => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<NguoiDungRequest>();
 
   useEffect(() => {
     if (open) {
       if (selectedUser) {
         form.setFieldsValue({
           tenDangNhap: selectedUser.tenDangNhap,
+          maNguoiDung: selectedUser.maNguoiDung,
           hoNguoiDung: selectedUser.hoNguoiDung,
           tenDemNguoiDung: selectedUser.tenDemNguoiDung,
           tenNguoiDung: selectedUser.tenNguoiDung,
@@ -76,7 +79,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               <Input disabled={!!selectedUser} placeholder="Ví dụ: hung.nv" />
             </Form.Item>
           </Col>
-          {!selectedUser && (
+          {!selectedUser ? (
             <Col span={12}>
               <Form.Item
                 name="matKhau"
@@ -84,6 +87,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 rules={[{ required: true, message: 'Vui lòng nhập mật khẩu khởi tạo!' }]}
               >
                 <Input.Password placeholder="Mật khẩu khởi tạo" />
+              </Form.Item>
+            </Col>
+          ) : (
+            <Col span={12}>
+              <Form.Item
+                name="maNguoiDung"
+                label="Mã nhân viên"
+              >
+                <Input disabled placeholder="Hệ thống tự động sinh" />
               </Form.Item>
             </Col>
           )}
@@ -135,13 +147,23 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="idPhongBan" label="Mã phòng ban làm việc">
-              <Input placeholder="Ví dụ: 1" />
+            <Form.Item name="idPhongBan" label="Phòng ban làm việc">
+              <Select
+                placeholder="Chọn phòng ban..."
+                allowClear
+                showSearch
+                optionFilterProp="children"
+                options={danhSachPhongBan.map(pb => ({ value: pb.id, label: pb.tenPhongBan }))}
+              />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item name="danhSachIdVaiTro" label="Danh sách vai trò gán cho tài khoản">
+        <Form.Item
+          name="danhSachIdVaiTro"
+          label="Danh sách vai trò gán cho tài khoản"
+          rules={[{ required: true, message: 'Vui lòng chọn ít nhất một vai trò!' }]}
+        >
           <Select
             mode="multiple"
             placeholder="Chọn vai trò..."

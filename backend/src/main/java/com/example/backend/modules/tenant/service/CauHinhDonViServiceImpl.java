@@ -40,16 +40,15 @@ public class CauHinhDonViServiceImpl implements CauHinhDonViService {
 
     @Override
     public PageResponse<CauHinhDonViResponse> layDanhSach(Long idDonVi, String tenCauHinh, int page, int size) {
-        if (idDonVi == null) {
-            throw new NghiepVuException("Chỉ admin đơn vị mới được xem cấu hình đơn vị", 403);
-        }
-
         Specification<CauHinhDonVi> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
             predicates.add(cb.isNull(root.get("danhMucCauHinh").get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("danhMucCauHinh").get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+            
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+                predicates.add(cb.equal(root.get("danhMucCauHinh").get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+            }
 
             if (tenCauHinh != null && !tenCauHinh.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("danhMucCauHinh").get("tenCauHinh")), 

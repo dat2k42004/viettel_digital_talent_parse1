@@ -1,7 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import type { NguoiDungResponse } from '../api-generated/models/nguoiDungResponse';
 
-// Mapping nhóm quyền FE -> các @PreAuthorize string thực tế trên Backend
 export const QUYEN = {
   XEM_BAO_CAO: 'XEM_BAO_CAO',
   THAO_TAC_TAI_SAN: 'THAO_TAC_TAI_SAN',
@@ -9,6 +8,34 @@ export const QUYEN = {
   XEM_NGUOI_DUNG: 'XEM_NGUOI_DUNG',
   XEM_VAI_TRO: 'XEM_VAI_TRO',
   XEM_QUYEN: 'XEM_QUYEN',
+  // Quyền quản lý Đơn vị (Tenant)
+  XEM_DON_VI: 'XEM_DON_VI',
+  SUA_DON_VI: 'SUA_DON_VI',
+  KHOA_DON_VI: 'KHOA_DON_VI',
+  XOA_DON_VI: 'XOA_DON_VI',
+  GIA_HAN_DON_VI: 'GIA_HAN_DON_VI',
+  // Quyền Phòng ban
+  XEM_PHONG_BAN: 'XEM_PHONG_BAN',
+  THEM_PHONG_BAN: 'THEM_PHONG_BAN',
+  SUA_PHONG_BAN: 'SUA_PHONG_BAN',
+  XOA_PHONG_BAN: 'XOA_PHONG_BAN',
+  CAP_NHAT_TRANG_THAI_PHONG_BAN: 'CAP_NHAT_TRANG_THAI_PHONG_BAN',
+  // Quyền Vị trí
+  XEM_VI_TRI: 'XEM_VI_TRI',
+  THEM_VI_TRI: 'THEM_VI_TRI',
+  SUA_VI_TRI: 'SUA_VI_TRI',
+  XOA_VI_TRI: 'XOA_VI_TRI',
+  CAP_NHAT_TRANG_THAI_VI_TRI: 'CAP_NHAT_TRANG_THAI_VI_TRI',
+  // Quyền Danh mục cấu hình hệ thống (Super Admin)
+  XEM_DANH_MUC_CAU_HINH: 'XEM_DANH_MUC_CAU_HINH',
+  THEM_DANH_MUC_CAU_HINH: 'THEM_DANH_MUC_CAU_HINH',
+  SUA_DANH_MUC_CAU_HINH: 'SUA_DANH_MUC_CAU_HINH',
+  XOA_DANH_MUC_CAU_HINH: 'XOA_DANH_MUC_CAU_HINH',
+  // Quyền Cấu hình đơn vị
+  XEM_CAU_HINH_DON_VI: 'XEM_CAU_HINH_DON_VI',
+  THEM_CAU_HINH_DON_VI: 'THEM_CAU_HINH_DON_VI',
+  SUA_CAU_HINH_DON_VI: 'SUA_CAU_HINH_DON_VI',
+  XOA_CAU_HINH_DON_VI: 'XOA_CAU_HINH_DON_VI',
 } as const;
 
 export type QuyenHanKey = (typeof QUYEN)[keyof typeof QUYEN] | string;
@@ -18,7 +45,7 @@ export type QuyenHanKey = (typeof QUYEN)[keyof typeof QUYEN] | string;
 class AuthStore {
   isAuthenticated: boolean = false;
   tenNguoiDung: string = '';
-  maDonVi: string = '1';
+  maDonVi: string = null;
   danhSachQuyenHan: string[] = [];
   currentUserProfile: NguoiDungResponse | null = null;
 
@@ -28,7 +55,7 @@ class AuthStore {
     if (savedTenant) {
       this.maDonVi = savedTenant;
     }
-    
+
     // Restore profile and permissions from localStorage on refresh
     const savedProfile = localStorage.getItem('userProfile');
     if (savedProfile) {
@@ -38,7 +65,7 @@ class AuthStore {
         this.isAuthenticated = true;
         const parts = [profile.hoNguoiDung, profile.tenDemNguoiDung, profile.tenNguoiDung];
         this.tenNguoiDung = parts.filter(Boolean).join(' ') || profile.tenDangNhap || '';
-        this.maDonVi = String(profile.idDonVi ?? '1');
+        this.maDonVi = profile.idDonVi ? String(profile.idDonVi) : '';
         this.danhSachQuyenHan = profile.danhSachQuyenPhanGiai ?? [];
       } catch (e) {
         console.error('Failed to parse cached profile', e);
@@ -74,21 +101,30 @@ class AuthStore {
 
   capNhatMaDonVi(maDonVi: string) {
     this.maDonVi = maDonVi;
-    localStorage.setItem('tenantId', maDonVi);
+    if (maDonVi) {
+      localStorage.setItem('tenantId', maDonVi);
+    } else {
+      localStorage.removeItem('tenantId');
+    }
   }
 
   // Nạp toàn bộ hồ sơ cá nhân nhận về từ API /api/auth/me
   napHoSoCaNhan(profile: NguoiDungResponse) {
     this.currentUserProfile = profile;
     this.isAuthenticated = true;
-    
+
     // Nối họ tên đệm và tên người dùng
     const parts = [profile.hoNguoiDung, profile.tenDemNguoiDung, profile.tenNguoiDung];
     this.tenNguoiDung = parts.filter(Boolean).join(' ') || profile.tenDangNhap || '';
-    
-    this.maDonVi = String(profile.idDonVi ?? '1');
+
+    this.maDonVi = profile.idDonVi ? String(profile.idDonVi) : '';
+    if (this.maDonVi) {
+      localStorage.setItem('tenantId', this.maDonVi);
+    } else {
+      localStorage.removeItem('tenantId');
+    }
     this.danhSachQuyenHan = profile.danhSachQuyenPhanGiai ?? [];
-    
+
     // Cache the profile to survive page reload (F5)
     localStorage.setItem('userProfile', JSON.stringify(profile));
   }
@@ -96,8 +132,13 @@ class AuthStore {
   dangNhapThanhCong(token: string, refreshToken: string, tenantId: string) {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('tenantId', tenantId);
-    this.maDonVi = tenantId;
+    if (tenantId) {
+      localStorage.setItem('tenantId', tenantId);
+      this.maDonVi = tenantId;
+    } else {
+      localStorage.removeItem('tenantId');
+      this.maDonVi = '';
+    }
     this.isAuthenticated = true;
   }
 

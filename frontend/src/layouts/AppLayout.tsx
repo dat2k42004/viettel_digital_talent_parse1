@@ -11,7 +11,8 @@ import {
   GlobalOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   UserOutlined, SwapOutlined, LogoutOutlined,
   ToolOutlined, ScanOutlined, BarChartOutlined, SettingOutlined,
-  KeyOutlined, SolutionOutlined, SunOutlined, MoonOutlined
+  KeyOutlined, SolutionOutlined, SunOutlined, MoonOutlined,
+  BankOutlined
 } from '@ant-design/icons';
 import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
@@ -106,11 +107,49 @@ export const AppLayout: React.FC = observer(() => {
           label: <Link to="/reports">Báo cáo thống kê</Link>,
         }
       : null,
-    authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)
+    authStore.kiemTraQuyen([
+      QUYEN.XEM_DON_VI,
+      QUYEN.XEM_PHONG_BAN,
+      QUYEN.XEM_VI_TRI,
+      QUYEN.XEM_DANH_MUC_CAU_HINH,
+      QUYEN.XEM_CAU_HINH_DON_VI
+    ])
       ? {
-          key: '/tenants',
-          icon: <GlobalOutlined />,
-          label: <Link to="/tenants">Đơn vị (SaaS)</Link>,
+          key: 'don-vi',
+          icon: <BankOutlined />,
+          label: 'Quản lý Đơn vị',
+          children: [
+            authStore.kiemTraQuyen(QUYEN.XEM_DON_VI)
+              ? {
+                  key: '/don-vi/don-vi',
+                  label: <Link to="/don-vi/don-vi">Danh sách đơn vị</Link>,
+                }
+              : null,
+            authStore.kiemTraQuyen(QUYEN.XEM_PHONG_BAN)
+              ? {
+                  key: '/don-vi/phong-ban',
+                  label: <Link to="/don-vi/phong-ban">Phòng ban</Link>,
+                }
+              : null,
+            authStore.kiemTraQuyen(QUYEN.XEM_VI_TRI)
+              ? {
+                  key: '/don-vi/vi-tri',
+                  label: <Link to="/don-vi/vi-tri">Vị trí & Kho bãi</Link>,
+                }
+              : null,
+            authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_CAU_HINH)
+              ? {
+                  key: '/don-vi/danh-muc',
+                  label: <Link to="/don-vi/danh-muc">Danh mục hệ thống</Link>,
+                }
+              : null,
+            authStore.kiemTraQuyen(QUYEN.XEM_CAU_HINH_DON_VI)
+              ? {
+                  key: '/don-vi/cau-hinh',
+                  label: <Link to="/don-vi/cau-hinh">Cấu hình đơn vị</Link>,
+                }
+              : null,
+          ].filter(Boolean) as MenuProps['items'],
         }
       : null,
     // Phân hệ Quản lý Người dùng / Hệ thống bảo mật
@@ -118,18 +157,18 @@ export const AppLayout: React.FC = observer(() => {
       ? {
           key: 'security-system',
           icon: <SettingOutlined />,
-          label: 'Hệ thống bảo mật',
+          label: 'Người dùng',
           children: [
             authStore.kiemTraQuyen(QUYEN.XEM_NGUOI_DUNG)
               ? {
-                  key: '/nguoi-dung',
-                  label: <Link to="/nguoi-dung">Quản lý tài khoản</Link>,
+                  key: '/nguoi-dung/nguoi-dung',
+                  label: <Link to="/nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
                 }
               : null,
             authStore.kiemTraQuyen(QUYEN.XEM_VAI_TRO)
               ? {
-                  key: '/vai-tro',
-                  label: <Link to="/vai-tro">Vai trò & Quyền hạn</Link>,
+                  key: '/nguoi-dung/vai-tro',
+                  label: <Link to="/nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
                 }
               : null,
           ].filter(Boolean),
@@ -179,6 +218,11 @@ export const AppLayout: React.FC = observer(() => {
       tenants: 'Cấu hình Đơn vị',
       'nguoi-dung': 'Quản lý tài khoản',
       'vai-tro': 'Vai trò & Quyền hạn',
+      'don-vi': 'Quản lý Đơn vị',
+      'phong-ban': 'Phòng ban',
+      'vi-tri': 'Vị trí & Kho bãi',
+      'danh-muc': 'Danh mục hệ thống',
+      'cau-hinh': 'Cấu hình đơn vị',
     };
     return maps[path] || path;
   };
@@ -204,8 +248,11 @@ export const AppLayout: React.FC = observer(() => {
           collapsed={collapsed}
           onCollapse={setCollapsed}
           width={240}
-          theme="dark"
+          theme={isDarkMode ? 'dark' : 'light'}
           trigger={null}
+          style={{
+            borderRight: isDarkMode ? 'none' : '1px solid #f0f0f0',
+          }}
         >
           <div
             style={{
@@ -214,19 +261,19 @@ export const AppLayout: React.FC = observer(() => {
               alignItems: 'center',
               justifyContent: collapsed ? 'center' : 'flex-start',
               padding: collapsed ? 0 : '0 24px',
-              borderBottom: `1px solid rgba(255,255,255,0.1)`,
+              borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #f0f0f0',
             }}
           >
             {!collapsed && (
-              <Text strong style={{ color: '#fff', fontSize: 16 }}>
+              <Text strong style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 16 }}>
                 ITAM Enterprise
               </Text>
             )}
-            {collapsed && <LaptopOutlined style={{ color: '#fff', fontSize: 20 }} />}
+            {collapsed && <LaptopOutlined style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 20 }} />}
           </div>
 
           <Menu
-            theme="dark"
+            theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
             selectedKeys={[selectedKey]}
             items={menuItems}
@@ -238,12 +285,12 @@ export const AppLayout: React.FC = observer(() => {
           {/* ===== HEADER ===== */}
           <Header
             style={{
-              background: isDarkMode ? token.colorBgContainer : '#fff',
+              background: isDarkMode ? '#141414' : '#fff',
               padding: '0 24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid #f0f0f0',
+              borderBottom: isDarkMode ? '1px solid #303030' : '1px solid #f0f0f0',
               height: 64,
             }}
           >

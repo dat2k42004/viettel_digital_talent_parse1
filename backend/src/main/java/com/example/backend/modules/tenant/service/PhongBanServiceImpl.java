@@ -37,15 +37,23 @@ public class PhongBanServiceImpl implements PhongBanService {
     @Override
     public PageResponse<PhongBanResponse> layDanhSach(String tenPhongBan, String maPhongBan, String trangThai, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
-        if (idDonVi == null) {
-            throw new NghiepVuException("Chỉ admin đơn vị mới được xem phòng ban", 403);
-        }
 
         Specification<PhongBan> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
-            predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+            
+            if (idDonVi == null) {
+                if (trangThai != null && !trangThai.trim().isEmpty()) {
+                    try {
+                        predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                    } catch (IllegalArgumentException e) {
+                        // Ignore
+                    }
+                }
+            } else {
+                predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+                predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+            }
 
             if (tenPhongBan != null && !tenPhongBan.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("tenPhongBan")), "%" + tenPhongBan.trim().toLowerCase() + "%"));

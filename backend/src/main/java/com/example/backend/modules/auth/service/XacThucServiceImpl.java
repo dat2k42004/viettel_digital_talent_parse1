@@ -352,6 +352,7 @@ public class XacThucServiceImpl implements XacThucService {
                 .idDonVi(nguoiDung.getIdDonVi())
                 .idPhongBan(nguoiDung.getIdPhongBan())
                 .tenPhongBan(tenPhongBan)
+                .maNguoiDung(nguoiDung.getMaNguoiDung())
                 .tenDangNhap(nguoiDung.getTenDangNhap())
                 .hoNguoiDung(nguoiDung.getHoNguoiDung())
                 .tenDemNguoiDung(nguoiDung.getTenDemNguoiDung())

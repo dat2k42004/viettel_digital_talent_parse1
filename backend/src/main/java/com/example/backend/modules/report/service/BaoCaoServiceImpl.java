@@ -57,7 +57,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      private void xacThucQuyenNguoiDungCoSo() {
           boolean laQuanTriToanSan = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                     .anyMatch(a -> "XEM_QUAN_TRI_TOAN_SAN".equalsIgnoreCase(a.getAuthority()));
-          if (laQuanTriToanSan) {
+          if (laQuanTriToanSan && DonViContextHolder.getTenantId() != null) {
                throw new NghiepVuException(
                          "Quyền truy cập bị từ chối. Bạn chỉ được phép xem số liệu tổng hợp để bảo mật dữ liệu khách hàng",
                          403);
@@ -75,7 +75,9 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           Specification<BaoCaoTonKho> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
-               predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               if (idDonVi != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               }
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                if (request.getIdViTri() != null) {
@@ -141,7 +143,9 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           Specification<BaoCaoCapPhat> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
-               predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               if (idDonVi != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               }
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                if (request.getIdPhongBan() != null) {
@@ -207,7 +211,9 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           Specification<BaoCaoBaoTri> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
-               predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               if (idDonVi != null) {
+                    predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+               }
                predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                if (request.getTuNgay() != null) {
@@ -313,16 +319,21 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                throw new NghiepVuException("Hệ thống chỉ hỗ trợ xuất file báo cáo định dạng Excel (.xlsx) hoặc PDF (.pdf)", 400);
           }
 
-          String tenDonVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
-                    .map(DonVi::getTenThuongMai)
-                    .orElse("Đơn vị");
+          String tenDonVi = "Tất cả đơn vị";
+          if (idDonVi != null) {
+               tenDonVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
+                         .map(DonVi::getTenThuongMai)
+                         .orElse("Đơn vị");
+          }
 
           try {
                if (request.getIdViTri() != null) {
                     // 1. Phân hệ Tồn Kho
                     Specification<BaoCaoTonKho> spec = (root, query, cb) -> {
                          List<Predicate> predicates = new ArrayList<>();
-                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         if (idDonVi != null) {
+                              predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         }
                          predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                          if (request.getIdViTri() != null) {
@@ -357,7 +368,9 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                     // 2. Phân hệ Cấp Phát Sử Dụng
                     Specification<BaoCaoCapPhat> spec = (root, query, cb) -> {
                          List<Predicate> predicates = new ArrayList<>();
-                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         if (idDonVi != null) {
+                              predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         }
                          predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                          if (request.getIdPhongBan() != null) {
@@ -393,7 +406,9 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                     // 3. Phân hệ Chi Phí Bảo Sửa Tài Sản
                     Specification<BaoCaoBaoTri> spec = (root, query, cb) -> {
                          List<Predicate> predicates = new ArrayList<>();
-                         predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         if (idDonVi != null) {
+                              predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+                         }
                          predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
                          if (request.getTuNgay() != null) {

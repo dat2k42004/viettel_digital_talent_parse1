@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, Typography, message, Space } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { authStore } from '../../../stores/AuthStore';
 import { login, getMyProfile } from '../../../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
+import type { DangNhapRequest } from '../../../api-generated/models/dangNhapRequest';
 import { ForgetPasswordModal } from './ForgetPasswordModal';
 
 const { Title, Text } = Typography;
@@ -17,13 +18,14 @@ export const LoginPage: React.FC = () => {
   const handleDangNhap = async (values: { tenDangNhap: string; matKhau: string }) => {
     setLoading(true);
     try {
-      const res = await login({
+      const loginPayload: DangNhapRequest = {
         username: values.tenDangNhap,
         password: values.matKhau,
-      });
+      };
+      const res = await login(loginPayload);
 
       if (res.data?.accessToken && res.data?.refreshToken) {
-        const idDonViStr = String(res.data.idDonVi || '1');
+        const idDonViStr = res.data.idDonVi ? String(res.data.idDonVi) : '';
         authStore.dangNhapThanhCong(res.data.accessToken, res.data.refreshToken, idDonViStr);
 
         if (res.data.thongTinNguoiDung) {
@@ -108,9 +110,7 @@ export const LoginPage: React.FC = () => {
           </a>
           <Space>
             <Text type="secondary">Chưa có đơn vị?</Text>
-            <a href="#register" onClick={(e) => { e.preventDefault(); message.info('Vui lòng liên hệ Super Admin'); }}>
-              Đăng ký
-            </a>
+            <Link to="/dang-ky">Đăng ký</Link>
           </Space>
         </div>
       </Card>

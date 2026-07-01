@@ -41,7 +41,7 @@ public class PhieuNhapTaiSan extends BaseEntity {
 
      @Column(name = "trang_thai", length = 30)
      @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
-     private com.example.backend.shared.model.TrangThaiPhieuEnum trangThai;
+     private com.example.backend.shared.model.TrangThaiPhieuNhapEnum trangThai;
 
      @Column(name = "ghi_chu", columnDefinition = "TEXT")
      private String ghiChu;

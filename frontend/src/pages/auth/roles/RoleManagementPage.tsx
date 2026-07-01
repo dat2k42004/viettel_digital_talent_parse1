@@ -252,7 +252,7 @@ export const RoleManagementPage: React.FC = observer(() => {
       ),
     },
     {
-      title: 'Tác vụ vai trò',
+      title: 'Hành động',
       key: 'hanhDong',
       render: (_: any, record: VaiTroResponse) => {
         const actItems: MenuProps['items'] = [

@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,7 @@ import com.example.backend.modules.procurement.repository.DonHangMuaSamRepositor
 import com.example.backend.modules.procurement.repository.PhieuNhapTaiSanRepository;
 import com.example.backend.modules.procurement.service.interfaces.PhieuNhapTaiSanService;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
 import com.example.backend.modules.asset.repository.TaiSanPhanMemRepository;
@@ -67,9 +70,30 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      private final TaiSanPhanCungRepository taiSanPhanCungRepository;
      private final TaiSanPhanMemRepository taiSanPhanMemRepository;
 
+     private final com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
+     private final com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
+     private final com.example.backend.modules.asset.repository.LinhKienPhanCungRepository linhKienPhanCungRepository;
+     private final org.springframework.cache.CacheManager cacheManager;
+
      @Autowired
      @Lazy
      private RabbitTemplate rabbitTemplate;
+
+     private Long getRequiredTenantId() {
+          Long tenantId = DonViContextHolder.getTenantId();
+          if (tenantId == null) {
+               throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
+          }
+          return tenantId;
+     }
+
+     private Long getCurrentUserId() {
+          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+          if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
+               return userDetails.getNguoiDung().getId();
+          }
+          throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
+     }
 
      @Override
      @Transactional(readOnly = true)
@@ -105,7 +129,8 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {
                          predicates.add(cb.equal(root.get("trangThai"),
-                                   com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(trangThai.trim())));
+                                   com.example.backend.shared.model.TrangThaiPhieuNhapEnum
+                                             .fromValue(trangThai.trim())));
                     } catch (IllegalArgumentException e) {
                          throw new NghiepVuException(e.getMessage(), 400);
                     }
@@ -142,7 +167,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      @Override
      @Transactional(readOnly = true)
      public PhieuNhapTaiSanResponse layTheoId(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu nhập kho tài sản hợp lệ", 404));
           return mapToResponseWithDetails(pnts);
@@ -151,7 +176,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      @Override
      @Transactional
      public PhieuNhapTaiSanResponse themMoi(PhieuNhapTaiSanRequest request) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
 
           DonHangMuaSam dh = donHangMuaSamRepository
                     .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdDonHangMuaSam(), currentTenantId)
@@ -160,13 +185,13 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           PhieuNhapTaiSan pnts = new PhieuNhapTaiSan();
           pnts.setIdDonVi(currentTenantId);
           pnts.setDonHangMuaSam(dh);
-          pnts.setIdNguoiNhap(request.getIdNguoiNhap());
+          pnts.setIdNguoiNhap(getCurrentUserId());
           pnts.setMaPhieuNhap("PN-" + currentTenantId + "-" + System.currentTimeMillis());
           pnts.setSoHoaDonVat(request.getSoHoaDonVat());
           pnts.setMaBienBanGiaoHang(request.getMaBienBanGiaoHang());
           pnts.setThoiGianNhapKho(
                     request.getThoiGianNhapKho() != null ? request.getThoiGianNhapKho() : LocalDateTime.now());
-          pnts.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI);
+          pnts.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuNhapEnum.TAO_MOI);
           pnts.setGhiChu(request.getGhiChu());
 
           PhieuNhapTaiSan savedPnts = phieuNhapTaiSanRepository.save(pnts);
@@ -233,16 +258,16 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      @Override
      @Transactional
      public PhieuNhapTaiSanResponse capNhat(Long id, PhieuNhapTaiSanRequest request) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin phiếu nhập kho cần chỉnh sửa",
                               404));
 
-          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuNhapEnum.TAO_MOI) {
                throw new NghiepVuException("Chỉ được sửa phiếu nhập tài sản khi ở trạng thái Tạo mới (TAO_MOI)", 400);
           }
 
-          pnts.setIdNguoiNhap(request.getIdNguoiNhap());
+          pnts.setIdNguoiNhap(getCurrentUserId());
           pnts.setSoHoaDonVat(request.getSoHoaDonVat());
           pnts.setMaBienBanGiaoHang(request.getMaBienBanGiaoHang());
           pnts.setThoiGianNhapKho(request.getThoiGianNhapKho());
@@ -285,25 +310,55 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                }
           }
 
+          if (request.getChiTietLinhKien() != null) {
+               for (ChiTietNhapLinhKienRequest lkReq : request.getChiTietLinhKien()) {
+                    ChiTietDonHangPhanCung ctdhPc = chiTietDonHangPhanCungRepository
+                              .findById(lkReq.getIdChiTietDonHangPhanCung()).orElseThrow();
+                    ChiTietNhapLinhKien lk = new ChiTietNhapLinhKien();
+                    lk.setPhieuNhapTaiSan(savedPnts);
+                    lk.setIdTaiSanPhanCung(lkReq.getIdTaiSanPhanCung());
+                    lk.setIdLinhKienPhanCung(lkReq.getIdLinhKienPhanCung());
+                    lk.setChiTietDonHangPhanCung(ctdhPc);
+                    lk.setGiaNhapThucTe(lkReq.getGiaNhapThucTe());
+                    lk.setTinhTrangLucNhap(lkReq.getTinhTrangLucNhap());
+                    chiTietNhapLinhKienRepository.save(lk);
+               }
+          }
+
+          if (request.getChiTietPhanMem() != null) {
+               for (ChiTietNhapPhanMemRequest pmReq : request.getChiTietPhanMem()) {
+                    ChiTietDonHangPhanMem ctdhPm = chiTietDonHangPhanMemRepository
+                              .findById(pmReq.getIdChiTietDonHangPhanMem()).orElseThrow();
+                    ChiTietNhapPhanMem pm = new ChiTietNhapPhanMem();
+                    pm.setPhieuNhapTaiSan(savedPnts);
+                    pm.setIdTaiSanPhanMem(pmReq.getIdTaiSanPhanMem());
+                    pm.setIdDanhSachThietBiPhanMem(pmReq.getIdDanhSachThietBiPhanMem());
+                    pm.setChiTietDonHangPhanMem(ctdhPm);
+                    pm.setSoLuongGheNhap(pmReq.getSoLuongGheNhap());
+                    pm.setGiaNhapThucTe(pmReq.getGiaNhapThucTe());
+                    chiTietNhapPhanMemRepository.save(pm);
+               }
+          }
+
           return mapToResponseWithDetails(savedPnts);
      }
 
      @Override
      @Transactional
      public void capNhatTrangThai(Long id, TrangThaiRequest request) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException(
                               "Không tìm thấy thông tin phiếu nhập cần cập nhật trạng thái", 404));
 
-          com.example.backend.shared.model.TrangThaiPhieuEnum targetStatus;
+          com.example.backend.shared.model.TrangThaiPhieuNhapEnum targetStatus;
           try {
-               targetStatus = com.example.backend.shared.model.TrangThaiPhieuEnum.fromValue(request.getTrangThai());
+               targetStatus = com.example.backend.shared.model.TrangThaiPhieuNhapEnum.fromValue(request.getTrangThai());
           } catch (IllegalArgumentException e) {
                throw new NghiepVuException(e.getMessage(), 400);
           }
 
-          if (targetStatus != com.example.backend.shared.model.TrangThaiPhieuEnum.HOAN_THANH) {
+          if (targetStatus != com.example.backend.shared.model.TrangThaiPhieuNhapEnum.HOAN_THANH) {
                throw new NghiepVuException("Phiếu nhập tài sản chỉ có thể cập nhật trạng thái thành HOAN_THANH", 400);
           }
 
@@ -322,9 +377,49 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                donHangMuaSamRepository.save(dh);
           }
 
-          // đẩy sự kiện đi cập nhật báo cáo tồn kho
+          // Cập nhật trạng thái các thiết bị từ KHOA -> HOAT_DONG
           List<ChiTietNhapPhanCung> pcList = chiTietNhapPhanCungRepository
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapPhanCung pc : pcList) {
+               if (pc.getIdDanhSachThietBiPhanCung() != null) {
+                    thietBiPhanCungRepository.findById(pc.getIdDanhSachThietBiPhanCung()).ifPresent(device -> {
+                         device.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
+                         thietBiPhanCungRepository.save(device);
+                    });
+               }
+          }
+
+          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapLinhKien lk : lkList) {
+               if (lk.getIdLinhKienPhanCung() != null) {
+                    linhKienPhanCungRepository.findById(lk.getIdLinhKienPhanCung()).ifPresent(comp -> {
+                         comp.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
+                         linhKienPhanCungRepository.save(comp);
+                    });
+               }
+          }
+
+          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository
+                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
+          for (ChiTietNhapPhanMem pm : pmList) {
+               if (pm.getIdDanhSachThietBiPhanMem() != null) {
+                    thietBiPhanMemRepository.findById(pm.getIdDanhSachThietBiPhanMem()).ifPresent(soft -> {
+                         soft.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
+                         thietBiPhanMemRepository.save(soft);
+                    });
+               }
+          }
+
+          // Xóa cache của 3 module thiết bị liên quan
+          evictCache("thiet_bi_phan_cung_cache");
+          evictCache("thiet_bi_phan_cung_list_cache");
+          evictCache("thiet_bi_phan_mem_cache");
+          evictCache("thiet_bi_phan_mem_list_cache");
+          evictCache("linh_kien_phan_cung_cache");
+          evictCache("linh_kien_phan_cung_list_cache");
+
+          // đẩy sự kiện đi cập nhật báo cáo tồn kho
           for (ChiTietNhapPhanCung pc : pcList) {
                if (pc.getIdDanhSachThietBiPhanCung() != null) {
                     com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -346,8 +441,6 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                }
           }
 
-          List<ChiTietNhapLinhKien> lkList = chiTietNhapLinhKienRepository
-                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
           for (ChiTietNhapLinhKien lk : lkList) {
                if (lk.getIdLinhKienPhanCung() != null) {
                     com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -368,8 +461,6 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                }
           }
 
-          List<ChiTietNhapPhanMem> pmList = chiTietNhapPhanMemRepository
-                    .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
           for (ChiTietNhapPhanMem pm : pmList) {
                if (pm.getIdDanhSachThietBiPhanMem() != null) {
                     com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -390,14 +481,23 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           }
      }
 
+     private void evictCache(String cacheName) {
+          if (cacheManager != null) {
+               org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
+               if (cache != null) {
+                    cache.clear();
+               }
+          }
+     }
+
      @Override
      @Transactional
      public void xoaMem(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin phiếu nhập cần xóa", 404));
 
-          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuEnum.TAO_MOI) {
+          if (pnts.getTrangThai() != com.example.backend.shared.model.TrangThaiPhieuNhapEnum.TAO_MOI) {
                throw new NghiepVuException("Chỉ được xóa phiếu nhập tài sản khi ở trạng thái Tạo mới", 400);
           }
 

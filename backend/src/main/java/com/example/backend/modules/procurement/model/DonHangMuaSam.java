@@ -44,7 +44,7 @@ public class DonHangMuaSam extends BaseEntity {
      @Column(name = "tong_tien_truoc_thue", precision = 15, scale = 2)
      private BigDecimal tongTienTruocThue;
 
-     @Column(name = "thue_vat", precision = 5, scale = 2)
+     @Column(name = "thue_vat", precision = 15, scale = 2)
      private BigDecimal thueVat;
 
      @Column(name = "tong_tien_sau_thue", precision = 15, scale = 2)

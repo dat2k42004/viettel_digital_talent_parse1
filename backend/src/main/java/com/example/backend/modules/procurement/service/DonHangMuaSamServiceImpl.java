@@ -16,6 +16,7 @@ import com.example.backend.modules.procurement.repository.DonHangMuaSamRepositor
 import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
 import com.example.backend.modules.procurement.service.interfaces.DonHangMuaSamService;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
 import com.example.backend.modules.asset.repository.TaiSanPhanMemRepository;
@@ -52,6 +53,22 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      private final NguoiDungRepository nguoiDungRepository;
      private final TaiSanPhanCungRepository taiSanPhanCungRepository;
      private final TaiSanPhanMemRepository taiSanPhanMemRepository;
+
+     private Long getRequiredTenantId() {
+          Long tenantId = DonViContextHolder.getTenantId();
+          if (tenantId == null) {
+               throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
+          }
+          return tenantId;
+     }
+
+     private Long getCurrentUserId() {
+          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+          if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
+               return userDetails.getNguoiDung().getId();
+          }
+          throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
+     }
 
      @Override
      @Transactional(readOnly = true)
@@ -145,7 +162,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional(readOnly = true)
      public DonHangMuaSamResponse layTheoId(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException(
                               "Không tìm thấy đơn hàng mua sắm hoặc dữ liệu không thuộc quyền quản lý", 404));
@@ -155,7 +172,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional(readOnly = true)
      public List<SelectOption> laySelectOptions() {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           List<DonHangMuaSam> danhSach = donHangMuaSamRepository
                     .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId,
                               com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
@@ -170,7 +187,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional
      public DonHangMuaSamResponse themMoi(DonHangMuaSamRequest request) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
 
           NhaCungCap ncc = nhaCungCapRepository
                     .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdNhaCungCap(), currentTenantId)
@@ -180,8 +197,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           DonHangMuaSam dh = new DonHangMuaSam();
           dh.setIdDonVi(currentTenantId);
           dh.setNhaCungCap(ncc);
-          dh.setIdNguoiLap(request.getIdNguoiLap());
-          dh.setIdNguoiPheDuyet(request.getIdNguoiPheDuyet());
+          dh.setIdNguoiLap(getCurrentUserId());
+          // dh.setIdNguoiPheDuyet(request.getIdNguoiPheDuyet());
           dh.setMaDonHang("PO-" + currentTenantId + "-" + System.currentTimeMillis());
           dh.setSoHopDongDinhKem(request.getSoHopDongDinhKem());
           dh.setTongTienTruocThue(request.getTongTienTruocThue());
@@ -227,7 +244,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional
      public DonHangMuaSamResponse capNhat(Long id, DonHangMuaSamRequest request) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm cần chỉnh sửa",
                               404));
@@ -241,7 +258,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                     .orElseThrow(() -> new NghiepVuException("Nhà cung cấp lựa chọn không tồn tại", 400));
 
           dh.setNhaCungCap(ncc);
-          dh.setIdNguoiLap(request.getIdNguoiLap());
+          dh.setIdNguoiLap(getCurrentUserId());
           dh.setSoHopDongDinhKem(request.getSoHopDongDinhKem());
           dh.setTongTienTruocThue(request.getTongTienTruocThue());
           dh.setThueVat(request.getThueVat());
@@ -299,7 +316,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional
      public void yeuCauPheDuyet(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
 
@@ -315,16 +332,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      @Override
      @Transactional
      public void pheDuyet(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-          Long userId = null;
-          if (authentication != null && authentication
-                    .getPrincipal() instanceof com.example.backend.modules.auth.security.NguoiDungUserDetails userDetails) {
-               userId = userDetails.getNguoiDung().getId();
-          }
-          if (userId == null) {
-               throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
-          }
 
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm", 404));
@@ -335,14 +344,14 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
           }
 
           dh.setTrangThai(com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
-          dh.setIdNguoiPheDuyet(userId);
+          dh.setIdNguoiPheDuyet(getCurrentUserId());
           donHangMuaSamRepository.save(dh);
      }
 
      @Override
      @Transactional
      public void xoaMem(Long id) {
-          Long currentTenantId = DonViContextHolder.getTenantId();
+          Long currentTenantId = getRequiredTenantId();
           DonHangMuaSam dh = donHangMuaSamRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đơn hàng mua sắm cần xóa", 404));
 

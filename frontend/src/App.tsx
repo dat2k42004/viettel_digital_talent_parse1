@@ -5,7 +5,16 @@ import { observer } from 'mobx-react-lite';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/auth/login/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
-import AssetListPage from './pages/asset/AssetListPage';
+import HangSanXuatPage from './pages/asset/hangsanxuat/HangSanXuatPage';
+import LoaiTaiSanPage from './pages/asset/loaitaisan/LoaiTaiSanPage';
+import DanhMucTaiSanPage from './pages/asset/danhmuctaisan/DanhMucTaiSanPage';
+import TaiSanPhanCungPage from './pages/asset/maumataisan/taisanphancung/TaiSanPhanCungPage';
+import TaiSanPhanMemPage from './pages/asset/maumataisan/taisanphanmem/TaiSanPhanMemPage';
+import DanhSachThietBiPhanCungPage from './pages/asset/taisan/danhsachthietbiphancung/DanhSachThietBiPhanCungPage';
+import DanhSachThietBiPhanMemPage from './pages/asset/taisan/danhsachthietbiphanmem/DanhSachThietBiPhanMemPage';
+import LinhKienPhanCungPage from './pages/asset/taisan/linhkienphancung/LinhKienPhanCungPage';
+import DanhMucThuocTinhPage from './pages/asset/danhmucthuoctinh/DanhMucThuocTinhPage';
+import LapRapLinhKienPage from './pages/asset/lapraplinhkien/LapRapLinhKienPage';
 import LifecyclePage from './pages/lifecycle/LifecyclePage';
 import MaintenancePage from './pages/maintenance/MaintenancePage';
 import InventoryPage from './pages/inventory/InventoryPage';
@@ -22,6 +31,9 @@ import PhongBanManagementPage from './pages/tenant/phongban/PhongBanManagementPa
 import ViTriManagementPage from './pages/tenant/vitri/ViTriManagementPage';
 import DanhMucCauHinhPage from './pages/tenant/danhmuc/DanhMucCauHinhPage';
 import CauHinhDonViPage from './pages/tenant/cauhinhdonvi/CauHinhDonViPage';
+import NhaCungCapPage from './pages/procurement/nhacungcap/NhaCungCapPage';
+import DonHangMuaSamPage from './pages/procurement/donhangmuasam/DonHangMuaSamPage';
+import PhieuNhapTaiSanPage from './pages/procurement/phieunhaptaisan/PhieuNhapTaiSanPage';
 import './App.css';
 
 const ProtectedRoute = observer(({ children }: { children: React.ReactNode }) => {
@@ -88,8 +100,44 @@ const router = createBrowserRouter([
         element: <DashboardPage />,
       },
       {
-        path: 'assets',
-        element: <AssetListPage />,
+        path: 'tai-san/hang-san-xuat',
+        element: <HangSanXuatPage />,
+      },
+      {
+        path: 'tai-san/loai-tai-san',
+        element: <LoaiTaiSanPage />,
+      },
+      {
+        path: 'tai-san/danh-muc-tai-san',
+        element: <DanhMucTaiSanPage />,
+      },
+      {
+        path: 'tai-san/mau-ma-tai-san/tai-san-phan-cung',
+        element: <TaiSanPhanCungPage />,
+      },
+      {
+        path: 'tai-san/mau-ma-tai-san/tai-san-phan-mem',
+        element: <TaiSanPhanMemPage />,
+      },
+      {
+        path: 'tai-san/danh-sach-thiet-bi-phan-cung',
+        element: <DanhSachThietBiPhanCungPage />,
+      },
+      {
+        path: 'tai-san/danh-sach-thiet-bi-phan-mem',
+        element: <DanhSachThietBiPhanMemPage />,
+      },
+      {
+        path: 'tai-san/linh-kien-phan-cung',
+        element: <LinhKienPhanCungPage />,
+      },
+      {
+        path: 'tai-san/danh-muc-thuoc-tinh',
+        element: <DanhMucThuocTinhPage />,
+      },
+      {
+        path: 'tai-san/lap-rap-linh-kien',
+        element: <LapRapLinhKienPage />,
       },
       {
         path: 'lifecycle',
@@ -134,6 +182,18 @@ const router = createBrowserRouter([
       {
         path: 'don-vi/cau-hinh',
         element: <CauHinhDonViPage />,
+      },
+      {
+        path: 'mua-sam/nha-cung-cap',
+        element: <NhaCungCapPage />,
+      },
+      {
+        path: 'mua-sam/don-hang-mua-sam',
+        element: <DonHangMuaSamPage />,
+      },
+      {
+        path: 'mua-sam/phieu-nhap-tai-san',
+        element: <PhieuNhapTaiSanPage />,
       },
     ],
   },

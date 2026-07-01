@@ -99,6 +99,7 @@ public class DonViServiceImpl implements DonViService {
         // 2. Tạo Tài khoản Admin Đơn Vị
         NguoiDung admin = new NguoiDung();
         admin.setIdDonVi(donVi.getId());
+        admin.setMaNguoiDung("ND-" + (donVi.getId() == null ? 0 : donVi.getId()) + "-" + System.currentTimeMillis());
         admin.setTenDangNhap(request.getTenDangNhapAdmin());
         admin.setMatKhau(passwordEncoder.encode(request.getMatKhauAdmin()));
         admin.setTenNguoiDung(request.getTenAdmin());

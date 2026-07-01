@@ -304,7 +304,7 @@ export const UserManagementPage: React.FC = observer(() => {
       },
     },
     {
-      title: 'Thao tác tác vụ',
+      title: 'Hành động',
       key: 'hanhDong',
       render: (_: any, record: NguoiDungResponse) => {
         const coQuyenTacDong = true;

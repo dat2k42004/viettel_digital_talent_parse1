@@ -11,6 +11,6 @@ export interface PageInfo {
   page_size?: number;
   total_elements?: number;
   total_pages?: number;
-  is_first?: boolean;
   is_last?: boolean;
+  is_first?: boolean;
 }

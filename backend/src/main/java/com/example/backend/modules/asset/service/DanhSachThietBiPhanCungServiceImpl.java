@@ -161,9 +161,6 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException(
                         "Không tìm thấy thiết bị phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
-        if (thietBi.getTrangThai() != com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG) {
-            throw new NghiepVuException("Thiết bị phần cứng hiện đang bị khóa hoặc ngừng hoạt động", 400);
-        }
         return mapToResponse(thietBi);
     }
 
@@ -180,6 +177,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         DanhSachThietBiPhanCung thietBi = new DanhSachThietBiPhanCung();
         thietBi.setIdDonVi(idDonVi);
         capNhatThongTin(thietBi, request);
+        thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA);
         thietBi.setMaTheTaiSan("TS-" + idDonVi + "-" + System.currentTimeMillis());
         thietBi = thietBiPhanCungRepository.save(thietBi);
 
@@ -246,7 +244,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA));
         return thietBiPhanCungRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
@@ -267,11 +265,15 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         thietBi.setHanBaoHanhThang(request.getHanBaoHanhThang());
         thietBi.setTrangThaiKho(request.getTrangThaiKho() != null ? request.getTrangThaiKho().trim() : null);
         thietBi.setViTriKho(request.getViTriKho() != null ? request.getViTriKho().trim() : null);
-        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
-        try {
-            thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(statusStr));
-        } catch (IllegalArgumentException e) {
-            throw new NghiepVuException(e.getMessage(), 400);
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : null;
+        if (statusStr != null) {
+            try {
+                thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(statusStr));
+            } catch (IllegalArgumentException e) {
+                throw new NghiepVuException(e.getMessage(), 400);
+            }
+        } else if (thietBi.getTrangThai() == null) {
+            thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA);
         }
     }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Layout, Menu, Button, Dropdown, Avatar, Space,
   Typography, Breadcrumb, theme, Badge, Modal, Form, Input, Descriptions, message, Tag, ConfigProvider, Tooltip
@@ -6,16 +6,18 @@ import {
 import type { MenuProps } from 'antd';
 import { observer } from 'mobx-react-lite';
 import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
-import {
+import Icon, {
   DashboardOutlined, FileTextOutlined, LaptopOutlined,
-  GlobalOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
-  UserOutlined, SwapOutlined, LogoutOutlined,
+  MenuFoldOutlined, MenuUnfoldOutlined,
+  UserOutlined, LogoutOutlined,
   ToolOutlined, ScanOutlined, BarChartOutlined, SettingOutlined,
   KeyOutlined, SolutionOutlined, SunOutlined, MoonOutlined,
-  BankOutlined
+  BankOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons';
 import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
+import ItamIcon from '../assets/icon.png';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -27,7 +29,16 @@ export const AppLayout: React.FC = observer(() => {
   const navigate = useNavigate();
 
   // Trạng thái giao diện tối (Dark Mode)
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    const savedTheme = localStorage.getItem("themeMode");
+    return savedTheme === "dark";
+  })
+
+  const handleToggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem("themeMode", newMode ? "dark" : "light");
+  }
 
 
 
@@ -72,41 +83,142 @@ export const AppLayout: React.FC = observer(() => {
       icon: <DashboardOutlined />,
       label: <Link to="/">Tổng quan</Link>,
     },
-    authStore.kiemTraQuyen([QUYEN.XEM_BAO_CAO, QUYEN.THAO_TAC_TAI_SAN])
+    authStore.kiemTraQuyen([
+      QUYEN.XEM_HANG_SAN_XUAT,
+      QUYEN.XEM_LOAI_TAI_SAN,
+      QUYEN.XEM_DANH_MUC_TAI_SAN,
+      QUYEN.XEM_TAI_SAN_PHAN_CUNG,
+      QUYEN.XEM_TAI_SAN_PHAN_MEM,
+      QUYEN.XEM_THIET_BI_PHAN_CUNG,
+      QUYEN.XEM_THIET_BI_PHAN_MEM,
+      QUYEN.XEM_LINH_KIEN_PHAN_CUNG,
+      QUYEN.XEM_DANH_MUC_THUOC_TINH,
+      QUYEN.XEM_LAP_RAP_LINH_KIEN,
+    ])
       ? {
-          key: '/assets',
-          icon: <LaptopOutlined />,
-          label: <Link to="/assets">Quản lý tài sản</Link>,
-        }
+        key: '/tai-san',
+        icon: <LaptopOutlined />,
+        label: 'Quản lý Tài sản',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.XEM_HANG_SAN_XUAT)
+            ? {
+              key: '/tai-san/hang-san-xuat',
+              label: <Link to="/tai-san/hang-san-xuat">Hãng sản xuất</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_LOAI_TAI_SAN)
+            ? {
+              key: '/tai-san/loai-tai-san',
+              label: <Link to="/tai-san/loai-tai-san">Loại tài sản</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_TAI_SAN)
+            ? {
+              key: '/tai-san/danh-muc-tai-san',
+              label: <Link to="/tai-san/danh-muc-tai-san">Danh mục tài sản</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_CUNG)
+            ? {
+              key: '/tai-san/mau-ma-tai-san/tai-san-phan-cung',
+              label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-cung">Mẫu mã phần cứng</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_MEM)
+            ? {
+              key: '/tai-san/mau-ma-tai-san/tai-san-phan-mem',
+              label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-mem">Mẫu mã phần mềm</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_CUNG)
+            ? {
+              key: '/tai-san/danh-sach-thiet-bi-phan-cung',
+              label: <Link to="/tai-san/danh-sach-thiet-bi-phan-cung">Thiết bị phần cứng</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_MEM)
+            ? {
+              key: '/tai-san/danh-sach-thiet-bi-phan-mem',
+              label: <Link to="/tai-san/danh-sach-thiet-bi-phan-mem">Thiết bị phần mềm</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_LINH_KIEN_PHAN_CUNG)
+            ? {
+              key: '/tai-san/linh-kien-phan-cung',
+              label: <Link to="/tai-san/linh-kien-phan-cung">Linh kiện phần cứng</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_THUOC_TINH)
+            ? {
+              key: '/tai-san/danh-muc-thuoc-tinh',
+              label: <Link to="/tai-san/danh-muc-thuoc-tinh">Danh mục thuộc tính</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_LAP_RAP_LINH_KIEN)
+            ? {
+              key: '/tai-san/lap-rap-linh-kien',
+              label: <Link to="/tai-san/lap-rap-linh-kien">Lắp ráp linh kiện</Link>,
+            }
+            : null,
+        ].filter(Boolean) as MenuProps['items'],
+      }
       : null,
     authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
       ? {
-          key: '/lifecycle',
-          icon: <FileTextOutlined />,
-          label: <Link to="/lifecycle">Vòng đời tài sản</Link>,
-        }
+        key: '/lifecycle',
+        icon: <FileTextOutlined />,
+        label: <Link to="/lifecycle">Vòng đời tài sản</Link>,
+      }
       : null,
     authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
       ? {
-          key: '/maintenance',
-          icon: <ToolOutlined />,
-          label: <Link to="/maintenance">Bảo trì & Bảo hành</Link>,
-        }
+        key: '/maintenance',
+        icon: <ToolOutlined />,
+        label: <Link to="/maintenance">Bảo trì & Bảo hành</Link>,
+      }
       : null,
     authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
       ? {
-          key: '/inventory',
-          icon: <ScanOutlined />,
-          label: <Link to="/inventory">Đối soát kiểm kê</Link>,
-        }
+        key: '/inventory',
+        icon: <ScanOutlined />,
+        label: <Link to="/inventory">Đối soát kiểm kê</Link>,
+      }
       : null,
     authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)
       ? {
-          key: '/reports',
-          icon: <BarChartOutlined />,
-          label: <Link to="/reports">Báo cáo thống kê</Link>,
-        }
+        key: '/reports',
+        icon: <BarChartOutlined />,
+        label: <Link to="/reports">Báo cáo thống kê</Link>,
+      }
       : null,
+    // Phân hệ quản lý mua sắm
+    authStore.kiemTraQuyen([QUYEN.XEM_NHA_CUNG_CAP,
+    QUYEN.XEM_DON_HANG_MUA_SAM,
+    QUYEN.XEM_PHIEU_NHAP_TAI_SAN]) ? {
+      key: 'procurement-module',
+      icon: <ShoppingCartOutlined />,
+      label: 'Quản lý mua sắm',
+      children: [
+        authStore.kiemTraQuyen(QUYEN.XEM_NHA_CUNG_CAP) ? {
+          key: '/mua-sam/nha-cung-cap',
+          // icon: <ShopOutlined />,
+          label: 'Nhà cung cấp',
+          onClick: () => navigate('/mua-sam/nha-cung-cap'),
+        } : null,
+        authStore.kiemTraQuyen(QUYEN.XEM_DON_HANG_MUA_SAM) ? {
+          key: '/mua-sam/don-hang-mua-sam',
+          // icon: <FileDoneOutlined />,
+          label: 'Đơn hàng mua sắm',
+          onClick: () => navigate('/mua-sam/don-hang-mua-sam'),
+        } : null,
+        authStore.kiemTraQuyen(QUYEN.XEM_PHIEU_NHAP_TAI_SAN) ? {
+          key: '/mua-sam/phieu-nhap-tai-san',
+          // icon: <InboxOutlined />,
+          label: 'Phiếu nhập tài sản',
+          onClick: () => navigate('/mua-sam/phieu-nhap-tai-san'),
+        } : null,
+      ].filter(Boolean),
+    } : null,
     authStore.kiemTraQuyen([
       QUYEN.XEM_DON_VI,
       QUYEN.XEM_PHONG_BAN,
@@ -115,64 +227,64 @@ export const AppLayout: React.FC = observer(() => {
       QUYEN.XEM_CAU_HINH_DON_VI
     ])
       ? {
-          key: 'don-vi',
-          icon: <BankOutlined />,
-          label: 'Quản lý Đơn vị',
-          children: [
-            authStore.kiemTraQuyen(QUYEN.XEM_DON_VI)
-              ? {
-                  key: '/don-vi/don-vi',
-                  label: <Link to="/don-vi/don-vi">Danh sách đơn vị</Link>,
-                }
-              : null,
-            authStore.kiemTraQuyen(QUYEN.XEM_PHONG_BAN)
-              ? {
-                  key: '/don-vi/phong-ban',
-                  label: <Link to="/don-vi/phong-ban">Phòng ban</Link>,
-                }
-              : null,
-            authStore.kiemTraQuyen(QUYEN.XEM_VI_TRI)
-              ? {
-                  key: '/don-vi/vi-tri',
-                  label: <Link to="/don-vi/vi-tri">Vị trí & Kho bãi</Link>,
-                }
-              : null,
-            authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_CAU_HINH)
-              ? {
-                  key: '/don-vi/danh-muc',
-                  label: <Link to="/don-vi/danh-muc">Danh mục hệ thống</Link>,
-                }
-              : null,
-            authStore.kiemTraQuyen(QUYEN.XEM_CAU_HINH_DON_VI)
-              ? {
-                  key: '/don-vi/cau-hinh',
-                  label: <Link to="/don-vi/cau-hinh">Cấu hình đơn vị</Link>,
-                }
-              : null,
-          ].filter(Boolean) as MenuProps['items'],
-        }
+        key: 'don-vi',
+        icon: <BankOutlined />,
+        label: 'Quản lý Đơn vị',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.XEM_DON_VI)
+            ? {
+              key: '/don-vi/don-vi',
+              label: <Link to="/don-vi/don-vi">Danh sách đơn vị</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_PHONG_BAN)
+            ? {
+              key: '/don-vi/phong-ban',
+              label: <Link to="/don-vi/phong-ban">Phòng ban</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_VI_TRI)
+            ? {
+              key: '/don-vi/vi-tri',
+              label: <Link to="/don-vi/vi-tri">Vị trí & Kho bãi</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_CAU_HINH)
+            ? {
+              key: '/don-vi/danh-muc',
+              label: <Link to="/don-vi/danh-muc">Danh mục hệ thống</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_CAU_HINH_DON_VI)
+            ? {
+              key: '/don-vi/cau-hinh',
+              label: <Link to="/don-vi/cau-hinh">Cấu hình đơn vị</Link>,
+            }
+            : null,
+        ].filter(Boolean) as MenuProps['items'],
+      }
       : null,
     // Phân hệ Quản lý Người dùng / Hệ thống bảo mật
     authStore.kiemTraQuyen([QUYEN.XEM_NGUOI_DUNG, QUYEN.XEM_VAI_TRO])
       ? {
-          key: 'security-system',
-          icon: <SettingOutlined />,
-          label: 'Người dùng',
-          children: [
-            authStore.kiemTraQuyen(QUYEN.XEM_NGUOI_DUNG)
-              ? {
-                  key: '/nguoi-dung/nguoi-dung',
-                  label: <Link to="/nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
-                }
-              : null,
-            authStore.kiemTraQuyen(QUYEN.XEM_VAI_TRO)
-              ? {
-                  key: '/nguoi-dung/vai-tro',
-                  label: <Link to="/nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
-                }
-              : null,
-          ].filter(Boolean),
-        }
+        key: 'security-system',
+        icon: <SettingOutlined />,
+        label: 'Người dùng',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.XEM_NGUOI_DUNG)
+            ? {
+              key: '/nguoi-dung/nguoi-dung',
+              label: <Link to="/nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_VAI_TRO)
+            ? {
+              key: '/nguoi-dung/vai-tro',
+              label: <Link to="/nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
+            }
+            : null,
+        ].filter(Boolean),
+      }
       : null,
   ].filter(Boolean) as MenuProps['items'];
 
@@ -211,6 +323,21 @@ export const AppLayout: React.FC = observer(() => {
   const translatePath = (path: string) => {
     const maps: Record<string, string> = {
       assets: 'Quản lý tài sản',
+      'tai-san': 'Quản lý Tài sản',
+      'hang-san-xuat': 'Hãng sản xuất',
+      'loai-tai-san': 'Loại tài sản',
+      'danh-muc-tai-san': 'Danh mục tài sản',
+      'mau-ma-tai-san': 'Mẫu mã tài sản',
+      'tai-san-phan-cung': 'Mẫu mã phần cứng',
+      'tai-san-phan-mem': 'Mẫu mã phần mềm',
+      'danh-sach-thiet-bi-phan-cung': 'Thiết bị phần cứng',
+      'danh-sach-thiet-bi-phan-mem': 'Thiết bị phần mềm',
+      'linh-kien-phan-cung': 'Linh kiện phần cứng',
+      'danh-muc-thuoc-tinh': 'Danh mục thuộc tính',
+      'lap-rap-linh-kien': 'Lắp ráp linh kiện',
+      'nha-cung-cap': 'Nhà cung cấp',
+      'don-hang-mua-sam': 'Đơn hàng mua săm',
+      'phieu-nhap-tai-san': 'Phiếu nhập tài sản',
       lifecycle: 'Vòng đời tài sản',
       maintenance: 'Bảo trì & Bảo hành',
       inventory: 'Đối soát kiểm kê',
@@ -265,17 +392,30 @@ export const AppLayout: React.FC = observer(() => {
             }}
           >
             {!collapsed && (
-              <Text strong style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 16 }}>
-                ITAM Enterprise
-              </Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
+                <img
+                  src={ItamIcon} // Nhớ trỏ đúng biến import ảnh của cậu nhé
+                  alt="ITAM Logo"
+                  style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
+                />
+                <Text strong style={{ fontSize: 24, margin: 0 }}>
+                  ITAM
+                </Text>
+              </div>
             )}
-            {collapsed && <LaptopOutlined style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 20 }} />}
+            {collapsed && <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
+              <img
+                src={ItamIcon} // Nhớ trỏ đúng biến import ảnh của cậu nhé
+                alt="ITAM Logo"
+                style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
+              />
+            </div>}
           </div>
 
           <Menu
             theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
-            selectedKeys={[selectedKey]}
+            selectedKeys={[location.pathname, selectedKey]}
             items={menuItems}
             style={{ borderRight: 0, marginTop: 8 }}
           />
@@ -311,7 +451,7 @@ export const AppLayout: React.FC = observer(() => {
                 <Button
                   type="text"
                   icon={isDarkMode ? <SunOutlined style={{ color: '#fadb14', fontSize: 16 }} /> : <MoonOutlined style={{ fontSize: 16 }} />}
-                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  onClick={handleToggleTheme}
                 />
               </Tooltip>
 

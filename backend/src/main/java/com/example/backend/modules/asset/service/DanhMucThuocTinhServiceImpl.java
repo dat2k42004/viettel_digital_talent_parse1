@@ -228,8 +228,9 @@ public class DanhMucThuocTinhServiceImpl implements DanhMucThuocTinhService {
         ent.setApDungCho(request.getApDungCho().trim());
         ent.setBatBuocNhap(request.getBatBuocNhap());
         ent.setGiaTriMacDinh(request.getGiaTriMacDinh() != null ? request.getGiaTriMacDinh().trim() : null);
+        String statusStr = request.getTrangThai() != null ? request.getTrangThai().trim() : "HOAT_DONG";
         try {
-            ent.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(request.getTrangThai().trim()));
+            ent.setTrangThai(com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(statusStr));
         } catch (IllegalArgumentException e) {
             throw new NghiepVuException(e.getMessage(), 400);
         }

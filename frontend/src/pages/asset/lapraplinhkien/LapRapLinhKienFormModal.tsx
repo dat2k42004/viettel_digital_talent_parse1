@@ -3,7 +3,7 @@ import { Modal, Form, Input, Button, Row, Col, Select, message } from 'antd';
 import type { LapRapLinhKienRequest } from '../../../api-generated/models/lapRapLinhKienRequest';
 import type { SelectOption } from '../../../api-generated/models/selectOption';
 import { laySelectOptions1 } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
-import { laySelectOptions6 } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
+import { laySelectOptions8 } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
 
 interface LapRapFormModalProps {
   open: boolean;
@@ -28,7 +28,7 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
       try {
         const [tbRes, lkRes] = await Promise.all([
           laySelectOptions1(),
-          laySelectOptions6(),
+          laySelectOptions8(),
         ]);
         if (tbRes.data) setThietBiOptions(tbRes.data);
         if (lkRes.data) setLinhKienOptions(lkRes.data);

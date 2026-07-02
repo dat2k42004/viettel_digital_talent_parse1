@@ -197,6 +197,8 @@ export * from './layDanhSach27Params';
 export * from './layDanhSach28Params';
 export * from './layDanhSach29Params';
 export * from './layDanhSachParams';
+export * from './laySelectOptions4Params';
+export * from './laySelectOptions6Params';
 export * from './layTaiSanTheoPhongBanParams';
 export * from './layTongHopToanSanSuperAdminParams';
 export * from './linhKienPhanCungRequest';

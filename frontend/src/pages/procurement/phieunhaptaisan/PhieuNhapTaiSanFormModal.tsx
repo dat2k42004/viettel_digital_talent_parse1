@@ -7,12 +7,12 @@ import type { PhieuNhapTaiSanRequest } from '../../../api-generated/models/phieu
 import type { SelectOption } from '../../../api-generated/models/selectOption';
 
 // TODO: Đổi tên import khớp với hàm Orval sinh ra
-import { laySelectOptions8 as layDonHangOptions, layTheoId22 as layDonHangChiTiet } from '../../../api-generated/endpoints/don-hang-mua-sam-controller/don-hang-mua-sam-controller';
+import { laySelectOptions10 as layDonHangOptions, layTheoId22 as layDonHangChiTiet } from '../../../api-generated/endpoints/don-hang-mua-sam-controller/don-hang-mua-sam-controller';
 import { laySelectOptions3 as layPhanCungOptions } from '../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
 import { laySelectOptions2 as layPhanMemOptions } from '../../../api-generated/endpoints/tai-san-phan-mem-controller/tai-san-phan-mem-controller';
 import { laySelectOptions1 as layThietBiPhanCungOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
 import { laySelectOptions as layThietBiPhanMemOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-mem-controller/danh-sach-thiet-bi-phan-mem-controller';
-import { laySelectOptions6 as layThietBiLinhKienOptions } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
+import { laySelectOptions8 as layThietBiLinhKienOptions } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
 import type { ChiTietDonHangGeneralResponse } from '../../../api-generated/models/chiTietDonHangGeneralResponse';
 
 interface PhieuNhapTaiSanFormModalProps {

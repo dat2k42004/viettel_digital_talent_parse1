@@ -29,7 +29,12 @@ VALUES
 (NULL, 'NHOM_PHIEU_SUA_CHUA', 'Phiếu sửa chữa bảo trì', 'NHOM_QUYEN', NULL, NULL, 18, NULL, 'HOAT_DONG', NOW(), NOW()),
 (NULL, 'NHOM_DOT_KIEM_KE', 'Đợt kiểm kê', 'NHOM_QUYEN', NULL, NULL, 19, NULL, 'HOAT_DONG', NOW(), NOW()),
 (NULL, 'NHOM_PHIEU_KIEM_KE', 'Phiếu kiểm kê phòng ban', 'NHOM_QUYEN', NULL, NULL, 20, NULL, 'HOAT_DONG', NOW(), NOW()),
-(NULL, 'NHOM_BAO_CAO_THONG_KE', 'Báo cáo và Thống kê', 'NHOM_QUYEN', NULL, NULL, 21, NULL, 'HOAT_DONG', NOW(), NOW());
+(NULL, 'NHOM_BAO_CAO_THONG_KE', 'Báo cáo và Thống kê', 'NHOM_QUYEN', NULL, NULL, 21, NULL, 'HOAT_DONG', NOW(), NOW()),
+(NULL, 'NHOM_DANH_MUC_CAU_HINH', 'Danh mục cấu hình', 'NHOM_QUYEN', NULL, NULL, 22, NULL, 'HOAT_DONG', NOW(), NOW()),
+(NULL, 'NHOM_HANG_SAN_XUAT', 'Hãng sản xuất', 'NHOM_QUYEN', NULL, NULL, 23, NULL, 'HOAT_DONG', NOW(), NOW()),
+(NULL, 'NHOM_LOAI_TAI_SAN', 'Loại tài sản', 'NHOM_QUYEN', NULL, NULL, 24, NULL, 'HOAT_DONG', NOW(), NOW()),
+(NULL, 'NHOM_DANH_MUC_THUOC_TINH', 'Danh mục thuộc tính', 'NHOM_QUYEN', NULL, NULL, 25, NULL, 'HOAT_DONG', NOW(), NOW()),
+(NULL, 'NHOM_LAP_RAP_LINH_KIEN', 'Lắp ráp linh kiện', 'NHOM_QUYEN', NULL, NULL, 26, NULL, 'HOAT_DONG', NOW(), NOW());
 
 -- =======================================================================
 -- BƯỚC 2: KHỞI TẠO 154 BẢN GHI QUYỀN CON THAO TÁC (TỰ ĐỘNG TĂNG ID)

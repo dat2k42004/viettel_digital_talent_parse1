@@ -7,7 +7,7 @@ import type { DonHangMuaSamRequest } from '../../../api-generated/models/donHang
 import type { SelectOption } from '../../../api-generated/models/selectOption';
 
 // Chú ý: Đổi tên hàm import sao cho khớp với file endpoint sinh ra từ Orval
-import { laySelectOptions4 as layNccOptions } from '../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { laySelectOptions5 as layNccOptions } from '../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
 import { laySelectOptions3 as layPhanCungOptions } from '../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
 import { laySelectOptions2 as layPhanMemOptions } from '../../../api-generated/endpoints/tai-san-phan-mem-controller/tai-san-phan-mem-controller';
 

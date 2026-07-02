@@ -27,9 +27,9 @@ public class PhieuThanhLyTaiSanController {
                @RequestParam(required = false) LocalDate denNgay,
                @RequestParam(defaultValue = "0") int page,
                @RequestParam(defaultValue = "10") int size,
-               @RequestParam(defaultValue = "id,desc") String sort
-     ) {
-          return ApiResponse.success(phieuThanhLyTaiSanService.layDanhSach(trangThai, tuNgay, denNgay, page, size, sort));
+               @RequestParam(defaultValue = "id,desc") String sort) {
+          return ApiResponse
+                    .success(phieuThanhLyTaiSanService.layDanhSach(trangThai, tuNgay, denNgay, page, size, sort));
      }
 
      @GetMapping("/{id}")
@@ -48,8 +48,7 @@ public class PhieuThanhLyTaiSanController {
      @PreAuthorize("hasAuthority('SUA_PHIEU_THANH_LY')")
      public ApiResponse<PhieuThanhLyTaiSanResponse> capNhat(
                @PathVariable Long id,
-               @Valid @RequestBody PhieuThanhLyTaiSanRequest request
-     ) {
+               @Valid @RequestBody PhieuThanhLyTaiSanRequest request) {
           return ApiResponse.success(phieuThanhLyTaiSanService.capNhat(id, request));
      }
 
@@ -82,11 +81,10 @@ public class PhieuThanhLyTaiSanController {
      }
 
      @PutMapping("/{id}/tu-choi")
-     @PreAuthorize("hasAuthority('THAO_TAC_TAI_SAN')")
+     @PreAuthorize("hasAuthority('PHE_DUYET_THANH_LY')")
      public ApiResponse<String> tuChoiPheDuyet(
                @PathVariable Long id,
-               @RequestParam String lyDoTuChoi
-     ) {
+               @RequestParam String lyDoTuChoi) {
           phieuThanhLyTaiSanService.tuChoiPheDuyet(id, lyDoTuChoi);
           return ApiResponse.success("Từ chối phê duyệt phiếu thanh lý thành công");
      }

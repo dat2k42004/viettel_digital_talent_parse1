@@ -32,4 +32,6 @@ public interface NguoiDungService {
     java.util.List<String> resolveAndCacheUserPermissions(Long userId);
 
     void thuHoiPhien(Long id);
+
+    java.util.List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan);
 }

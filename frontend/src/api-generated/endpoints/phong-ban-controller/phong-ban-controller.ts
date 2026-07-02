@@ -6,10 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  ApiResponseListSelectOption,
   ApiResponsePageResponsePhongBanResponse,
   ApiResponsePhongBanResponse,
   ApiResponseString,
   LayDanhSach6Params,
+  LaySelectOptions4Params,
   PhongBanRequest,
   TrangThaiRequest
 } from '../../models';
@@ -75,9 +77,19 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
     },
       );
     }
+  export const laySelectOptions4 = (
+    params?: LaySelectOptions4Params,
+ ) => {
+      return customAxiosInstance<ApiResponseListSelectOption>(
+      {url: `/api/phong-ban/select-options`, method: 'GET',
+        params
+    },
+      );
+    }
   export type LayTheoId6Result = NonNullable<Awaited<ReturnType<typeof layTheoId6>>>
 export type CapNhat6Result = NonNullable<Awaited<ReturnType<typeof capNhat6>>>
 export type XoaMem6Result = NonNullable<Awaited<ReturnType<typeof xoaMem6>>>
 export type CapNhatTrangThai6Result = NonNullable<Awaited<ReturnType<typeof capNhatTrangThai6>>>
 export type LayDanhSach6Result = NonNullable<Awaited<ReturnType<typeof layDanhSach6>>>
 export type ThemMoi6Result = NonNullable<Awaited<ReturnType<typeof themMoi6>>>
+export type LaySelectOptions4Result = NonNullable<Awaited<ReturnType<typeof laySelectOptions4>>>

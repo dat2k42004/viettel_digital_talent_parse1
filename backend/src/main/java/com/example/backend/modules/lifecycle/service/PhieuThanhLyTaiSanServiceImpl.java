@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -55,7 +56,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
      @Autowired
      @Lazy
-     private RabbitTemplate rabbitTemplate;
+     private final RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -167,6 +168,11 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
      @Override
      @Transactional
+     @CacheEvict(value = {
+               "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+               "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+               "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+     }, allEntries = true)
      public PhieuThanhLyTaiSanResponse themMoi(PhieuThanhLyTaiSanRequest request) {
           Long tenantId = getRequiredTenantId();
           Long userId = getCurrentUserId();
@@ -269,6 +275,11 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
      @Override
      @Transactional
+     @CacheEvict(value = {
+               "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+               "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+               "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+     }, allEntries = true)
      public PhieuThanhLyTaiSanResponse capNhat(Long id, PhieuThanhLyTaiSanRequest request) {
           Long tenantId = getRequiredTenantId();
           PhieuThanhLyTaiSan phieu = phieuThanhLyTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
@@ -428,6 +439,11 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
      @Override
      @Transactional
+     @CacheEvict(value = {
+               "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+               "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+               "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+     }, allEntries = true)
      public void xoaMem(Long id) {
           Long tenantId = getRequiredTenantId();
           PhieuThanhLyTaiSan phieu = phieuThanhLyTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
@@ -522,6 +538,11 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
      // ==========================================================
      @Override
      @Transactional
+     @CacheEvict(value = {
+               "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+               "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+               "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+     }, allEntries = true)
      public void hoanThanh(Long id) {
           Long tenantId = getRequiredTenantId();
           PhieuThanhLyTaiSan phieu = phieuThanhLyTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
@@ -622,6 +643,11 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
      @Override
      @Transactional
+     @CacheEvict(value = {
+               "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+               "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+               "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+     }, allEntries = true)
      public void tuChoiPheDuyet(Long id, String lyDoTuChoi) {
           Long idDonVi = getRequiredTenantId();
           PhieuThanhLyTaiSan phieu = phieuThanhLyTaiSanRepository

@@ -56,7 +56,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
 
      @Autowired
      @Lazy
-     private RabbitTemplate rabbitTemplate;
+     private final RabbitTemplate rabbitTemplate;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -537,7 +537,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           // đẩy sự kiện xuống queue để thực hiện cập nhật bao cáo cấp phát
           for (ChiTietDieuChuyenPhanCung pc : pcDetails) {
                if (pc.getTrangThaiNhan() == null || pc.getTrangThaiNhan().trim().isEmpty()) {
-                    pc.setTrangThaiNhan("Đã nhận bàn giao thiết bị phần cứng từ điều chuyển");
+                    pc.setTrangThaiNhan(pc.getTrangThaiXuat());
                }
                chiTietDieuChuyenPhanCungRepository.save(pc);
 
@@ -574,7 +574,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           // 6.2: Điều chuyển linh kiện rời và phát hành thông điệp
           for (ChiTietDieuChuyenLinhKien lk : lkDetails) {
                if (lk.getTrangThaiNhan() == null || lk.getTrangThaiNhan().trim().isEmpty()) {
-                    lk.setTrangThaiNhan("Đã nhận bàn giao linh kiện từ điều chuyển");
+                    lk.setTrangThaiNhan(lk.getTrangThaiXuat());
                }
                chiTietDieuChuyenLinhKienRepository.save(lk);
 

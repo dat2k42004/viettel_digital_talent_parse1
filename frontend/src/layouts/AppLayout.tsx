@@ -18,6 +18,7 @@ import Icon, {
 import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 import ItamIcon from '../assets/icon.png';
+import { keys } from 'mobx';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -84,77 +85,88 @@ export const AppLayout: React.FC = observer(() => {
       label: <Link to="/">Tổng quan</Link>,
     },
     authStore.kiemTraQuyen([
-      QUYEN.XEM_HANG_SAN_XUAT,
-      QUYEN.XEM_LOAI_TAI_SAN,
-      QUYEN.XEM_DANH_MUC_TAI_SAN,
-      QUYEN.XEM_TAI_SAN_PHAN_CUNG,
-      QUYEN.XEM_TAI_SAN_PHAN_MEM,
-      QUYEN.XEM_THIET_BI_PHAN_CUNG,
-      QUYEN.XEM_THIET_BI_PHAN_MEM,
-      QUYEN.XEM_LINH_KIEN_PHAN_CUNG,
-      QUYEN.XEM_DANH_MUC_THUOC_TINH,
-      QUYEN.XEM_LAP_RAP_LINH_KIEN,
+      QUYEN.NHOM_HANG_SAN_XUAT,
+      QUYEN.NHOM_LOAI_TAI_SAN,
+      QUYEN.NHOM_DANH_MUC_TAI_SAN,
+      QUYEN.NHOM_MAU_TAI_SAN,
+      QUYEN.NHOM_THIET_BI_THUC_THE,
+      QUYEN.NHOM_DANH_MUC_THUOC_TINH,
+      QUYEN.NHOM_LAP_RAP_LINH_KIEN,
     ])
       ? {
         key: '/tai-san',
         icon: <LaptopOutlined />,
         label: 'Quản lý Tài sản',
         children: [
-          authStore.kiemTraQuyen(QUYEN.XEM_HANG_SAN_XUAT)
+          authStore.kiemTraQuyen(QUYEN.NHOM_HANG_SAN_XUAT)
             ? {
               key: '/tai-san/hang-san-xuat',
               label: <Link to="/tai-san/hang-san-xuat">Hãng sản xuất</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_LOAI_TAI_SAN)
+          authStore.kiemTraQuyen(QUYEN.NHOM_LOAI_TAI_SAN)
             ? {
               key: '/tai-san/loai-tai-san',
               label: <Link to="/tai-san/loai-tai-san">Loại tài sản</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_TAI_SAN)
+          authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_TAI_SAN)
             ? {
               key: '/tai-san/danh-muc-tai-san',
               label: <Link to="/tai-san/danh-muc-tai-san">Danh mục tài sản</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_CUNG)
+          authStore.kiemTraQuyen(QUYEN.NHOM_MAU_TAI_SAN)
             ? {
-              key: '/tai-san/mau-ma-tai-san/tai-san-phan-cung',
-              label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-cung">Mẫu mã phần cứng</Link>,
-            }
-            : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_MEM)
+              key: '/tai-san/mau-tai-san',
+              label: 'Mẫu tài sản',
+              children: [
+                authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_CUNG)
+                  ? {
+                    key: '/tai-san/mau-ma-tai-san/tai-san-phan-cung',
+                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-cung">Mẫu mã phần cứng</Link>,
+                  }
+                  : null,
+                authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_MEM)
+                  ? {
+                    key: '/tai-san/mau-ma-tai-san/tai-san-phan-mem',
+                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-mem">Mẫu mã phần mềm</Link>,
+                  }
+                  : null,
+              ]
+            } : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_THIET_BI_THUC_THE)
             ? {
-              key: '/tai-san/mau-ma-tai-san/tai-san-phan-mem',
-              label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-mem">Mẫu mã phần mềm</Link>,
-            }
-            : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_CUNG)
-            ? {
-              key: '/tai-san/danh-sach-thiet-bi-phan-cung',
-              label: <Link to="/tai-san/danh-sach-thiet-bi-phan-cung">Thiết bị phần cứng</Link>,
-            }
-            : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_MEM)
-            ? {
-              key: '/tai-san/danh-sach-thiet-bi-phan-mem',
-              label: <Link to="/tai-san/danh-sach-thiet-bi-phan-mem">Thiết bị phần mềm</Link>,
-            }
-            : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_LINH_KIEN_PHAN_CUNG)
-            ? {
-              key: '/tai-san/linh-kien-phan-cung',
-              label: <Link to="/tai-san/linh-kien-phan-cung">Linh kiện phần cứng</Link>,
-            }
-            : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_THUOC_TINH)
+              key: '/tai-san/thiet-bi',
+              label: "Thiết bị thực",
+              children: [
+                authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_CUNG)
+                  ? {
+                    key: '/tai-san/thiet-bi/danh-sach-thiet-bi-phan-cung',
+                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-cung">Thiết bị phần cứng</Link>,
+                  }
+                  : null,
+                authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_MEM)
+                  ? {
+                    key: '/tai-san/thiet-bi/danh-sach-thiet-bi-phan-mem',
+                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-mem">Thiết bị phần mềm</Link>,
+                  }
+                  : null,
+                authStore.kiemTraQuyen(QUYEN.XEM_LINH_KIEN_PHAN_CUNG)
+                  ? {
+                    key: '/tai-san/thiet-bi/linh-kien-phan-cung',
+                    label: <Link to="/tai-san/thiet-bi/linh-kien-phan-cung">Linh kiện phần cứng</Link>,
+                  }
+                  : null,
+              ]
+            } : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_THUOC_TINH)
             ? {
               key: '/tai-san/danh-muc-thuoc-tinh',
               label: <Link to="/tai-san/danh-muc-thuoc-tinh">Danh mục thuộc tính</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_LAP_RAP_LINH_KIEN)
+          authStore.kiemTraQuyen(QUYEN.NHOM_LAP_RAP_LINH_KIEN)
             ? {
               key: '/tai-san/lap-rap-linh-kien',
               label: <Link to="/tai-san/lap-rap-linh-kien">Lắp ráp linh kiện</Link>,
@@ -163,11 +175,38 @@ export const AppLayout: React.FC = observer(() => {
         ].filter(Boolean) as MenuProps['items'],
       }
       : null,
-    authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
+    authStore.kiemTraQuyen([
+      QUYEN.NHOM_PHIEU_CAP_PHAT,
+      QUYEN.NHOM_PHIEU_THU_HOI,
+      QUYEN.NHOM_PHIEU_DIEU_CHUYEN,
+      QUYEN.NHOM_PHIEU_THANH_LY
+    ])
       ? {
-        key: '/lifecycle',
+        key: '/vong-doi',
         icon: <FileTextOutlined />,
-        label: <Link to="/lifecycle">Vòng đời tài sản</Link>,
+        label: 'Vòng đời tài sản',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_CAP_PHAT) ? {
+            key: '/vong-doi/cap-phat',
+            label: 'Phiếu cấp phát',
+            onClick: () => navigate('/vong-doi/cap-phat'),
+          } : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_THU_HOI) ? {
+            key: '/vong-doi/thu-hoi',
+            label: 'Phiếu thu hồi',
+            onClick: () => navigate('/vong-doi/thu-hoi'),
+          } : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_DIEU_CHUYEN) ? {
+            key: '/vong-doi/dieu-chuyen',
+            label: 'Phiếu điều chuyển',
+            onClick: () => navigate('/vong-doi/dieu-chuyen'),
+          } : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_THANH_LY) ? {
+            key: '/vong-doi/thanh-ly',
+            label: 'Phiếu thanh lý',
+            onClick: () => navigate('/vong-doi/thanh-ly'),
+          } : null,
+        ]
       }
       : null,
     authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
@@ -192,26 +231,27 @@ export const AppLayout: React.FC = observer(() => {
       }
       : null,
     // Phân hệ quản lý mua sắm
-    authStore.kiemTraQuyen([QUYEN.XEM_NHA_CUNG_CAP,
-    QUYEN.XEM_DON_HANG_MUA_SAM,
-    QUYEN.XEM_PHIEU_NHAP_TAI_SAN]) ? {
-      key: 'procurement-module',
+    authStore.kiemTraQuyen([
+      QUYEN.NHOM_NHA_CUNG_CAP,
+      QUYEN.NHOM_DON_HANG_MUA_SAM,
+      QUYEN.NHOM_PHIEU_NHAP_KHO]) ? {
+      key: '/mua-sam',
       icon: <ShoppingCartOutlined />,
       label: 'Quản lý mua sắm',
       children: [
-        authStore.kiemTraQuyen(QUYEN.XEM_NHA_CUNG_CAP) ? {
+        authStore.kiemTraQuyen(QUYEN.NHOM_NHA_CUNG_CAP) ? {
           key: '/mua-sam/nha-cung-cap',
           // icon: <ShopOutlined />,
           label: 'Nhà cung cấp',
           onClick: () => navigate('/mua-sam/nha-cung-cap'),
         } : null,
-        authStore.kiemTraQuyen(QUYEN.XEM_DON_HANG_MUA_SAM) ? {
+        authStore.kiemTraQuyen(QUYEN.NHOM_DON_HANG_MUA_SAM) ? {
           key: '/mua-sam/don-hang-mua-sam',
           // icon: <FileDoneOutlined />,
           label: 'Đơn hàng mua sắm',
           onClick: () => navigate('/mua-sam/don-hang-mua-sam'),
         } : null,
-        authStore.kiemTraQuyen(QUYEN.XEM_PHIEU_NHAP_TAI_SAN) ? {
+        authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_NHAP_KHO) ? {
           key: '/mua-sam/phieu-nhap-tai-san',
           // icon: <InboxOutlined />,
           label: 'Phiếu nhập tài sản',
@@ -220,67 +260,67 @@ export const AppLayout: React.FC = observer(() => {
       ].filter(Boolean),
     } : null,
     authStore.kiemTraQuyen([
-      QUYEN.XEM_DON_VI,
-      QUYEN.XEM_PHONG_BAN,
-      QUYEN.XEM_VI_TRI,
-      QUYEN.XEM_DANH_MUC_CAU_HINH,
-      QUYEN.XEM_CAU_HINH_DON_VI
+      QUYEN.NHOM_QUAN_LY_DON_VI,
+      QUYEN.NHOM_QUAN_LY_PHONG_BAN,
+      QUYEN.NHOM_QUAN_LY_VI_TRI,
+      QUYEN.NHOM_DANH_MUC_CAU_HINH,
+      QUYEN.NHOM_CAU_HINH_DON_VI
     ])
       ? {
-        key: 'don-vi',
+        key: 'quan-ly-don-vi',
         icon: <BankOutlined />,
         label: 'Quản lý Đơn vị',
         children: [
-          authStore.kiemTraQuyen(QUYEN.XEM_DON_VI)
+          authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_DON_VI)
             ? {
-              key: '/don-vi/don-vi',
-              label: <Link to="/don-vi/don-vi">Danh sách đơn vị</Link>,
+              key: '/quan-ly-don-vi/don-vi',
+              label: <Link to="/quan-ly-don-vi/don-vi">Danh sách đơn vị</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_PHONG_BAN)
+          authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_PHONG_BAN)
             ? {
-              key: '/don-vi/phong-ban',
-              label: <Link to="/don-vi/phong-ban">Phòng ban</Link>,
+              key: '/quan-ly-don-vi/phong-ban',
+              label: <Link to="/quan-ly-don-vi/phong-ban">Phòng ban</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_VI_TRI)
+          authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_VI_TRI)
             ? {
-              key: '/don-vi/vi-tri',
-              label: <Link to="/don-vi/vi-tri">Vị trí & Kho bãi</Link>,
+              key: '/quan-ly-don-vi/vi-tri',
+              label: <Link to="/quan-ly-don-vi/vi-tri">Vị trí & Kho bãi</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_CAU_HINH)
+          authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_CAU_HINH)
             ? {
-              key: '/don-vi/danh-muc',
-              label: <Link to="/don-vi/danh-muc">Danh mục hệ thống</Link>,
+              key: '/quan-ly-don-vi/danh-muc',
+              label: <Link to="/quan-ly-don-vi/danh-muc">Danh mục hệ thống</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_CAU_HINH_DON_VI)
+          authStore.kiemTraQuyen(QUYEN.NHOM_CAU_HINH_DON_VI)
             ? {
-              key: '/don-vi/cau-hinh',
-              label: <Link to="/don-vi/cau-hinh">Cấu hình đơn vị</Link>,
+              key: '/quan-ly-don-vi/cau-hinh',
+              label: <Link to="/quan-ly-don-vi/cau-hinh">Cấu hình đơn vị</Link>,
             }
             : null,
         ].filter(Boolean) as MenuProps['items'],
       }
       : null,
     // Phân hệ Quản lý Người dùng / Hệ thống bảo mật
-    authStore.kiemTraQuyen([QUYEN.XEM_NGUOI_DUNG, QUYEN.XEM_VAI_TRO])
+    authStore.kiemTraQuyen([QUYEN.NHOM_NGUOI_DUNG, QUYEN.NHOM_VAI_TRO])
       ? {
-        key: 'security-system',
+        key: '/quan-ly-nguoi-dung',
         icon: <SettingOutlined />,
         label: 'Người dùng',
         children: [
-          authStore.kiemTraQuyen(QUYEN.XEM_NGUOI_DUNG)
+          authStore.kiemTraQuyen(QUYEN.NHOM_NGUOI_DUNG)
             ? {
-              key: '/nguoi-dung/nguoi-dung',
-              label: <Link to="/nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
+              key: '/quan-ly-nguoi-dung/nguoi-dung',
+              label: <Link to="/quan-ly-nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
             }
             : null,
-          authStore.kiemTraQuyen(QUYEN.XEM_VAI_TRO)
+          authStore.kiemTraQuyen(QUYEN.NHOM_VAI_TRO)
             ? {
-              key: '/nguoi-dung/vai-tro',
-              label: <Link to="/nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
+              key: '/quan-ly-nguoi-dung/vai-tro',
+              label: <Link to="/quan-ly-nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
             }
             : null,
         ].filter(Boolean),
@@ -322,7 +362,6 @@ export const AppLayout: React.FC = observer(() => {
   // Chuyển đổi tên đường dẫn sang tiếng Việt có dấu trên Breadcrumb
   const translatePath = (path: string) => {
     const maps: Record<string, string> = {
-      assets: 'Quản lý tài sản',
       'tai-san': 'Quản lý Tài sản',
       'hang-san-xuat': 'Hãng sản xuất',
       'loai-tai-san': 'Loại tài sản',
@@ -345,11 +384,20 @@ export const AppLayout: React.FC = observer(() => {
       tenants: 'Cấu hình Đơn vị',
       'nguoi-dung': 'Quản lý tài khoản',
       'vai-tro': 'Vai trò & Quyền hạn',
-      'don-vi': 'Quản lý Đơn vị',
+      'quan-ly-don-vi': 'Quản lý đơn vị',
+      'don-vi': 'Đơn vị',
       'phong-ban': 'Phòng ban',
       'vi-tri': 'Vị trí & Kho bãi',
       'danh-muc': 'Danh mục hệ thống',
       'cau-hinh': 'Cấu hình đơn vị',
+      'vong-doi': 'Vòng đời tài sản',
+      'cap-phat': 'Cấp phát tài sản',
+      'thu-hoi': 'Thu hồi tài sản',
+      'dieu-chuyen': "Điều chuyển tài sản",
+      'thanh-ly': 'Thanh lý tài sản',
+      'quan-ly-nguoi-dung': 'Quản lý người dùng',
+      'mua-sam': 'Quản lý mua sắm',
+      'thiet-bi': 'Thiết bị thực',
     };
     return maps[path] || path;
   };

@@ -235,64 +235,64 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
         const items: MenuProps['items'] = [
           authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_CUNG)
             ? {
-                key: 'view',
-                label: 'Chi tiết',
-                icon: <EyeOutlined />,
-                onClick: () => {
-                  setSelectedItem(record);
-                  setFormMode('view');
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'view',
+              label: 'Chi tiết',
+              icon: <EyeOutlined />,
+              onClick: () => {
+                setSelectedItem(record);
+                setFormMode('view');
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.SUA_THIET_BI_PHAN_CUNG)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedItem(record);
-                  setFormMode('edit');
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedItem(record);
+                setFormMode('edit');
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XEM_GIA_TRI_THUOC_TINH)
             ? {
-                key: 'attributes',
-                label: 'Thuộc tính động',
-                icon: <SettingOutlined />,
-                onClick: () => {
-                  setAttrTargetId(record.id!);
-                  setAttrTargetName(record.tenTaiSanPhanCung || record.soSerial || '');
-                  setIsAttrModalOpen(true);
-                },
-              }
+              key: 'attributes',
+              label: 'Thuộc tính động',
+              icon: <SettingOutlined />,
+              onClick: () => {
+                setAttrTargetId(record.id!);
+                setAttrTargetName(record.tenTaiSanPhanCung || record.soSerial || '');
+                setIsAttrModalOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_THIET_BI_PHAN_CUNG)
             ? {
-                key: 'toggle_status',
-                label: record.trangThai === 'HOAT_DONG' ? 'Khóa thiết bị' : 'Kích hoạt',
-                icon: <SafetyOutlined />,
-                onClick: () => handleToggleStatus(record),
-              }
+              key: 'toggle_status',
+              label: record.trangThai === 'HOAT_DONG' ? 'Khóa thiết bị' : 'Kích hoạt',
+              icon: <SafetyOutlined />,
+              onClick: () => handleToggleStatus(record),
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_THIET_BI_PHAN_CUNG)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa thiết bị này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoa(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa thiết bị</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa thiết bị này?"
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoa(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa thiết bị</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -387,7 +387,7 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
                 <Button type="primary" onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

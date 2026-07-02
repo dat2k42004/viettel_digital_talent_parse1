@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.shared.response.PageResponse;
+import java.util.List;
+import com.example.backend.modules.asset.dto.SelectOption;
 
 @RestController
 @RequestMapping("/api/phong-ban")
@@ -64,6 +66,14 @@ public class PhongBanController {
     ) {
         phongBanService.capNhatTrangThai(id, request);
         return ApiResponse.success("Cập nhật trạng thái phòng ban thành công");
+    }
+
+    @GetMapping("/select-options")
+    @PreAuthorize("hasAuthority('XEM_PHONG_BAN')")
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) Long idDonVi
+    ) {
+        return ApiResponse.success(phongBanService.laySelectOptions(idDonVi));
     }
 }
 

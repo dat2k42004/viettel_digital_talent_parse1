@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.shared.response.PageResponse;
+import java.util.List;
+import com.example.backend.modules.asset.dto.SelectOption;
 
 @RestController
 @RequestMapping("/api/nguoi-dung")
@@ -38,6 +40,14 @@ public class NguoiDungController {
     @PreAuthorize("hasAuthority('XEM_NGUOI_DUNG')")
     public ApiResponse<NguoiDungResponse> layTheoId(@PathVariable Long id) {
         return ApiResponse.success(nguoiDungService.layTheoId(id));
+    }
+
+    @GetMapping("/select-options")
+    @PreAuthorize("hasAuthority('XEM_NGUOI_DUNG')")
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) Long idPhongBan
+    ) {
+        return ApiResponse.success(nguoiDungService.laySelectOptions(idPhongBan));
     }
 
     @PostMapping

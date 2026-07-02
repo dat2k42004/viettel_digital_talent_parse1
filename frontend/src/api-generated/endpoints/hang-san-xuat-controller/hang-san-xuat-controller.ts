@@ -76,7 +76,7 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
     },
       );
     }
-  export const laySelectOptions7 = (
+  export const laySelectOptions9 = (
 
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
@@ -90,4 +90,4 @@ export type XoaMem19Result = NonNullable<Awaited<ReturnType<typeof xoaMem19>>>
 export type CapNhatTrangThai12Result = NonNullable<Awaited<ReturnType<typeof capNhatTrangThai12>>>
 export type LayDanhSach20Result = NonNullable<Awaited<ReturnType<typeof layDanhSach20>>>
 export type ThemMoi20Result = NonNullable<Awaited<ReturnType<typeof themMoi20>>>
-export type LaySelectOptions7Result = NonNullable<Awaited<ReturnType<typeof laySelectOptions7>>>
+export type LaySelectOptions9Result = NonNullable<Awaited<ReturnType<typeof laySelectOptions9>>>

@@ -16,7 +16,7 @@ import {
     capNhatTrangThai7,
     xoaMem10
 } from '../../../api-generated/endpoints/phieu-nhap-tai-san-controller/phieu-nhap-tai-san-controller';
-import { laySelectOptions8 as layDonHangOptions } from '../../../api-generated/endpoints/don-hang-mua-sam-controller/don-hang-mua-sam-controller';
+import { laySelectOptions10 as layDonHangOptions } from '../../../api-generated/endpoints/don-hang-mua-sam-controller/don-hang-mua-sam-controller';
 import type { PhieuNhapTaiSanResponse } from '../../../api-generated/models/phieuNhapTaiSanResponse';
 import type { PhieuNhapTaiSanRequest } from '../../../api-generated/models/phieuNhapTaiSanRequest';
 import type { SelectOption } from '../../../api-generated/models/selectOption';

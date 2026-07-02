@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class PhieuDieuChuyenTaiSanController {
 
-     private PhieuDieuChuyenTaiSanService phieuDieuChuyenService;
+     private final PhieuDieuChuyenTaiSanService phieuDieuChuyenService;
 
      @GetMapping
      @PreAuthorize("hasAuthority('XEM_PHIEU_DIEU_CHUYEN')")
@@ -82,7 +82,7 @@ public class PhieuDieuChuyenTaiSanController {
      }
 
      @PutMapping("/{id}/tu-choi")
-     @PreAuthorize("hasAuthority('THAO_TAC_TAI_SAN')")
+     @PreAuthorize("hasAuthority('PHE_DUYET_DIEU_CHUYEN')")
      public ApiResponse<String> tuChoiPheDuyet(
                @PathVariable Long id,
                @RequestParam String lyDoTuChoi) {

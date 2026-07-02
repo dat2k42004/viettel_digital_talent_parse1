@@ -184,6 +184,26 @@ public class PhongBanServiceImpl implements PhongBanService {
 
         return mapToResponse(phongBan);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi) {
+        Long targetUnitId = idDonVi != null ? idDonVi : DonViContextHolder.getTenantId();
+        if (targetUnitId == null) {
+            return new ArrayList<>();
+        }
+        Specification<PhongBan> spec = (root, query, cb) -> cb.and(
+                cb.isNull(root.get("thoiGianXoa")),
+                cb.equal(root.get("donVi").get("id"), targetUnitId),
+                cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG)
+        );
+        return phongBanRepository.findAll(spec).stream()
+                .map(pb -> com.example.backend.modules.asset.dto.SelectOption.builder()
+                        .id(pb.getId())
+                        .ten(pb.getTenPhongBan())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
 
 

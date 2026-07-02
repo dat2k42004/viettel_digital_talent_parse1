@@ -6,10 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  ApiResponseListSelectOption,
   ApiResponseNguoiDungResponse,
   ApiResponsePageResponseNguoiDungResponse,
   ApiResponseString,
   LayDanhSach15Params,
+  LaySelectOptions6Params,
   NguoiDungQuyenUpdateRequest,
   NguoiDungRequest,
   NguoiDungTrangThaiRequest
@@ -95,6 +97,15 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
     },
       );
     }
+  export const laySelectOptions6 = (
+    params?: LaySelectOptions6Params,
+ ) => {
+      return customAxiosInstance<ApiResponseListSelectOption>(
+      {url: `/api/nguoi-dung/select-options`, method: 'GET',
+        params
+    },
+      );
+    }
   export type LayTheoId15Result = NonNullable<Awaited<ReturnType<typeof layTheoId15>>>
 export type CapNhat15Result = NonNullable<Awaited<ReturnType<typeof capNhat15>>>
 export type XoaMem15Result = NonNullable<Awaited<ReturnType<typeof xoaMem15>>>
@@ -103,3 +114,4 @@ export type CapNhatQuyen1Result = NonNullable<Awaited<ReturnType<typeof capNhatQ
 export type LayDanhSach15Result = NonNullable<Awaited<ReturnType<typeof layDanhSach15>>>
 export type ThemMoi15Result = NonNullable<Awaited<ReturnType<typeof themMoi15>>>
 export type ThuHoiPhienResult = NonNullable<Awaited<ReturnType<typeof thuHoiPhien>>>
+export type LaySelectOptions6Result = NonNullable<Awaited<ReturnType<typeof laySelectOptions6>>>

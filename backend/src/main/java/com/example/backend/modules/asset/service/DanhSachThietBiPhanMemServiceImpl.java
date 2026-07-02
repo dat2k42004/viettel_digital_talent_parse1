@@ -60,11 +60,11 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
             String trangThaiKho,
             int page,
             int size,
-            String sort
-    ) {
+            String sort) {
         Long idDonVi = DonViContextHolder.getTenantId();
         String[] sortParts = sort.split(",");
-        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
         String sortBy = sortParts[0];
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
@@ -78,7 +78,8 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {
-                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
+                    predicates.add(cb.equal(root.get("trangThai"),
+                            com.example.backend.shared.model.TrangThaiVanHanhEnum.fromValue(trangThai.trim())));
                 } catch (IllegalArgumentException e) {
                     throw new NghiepVuException(e.getMessage(), 400);
                 }
@@ -115,8 +116,9 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         };
 
         Page<DanhSachThietBiPhanMem> pageResult = thietBiPhanMemRepository.findAll(spec, pageRequest);
-        
-        // GIẢI QUYẾT N+1: Gom toàn bộ ID Mẫu tài sản phần mềm có trong trang kết quả hiện tại
+
+        // GIẢI QUYẾT N+1: Gom toàn bộ ID Mẫu tài sản phần mềm có trong trang kết quả
+        // hiện tại
         Set<Long> mauIds = pageResult.getContent().stream()
                 .filter(t -> t.getTaiSanPhanMem() != null)
                 .map(t -> t.getTaiSanPhanMem().getId())
@@ -133,7 +135,8 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         // Khớp nối trực tiếp trên RAM, loại bỏ Lazy Load getter lặp
         List<DanhSachThietBiPhanMemResponse> content = pageResult.getContent().stream()
                 .map(t -> {
-                    TaiSanPhanMem mau = t.getTaiSanPhanMem() != null ? finalMauMap.get(t.getTaiSanPhanMem().getId()) : null;
+                    TaiSanPhanMem mau = t.getTaiSanPhanMem() != null ? finalMauMap.get(t.getTaiSanPhanMem().getId())
+                            : null;
                     return DanhSachThietBiPhanMemResponse.builder()
                             .id(t.getId())
                             .idTaiSanPhanMem(mau != null ? mau.getId() : null)
@@ -155,7 +158,8 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 })
                 .collect(Collectors.toList());
 
-        return PageResponse.from(new org.springframework.data.domain.PageImpl<>(content, pageRequest, pageResult.getTotalElements()));
+        return PageResponse.from(
+                new org.springframework.data.domain.PageImpl<>(content, pageRequest, pageResult.getTotalElements()));
     }
 
     @Override
@@ -164,17 +168,19 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
     public DanhSachThietBiPhanMemResponse layTheoId(Long id) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy key bản quyền thuộc đơn vị của bạn với ID: " + id, 404));
+                .orElseThrow(() -> new NghiepVuException(
+                        "Không tìm thấy key bản quyền thuộc đơn vị của bạn với ID: " + id, 404));
         return mapToResponse(thietBi);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache" }, allEntries = true)
     public DanhSachThietBiPhanMemResponse themMoi(DanhSachThietBiPhanMemRequest request) {
         Long idDonVi = getRequiredTenantId();
 
-        if (thietBiPhanMemRepository.existsByKeyBanQuyenAndIdDonViAndThoiGianXoaIsNull(request.getKeyBanQuyen(), idDonVi)) {
+        if (thietBiPhanMemRepository.existsByKeyBanQuyenAndIdDonViAndThoiGianXoaIsNull(request.getKeyBanQuyen(),
+                idDonVi)) {
             throw new NghiepVuException("Key bản quyền đã tồn tại trong đơn vị", 400);
         }
 
@@ -189,14 +195,15 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache" }, allEntries = true)
     public DanhSachThietBiPhanMemResponse capNhat(Long id, DanhSachThietBiPhanMemRequest request) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy key bản quyền để cập nhật", 404));
 
         if (!thietBi.getKeyBanQuyen().equals(request.getKeyBanQuyen()) &&
-                thietBiPhanMemRepository.existsByKeyBanQuyenAndIdDonViAndThoiGianXoaIsNull(request.getKeyBanQuyen(), idDonVi)) {
+                thietBiPhanMemRepository.existsByKeyBanQuyenAndIdDonViAndThoiGianXoaIsNull(request.getKeyBanQuyen(),
+                        idDonVi)) {
             throw new NghiepVuException("Key bản quyền mới đã tồn tại trong đơn vị", 400);
         }
 
@@ -208,7 +215,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache" }, allEntries = true)
     public void xoaMem(Long id) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
@@ -221,7 +228,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
     @Override
     @Transactional
-    @CacheEvict(value = {"thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache" }, allEntries = true)
     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
         Long idDonVi = getRequiredTenantId();
         DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
@@ -246,12 +253,11 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA)
-        );
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
         return thietBiPhanMemRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
-                        .ten(item.getKeyBanQuyen())
+                        .ten(item.getTaiSanPhanMem().getTenMau() + "-" + item.getKeyBanQuyen())
                         .build())
                 .collect(Collectors.toList());
     }

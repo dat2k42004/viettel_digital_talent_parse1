@@ -15,7 +15,7 @@ import {
     pheDuyet7,
     xoaMem22
 } from '../../../api-generated/endpoints/don-hang-mua-sam-controller/don-hang-mua-sam-controller';
-import { laySelectOptions4 as layNccOptions } from '../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { laySelectOptions5 as layNccOptions } from '../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
 import type { DonHangMuaSamResponse } from '../../../api-generated/models/donHangMuaSamResponse';
 import type { DonHangMuaSamRequest } from '../../../api-generated/models/donHangMuaSamRequest';
 import type { SelectOption } from '../../../api-generated/models/selectOption';

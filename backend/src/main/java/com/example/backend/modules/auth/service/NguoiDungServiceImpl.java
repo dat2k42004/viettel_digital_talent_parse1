@@ -529,6 +529,46 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 activeSessions.size(), id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan) {
+        Long idDonVi = DonViContextHolder.getTenantId();
+        
+        Specification<NguoiDung> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+            
+            if (idPhongBan != null) {
+                predicates.add(cb.equal(root.get("idPhongBan"), idPhongBan));
+            } else if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        return nguoiDungRepository.findAll(spec).stream()
+                .map(nd -> {
+                    StringBuilder sb = new StringBuilder();
+                    if (nd.getHoNguoiDung() != null)
+                        sb.append(nd.getHoNguoiDung().trim()).append(" ");
+                    if (nd.getTenDemNguoiDung() != null)
+                        sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
+                    if (nd.getTenNguoiDung() != null)
+                        sb.append(nd.getTenNguoiDung().trim());
+                    String name = sb.toString().trim();
+                    if (name.isEmpty()) {
+                        name = nd.getTenDangNhap();
+                    }
+                    return com.example.backend.modules.asset.dto.SelectOption.builder()
+                            .id(nd.getId())
+                            .ten(name)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
     @jakarta.annotation.PostConstruct
     @Transactional
     public void initCleanup() {

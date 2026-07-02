@@ -12,5 +12,6 @@ public interface PhongBanService {
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
     PhongBanResponse layTheoId(Long id);
+    java.util.List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi);
 }
 

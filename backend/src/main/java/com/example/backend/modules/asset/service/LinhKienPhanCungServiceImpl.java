@@ -204,11 +204,11 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
         Specification<LinhKienPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA));
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
         return linhKienRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
-                        .ten(item.getSoSerial())
+                        .ten(item.getTaiSanPhanCung().getTenMau() + "-" + item.getSoSerial())
                         .build())
                 .collect(Collectors.toList());
     }

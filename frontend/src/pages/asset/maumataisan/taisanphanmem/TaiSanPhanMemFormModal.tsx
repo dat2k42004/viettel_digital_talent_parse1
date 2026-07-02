@@ -6,9 +6,9 @@ import { axiosInstance } from '../../../../api/axiosInstance';
 import type { TaiSanPhanMemResponse } from '../../../../api-generated/models/taiSanPhanMemResponse';
 import type { TaiSanPhanMemRequest } from '../../../../api-generated/models/taiSanPhanMemRequest';
 import type { SelectOption } from '../../../../api-generated/models/selectOption';
-import { laySelectOptions7 } from '../../../../api-generated/endpoints/hang-san-xuat-controller/hang-san-xuat-controller';
-import { laySelectOptions5 } from '../../../../api-generated/endpoints/loai-tai-san-controller/loai-tai-san-controller';
-import { laySelectOptions9 } from '../../../../api-generated/endpoints/danh-muc-tai-san-controller/danh-muc-tai-san-controller';
+import { laySelectOptions9 } from '../../../../api-generated/endpoints/hang-san-xuat-controller/hang-san-xuat-controller';
+import { laySelectOptions7 } from '../../../../api-generated/endpoints/loai-tai-san-controller/loai-tai-san-controller';
+import { laySelectOptions11 } from '../../../../api-generated/endpoints/danh-muc-tai-san-controller/danh-muc-tai-san-controller';
 
 interface TaiSanPhanMemFormModalProps {
   open: boolean;
@@ -39,9 +39,9 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
     const fetchOptions = async () => {
       try {
         const [hangRes, loaiRes, dmRes] = await Promise.all([
-          laySelectOptions7(),
-          laySelectOptions5(),
           laySelectOptions9(),
+          laySelectOptions7(),
+          laySelectOptions11(),
         ]);
         if (hangRes.data) setHangOptions(hangRes.data);
         if (loaiRes.data) setLoaiOptions(loaiRes.data);
@@ -105,18 +105,18 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
       footer={
         isView
           ? [
-              <Button key="close" onClick={onCancel}>
-                Đóng
-              </Button>,
-            ]
+            <Button key="close" onClick={onCancel}>
+              Đóng
+            </Button>,
+          ]
           : [
-              <Button key="cancel" onClick={onCancel}>
-                Hủy bỏ
-              </Button>,
-              <Button key="submit" type="primary" onClick={handleSubmit}>
-                Xác nhận lưu
-              </Button>,
-            ]
+            <Button key="cancel" onClick={onCancel}>
+              Hủy bỏ
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleSubmit}>
+              Xác nhận lưu
+            </Button>,
+          ]
       }
       width={700}
     >
@@ -245,10 +245,10 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
                 )
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <Input 
-                    value={imageUrl} 
-                    disabled 
-                    placeholder="URL hình ảnh sẽ tự động điền khi upload thành công" 
+                  <Input
+                    value={imageUrl}
+                    disabled
+                    placeholder="URL hình ảnh sẽ tự động điền khi upload thành công"
                   />
                   {authStore.kiemTraQuyen(QUYEN.TAI_LEN_FILE) ? (
                     <Upload

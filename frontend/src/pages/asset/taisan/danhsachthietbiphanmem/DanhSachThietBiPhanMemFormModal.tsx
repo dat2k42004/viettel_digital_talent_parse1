@@ -5,7 +5,7 @@ import type { DanhSachThietBiPhanMemResponse } from '../../../../api-generated/m
 import type { DanhSachThietBiPhanMemRequest } from '../../../../api-generated/models/danhSachThietBiPhanMemRequest';
 import type { SelectOption } from '../../../../api-generated/models/selectOption';
 import { laySelectOptions2 } from '../../../../api-generated/endpoints/tai-san-phan-mem-controller/tai-san-phan-mem-controller';
-import { laySelectOptions4 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { laySelectOptions5 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
 
 interface DanhSachThietBiPhanMemFormModalProps {
   open: boolean;
@@ -33,7 +33,7 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
       try {
         const [mauRes, nccRes] = await Promise.all([
           laySelectOptions2(),
-          laySelectOptions4(),
+          laySelectOptions5(),
         ]);
         if (mauRes.data) setMauPhanMemOptions(mauRes.data);
         if (nccRes.data) setNhaCungCapOptions(nccRes.data);
@@ -96,18 +96,18 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
       footer={
         isView
           ? [
-              <Button key="close" onClick={onCancel}>
-                Đóng
-              </Button>,
-            ]
+            <Button key="close" onClick={onCancel}>
+              Đóng
+            </Button>,
+          ]
           : [
-              <Button key="cancel" onClick={onCancel}>
-                Hủy bỏ
-              </Button>,
-              <Button key="submit" type="primary" onClick={handleSubmit}>
-                Xác nhận lưu
-              </Button>,
-            ]
+            <Button key="cancel" onClick={onCancel}>
+              Hủy bỏ
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleSubmit}>
+              Xác nhận lưu
+            </Button>,
+          ]
       }
       width={700}
     >

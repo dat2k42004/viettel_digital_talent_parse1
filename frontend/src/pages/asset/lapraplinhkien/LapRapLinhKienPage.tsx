@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Button, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
+import { Card, Table, Button, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, Space } from 'antd';
 import type { MenuProps } from 'antd';
-import { PlusOutlined, SafetyOutlined, DownOutlined } from '@ant-design/icons';
+import { PlusOutlined, SafetyOutlined, DownOutlined, SearchOutlined } from '@ant-design/icons';
 import { observer } from 'mobx-react-lite';
 import dayjs from 'dayjs';
 import { QuyenHanGuard } from '../../../components/protected/QuyenHanGuard';
@@ -12,7 +12,7 @@ import {
   capNhatThaoDo,
 } from '../../../api-generated/endpoints/lap-rap-linh-kien-controller/lap-rap-linh-kien-controller';
 import { laySelectOptions1 } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
-import { laySelectOptions6 } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
+import { laySelectOptions8 } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
 import type { LapRapLinhKienResponse } from '../../../api-generated/models/lapRapLinhKienResponse';
 import type { LapRapLinhKienRequest } from '../../../api-generated/models/lapRapLinhKienRequest';
 import type { SelectOption } from '../../../api-generated/models/selectOption';
@@ -39,15 +39,16 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  const taiDuLieu = async (page: number, size: number) => {
+  const taiDuLieu = async (page: number, size: number, filtersOverride?: any) => {
     setLoading(true);
     try {
       const res = await layDanhSach18({
         page: page - 1,
         size,
-        thietBiPhanCungId: thietBiId,
-        linhKienPhanCungId: linhKienId,
-        trangThaiLienKet: trangThaiLienKet || undefined,
+        // Dùng filter truyền vào (khi reset) hoặc dùng state hiện tại
+        thietBiPhanCungId: filtersOverride && 'thietBiId' in filtersOverride ? filtersOverride.thietBiId : thietBiId,
+        linhKienPhanCungId: filtersOverride && 'linhKienId' in filtersOverride ? filtersOverride.linhKienId : linhKienId,
+        trangThaiLienKet: filtersOverride && 'trangThaiLienKet' in filtersOverride ? filtersOverride.trangThaiLienKet : (trangThaiLienKet || undefined),
       });
       if (res.data) {
         // Handle custom response wrappers
@@ -68,7 +69,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
       try {
         const [tbRes, lkRes] = await Promise.all([
           laySelectOptions1(),
-          laySelectOptions6(),
+          laySelectOptions8(),
         ]);
         if (tbRes.data) setThietBiOptions(tbRes.data);
         if (lkRes.data) setLinhKienOptions(lkRes.data);
@@ -77,28 +78,43 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
     fetchFilterOptions();
   }, []);
 
+  // Bỏ các filter (thietBiId, linhKienId, trangThaiLienKet) ra khỏi dependencies
+  // Chỉ tự động gọi API khi chuyển trang hoặc đổi số lượng bản ghi
   useEffect(() => {
     taiDuLieu(currentPage, pageSize);
-  }, [currentPage, pageSize, thietBiId, linhKienId, trangThaiLienKet]);
+  }, [currentPage, pageSize]);
 
+  // Hành động bấm nút Tìm kiếm
+  const handleSearch = () => {
+    setCurrentPage(1);
+    taiDuLieu(1, pageSize);
+  };
+
+  // Hành động bấm nút Làm mới
   const handleReset = () => {
     setThietBiId(undefined);
     setLinhKienId(undefined);
     setTrangThaiLienKet(undefined);
     setCurrentPage(1);
+
+    // Gọi API với data rỗng thay vì chờ state cập nhật
+    taiDuLieu(1, pageSize, {
+      thietBiId: undefined,
+      linhKienId: undefined,
+      trangThaiLienKet: undefined
+    });
   };
 
   const handleSaveForm = async (values: LapRapLinhKienRequest) => {
     try {
       const res = await themMoi18(values);
-      // Backend may return LapRapLinhKienResponse or ApiResponseLapRapLinhKienResponse
       const code = (res as any).code;
       if (code === 200 || (res && !code)) {
         message.success('Thực hiện lắp ráp thành công!');
         setIsFormOpen(false);
         taiDuLieu(1, pageSize);
         // Refresh options since linkien might be linked now
-        const lkRes = await laySelectOptions6();
+        const lkRes = await laySelectOptions8();
         if (lkRes.data) setLinhKienOptions(lkRes.data);
       } else {
         message.error((res as any).message || 'Lắp ráp thất bại!');
@@ -116,7 +132,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
         message.success('Tháo dỡ linh kiện thành công!');
         taiDuLieu(currentPage, pageSize);
         // Refresh options
-        const lkRes = await laySelectOptions6();
+        const lkRes = await laySelectOptions8();
         if (lkRes.data) setLinhKienOptions(lkRes.data);
       } else {
         message.error((res as any).message || 'Tháo dỡ thất bại!');
@@ -249,7 +265,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
 
         <Card style={{ marginBottom: 24 }}>
           <Row gutter={[16, 16]}>
-            <Col xs={24} md={8}>
+            <Col xs={24} md={7}>
               <Select
                 placeholder="Chọn thiết bị phần cứng (Mẹ)"
                 style={{ width: '100%' }}
@@ -263,7 +279,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
                 options={thietBiOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={24} md={7}>
               <Select
                 placeholder="Chọn linh kiện lắp đặt (Con)"
                 style={{ width: '100%' }}
@@ -277,7 +293,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
                 options={linhKienOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Col>
-            <Col xs={24} md={4}>
+            <Col xs={24} md={5}>
               <Select
                 placeholder="Trạng thái liên kết"
                 style={{ width: '100%' }}
@@ -290,10 +306,15 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
                 ]}
               />
             </Col>
-            <Col xs={24} md={4}>
-              <Button onClick={handleReset} block>
-                Xóa bộ lọc
-              </Button>
+            <Col xs={24} md={5}>
+              <Space>
+                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>
+                  Tìm kiếm
+                </Button>
+                <Button onClick={handleReset}>
+                  Làm mới
+                </Button>
+              </Space>
             </Col>
           </Row>
         </Card>

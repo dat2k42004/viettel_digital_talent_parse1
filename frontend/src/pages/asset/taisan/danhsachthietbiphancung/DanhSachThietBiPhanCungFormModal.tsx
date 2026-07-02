@@ -5,7 +5,7 @@ import type { DanhSachThietBiPhanCungResponse } from '../../../../api-generated/
 import type { DanhSachThietBiPhanCungRequest } from '../../../../api-generated/models/danhSachThietBiPhanCungRequest';
 import type { SelectOption } from '../../../../api-generated/models/selectOption';
 import { laySelectOptions3 } from '../../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
-import { laySelectOptions4 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { laySelectOptions5 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
 
 interface DanhSachThietBiPhanCungFormModalProps {
   open: boolean;
@@ -33,7 +33,7 @@ export const DanhSachThietBiPhanCungFormModal: React.FC<DanhSachThietBiPhanCungF
       try {
         const [mauRes, nccRes] = await Promise.all([
           laySelectOptions3(),
-          laySelectOptions4(),
+          laySelectOptions5(),
         ]);
         if (mauRes.data) setMauPhanCungOptions(mauRes.data);
         if (nccRes.data) setNhaCungCapOptions(nccRes.data);
@@ -95,18 +95,18 @@ export const DanhSachThietBiPhanCungFormModal: React.FC<DanhSachThietBiPhanCungF
       footer={
         isView
           ? [
-              <Button key="close" onClick={onCancel}>
-                Đóng
-              </Button>,
-            ]
+            <Button key="close" onClick={onCancel}>
+              Đóng
+            </Button>,
+          ]
           : [
-              <Button key="cancel" onClick={onCancel}>
-                Hủy bỏ
-              </Button>,
-              <Button key="submit" type="primary" onClick={handleSubmit}>
-                Xác nhận lưu
-              </Button>,
-            ]
+            <Button key="cancel" onClick={onCancel}>
+              Hủy bỏ
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleSubmit}>
+              Xác nhận lưu
+            </Button>,
+          ]
       }
       width={700}
     >

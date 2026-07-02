@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -64,7 +65,7 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
 
     @Autowired
     @Lazy
-    private RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     private final NguoiDungRepository nguoiDungRepository;
     private final PhongBanRepository phongBanRepository;
@@ -140,8 +141,9 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
 
         // 1. Hardware allocations
         List<ChiTietCapPhatPhanCung> pcAllocations = chiTietCapPhatPhanCungRepository
-                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndThoiGianXoaIsNull(idNhanVien,
-                        tenantId);
+                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndPhieuCapPhatTaiSanTrangThaiAndThoiGianXoaIsNull(
+                        idNhanVien,
+                        tenantId, TrangThaiPhieuEnum.HOAN_THANH);
         List<AllocatedHardwareResponse> pcList = new ArrayList<>();
         for (ChiTietCapPhatPhanCung pc : pcAllocations) {
             boolean daThuHoi = chiTietThuHoiPhanCungRepository
@@ -175,8 +177,9 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
 
         // 2. Software allocations
         List<ChiTietCapPhatPhanMem> pmAllocations = chiTietCapPhatPhanMemRepository
-                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndThoiGianXoaIsNull(idNhanVien,
-                        tenantId);
+                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndPhieuCapPhatTaiSanTrangThaiAndThoiGianXoaIsNull(
+                        idNhanVien,
+                        tenantId, TrangThaiPhieuEnum.HOAN_THANH);
         List<AllocatedSoftwareResponse> pmList = new ArrayList<>();
         for (ChiTietCapPhatPhanMem pm : pmAllocations) {
             boolean daThuHoi = chiTietThuHoiPhanMemRepository
@@ -205,8 +208,9 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
 
         // 3. Component allocations
         List<ChiTietCapPhatLinhKien> lkAllocations = chiTietCapPhatLinhKienRepository
-                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndThoiGianXoaIsNull(idNhanVien,
-                        tenantId);
+                .findByPhieuCapPhatTaiSanIdNguoiNhanAndPhieuCapPhatTaiSanIdDonViAndPhieuCapPhatTaiSanTrangThaiAndThoiGianXoaIsNull(
+                        idNhanVien,
+                        tenantId, TrangThaiPhieuEnum.HOAN_THANH);
         List<AllocatedLinhKienResponse> lkList = new ArrayList<>();
         for (ChiTietCapPhatLinhKien lk : lkAllocations) {
             boolean daThuHoi = chiTietThuHoiLinhKienRepository
@@ -674,6 +678,11 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {
+            "thiet_bi_phan_cung_cache", "thiet_bi_phan_cung_list_cache",
+            "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache",
+            "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache"
+    }, allEntries = true)
     public void hoanThanh(Long id) {
         Long tenantId = getRequiredTenantId();
 
@@ -788,7 +797,8 @@ public class PhieuThuHoiTaiSanServiceImpl implements PhieuThuHoiTaiSanService {
         phieu.setLyDoTuChoi(lyDoTuChoi);
         phieuThuHoiTaiSanRepository.save(phieu);
 
-        // Khôi phục trạng thái gốc (đợt thu hồi bị từ chối): các dòng cấp phát cũ được hoàn nguyên (xóa cờ xóa mềm)
+        // Khôi phục trạng thái gốc (đợt thu hồi bị từ chối): các dòng cấp phát cũ được
+        // hoàn nguyên (xóa cờ xóa mềm)
         // 1. Phần cứng
         List<ChiTietThuHoiPhanCung> danhSachPhanCung = chiTietThuHoiPhanCungRepository
                 .findByPhieuThuHoiTaiSanIdAndThoiGianXoaIsNull(phieu.getId());

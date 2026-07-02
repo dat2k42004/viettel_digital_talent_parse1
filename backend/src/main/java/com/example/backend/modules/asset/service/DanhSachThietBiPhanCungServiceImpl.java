@@ -244,11 +244,12 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
                 cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA));
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
         return thietBiPhanCungRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
-                        .ten(item.getMaTheTaiSan() + " - " + item.getSoSerial())
+                        .ten(item.getMaTheTaiSan() + " - " + item.getTaiSanPhanCung().getTenMau() + "-"
+                                + item.getSoSerial())
                         .build())
                 .collect(Collectors.toList());
     }

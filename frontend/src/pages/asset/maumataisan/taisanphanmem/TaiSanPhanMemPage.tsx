@@ -314,7 +314,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
                 <Button type="primary" onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

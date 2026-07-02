@@ -467,7 +467,7 @@ export const UserManagementPage: React.FC = observer(() => {
                 style={{ width: 140 }}
               />
               <Button type="primary" onClick={handleSearch}>Lọc</Button>
-              <Button onClick={handleResetFilters}>Reset</Button>
+              <Button onClick={handleResetFilters}>Làm mới</Button>
             </Space>
           </Col>
         </Row>

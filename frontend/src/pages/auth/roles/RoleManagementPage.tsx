@@ -358,7 +358,7 @@ export const RoleManagementPage: React.FC = observer(() => {
           <Col xs={24} sm={24} md={5}>
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
               <Button type="primary" onClick={handleSearch}>Lọc</Button>
-              <Button onClick={handleResetFilters}>Reset</Button>
+              <Button onClick={handleResetFilters}>Làm mới</Button>
             </Space>
           </Col>
         </Row>

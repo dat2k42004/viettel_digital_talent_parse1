@@ -153,6 +153,8 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
       dataIndex: 'maMau',
       key: 'maMau',
       width: 120,
+      sorter: (a: any, b: any) => (a.maMau || '').localeCompare(b.maMau || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên mẫu',
@@ -311,7 +313,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

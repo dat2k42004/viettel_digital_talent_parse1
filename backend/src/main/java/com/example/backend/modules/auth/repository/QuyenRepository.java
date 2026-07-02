@@ -6,19 +6,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 public interface QuyenRepository extends JpaRepository<Quyen, Long> {
 
     @Query("SELECT DISTINCT q FROM Quyen q " +
-           "LEFT JOIN VaiTroQuyen vq ON q.id = vq.quyen.id " +
-           "LEFT JOIN NguoiDungVaiTro nv ON vq.vaiTro.id = nv.vaiTro.id " +
-           "LEFT JOIN NguoiDungQuyen nq ON q.id = nq.quyen.id " +
-           "WHERE (nv.nguoiDung.id = :userId OR nq.nguoiDung.id = :userId) AND q.thoiGianXoa IS NULL")
+            "LEFT JOIN VaiTroQuyen vq ON q.id = vq.quyen.id " +
+            "LEFT JOIN NguoiDungVaiTro nv ON vq.vaiTro.id = nv.vaiTro.id " +
+            "LEFT JOIN NguoiDungQuyen nq ON q.id = nq.quyen.id " +
+            "WHERE (nv.nguoiDung.id = :userId OR nq.nguoiDung.id = :userId) AND q.thoiGianXoa IS NULL")
     List<Quyen> findAllByNguoiDungId(@Param("userId") Long userId);
 
     boolean existsByMaQuyen(String maQuyen);
+
     List<Quyen> findByLoaiQuyenAndTrangThaiAndThoiGianXoaIsNull(String loaiQuyen, TrangThaiCoBanEnum trangThai);
+
     List<Quyen> findByThoiGianXoaIsNull();
+
+    List<Quyen> findAllByIdInAndThoiGianXoaIsNull(Set<Long> ids);
+
+    List<Quyen> findAllByIdInAndThoiGianXoaIsNull(List<Long> ids);
 }

@@ -5,8 +5,14 @@ import com.example.backend.shared.model.NhatKyThaoTacHeThong;
 import com.example.backend.shared.repository.NhatKyThaoTacHeThongRepository;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.service.interfaces.NhatKyThaoTacHeThongService;
+import com.example.backend.shared.tenant.DonViContextHolder;
+import com.example.backend.modules.auth.model.NguoiDung;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,6 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NhatKyThaoTacHeThongServiceImpl implements NhatKyThaoTacHeThongService {
 
     private final NhatKyThaoTacHeThongRepository repository;
@@ -35,10 +42,22 @@ public class NhatKyThaoTacHeThongServiceImpl implements NhatKyThaoTacHeThongServ
             int page,
             int size) {
 
+        Long idDonVi = DonViContextHolder.getTenantId();
+
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "thoiGianThaoTac"));
 
         Specification<NhatKyThaoTacHeThong> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (idDonVi != null) {
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<NguoiDung> userRoot = subquery.from(NguoiDung.class);
+                subquery.select(userRoot.get("id"));
+                subquery.where(cb.and(
+                        cb.isNull(userRoot.get("thoiGianXoa")),
+                        cb.equal(userRoot.get("idDonVi"), idDonVi)));
+                predicates.add(root.get("idTaiKhoanThaoTac").in(subquery));
+            }
 
             if (idTaiKhoanThaoTac != null) {
                 predicates.add(cb.equal(root.get("idTaiKhoanThaoTac"), idTaiKhoanThaoTac));
@@ -47,7 +66,8 @@ public class NhatKyThaoTacHeThongServiceImpl implements NhatKyThaoTacHeThongServ
                 predicates.add(cb.equal(cb.upper(root.get("phuongThucApi")), phuongThucApi.trim().toUpperCase()));
             }
             if (thucTheTacDong != null && !thucTheTacDong.trim().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("thucTheTacDong")), "%" + thucTheTacDong.trim().toLowerCase() + "%"));
+                predicates.add(
+                        cb.like(cb.lower(root.get("thucTheTacDong")), "%" + thucTheTacDong.trim().toLowerCase() + "%"));
             }
             if (tuNgay != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("thoiGianThaoTac"), tuNgay));
@@ -63,6 +83,15 @@ public class NhatKyThaoTacHeThongServiceImpl implements NhatKyThaoTacHeThongServ
         Page<NhatKyThaoTacHeThongResponse> responsePage = pageData.map(this::mapToResponse);
 
         return PageResponse.from(responsePage);
+    }
+
+    @Transactional
+    public void donDepLogCu(int soThangGiuLai) {
+        LocalDateTime thoiGianGioiHan = LocalDateTime.now().minusMonths(soThangGiuLai);
+
+        log.info("Bắt đầu dọn dẹp nhật ký thao tác cũ hơn mốc: {}", thoiGianGioiHan);
+        int soBanGhiDaXoa = repository.deleteOldLogs(thoiGianGioiHan);
+        log.info("Dọn dẹp log xong. Tổng số bản ghi đã xóa: {}", soBanGhiDaXoa);
     }
 
     private NhatKyThaoTacHeThongResponse mapToResponse(NhatKyThaoTacHeThong entity) {

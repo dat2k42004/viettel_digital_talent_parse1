@@ -151,7 +151,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllById(userIds).stream()
+               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                          .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
           }
 
@@ -533,7 +533,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllById(userIds).stream()
+               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                          .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
           }
 
@@ -572,13 +572,13 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           // Fetch asset names in batch
           java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
           if (!pcIds.isEmpty()) {
-               pcNameMap = taiSanPhanCungRepository.findAllById(pcIds).stream()
+               pcNameMap = taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(pcIds).stream()
                          .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
           }
 
           java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
           if (!pmIds.isEmpty()) {
-               pmNameMap = taiSanPhanMemRepository.findAllById(pmIds).stream()
+               pmNameMap = taiSanPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(pmIds).stream()
                          .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
           }
 

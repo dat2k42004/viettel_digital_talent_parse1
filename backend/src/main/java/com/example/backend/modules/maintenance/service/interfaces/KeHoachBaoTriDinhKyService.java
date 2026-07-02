@@ -21,4 +21,6 @@ public interface KeHoachBaoTriDinhKyService {
                int size, String sort);
 
      KeHoachBaoTriDinhKyResponse layTheoId(Long id);
+
+     void tuChoiPheDuyet(Long id, String lyDoTuChoi);
 }

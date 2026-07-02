@@ -8,20 +8,29 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long>, JpaSpecificationExecutor<NguoiDung> {
     Optional<NguoiDung> findByTenDangNhapOrEmail(String tenDangNhap, String email);
+
     Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
+
     Optional<NguoiDung> findByTenDangNhapAndThoiGianXoaIsNull(String tenDangNhap);
+
     Optional<NguoiDung> findByEmailAndThoiGianXoaIsNull(String email);
+
     Optional<NguoiDung> findByIdAndThoiGianXoaIsNull(Long id);
-    
+
     List<NguoiDung> findByIdDonViIsNullAndThoiGianXoaIsNull();
+
     List<NguoiDung> findByIdDonViAndThoiGianXoaIsNull(Long idDonVi);
 
+    List<NguoiDung> findAllByIdInAndThoiGianXoaIsNull(Set<Long> ids);
+
     boolean existsByTenDangNhapAndThoiGianXoaIsNull(String tenDangNhap);
+
     boolean existsByEmailAndThoiGianXoaIsNull(String email);
 
     @Modifying

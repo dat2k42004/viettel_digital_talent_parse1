@@ -132,7 +132,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     userIds.add(p.getIdNguoiPheDuyet());
           }
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllById(userIds).stream()
+          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                     .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<PhieuThanhLyTaiSanResponse> responses = new ArrayList<>();
@@ -704,7 +704,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           if (phieu.getIdNguoiPheDuyet() != null)
                userIds.add(phieu.getIdNguoiPheDuyet());
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllById(userIds).stream()
+          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                     .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<ChiTietThanhLyGeneralResponse> chiTietTaiSan = new ArrayList<>();

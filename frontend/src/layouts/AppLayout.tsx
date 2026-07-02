@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Button, Dropdown, Avatar, Space,
   Typography, Breadcrumb, theme, Badge, Modal, Form, Input, Descriptions, message, Tag, ConfigProvider, Tooltip
@@ -209,25 +209,46 @@ export const AppLayout: React.FC = observer(() => {
         ]
       }
       : null,
-    authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
+    authStore.kiemTraQuyen([QUYEN.NHOM_KE_HOACH_BAO_TRI, QUYEN.NHOM_PHIEU_SUA_CHUA])
       ? {
-        key: '/maintenance',
+        key: '/bao-tri',
         icon: <ToolOutlined />,
-        label: <Link to="/maintenance">Bảo trì & Bảo hành</Link>,
+        label: 'Bảo hành và bảo trì',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.NHOM_KE_HOACH_BAO_TRI)
+            ? {
+              key: '/bao-tri/ke-hoach',
+              label: <Link to="/bao-tri/ke-hoach">Kế hoạch bảo trì</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_SUA_CHUA)
+            ? {
+              key: '/bao-tri/sua-chua',
+              label: <Link to="/bao-tri/sua-chua">Phiếu sửa chữa</Link>,
+            }
+            : null,
+        ].filter(Boolean) as MenuProps['items'],
       }
       : null,
-    authStore.kiemTraQuyen(QUYEN.THAO_TAC_TAI_SAN)
+    authStore.kiemTraQuyen([QUYEN.NHOM_DOT_KIEM_KE, QUYEN.NHOM_PHIEU_KIEM_KE])
       ? {
-        key: '/inventory',
+        key: '/kiem-ke',
         icon: <ScanOutlined />,
-        label: <Link to="/inventory">Đối soát kiểm kê</Link>,
-      }
-      : null,
-    authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)
-      ? {
-        key: '/reports',
-        icon: <BarChartOutlined />,
-        label: <Link to="/reports">Báo cáo thống kê</Link>,
+        label: 'Quản lý kiểm kê',
+        children: [
+          authStore.kiemTraQuyen(QUYEN.NHOM_DOT_KIEM_KE)
+            ? {
+              key: '/kiem-ke/dot-kiem-ke',
+              label: <Link to="/kiem-ke/dot-kiem-ke">Đợt kiểm kê</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_KIEM_KE)
+            ? {
+              key: '/kiem-ke/phieu-kiem-ke',
+              label: <Link to="/kiem-ke/phieu-kiem-ke">Phiếu kiểm kê</Link>,
+            }
+            : null,
+        ].filter(Boolean) as MenuProps['items'],
       }
       : null,
     // Phân hệ quản lý mua sắm
@@ -305,7 +326,7 @@ export const AppLayout: React.FC = observer(() => {
       }
       : null,
     // Phân hệ Quản lý Người dùng / Hệ thống bảo mật
-    authStore.kiemTraQuyen([QUYEN.NHOM_NGUOI_DUNG, QUYEN.NHOM_VAI_TRO])
+    authStore.kiemTraQuyen([QUYEN.NHOM_NGUOI_DUNG, QUYEN.NHOM_VAI_TRO, QUYEN.XEM_NHAT_KY_THAO_TAC])
       ? {
         key: '/quan-ly-nguoi-dung',
         icon: <SettingOutlined />,
@@ -321,6 +342,12 @@ export const AppLayout: React.FC = observer(() => {
             ? {
               key: '/quan-ly-nguoi-dung/vai-tro',
               label: <Link to="/quan-ly-nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
+            }
+            : null,
+          authStore.kiemTraQuyen(QUYEN.XEM_NHAT_KY_THAO_TAC)
+            ? {
+              key: '/quan-ly-nguoi-dung/nhat-ky-thao-tac',
+              label: <Link to="/quan-ly-nguoi-dung/nhat-ky-thao-tac">Nhật ký thao tác</Link>,
             }
             : null,
         ].filter(Boolean),
@@ -359,6 +386,32 @@ export const AppLayout: React.FC = observer(() => {
   // Active key
   const selectedKey = '/' + location.pathname.split('/').filter(Boolean)[0] || '/';
 
+  const [openKeys, setOpenKeys] = useState<string[]>(() => {
+    const key = '/' + location.pathname.split('/').filter(Boolean)[0];
+    return key ? [key] : [];
+  });
+
+  useEffect(() => {
+    const firstLevel = '/' + location.pathname.split('/').filter(Boolean)[0];
+    if (firstLevel) {
+      setOpenKeys(prev => {
+        if (prev.includes(firstLevel)) return prev;
+        return [firstLevel];
+      });
+    }
+  }, [location.pathname]);
+
+  const rootSubmenuKeys = ['/tai-san', '/vong-doi', '/bao-tri', '/kiem-ke', '/mua-sam', '/quan-ly-don-vi', '/quan-ly-nguoi-dung'];
+
+  const onOpenChange = (keys: string[]) => {
+    const latestOpenKey = keys.find(key => !openKeys.includes(key));
+    if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+      setOpenKeys(keys);
+    } else {
+      setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+    }
+  };
+
   // Chuyển đổi tên đường dẫn sang tiếng Việt có dấu trên Breadcrumb
   const translatePath = (path: string) => {
     const maps: Record<string, string> = {
@@ -377,11 +430,6 @@ export const AppLayout: React.FC = observer(() => {
       'nha-cung-cap': 'Nhà cung cấp',
       'don-hang-mua-sam': 'Đơn hàng mua săm',
       'phieu-nhap-tai-san': 'Phiếu nhập tài sản',
-      lifecycle: 'Vòng đời tài sản',
-      maintenance: 'Bảo trì & Bảo hành',
-      inventory: 'Đối soát kiểm kê',
-      reports: 'Báo cáo thống kê',
-      tenants: 'Cấu hình Đơn vị',
       'nguoi-dung': 'Quản lý tài khoản',
       'vai-tro': 'Vai trò & Quyền hạn',
       'quan-ly-don-vi': 'Quản lý đơn vị',
@@ -398,6 +446,13 @@ export const AppLayout: React.FC = observer(() => {
       'quan-ly-nguoi-dung': 'Quản lý người dùng',
       'mua-sam': 'Quản lý mua sắm',
       'thiet-bi': 'Thiết bị thực',
+      'nhat-ky-thao-tac': 'Nhật ký thao tác',
+      'bao-tri': "Bảo hành & bảo trì",
+      'ke-hoach': 'Kế hoạch bảo trì',
+      'sua-chua': 'Phiếu sửa chữa',
+      'kiem-ke': 'Kiểm kê tài sản',
+      'dot-kiem-ke': "Đợt kiểm kê",
+      'phieu-kiem-ke': 'Phiếu kiểm kê',
     };
     return maps[path] || path;
   };
@@ -464,6 +519,8 @@ export const AppLayout: React.FC = observer(() => {
             theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
             selectedKeys={[location.pathname, selectedKey]}
+            openKeys={openKeys}
+            onOpenChange={onOpenChange}
             items={menuItems}
             style={{ borderRight: 0, marginTop: 8 }}
           />

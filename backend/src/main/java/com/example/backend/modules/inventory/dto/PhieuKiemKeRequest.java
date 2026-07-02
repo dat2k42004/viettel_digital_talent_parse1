@@ -8,8 +8,8 @@ public class PhieuKiemKeRequest {
      @NotNull(message = "ID đợt kiểm kê tổng không được để trống")
      private Long dotKiemKeId;
 
-     @NotNull(message = "ID phòng ban thực hiện kiểm kê không được để trống")
+     // @NotNull(message = "ID phòng ban thực hiện kiểm kê không được để trống")
      private Long idPhongBanKiemKe;
 
-     private Long idKhoKiemKe;
+     // private Long idKhoKiemKe;
 }

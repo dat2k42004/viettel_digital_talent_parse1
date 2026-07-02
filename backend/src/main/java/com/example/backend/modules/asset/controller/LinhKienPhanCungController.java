@@ -45,8 +45,8 @@ public class LinhKienPhanCungController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_LINH_KIEN_PHAN_CUNG')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(linhKienService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(@RequestParam(required = false) Long idTaiSanPhanCung) {
+        return ApiResponse.success(linhKienService.laySelectOptions(idTaiSanPhanCung));
     }
 
     @PostMapping

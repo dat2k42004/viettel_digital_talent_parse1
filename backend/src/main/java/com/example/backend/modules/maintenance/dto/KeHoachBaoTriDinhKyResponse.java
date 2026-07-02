@@ -28,6 +28,7 @@ public class KeHoachBaoTriDinhKyResponse {
      private BigDecimal chiPhiDuKien;
      private String trangThai;
      private String noiDungBaoTri;
+     private String lyDoTuChoi;
      private LocalDateTime thoiGianTao;
      private LocalDateTime thoiGianCapNhat;
      private List<ChiTietKeHoachBaoTriResponse> chiTietPhanVi;

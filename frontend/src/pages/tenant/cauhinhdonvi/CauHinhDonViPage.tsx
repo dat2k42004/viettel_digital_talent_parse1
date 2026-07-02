@@ -135,31 +135,31 @@ export const CauHinhDonViPage: React.FC = observer(() => {
         const items: MenuProps['items'] = [
           authStore.kiemTraQuyen(QUYEN.SUA_CAU_HINH_DON_VI)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedRecord(record);
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedRecord(record);
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_CAU_HINH_DON_VI)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa cấu hình riêng này? Hệ thống sẽ sử dụng giá trị mặc định."
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoaCauHinh(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa cấu hình</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa cấu hình riêng này? Hệ thống sẽ sử dụng giá trị mặc định."
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoaCauHinh(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa cấu hình</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -212,10 +212,10 @@ export const CauHinhDonViPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={8}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

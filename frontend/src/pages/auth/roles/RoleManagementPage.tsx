@@ -201,6 +201,8 @@ export const RoleManagementPage: React.FC = observer(() => {
       title: 'Mã định danh vai trò',
       dataIndex: 'maVaiTro',
       key: 'maVaiTro',
+      sorter: (a: any, b: any) => (a.maVaiTro || '').localeCompare(b.maVaiTro || ''),
+      defaultSortOrder: 'ascend' as const,
       render: (val: string) => <Tag color="purple">{val}</Tag>
     },
     {
@@ -357,7 +359,7 @@ export const RoleManagementPage: React.FC = observer(() => {
           </Col>
           <Col xs={24} sm={24} md={5}>
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button type="primary" onClick={handleSearch}>Lọc</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
               <Button onClick={handleResetFilters}>Làm mới</Button>
             </Space>
           </Col>

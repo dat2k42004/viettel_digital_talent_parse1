@@ -6,6 +6,7 @@ import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.service.interfaces.NhatKyThaoTacHeThongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class NhatKyThaoTacHeThongController {
     private final NhatKyThaoTacHeThongService service;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('XEM_NHAT_KY_THAO_TAC')")
     public ApiResponse<PageResponse<NhatKyThaoTacHeThongResponse>> layDanhSach(
             @RequestParam(required = false) Long idTaiKhoanThaoTac,
             @RequestParam(required = false) String phuongThucApi,

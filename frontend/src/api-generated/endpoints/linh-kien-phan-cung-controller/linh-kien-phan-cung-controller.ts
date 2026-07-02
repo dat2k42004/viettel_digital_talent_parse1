@@ -11,6 +11,7 @@ import type {
   ApiResponsePageResponseLinhKienPhanCungResponse,
   ApiResponseString,
   LayDanhSach17Params,
+  LaySelectOptions8Params,
   LinhKienPhanCungRequest,
   TrangThaiRequest
 } from '../../models';
@@ -77,10 +78,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const laySelectOptions8 = (
-
+    params?: LaySelectOptions8Params,
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
-      {url: `/api/linh-kien-phan-cung/select-options`, method: 'GET'
+      {url: `/api/linh-kien-phan-cung/select-options`, method: 'GET',
+        params
     },
       );
     }

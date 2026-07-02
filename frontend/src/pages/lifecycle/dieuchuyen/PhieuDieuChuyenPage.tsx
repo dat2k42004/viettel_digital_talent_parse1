@@ -211,6 +211,8 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             dataIndex: 'maPhieuDieuChuyen',
             key: 'maPhieuDieuChuyen',
             width: 130,
+            sorter: (a: any, b: any) => (a.maPhieuDieuChuyen || '').localeCompare(b.maPhieuDieuChuyen || ''),
+            defaultSortOrder: 'ascend' as const,
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
@@ -395,7 +397,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={4}>
                             <Space>
-                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>Lọc</Button>
+                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>Tìm kiếm</Button>
                                 <Button onClick={handleReset}>Làm mới</Button>
                             </Space>
                         </Col>

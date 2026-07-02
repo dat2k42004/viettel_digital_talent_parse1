@@ -128,7 +128,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
           p.setIdDonVi(tenantId);
           p.setDotKiemKe(dkk);
           p.setMaPhieuKiemKe("PKK-" + tenantId + "-" + System.currentTimeMillis());
-          p.setIdKhoKiemKe(request.getIdKhoKiemKe());
+          // p.setIdKhoKiemKe(request.getIdKhoKiemKe());
           p.setIdPhongBanKiemKe(request.getIdPhongBanKiemKe());
           p.setIdNhanVienKiemKe(userId);
           p.setIdNguoiNhanBaoCao(dkk.getIdNguoiLap());
@@ -200,7 +200,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
                          400);
           }
 
-          p.setIdKhoKiemKe(request.getIdKhoKiemKe());
+          // p.setIdKhoKiemKe(request.getIdKhoKiemKe());
           p.setIdPhongBanKiemKe(request.getIdPhongBanKiemKe());
 
           PhieuKiemKe saved = phieuKiemKeRepository.save(p);
@@ -346,7 +346,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
           Set<Long> pbIds = phieus.stream().map(PhieuKiemKe::getIdPhongBanKiemKe).filter(Objects::nonNull)
                     .collect(Collectors.toSet());
           Map<Long, String> pbMap = pbIds.isEmpty() ? new HashMap<>()
-                    : phongBanRepository.findAllById(pbIds).stream()
+                    : phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
                               .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
 
           List<TienDoPhongBanResponse> resList = new ArrayList<>();
@@ -460,7 +460,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
           Set<Long> pbIds = pageResult.getContent().stream().map(PhieuKiemKe::getIdPhongBanKiemKe)
                     .filter(Objects::nonNull).collect(Collectors.toSet());
           Map<Long, String> pbMap = pbIds.isEmpty() ? new HashMap<>()
-                    : phongBanRepository.findAllById(pbIds).stream()
+                    : phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
                               .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
 
           List<PhieuKiemKeResponse> content = pageResult.getContent().stream()
@@ -620,7 +620,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
                Set<Long> tbIds = tbs.stream().map(ChiTietKiemKePhanCung::getIdDanhSachThietBiPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, DanhSachThietBiPhanCung> tbMap = tbIds.isEmpty() ? new HashMap<>()
-                         : danhSachThietBiPhanCungRepository.findAllById(tbIds).stream()
+                         : danhSachThietBiPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(tbIds).stream()
                                    .collect(Collectors.toMap(DanhSachThietBiPhanCung::getId,
                                              java.util.function.Function.identity()));
 
@@ -644,7 +644,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
                Set<Long> lkIds = lks.stream().map(ChiTietKiemKeLinhKien::getIdLinhKienPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, LinhKienPhanCung> lkMap = lkIds.isEmpty() ? new HashMap<>()
-                         : linhKienPhanCungRepository.findAllById(lkIds).stream()
+                         : linhKienPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(lkIds).stream()
                                    .collect(Collectors.toMap(LinhKienPhanCung::getId,
                                              java.util.function.Function.identity()));
 
@@ -667,7 +667,7 @@ public class PhieuKiemKeServiceImpl implements PhieuKiemKeService {
                          .findByPhieuKiemKeIdAndThoiGianXoaIsNull(p.getId());
                Set<Long> pmIds = pms.stream().map(ChiTietKiemKePhanMem::getIdTaiSanPhanMem).collect(Collectors.toSet());
                Map<Long, DanhSachThietBiPhanMem> pmMap = pmIds.isEmpty() ? new HashMap<>()
-                         : danhSachThietBiPhanMemRepository.findAllById(pmIds).stream()
+                         : danhSachThietBiPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(pmIds).stream()
                                    .collect(Collectors.toMap(DanhSachThietBiPhanMem::getId,
                                              java.util.function.Function.identity()));
 

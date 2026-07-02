@@ -4482,7 +4482,7 @@ Hệ thống cho phép thực hiện việc lắp ráp linh kiện lẻ vào m�
 * **Endpoint**: `GET /api/nhat-ky-thao-tac`
 * **Headers**:
   * `Authorization`: `Bearer <token>`
-* **Quyền (Permission)**: Yêu cầu quản trị viên hệ thống (Public nội bộ hoặc Admin)
+* **Quyền (Permission)**: `@PreAuthorize("hasAuthority('XEM_NHAT_KY_THAO_TAC')")` (Cô lập dữ liệu theo Đơn vị: Admin đơn vị chỉ xem được nhật ký thao tác của người dùng thuộc đơn vị mình; Super Admin xem được toàn bộ).
 * **Query Parameters**:
   * `idTaiKhoanThaoTac` (tùy chọn): ID người dùng thực hiện thao tác.
   * `phuongThucApi` (tùy chọn): Phương thức HTTP (`GET`, `POST`, `PUT`, `DELETE`).

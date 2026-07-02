@@ -9,12 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PhongBanRepository extends JpaRepository<PhongBan, Long>, JpaSpecificationExecutor<PhongBan> {
     List<PhongBan> findByDonViIdAndThoiGianXoaIsNull(Long idDonVi);
+
     Optional<PhongBan> findByIdAndThoiGianXoaIsNull(Long id);
+
     Optional<PhongBan> findByIdAndDonViIdAndThoiGianXoaIsNull(Long id, Long idDonVi);
+
     boolean existsByMaPhongBanAndDonViIdAndThoiGianXoaIsNull(String maPhongBan, Long idDonVi);
+
+    List<PhongBan> findAllByIdInAndThoiGianXoaIsNull(Set<Long> ids);
+
+    List<PhongBan> findAllByIdInAndThoiGianXoaIsNull(List<Long> ids);
 
     @Modifying
     @Query("UPDATE PhongBan p SET p.trangThai = :trangThai WHERE p.donVi.id = :idDonVi AND p.thoiGianXoa IS NULL")

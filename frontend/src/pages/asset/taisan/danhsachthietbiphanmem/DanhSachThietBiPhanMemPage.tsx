@@ -190,6 +190,8 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
       title: 'Tên mẫu phần mềm',
       dataIndex: 'tenTaiSanPhanMem',
       key: 'tenTaiSanPhanMem',
+      sorter: (a: any, b: any) => (a.tenTaiSanPhanMem || '').localeCompare(b.tenTaiSanPhanMem || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Key bản quyền',
@@ -405,7 +407,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

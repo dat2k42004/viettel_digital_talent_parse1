@@ -168,6 +168,8 @@ export const ViTriManagementPage: React.FC = observer(() => {
       dataIndex: 'maViTri',
       key: 'maViTri',
       width: 160,
+      sorter: (a: any, b: any) => (a.maViTri || '').localeCompare(b.maViTri || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên vị trí',
@@ -210,39 +212,39 @@ export const ViTriManagementPage: React.FC = observer(() => {
         const items: MenuProps['items'] = [
           authStore.kiemTraQuyen(QUYEN.SUA_VI_TRI)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedViTri(record);
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedViTri(record);
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_VI_TRI)
             ? {
-                key: 'toggle_status',
-                label: record.trangThai === 'HOAT_DONG' ? 'Khóa vị trí' : 'Kích hoạt',
-                icon: <SafetyOutlined />,
-                onClick: () => handleToggleStatus(record),
-              }
+              key: 'toggle_status',
+              label: record.trangThai === 'HOAT_DONG' ? 'Khóa vị trí' : 'Kích hoạt',
+              icon: <SafetyOutlined />,
+              onClick: () => handleToggleStatus(record),
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_VI_TRI)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa vị trí này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoaViTri(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa vị trí</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa vị trí này?"
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoaViTri(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa vị trí</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -330,10 +332,10 @@ export const ViTriManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

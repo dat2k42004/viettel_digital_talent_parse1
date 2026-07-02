@@ -16,6 +16,7 @@ public class PhieuSuaChuaBaoTriResponse {
      private Long id;
      private Long idDonVi;
      private Long keHoachBaoTriId;
+     private String maKeHoachBaoTri;
      private String maPhieuSuaChua;
      private String tenNguoiLap;
      private String tenNguoiPheDuyet;

@@ -22,6 +22,7 @@ export interface KeHoachBaoTriDinhKyResponse {
   chiPhiDuKien?: number;
   trangThai?: string;
   noiDungBaoTri?: string;
+  lyDoTuChoi?: string;
   thoiGianTao?: string;
   thoiGianCapNhat?: string;
   chiTietPhanVi?: ChiTietKeHoachBaoTriResponse[];

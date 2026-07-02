@@ -153,6 +153,8 @@ export const NhaCungCapPage: React.FC = observer(() => {
             dataIndex: 'maNhaCungCap',
             key: 'maNhaCungCap',
             width: 140,
+            sorter: (a: any, b: any) => (a.maNhaCungCap || '').localeCompare(b.maNhaCungCap || ''),
+            defaultSortOrder: 'ascend' as const,
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
@@ -300,7 +302,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={6}>
                             <Space>
-                                <Button type="primary" onClick={handleSearch}>
+                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                                     Tìm kiếm
                                 </Button>
                                 <Button onClick={handleReset}>Làm mới</Button>

@@ -150,6 +150,8 @@ export const PhongBanManagementPage: React.FC = observer(() => {
       dataIndex: 'maPhongBan',
       key: 'maPhongBan',
       width: 160,
+      sorter: (a: any, b: any) => (a.maPhongBan || '').localeCompare(b.maPhongBan || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên phòng ban',
@@ -188,39 +190,39 @@ export const PhongBanManagementPage: React.FC = observer(() => {
         const items: MenuProps['items'] = [
           authStore.kiemTraQuyen(QUYEN.SUA_PHONG_BAN)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedPhongBan(record);
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedPhongBan(record);
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_PHONG_BAN)
             ? {
-                key: 'toggle_status',
-                label: record.trangThai === 'HOAT_DONG' ? 'Khóa phòng ban' : 'Kích hoạt',
-                icon: <SafetyOutlined />,
-                onClick: () => handleToggleStatus(record),
-              }
+              key: 'toggle_status',
+              label: record.trangThai === 'HOAT_DONG' ? 'Khóa phòng ban' : 'Kích hoạt',
+              icon: <SafetyOutlined />,
+              onClick: () => handleToggleStatus(record),
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_PHONG_BAN)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa phòng ban này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoaPhongBan(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa phòng ban</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa phòng ban này?"
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoaPhongBan(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa phòng ban</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -293,10 +295,10 @@ export const PhongBanManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

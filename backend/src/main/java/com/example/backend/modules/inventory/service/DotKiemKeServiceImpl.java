@@ -209,7 +209,7 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<DotKiemKeResponse> content = pageResult.getContent().stream()
@@ -254,7 +254,7 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
                userIds.add(dkk.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           return DotKiemKeResponse.builder()

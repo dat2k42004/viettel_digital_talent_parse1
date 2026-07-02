@@ -156,7 +156,7 @@ public class VaiTroServiceImpl implements VaiTroService {
     private void capNhatQuyenChoVaiTro(VaiTro vaiTro, List<Long> idQuyenList) {
         vaiTroQuyenRepository.deleteByVaiTroId(vaiTro.getId());
         if (idQuyenList != null && !idQuyenList.isEmpty()) {
-            List<Quyen> quyenList = quyenRepository.findAllById(idQuyenList);
+            List<Quyen> quyenList = quyenRepository.findAllByIdInAndThoiGianXoaIsNull(idQuyenList);
             List<VaiTroQuyen> vaiTroQuyenList = quyenList.stream().map(q -> {
                 VaiTroQuyen vq = new VaiTroQuyen();
                 vq.setVaiTro(vaiTro);
@@ -169,7 +169,8 @@ public class VaiTroServiceImpl implements VaiTroService {
     }
 
     private void dongBoQuyenTheoVaiTro(Long vaiTroId) {
-        List<com.example.backend.modules.auth.model.NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository.findByVaiTroId(vaiTroId);
+        List<com.example.backend.modules.auth.model.NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository
+                .findByVaiTroId(vaiTroId);
         for (com.example.backend.modules.auth.model.NguoiDungVaiTro ur : userRoles) {
             dongBoQuyenNguoiDung(ur.getNguoiDung());
         }
@@ -177,8 +178,9 @@ public class VaiTroServiceImpl implements VaiTroService {
 
     private void dongBoQuyenNguoiDung(com.example.backend.modules.auth.model.NguoiDung user) {
         nguoiDungQuyenRepository.deleteByNguoiDungId(user.getId());
-        List<com.example.backend.modules.auth.model.NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository.findByNguoiDungId(user.getId());
-        
+        List<com.example.backend.modules.auth.model.NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository
+                .findByNguoiDungId(user.getId());
+
         // Evict user permissions cache
         if (cacheManager != null && cacheManager.getCache("user_permissions") != null) {
             cacheManager.getCache("user_permissions").evict(user.getId());

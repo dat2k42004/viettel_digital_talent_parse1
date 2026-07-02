@@ -157,6 +157,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
     {
       title: 'Thiết bị mẹ (Serial / Thẻ tài sản)',
       key: 'thietBiMe',
+      sorter: (a: any, b: any) => (a.soSerialThietBi || '').localeCompare(b.soSerialThietBi || ''),
       render: (_: any, record: LapRapLienKetThaoDoResponse) => {
         return (
           <div>
@@ -170,6 +171,8 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
       title: 'Linh kiện con (Serial)',
       dataIndex: 'soSerialLinhKien',
       key: 'soSerialLinhKien',
+      sorter: (a: any, b: any) => (a.soSerialLinhKien || '').localeCompare(b.soSerialLinhKien || ''),
+      defaultSortOrder: 'ascend' as const,
       render: (val: string) => <Text strong>{val}</Text>,
     },
     {

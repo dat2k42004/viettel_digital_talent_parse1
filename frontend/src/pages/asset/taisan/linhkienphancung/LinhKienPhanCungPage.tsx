@@ -186,12 +186,15 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
       title: 'Tên mẫu thiết bị',
       dataIndex: 'tenTaiSanPhanCung',
       key: 'tenTaiSanPhanCung',
+      sorter: (a: any, b: any) => (a.tenTaiSanPhanCung || '').localeCompare(b.tenTaiSanPhanCung || ''),
     },
     {
       title: 'Số Serial',
       dataIndex: 'soSerial',
       key: 'soSerial',
       width: 150,
+      sorter: (a: any, b: any) => (a.soSerial || '').localeCompare(b.soSerial || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Mã mẫu thiết bị gốc',
@@ -384,7 +387,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

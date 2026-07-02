@@ -128,14 +128,14 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllById(userIds).stream()
+               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                          .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
           }
 
           // Kéo thông tin Nhà cung cấp lên RAM trong 1 câu SQL duy nhất
           java.util.Map<Long, String> nccMap = new java.util.HashMap<>();
           if (!nccIds.isEmpty()) {
-               nccMap = nhaCungCapRepository.findAllById(nccIds).stream()
+               nccMap = nhaCungCapRepository.findAllByIdInAndThoiGianXoaIsNull(nccIds).stream()
                          .collect(Collectors.toMap(NhaCungCap::getId, NhaCungCap::getTenNhaCungCap));
           }
 
@@ -398,7 +398,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllById(userIds).stream()
+               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                          .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
           }
 
@@ -416,7 +416,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                          .collect(Collectors.toSet());
                java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
                if (!pcIds.isEmpty()) {
-                    pcNameMap = taiSanPhanCungRepository.findAllById(pcIds).stream()
+                    pcNameMap = taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(pcIds).stream()
                               .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
                }
 
@@ -448,7 +448,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                          .collect(Collectors.toSet());
                java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
                if (!pmIds.isEmpty()) {
-                    pmNameMap = taiSanPhanMemRepository.findAllById(pmIds).stream()
+                    pmNameMap = taiSanPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(pmIds).stream()
                               .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
                }
 

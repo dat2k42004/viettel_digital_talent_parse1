@@ -187,6 +187,8 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
       dataIndex: 'maTheTaiSan',
       key: 'maTheTaiSan',
       width: 140,
+      sorter: (a: any, b: any) => (a.maTheTaiSan || '').localeCompare(b.maTheTaiSan || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên mẫu',
@@ -384,7 +386,7 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

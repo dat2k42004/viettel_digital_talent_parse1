@@ -166,6 +166,8 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
       dataIndex: 'maThuocTinh',
       key: 'maThuocTinh',
       width: 140,
+      sorter: (a: any, b: any) => (a.maThuocTinh || '').localeCompare(b.maThuocTinh || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên thuộc tính',
@@ -328,7 +330,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

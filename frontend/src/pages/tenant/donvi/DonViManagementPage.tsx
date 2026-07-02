@@ -200,6 +200,8 @@ export const DonViManagementPage: React.FC = observer(() => {
       dataIndex: 'maDonVi',
       key: 'maDonVi',
       width: 140,
+      sorter: (a: any, b: any) => (a.maDonVi || '').localeCompare(b.maDonVi || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên pháp lý',
@@ -245,50 +247,50 @@ export const DonViManagementPage: React.FC = observer(() => {
           },
           authStore.kiemTraQuyen(QUYEN.SUA_DON_VI)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedDonVi(record);
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedDonVi(record);
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.KHOA_DON_VI) && authStore.laSuperAdmin
             ? {
-                key: 'toggle_status',
-                label: record.trangThai === 'HOAT_DONG' ? 'Khóa đơn vị' : 'Mở khóa',
-                icon: <SafetyOutlined />,
-                onClick: () => handleToggleStatus(record),
-              }
+              key: 'toggle_status',
+              label: record.trangThai === 'HOAT_DONG' ? 'Khóa đơn vị' : 'Mở khóa',
+              icon: <SafetyOutlined />,
+              onClick: () => handleToggleStatus(record),
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.GIA_HAN_DON_VI) && authStore.laSuperAdmin
             ? {
-                key: 'gia_han',
-                label: 'Gia hạn',
-                icon: <PlusOutlined />,
-                onClick: () => {
-                  setSelectedDonVi(record);
-                  setIsGiaHanOpen(true);
-                },
-              }
+              key: 'gia_han',
+              label: 'Gia hạn',
+              icon: <PlusOutlined />,
+              onClick: () => {
+                setSelectedDonVi(record);
+                setIsGiaHanOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_DON_VI)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa đơn vị này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoaDonVi(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa đơn vị</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa đơn vị này?"
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoaDonVi(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa đơn vị</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -366,10 +368,10 @@ export const DonViManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

@@ -168,7 +168,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
         java.util.Map<Long, String> mapPhongBan = new java.util.HashMap<>();
         if (!idPhongBanList.isEmpty()) {
-            phongBanRepository.findAllById(idPhongBanList)
+            phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(idPhongBanList)
                     .forEach(pb -> mapPhongBan.put(pb.getId(), pb.getTenPhongBan()));
         }
 
@@ -268,7 +268,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private void capNhatVaiTroChoNguoiDung(NguoiDung nguoiDung, List<Long> idVaiTroList) {
         nguoiDungVaiTroRepository.deleteByNguoiDungId(nguoiDung.getId());
         if (idVaiTroList != null && !idVaiTroList.isEmpty()) {
-            List<VaiTro> vaiTroList = vaiTroRepository.findAllById(idVaiTroList);
+            List<VaiTro> vaiTroList = vaiTroRepository.findAllByIdInAndThoiGianXoaIsNull(idVaiTroList);
             List<NguoiDungVaiTro> list = vaiTroList.stream().map(v -> {
                 NguoiDungVaiTro nv = new NguoiDungVaiTro();
                 nv.setNguoiDung(nguoiDung);
@@ -283,7 +283,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private void dongBoQuyenNguoiDung(NguoiDung nguoiDung) {
         nguoiDungQuyenRepository.deleteByNguoiDungId(nguoiDung.getId());
         List<NguoiDungVaiTro> userRoles = nguoiDungVaiTroRepository.findByNguoiDungId(nguoiDung.getId());
-        
+
         // Evict user permissions cache
         if (cacheManager != null && cacheManager.getCache("user_permissions") != null) {
             cacheManager.getCache("user_permissions").evict(nguoiDung.getId());
@@ -294,7 +294,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         }
 
         List<Long> roleIds = userRoles.stream().map(ur -> ur.getVaiTro().getId()).collect(Collectors.toList());
-        List<com.example.backend.modules.auth.model.VaiTroQuyen> rolePermissions = vaiTroQuyenRepository.findByVaiTroIdIn(roleIds);
+        List<com.example.backend.modules.auth.model.VaiTroQuyen> rolePermissions = vaiTroQuyenRepository
+                .findByVaiTroIdIn(roleIds);
 
         List<Quyen> uniquePermissions = rolePermissions.stream()
                 .map(com.example.backend.modules.auth.model.VaiTroQuyen::getQuyen)
@@ -417,7 +418,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private void capNhatQuyenTrucTiepChoNguoiDung(NguoiDung nguoiDung, List<Long> idQuyenList) {
         nguoiDungQuyenRepository.deleteByNguoiDungId(nguoiDung.getId());
         if (idQuyenList != null && !idQuyenList.isEmpty()) {
-            List<Quyen> quyenList = quyenRepository.findAllById(idQuyenList);
+            List<Quyen> quyenList = quyenRepository.findAllByIdInAndThoiGianXoaIsNull(idQuyenList);
             List<NguoiDungQuyen> list = quyenList.stream().map(q -> {
                 NguoiDungQuyen nq = new NguoiDungQuyen();
                 nq.setNguoiDung(nguoiDung);
@@ -474,7 +475,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             if (currentUserIdDonVi != null) {
                 // Kiểm tra xem trong các vai trò được gán có vai trò nào là của Super Admin
                 // (idDonVi == null) không
-                List<VaiTro> vaiTroList = vaiTroRepository.findAllById(idVaiTroList);
+                List<VaiTro> vaiTroList = vaiTroRepository.findAllByIdInAndThoiGianXoaIsNull(idVaiTroList);
                 for (VaiTro vaiTro : vaiTroList) {
                     if (vaiTro.getIdDonVi() == null) {
                         throw new NghiepVuException("Bạn không có quyền cấp phát vai trò cấp cao hệ thống", 403);
@@ -533,21 +534,21 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     @Transactional(readOnly = true)
     public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan) {
         Long idDonVi = DonViContextHolder.getTenantId();
-        
+
         Specification<NguoiDung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
             predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
-            
+
             if (idPhongBan != null) {
                 predicates.add(cb.equal(root.get("idPhongBan"), idPhongBan));
             } else if (idDonVi != null) {
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        
+
         return nguoiDungRepository.findAll(spec).stream()
                 .map(nd -> {
                     StringBuilder sb = new StringBuilder();

@@ -25,5 +25,5 @@ public interface DanhSachThietBiPhanCungService {
     DanhSachThietBiPhanCungResponse capNhat(Long id, DanhSachThietBiPhanCungRequest request);
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
-    List<SelectOption> laySelectOptions();
+    List<SelectOption> laySelectOptions(Long idTaiSanPhanCung);
 }

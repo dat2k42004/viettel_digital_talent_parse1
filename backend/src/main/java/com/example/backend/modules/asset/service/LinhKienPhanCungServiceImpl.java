@@ -80,7 +80,7 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
 
         Map<Long, TaiSanPhanCung> mauMap = new HashMap<>();
         if (!mauIds.isEmpty()) {
-            mauMap = taiSanPhanCungRepository.findAllById(mauIds).stream()
+            mauMap = taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(mauIds).stream()
                     .collect(Collectors.toMap(TaiSanPhanCung::getId, java.util.function.Function.identity()));
         }
 
@@ -199,16 +199,23 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions() {
+    public List<SelectOption> laySelectOptions(Long idTaiSanPhanCung) {
         Long idDonVi = getRequiredTenantId();
-        Specification<LinhKienPhanCung> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+        Specification<LinhKienPhanCung> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            predicates.add(
+                    cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+            if (idTaiSanPhanCung != null) {
+                predicates.add(cb.equal(root.get("taiSanPhanCung").get("id"), idTaiSanPhanCung));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         return linhKienRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
-                        .ten(item.getTaiSanPhanCung().getTenMau() + "-" + item.getSoSerial())
+                        .ten(item.getTaiSanPhanCung().getTenMau() + " - " + item.getSoSerial())
                         .build())
                 .collect(Collectors.toList());
     }

@@ -56,4 +56,7 @@ public class KeHoachBaoTriDinhKy extends BaseEntity {
 
      @Column(name = "noi_dung_bao_tri", columnDefinition = "TEXT")
      private String noiDungBaoTri;
+
+     @Column(name = "ly_do_tu_choi", length = 500)
+     private String lyDoTuChoi;
 }

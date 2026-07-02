@@ -149,9 +149,9 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                     pbIds.add(p.getIdPhongBanNhan());
           }
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllById(userIds).stream()
+          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                     .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
-          Map<Long, String> pbMap = phongBanRepository.findAllById(pbIds).stream()
+          Map<Long, String> pbMap = phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
                     .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
 
           List<PhieuDieuChuyenTaiSanResponse> responses = new ArrayList<>();
@@ -671,9 +671,9 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           if (phieu.getIdPhongBanNhan() != null)
                pbIds.add(phieu.getIdPhongBanNhan());
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllById(userIds).stream()
+          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                     .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
-          Map<Long, String> pbMap = phongBanRepository.findAllById(pbIds).stream()
+          Map<Long, String> pbMap = phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
                     .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
 
           List<ChiTietDieuChuyenGeneralResponse> chiTietTaiSan = new ArrayList<>();

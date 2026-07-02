@@ -126,7 +126,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
         Map<Long, TaiSanPhanMem> mauMap = new HashMap<>();
         if (!mauIds.isEmpty()) {
-            mauMap = taiSanPhanMemRepository.findAllById(mauIds).stream()
+            mauMap = taiSanPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(mauIds).stream()
                     .collect(Collectors.toMap(TaiSanPhanMem::getId, java.util.function.Function.identity()));
         }
 

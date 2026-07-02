@@ -45,8 +45,8 @@ public class DanhSachThietBiPhanCungController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_THIET_BI_PHAN_CUNG')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(thietBiPhanCungService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(@RequestParam(required = false) Long idTaiSanPhanCung) {
+        return ApiResponse.success(thietBiPhanCungService.laySelectOptions(idTaiSanPhanCung));
     }
 
     @PostMapping

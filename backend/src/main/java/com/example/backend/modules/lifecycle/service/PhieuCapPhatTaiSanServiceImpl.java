@@ -643,9 +643,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 deptIds.add(p.getIdPhongBanNhan());
         }
 
-        Map<Long, String> userMap = nguoiDungRepository.findAllById(userIds).stream()
+        Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                 .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
-        Map<Long, String> deptMap = phongBanRepository.findAllById(deptIds).stream()
+        Map<Long, String> deptMap = phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(deptIds).stream()
                 .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
 
         List<PhieuCapPhatTaiSanResponse> responses = new ArrayList<>();

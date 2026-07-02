@@ -15,11 +15,13 @@ import DanhSachThietBiPhanMemPage from './pages/asset/taisan/danhsachthietbiphan
 import LinhKienPhanCungPage from './pages/asset/taisan/linhkienphancung/LinhKienPhanCungPage';
 import DanhMucThuocTinhPage from './pages/asset/danhmucthuoctinh/DanhMucThuocTinhPage';
 import LapRapLinhKienPage from './pages/asset/lapraplinhkien/LapRapLinhKienPage';
-import MaintenancePage from './pages/maintenance/MaintenancePage';
-import InventoryPage from './pages/inventory/InventoryPage';
-import ReportPage from './pages/report/ReportPage';
+import KeHoachBaoTriPage from './pages/maintenance/kehoachbaotri/KeHoachBaoTriPage';
+import PhieuSuaChuaPage from './pages/maintenance/phieusuachua/PhieuSuaChuaPage';
+import DotKiemKePage from './pages/inventory/dotkiemke/DotKiemKePage';
+import PhieuKiemKePage from './pages/inventory/phieukiemke/PhieuKiemKePage';
 import UserManagementPage from './pages/auth/users/UserManagementPage';
 import RoleManagementPage from './pages/auth/roles/RoleManagementPage';
+import NhatKyThaoTacPage from './pages/auth/nhatkythaotac/NhatKyThaoTacPage';
 import { getMyProfile } from './api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 import { authStore, QUYEN } from './stores/AuthStore';
 import DangKyDonViPage from './pages/tenant/donvi/DangKyDonViPage';
@@ -163,16 +165,20 @@ const router = createBrowserRouter([
         element: <PermittedRoute element={<LapRapLinhKienPage />} quyen={QUYEN.NHOM_LAP_RAP_LINH_KIEN} />,
       },
       {
-        path: 'maintenance',
-        element: <PermittedRoute element={<MaintenancePage />} quyen={QUYEN.THAO_TAC_TAI_SAN} />,
+        path: 'bao-tri/ke-hoach',
+        element: <PermittedRoute element={<KeHoachBaoTriPage />} quyen={QUYEN.NHOM_KE_HOACH_BAO_TRI} />,
       },
       {
-        path: 'inventory',
-        element: <PermittedRoute element={<InventoryPage />} quyen={QUYEN.THAO_TAC_TAI_SAN} />,
+        path: 'bao-tri/sua-chua',
+        element: <PermittedRoute element={<PhieuSuaChuaPage />} quyen={QUYEN.NHOM_PHIEU_SUA_CHUA} />,
       },
       {
-        path: 'reports',
-        element: <PermittedRoute element={<ReportPage />} quyen={QUYEN.XEM_BAO_CAO} />,
+        path: 'kiem-ke/dot-kiem-ke',
+        element: <PermittedRoute element={<DotKiemKePage />} quyen={QUYEN.NHOM_DOT_KIEM_KE} />,
+      },
+      {
+        path: 'kiem-ke/phieu-kiem-ke',
+        element: <PermittedRoute element={<PhieuKiemKePage />} quyen={QUYEN.NHOM_PHIEU_KIEM_KE} />,
       },
       {
         path: 'quan-ly-nguoi-dung/nguoi-dung',
@@ -181,6 +187,10 @@ const router = createBrowserRouter([
       {
         path: 'quan-ly-nguoi-dung/vai-tro',
         element: <PermittedRoute element={<RoleManagementPage />} quyen={QUYEN.NHOM_VAI_TRO} />,
+      },
+      {
+        path: 'quan-ly-nguoi-dung/nhat-ky-thao-tac',
+        element: <PermittedRoute element={<NhatKyThaoTacPage />} quyen={QUYEN.XEM_NHAT_KY_THAO_TAC} />,
       },
       {
         path: 'quan-ly-don-vi/don-vi',

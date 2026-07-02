@@ -153,6 +153,8 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
       dataIndex: 'maLoai',
       key: 'maLoai',
       width: 120,
+      sorter: (a: any, b: any) => (a.maLoai || '').localeCompare(b.maLoai || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên loại tài sản',
@@ -299,7 +301,7 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
                 <Button onClick={handleReset}>Làm mới</Button>

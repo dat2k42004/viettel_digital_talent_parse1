@@ -566,7 +566,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<PhieuSuaChuaBaoTriResponse> content = pageResult.getContent().stream()
@@ -574,6 +574,9 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                               .id(p.getId()).idDonVi(p.getIdDonVi()).maPhieuSuaChua(p.getMaPhieuSuaChua())
                               .keHoachBaoTriId(
                                         p.getKeHoachBaoTriDinhKy() != null ? p.getKeHoachBaoTriDinhKy().getId() : null)
+                              .maKeHoachBaoTri(
+                                        p.getKeHoachBaoTriDinhKy() != null ? p.getKeHoachBaoTriDinhKy().getMaKeHoach()
+                                                  : null)
                               .tenNguoiLap(userMap.get(p.getIdNguoiLap()))
                               .tenNguoiPheDuyet(userMap.get(p.getIdNguoiPheDuyet()))
                               .thoiGianLapPhieu(p.getThoiGianLapPhieu()).thoiGianBatDau(p.getThoiGianBatDau())
@@ -610,7 +613,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                userIds.add(p.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<ChiTietBaoTriGeneralResponse> detailsFlat = new ArrayList<>();
@@ -624,8 +627,10 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                Set<Long> tbIds = tbList.stream().map(ChiTietBaoTriThietBi::getIdDanhSachThietBiPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, DanhSachThietBiPhanCung> tbMap = tbIds.isEmpty() ? new HashMap<>()
-                         : thietBiPhanCungRepository.findAllById(tbIds).stream().collect(Collectors
-                                   .toMap(DanhSachThietBiPhanCung::getId, java.util.function.Function.identity()));
+                         : thietBiPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(tbIds).stream()
+                                   .collect(Collectors
+                                             .toMap(DanhSachThietBiPhanCung::getId,
+                                                       java.util.function.Function.identity()));
                tbList.forEach(x -> {
                     if (x.getIdNhaCungCap() != null)
                          nccIds.add(x.getIdNhaCungCap());
@@ -637,7 +642,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                Set<Long> lkIds = lkList.stream().map(ChiTietBaoTriLinhKien::getIdLinhKienPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, LinhKienPhanCung> lkMap = lkIds.isEmpty() ? new HashMap<>()
-                         : linhKienPhanCungRepository.findAllById(lkIds).stream().collect(
+                         : linhKienPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(lkIds).stream().collect(
                                    Collectors.toMap(LinhKienPhanCung::getId, java.util.function.Function.identity()));
                lkList.forEach(x -> {
                     if (x.getIdNhaCungCap() != null)
@@ -646,7 +651,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
 
                // Gom tên nhà cung cấp đối tác dịch vụ
                Map<Long, String> nccMap = nccIds.isEmpty() ? new HashMap<>()
-                         : nhaCungCapRepository.findAllById(nccIds).stream()
+                         : nhaCungCapRepository.findAllByIdInAndThoiGianXoaIsNull(nccIds).stream()
                                    .collect(Collectors.toMap(NhaCungCap::getId, NhaCungCap::getTenNhaCungCap));
 
                // Đưa dữ liệu thiết bị về định dạng mảng phẳng (Flattened Response Layout)
@@ -657,7 +662,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                          serial = core.getSoSerial();
                          assetCard = core.getMaTheTaiSan();
                          if (core.getTaiSanPhanCung() != null)
-                              tenMau = core.getTaiSanPhanCung().getTenMau();
+                              tenMau = core.getTaiSanPhanCung().getTenMau() + " - " + serial + " - " + assetCard;
                     }
                     detailsFlat.add(ChiTietBaoTriGeneralResponse.builder()
                               .id(ct.getId()).idTaiSanGoc(ct.getIdDanhSachThietBiPhanCung()).tenMauTaiSan(tenMau)
@@ -677,7 +682,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                     if (core != null) {
                          serial = core.getSoSerial();
                          if (core.getTaiSanPhanCung() != null)
-                              tenMau = core.getTaiSanPhanCung().getTenMau();
+                              tenMau = core.getTaiSanPhanCung().getTenMau() + " - " + serial;
                     }
                     detailsFlat.add(ChiTietBaoTriGeneralResponse.builder()
                               .id(ct.getId()).idTaiSanGoc(ct.getIdLinhKienPhanCung()).tenMauTaiSan(tenMau)
@@ -694,6 +699,8 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           return PhieuSuaChuaBaoTriResponse.builder()
                     .id(p.getId()).idDonVi(p.getIdDonVi()).maPhieuSuaChua(p.getMaPhieuSuaChua())
                     .keHoachBaoTriId(p.getKeHoachBaoTriDinhKy() != null ? p.getKeHoachBaoTriDinhKy().getId() : null)
+                    .maKeHoachBaoTri(
+                              p.getKeHoachBaoTriDinhKy() != null ? p.getKeHoachBaoTriDinhKy().getMaKeHoach() : null)
                     .tenNguoiLap(userMap.get(p.getIdNguoiLap())).tenNguoiPheDuyet(userMap.get(p.getIdNguoiPheDuyet()))
                     .thoiGianLapPhieu(p.getThoiGianLapPhieu()).thoiGianBatDau(p.getThoiGianBatDau())
                     .thoiGianHoanThanhDuKien(p.getThoiGianHoanThanhDuKien())

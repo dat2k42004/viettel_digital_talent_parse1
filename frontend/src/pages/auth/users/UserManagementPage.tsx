@@ -466,7 +466,7 @@ export const UserManagementPage: React.FC = observer(() => {
                 allowClear
                 style={{ width: 140 }}
               />
-              <Button type="primary" onClick={handleSearch}>Lọc</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
               <Button onClick={handleResetFilters}>Làm mới</Button>
             </Space>
           </Col>

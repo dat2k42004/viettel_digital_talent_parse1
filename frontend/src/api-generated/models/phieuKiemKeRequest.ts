@@ -8,6 +8,5 @@
 
 export interface PhieuKiemKeRequest {
   dotKiemKeId: number;
-  idPhongBanKiemKe: number;
-  idKhoKiemKe?: number;
+  idPhongBanKiemKe?: number;
 }

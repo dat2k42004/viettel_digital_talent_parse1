@@ -149,6 +149,8 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
       dataIndex: 'maCauHinh',
       key: 'maCauHinh',
       width: 220,
+      sorter: (a: any, b: any) => (a.maCauHinh || '').localeCompare(b.maCauHinh || ''),
+      defaultSortOrder: 'ascend' as const,
     },
     {
       title: 'Tên cấu hình',
@@ -182,31 +184,31 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
         const items: MenuProps['items'] = [
           authStore.kiemTraQuyen(QUYEN.SUA_DANH_MUC_CAU_HINH)
             ? {
-                key: 'edit',
-                label: 'Cập nhật',
-                icon: <EditOutlined />,
-                onClick: () => {
-                  setSelectedRecord(record);
-                  setIsFormOpen(true);
-                },
-              }
+              key: 'edit',
+              label: 'Cập nhật',
+              icon: <EditOutlined />,
+              onClick: () => {
+                setSelectedRecord(record);
+                setIsFormOpen(true);
+              },
+            }
             : null,
           authStore.kiemTraQuyen(QUYEN.XOA_DANH_MUC_CAU_HINH)
             ? {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Xác nhận xóa"
-                    description="Bạn có chắc chắn muốn xóa trường cấu hình này?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    onConfirm={() => handleXoaCauHinh(record.id!)}
-                  >
-                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa cấu hình</span>
-                  </Popconfirm>
-                ),
-                icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
-              }
+              key: 'delete',
+              label: (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description="Bạn có chắc chắn muốn xóa trường cấu hình này?"
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  onConfirm={() => handleXoaCauHinh(record.id!)}
+                >
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa cấu hình</span>
+                </Popconfirm>
+              ),
+              icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
+            }
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
@@ -266,10 +268,10 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={4}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset}>Làm mới</Button>
               </Space>
             </Col>
           </Row>

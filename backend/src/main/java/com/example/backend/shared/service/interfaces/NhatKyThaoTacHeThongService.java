@@ -12,6 +12,7 @@ public interface NhatKyThaoTacHeThongService {
             LocalDateTime tuNgay,
             LocalDateTime denNgay,
             int page,
-            int size
-    );
+            int size);
+
+    public void donDepLogCu(int soThangGiuLai);
 }

@@ -11,6 +11,7 @@ export interface PhieuSuaChuaBaoTriResponse {
   id?: number;
   idDonVi?: number;
   keHoachBaoTriId?: number;
+  maKeHoachBaoTri?: string;
   maPhieuSuaChua?: string;
   tenNguoiLap?: string;
   tenNguoiPheDuyet?: string;

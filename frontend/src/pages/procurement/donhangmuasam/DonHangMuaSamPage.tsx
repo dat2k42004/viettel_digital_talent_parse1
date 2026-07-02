@@ -208,6 +208,8 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
             dataIndex: 'maDonHang',
             key: 'maDonHang',
             width: 150,
+            sorter: (a: any, b: any) => (a.maDonHang || '').localeCompare(b.maDonHang || ''),
+            defaultSortOrder: 'ascend' as const,
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
@@ -369,7 +371,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={6}>
                             <Space>
-                                <Button type="primary" onClick={handleSearch}>Tìm kiếm</Button>
+                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
                                 <Button onClick={handleReset}>Làm mới</Button>
                             </Space>
                         </Col>

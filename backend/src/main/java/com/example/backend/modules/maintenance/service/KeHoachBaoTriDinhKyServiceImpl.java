@@ -287,7 +287,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<KeHoachBaoTriDinhKyResponse> content = pageResult.getContent().stream()
@@ -306,6 +306,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                               .chiPhiDuKien(kh.getChiPhiDuKien())
                               .trangThai(evaluateTrangThaiDong(kh))
                               .noiDungBaoTri(kh.getNoiDungBaoTri())
+                              .lyDoTuChoi(kh.getLyDoTuChoi())
                               .thoiGianTao(kh.getThoiGianTao())
                               .thoiGianCapNhat(kh.getThoiGianCapNhat())
                               .chiTietPhanVi(new ArrayList<>())
@@ -333,7 +334,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                userIds.add(kh.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllById(userIds).stream()
+                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
                               .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
 
           List<ChiTietKeHoachBaoTriResponse> chiTietList = new ArrayList<>();
@@ -345,7 +346,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                Set<Long> assetIds = details.stream().map(ChiTietKeHoachBaoTri::getIdTaiSanPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, TaiSanPhanCung> assetMap = assetIds.isEmpty() ? new HashMap<>()
-                         : taiSanPhanCungRepository.findAllById(assetIds).stream()
+                         : taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(assetIds).stream()
                                    .collect(Collectors.toMap(TaiSanPhanCung::getId,
                                              java.util.function.Function.identity()));
 
@@ -375,9 +376,29 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                     .chiPhiDuKien(kh.getChiPhiDuKien())
                     .trangThai(evaluateTrangThaiDong(kh))
                     .noiDungBaoTri(kh.getNoiDungBaoTri())
+                    .lyDoTuChoi(kh.getLyDoTuChoi())
                     .thoiGianTao(kh.getThoiGianTao())
                     .thoiGianCapNhat(kh.getThoiGianCapNhat())
                     .chiTietPhanVi(chiTietList)
                     .build();
+     }
+
+     @Override
+     @Transactional
+     public void tuChoiPheDuyet(Long id, String lyDoTuChoi) {
+          Long tenantId = getRequiredTenantId();
+          Long userId = getCurrentUserId();
+
+          KeHoachBaoTriDinhKy kh = keHoachBaoTriDinhKyRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin kế hoạch bảo trì", 404));
+
+          if (kh.getTrangThai() != TrangThaiPhieuEnum.GUI_PHE_DUYET) {
+               throw new NghiepVuException("Kế hoạch phải ở trạng thái Gửi phê duyệt mới có thể từ chối", 400);
+          }
+
+          kh.setTrangThai(TrangThaiPhieuEnum.TU_CHOI);
+          kh.setIdNguoiPheDuyet(userId);
+          kh.setLyDoTuChoi(lyDoTuChoi);
+          keHoachBaoTriDinhKyRepository.save(kh);
      }
 }

@@ -52,6 +52,13 @@ public class KeHoachBaoTriController {
           return ApiResponse.success("Phê duyệt thông qua kế hoạch bảo trì định kỳ thành công");
      }
 
+     @PutMapping("/{id}/tu-choi")
+     @PreAuthorize("hasAuthority('PHE_DUYET_KHBTDK')")
+     public ApiResponse<String> tuChoiPheDuyet(@PathVariable Long id, @RequestParam String lyDoTuChoi) {
+          keHoachBaoTriService.tuChoiPheDuyet(id, lyDoTuChoi);
+          return ApiResponse.success("Từ chối phê duyệt kế hoạch bảo trì định kỳ thành công");
+     }
+
      @GetMapping
      @PreAuthorize("hasAuthority('XEM_DANH_SACH_KHBTDK')")
      public ApiResponse<PageResponse<KeHoachBaoTriDinhKyResponse>> layDanhSach(

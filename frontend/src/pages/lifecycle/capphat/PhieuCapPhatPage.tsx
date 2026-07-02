@@ -211,6 +211,8 @@ export const PhieuCapPhatPage: React.FC = observer(() => {
             dataIndex: 'maPhiepCapPhat',
             key: 'maPhiepCapPhat',
             width: 140,
+            sorter: (a: any, b: any) => (a.maPhiepCapPhat || '').localeCompare(b.maPhiepCapPhat || ''),
+            defaultSortOrder: 'ascend' as const,
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {

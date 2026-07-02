@@ -10,7 +10,8 @@ import type {
   ApiResponsePageResponseKeHoachBaoTriDinhKyResponse,
   ApiResponseString,
   KeHoachBaoTriDinhKyRequest,
-  LayDanhSach19Params
+  LayDanhSach19Params,
+  TuChoiPheDuyet4Params
 } from '../../models';
 
 import { customAxiosInstance } from '../../../api/axiosInstance';
@@ -52,6 +53,16 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
     },
       );
     }
+  export const tuChoiPheDuyet4 = (
+    id: number,
+    params: TuChoiPheDuyet4Params,
+ ) => {
+      return customAxiosInstance<ApiResponseString>(
+      {url: `/api/ke-hoach-bao-tri/${id}/tu-choi`, method: 'PUT',
+        params
+    },
+      );
+    }
   export const pheDuyet5 = (
     id: number,
  ) => {
@@ -83,6 +94,7 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
 export type CapNhat18Result = NonNullable<Awaited<ReturnType<typeof capNhat18>>>
 export type XoaMem18Result = NonNullable<Awaited<ReturnType<typeof xoaMem18>>>
 export type YeuCauPheDuyet5Result = NonNullable<Awaited<ReturnType<typeof yeuCauPheDuyet5>>>
+export type TuChoiPheDuyet4Result = NonNullable<Awaited<ReturnType<typeof tuChoiPheDuyet4>>>
 export type PheDuyet5Result = NonNullable<Awaited<ReturnType<typeof pheDuyet5>>>
 export type LayDanhSach19Result = NonNullable<Awaited<ReturnType<typeof layDanhSach19>>>
 export type ThemMoi19Result = NonNullable<Awaited<ReturnType<typeof themMoi19>>>

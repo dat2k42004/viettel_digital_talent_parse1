@@ -208,6 +208,8 @@ export const PhieuThuHoiPage: React.FC = observer(() => {
             dataIndex: 'maPhieuThuHoi',
             key: 'maPhieuThuHoi',
             width: 150,
+            sorter: (a: any, b: any) => (a.maPhieuThuHoi || '').localeCompare(b.maPhieuThuHoi || ''),
+            defaultSortOrder: 'ascend' as const,
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {

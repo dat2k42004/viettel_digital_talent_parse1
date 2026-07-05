@@ -189,4 +189,28 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                     .thoiGianCapNhat(model.getThoiGianCapNhat())
                     .build();
      }
+
+     @Override
+     @Transactional(readOnly = true)
+     public java.util.Optional<com.example.backend.modules.procurement.model.NhaCungCap> layEntityTheoId(Long id) {
+          return nhaCungCapRepository.findById(id);
+     }
+
+     @Override
+     @Transactional
+     public void saveEntity(com.example.backend.modules.procurement.model.NhaCungCap entity) {
+          nhaCungCapRepository.save(entity);
+     }
+
+     @Override
+     @Transactional(readOnly = true)
+     public java.util.Map<Long, String> layTenNhaCungCapTheoIds(java.util.Collection<Long> ids) {
+          java.util.Map<Long, String> map = new java.util.HashMap<>();
+          if (ids == null || ids.isEmpty()) {
+               return map;
+          }
+          nhaCungCapRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids))
+                  .forEach(ncc -> map.put(ncc.getId(), ncc.getTenNhaCungCap()));
+          return map;
+     }
 }

@@ -6,31 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 import type {
-  ApiResponseString,
-  NhacNhoKiemKeCuTheParams
+  ApiResponseString
 } from '../../models';
 
 import { customAxiosInstance } from '../../../api/axiosInstance';
 
 
 
-  export const nhacNhoKiemKe = (
-
- ) => {
-      return customAxiosInstance<ApiResponseString>(
-      {url: `/api/thong-bao/nhac-nho-kiem-ke`, method: 'GET'
-    },
-      );
-    }
-  export const nhacNhoKiemKeCuThe = (
-    params: NhacNhoKiemKeCuTheParams,
- ) => {
-      return customAxiosInstance<ApiResponseString>(
-      {url: `/api/thong-bao/nhac-nho-kiem-ke-cu-the`, method: 'GET',
-        params
-    },
-      );
-    }
   export const nhacNhoChungTu = (
 
  ) => {
@@ -47,7 +29,5 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
     },
       );
     }
-  export type NhacNhoKiemKeResult = NonNullable<Awaited<ReturnType<typeof nhacNhoKiemKe>>>
-export type NhacNhoKiemKeCuTheResult = NonNullable<Awaited<ReturnType<typeof nhacNhoKiemKeCuThe>>>
-export type NhacNhoChungTuResult = NonNullable<Awaited<ReturnType<typeof nhacNhoChungTu>>>
+  export type NhacNhoChungTuResult = NonNullable<Awaited<ReturnType<typeof nhacNhoChungTu>>>
 export type CanhBaoHetHanResult = NonNullable<Awaited<ReturnType<typeof canhBaoHetHan>>>

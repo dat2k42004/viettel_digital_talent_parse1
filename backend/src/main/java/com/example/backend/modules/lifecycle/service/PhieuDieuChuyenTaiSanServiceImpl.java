@@ -2,17 +2,18 @@ package com.example.backend.modules.lifecycle.service;
 
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.modules.lifecycle.dto.*;
 import com.example.backend.modules.lifecycle.model.*;
 import com.example.backend.modules.lifecycle.repository.*;
 import com.example.backend.modules.lifecycle.service.interfaces.PhieuDieuChuyenTaiSanService;
 import com.example.backend.modules.tenant.model.PhongBan;
-import com.example.backend.modules.tenant.repository.PhongBanRepository;
+import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
+import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.response.PageResponse;
@@ -49,10 +50,10 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      private final ChiTietCapPhatPhanCungRepository chiTietCapPhatPhanCungRepository;
      private final ChiTietCapPhatLinhKienRepository chiTietCapPhatLinhKienRepository;
      private final PhieuCapPhatTaiSanRepository phieuCapPhatTaiSanRepository;
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final NguoiDungRepository nguoiDungRepository;
-     private final PhongBanRepository phongBanRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final NguoiDungService nguoiDungRepository;
+     private final PhongBanService phongBanRepository;
 
      @Autowired
      @Lazy
@@ -67,12 +68,8 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      }
 
      private Long getCurrentUserId() {
-          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-          if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
-               return userDetails.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Không tìm thấy thông tin nhân viên thao tác từ phiên làm việc", 401);
-     }
+        return nguoiDungRepository.layIdNguoiDungHienTai();
+    }
 
      private String getHoTenNguoiDung(NguoiDung nd) {
           if (nd == null)
@@ -149,10 +146,8 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                     pbIds.add(p.getIdPhongBanNhan());
           }
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                    .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
-          Map<Long, String> pbMap = phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
-                    .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
+          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
+          Map<Long, String> pbMap = phongBanRepository.layTenPhongBanTheoIds(pbIds);
 
           List<PhieuDieuChuyenTaiSanResponse> responses = new ArrayList<>();
           for (PhieuDieuChuyenTaiSan phieu : phieuList) {
@@ -671,10 +666,8 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           if (phieu.getIdPhongBanNhan() != null)
                pbIds.add(phieu.getIdPhongBanNhan());
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                    .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
-          Map<Long, String> pbMap = phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(pbIds).stream()
-                    .collect(Collectors.toMap(PhongBan::getId, PhongBan::getTenPhongBan));
+          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
+          Map<Long, String> pbMap = phongBanRepository.layTenPhongBanTheoIds(pbIds);
 
           List<ChiTietDieuChuyenGeneralResponse> chiTietTaiSan = new ArrayList<>();
 
@@ -685,7 +678,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                          .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietDieuChuyenPhanCung pc : pcList) {
                     String tenTaiSan = "", soSerial = "", maThe = "";
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.findById(pc.getDanhSachThietBiPhanCungId())
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId())
                               .orElse(null);
                     if (tb != null) {
                          soSerial = tb.getSoSerial();
@@ -715,7 +708,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                          .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietDieuChuyenLinhKien lk : lkList) {
                     String tenTaiSan = "", soSerial = "";
-                    LinhKienPhanCung lkEntity = linhKienPhanCungRepository.findById(lk.getLinhKienPhanCungId())
+                    LinhKienPhanCung lkEntity = linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId())
                               .orElse(null);
                     if (lkEntity != null) {
                          soSerial = lkEntity.getSoSerial();

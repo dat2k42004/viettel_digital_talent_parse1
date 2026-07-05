@@ -13,13 +13,13 @@ import com.example.backend.modules.procurement.model.NhaCungCap;
 import com.example.backend.modules.procurement.repository.ChiTietDonHangPhanCungRepository;
 import com.example.backend.modules.procurement.repository.ChiTietDonHangPhanMemRepository;
 import com.example.backend.modules.procurement.repository.DonHangMuaSamRepository;
-import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
+import com.example.backend.modules.procurement.service.interfaces.NhaCungCapService;
 import com.example.backend.modules.procurement.service.interfaces.DonHangMuaSamService;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
-import com.example.backend.modules.asset.repository.TaiSanPhanMemRepository;
+import com.example.backend.modules.asset.service.interfaces.TaiSanPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.TaiSanPhanMemService;
 import com.example.backend.modules.asset.model.TaiSanPhanCung;
 import com.example.backend.modules.asset.model.TaiSanPhanMem;
 import com.example.backend.shared.dto.TrangThaiRequest;
@@ -49,10 +49,10 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      private final DonHangMuaSamRepository donHangMuaSamRepository;
      private final ChiTietDonHangPhanCungRepository chiTietDonHangPhanCungRepository;
      private final ChiTietDonHangPhanMemRepository chiTietDonHangPhanMemRepository;
-     private final NhaCungCapRepository nhaCungCapRepository;
-     private final NguoiDungRepository nguoiDungRepository;
-     private final TaiSanPhanCungRepository taiSanPhanCungRepository;
-     private final TaiSanPhanMemRepository taiSanPhanMemRepository;
+     private final NhaCungCapService nhaCungCapRepository;
+     private final NguoiDungService nguoiDungRepository;
+     private final TaiSanPhanCungService taiSanPhanCungRepository;
+     private final TaiSanPhanMemService taiSanPhanMemRepository;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -63,12 +63,8 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      }
 
      private Long getCurrentUserId() {
-          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-          if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
-               return userDetails.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
-     }
+        return nguoiDungRepository.layIdNguoiDungHienTai();
+    }
 
      @Override
      @Transactional(readOnly = true)
@@ -128,15 +124,13 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+               userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
           }
 
           // Kéo thông tin Nhà cung cấp lên RAM trong 1 câu SQL duy nhất
           java.util.Map<Long, String> nccMap = new java.util.HashMap<>();
           if (!nccIds.isEmpty()) {
-               nccMap = nhaCungCapRepository.findAllByIdInAndThoiGianXoaIsNull(nccIds).stream()
-                         .collect(Collectors.toMap(NhaCungCap::getId, NhaCungCap::getTenNhaCungCap));
+               nccMap = nhaCungCapRepository.layTenNhaCungCapTheoIds(nccIds);
           }
 
           final java.util.Map<Long, String> finalUserMap = userMap;
@@ -189,8 +183,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
      public DonHangMuaSamResponse themMoi(DonHangMuaSamRequest request) {
           Long currentTenantId = getRequiredTenantId();
 
-          NhaCungCap ncc = nhaCungCapRepository
-                    .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdNhaCungCap(), currentTenantId)
+          NhaCungCap ncc = nhaCungCapRepository.layEntityTheoId(request.getIdNhaCungCap())
                     .orElseThrow(() -> new NghiepVuException(
                               "Nhà cung cấp lựa chọn không tồn tại hoặc không thuộc đơn vị", 400));
 
@@ -253,8 +246,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                throw new NghiepVuException("Chỉ được sửa đơn hàng khi ở trạng thái Tạo mới (TAO_MOI)", 400);
           }
 
-          NhaCungCap ncc = nhaCungCapRepository
-                    .findByIdAndIdDonViAndThoiGianXoaIsNull(request.getIdNhaCungCap(), currentTenantId)
+          NhaCungCap ncc = nhaCungCapRepository.layEntityTheoId(request.getIdNhaCungCap())
                     .orElseThrow(() -> new NghiepVuException("Nhà cung cấp lựa chọn không tồn tại", 400));
 
           dh.setNhaCungCap(ncc);
@@ -398,8 +390,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                         .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+               userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
           }
 
           DonHangMuaSamResponse response = mapToResponseWithoutDetails(model, userMap);
@@ -416,7 +407,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                          .collect(Collectors.toSet());
                java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
                if (!pcIds.isEmpty()) {
-                    pcNameMap = taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(pcIds).stream()
+                    pcNameMap = taiSanPhanCungRepository.layTheoIds(pcIds).stream()
                               .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
                }
 
@@ -448,7 +439,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                          .collect(Collectors.toSet());
                java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
                if (!pmIds.isEmpty()) {
-                    pmNameMap = taiSanPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(pmIds).stream()
+                    pmNameMap = taiSanPhanMemRepository.layTheoIds(pmIds).stream()
                               .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
                }
 

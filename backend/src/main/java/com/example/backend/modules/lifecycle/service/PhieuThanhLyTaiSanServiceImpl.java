@@ -3,12 +3,12 @@ package com.example.backend.modules.lifecycle.service;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanMem;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.modules.lifecycle.dto.*;
 import com.example.backend.modules.lifecycle.model.*;
 import com.example.backend.modules.lifecycle.repository.*;
@@ -49,10 +49,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
      private final ChiTietThanhLyPhanCungRepository chiTietThanhLyPhanCungRepository;
      private final ChiTietThanhLyPhanMemRepository chiTietThanhLyPhanMemRepository;
      private final ChiTietThanhLyLinhKienRepository chiTietThanhLyLinhKienRepository;
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final NguoiDungRepository nguoiDungRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final NguoiDungService nguoiDungRepository;
 
      @Autowired
      @Lazy
@@ -66,12 +66,8 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
      }
 
      private Long getCurrentUserId() {
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-          if (auth != null && auth.getPrincipal() instanceof NguoiDungUserDetails user) {
-               return user.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Không tìm thấy thông tin nhân viên thao tác", 401);
-     }
+        return nguoiDungRepository.layIdNguoiDungHienTai();
+    }
 
      private String getHoTenNguoiDung(NguoiDung nd) {
           if (nd == null)
@@ -132,8 +128,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     userIds.add(p.getIdNguoiPheDuyet());
           }
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                    .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<PhieuThanhLyTaiSanResponse> responses = new ArrayList<>();
           for (PhieuThanhLyTaiSan p : phieuList) {
@@ -192,8 +187,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           // 1. Lưu mảng Phần Cứng từ Request và Xóa mềm để giữ chỗ tĩnh
           if (request.getDanhSachPhanCung() != null) {
                for (ChiTietThanhLyPhanCungRequest item : request.getDanhSachPhanCung()) {
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdThietBiPhanCung(), tenantId)
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(item.getIdThietBiPhanCung())
                               .orElseThrow(
                                         () -> new NghiepVuException("Không tìm thấy thiết bị phần cứng hoạt động ID: "
                                                   + item.getIdThietBiPhanCung(), 400));
@@ -205,7 +199,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
                     tb.setThoiGianXoa(LocalDateTime.now());
                     tb.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
 
                     ChiTietThanhLyPhanCung ct = new ChiTietThanhLyPhanCung();
                     ct.setPhieuThanhLyTaiSan(savedPhieu);
@@ -219,8 +213,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           // 2. Lưu mảng Phần Mềm từ Request và Xóa mềm
           if (request.getDanhSachPhanMem() != null) {
                for (ChiTietThanhLyPhanMemRequest item : request.getDanhSachPhanMem()) {
-                    DanhSachThietBiPhanMem pm = thietBiPhanMemRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdThietBiPhanMem(), tenantId)
+                    DanhSachThietBiPhanMem pm = thietBiPhanMemRepository.layEntityTheoId(item.getIdThietBiPhanMem())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy bản quyền phần mềm hoạt động ID: " + item.getIdThietBiPhanMem(),
                                         400));
@@ -233,7 +226,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
                     pm.setThoiGianXoa(LocalDateTime.now());
                     pm.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    thietBiPhanMemRepository.save(pm);
+                    thietBiPhanMemRepository.saveEntity(pm);
 
                     ChiTietThanhLyPhanMem ct = new ChiTietThanhLyPhanMem();
                     ct.setPhieuThanhLyTaiSan(savedPhieu);
@@ -247,8 +240,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           // 3. Lưu mảng Linh Kiện từ Request và Xóa mềm
           if (request.getDanhSachLinhKien() != null) {
                for (ChiTietThanhLyLinhKienRequest item : request.getDanhSachLinhKien()) {
-                    LinhKienPhanCung lk = linhKienPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdLinhKienPhanCung(), tenantId)
+                    LinhKienPhanCung lk = linhKienPhanCungRepository.layEntityTheoId(item.getIdLinhKienPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy linh kiện hoạt động ID: " + item.getIdLinhKienPhanCung(), 400));
 
@@ -259,7 +251,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
                     lk.setThoiGianXoa(LocalDateTime.now());
                     lk.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
 
                     ChiTietThanhLyLinhKien ct = new ChiTietThanhLyLinhKien();
                     ct.setPhieuThanhLyTaiSan(savedPhieu);
@@ -309,10 +301,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
           for (ChiTietThanhLyPhanCung oldItem : oldPc) {
                if (!newPcIds.contains(oldItem.getDanhSachThietBiPhanCungId())) {
-                    thietBiPhanCungRepository.findById(oldItem.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                    thietBiPhanCungRepository.layEntityTheoId(oldItem.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                          tb.setThoiGianXoa(null);
                          tb.setLyDoXoa(null);
-                         thietBiPhanCungRepository.save(tb);
+                         thietBiPhanCungRepository.saveEntity(tb);
                     });
                     chiTietThanhLyPhanCungRepository.delete(oldItem);
                }
@@ -324,14 +316,13 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     oldItem.setGhiChu(item.getGhiChu());
                     chiTietThanhLyPhanCungRepository.save(oldItem);
                } else {
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdThietBiPhanCung(), tenantId)
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(item.getIdThietBiPhanCung())
                               .orElseThrow(
                                         () -> new NghiepVuException("Không tìm thấy thiết bị phần cứng bổ sung mới ID: "
                                                   + item.getIdThietBiPhanCung(), 400));
                     tb.setThoiGianXoa(LocalDateTime.now());
                     tb.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
 
                     ChiTietThanhLyPhanCung ct = new ChiTietThanhLyPhanCung();
                     ct.setPhieuThanhLyTaiSan(phieu);
@@ -355,10 +346,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
           for (ChiTietThanhLyPhanMem oldItem : oldPm) {
                if (!newPmIds.contains(oldItem.getDanhSachThietBiPhanMemId())) {
-                    thietBiPhanMemRepository.findById(oldItem.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
+                    thietBiPhanMemRepository.layEntityTheoId(oldItem.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
                          pm.setThoiGianXoa(null);
                          pm.setLyDoXoa(null);
-                         thietBiPhanMemRepository.save(pm);
+                         thietBiPhanMemRepository.saveEntity(pm);
                     });
                     chiTietThanhLyPhanMemRepository.delete(oldItem);
                }
@@ -370,13 +361,12 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     oldItem.setGhiChu(item.getGhiChu());
                     chiTietThanhLyPhanMemRepository.save(oldItem);
                } else {
-                    DanhSachThietBiPhanMem pm = thietBiPhanMemRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdThietBiPhanMem(), tenantId)
+                    DanhSachThietBiPhanMem pm = thietBiPhanMemRepository.layEntityTheoId(item.getIdThietBiPhanMem())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy phần mềm bổ sung mới ID: " + item.getIdThietBiPhanMem(), 400));
                     pm.setThoiGianXoa(LocalDateTime.now());
                     pm.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    thietBiPhanMemRepository.save(pm);
+                    thietBiPhanMemRepository.saveEntity(pm);
 
                     ChiTietThanhLyPhanMem ct = new ChiTietThanhLyPhanMem();
                     ct.setPhieuThanhLyTaiSan(phieu);
@@ -400,10 +390,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
 
           for (ChiTietThanhLyLinhKien oldItem : oldLk) {
                if (!newLkIds.contains(oldItem.getLinhKienPhanCungId())) {
-                    linhKienPhanCungRepository.findById(oldItem.getLinhKienPhanCungId()).ifPresent(lk -> {
+                    linhKienPhanCungRepository.layEntityTheoId(oldItem.getLinhKienPhanCungId()).ifPresent(lk -> {
                          lk.setThoiGianXoa(null);
                          lk.setLyDoXoa(null);
-                         linhKienPhanCungRepository.save(lk);
+                         linhKienPhanCungRepository.saveEntity(lk);
                     });
                     chiTietThanhLyLinhKienRepository.delete(oldItem);
                }
@@ -415,14 +405,13 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     oldItem.setGhiChu(item.getGhiChu());
                     chiTietThanhLyLinhKienRepository.save(oldItem);
                } else {
-                    LinhKienPhanCung lk = linhKienPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdLinhKienPhanCung(), tenantId)
+                    LinhKienPhanCung lk = linhKienPhanCungRepository.layEntityTheoId(item.getIdLinhKienPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy linh kiện bổ sung mới ID: " + item.getIdLinhKienPhanCung(),
                                         400));
                     lk.setThoiGianXoa(LocalDateTime.now());
                     lk.setLyDoXoa("Nằm trong kế hoạch lập phiếu thanh lý (Chờ hoàn thành)");
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
 
                     ChiTietThanhLyLinhKien ct = new ChiTietThanhLyLinhKien();
                     ct.setPhieuThanhLyTaiSan(phieu);
@@ -460,10 +449,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyPhanCung> pcList = chiTietThanhLyPhanCungRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(id);
           for (ChiTietThanhLyPhanCung ct : pcList) {
-               thietBiPhanCungRepository.findById(ct.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+               thietBiPhanCungRepository.layEntityTheoId(ct.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                     tb.setThoiGianXoa(null);
                     tb.setLyDoXoa(null);
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
                });
                ct.setThoiGianXoa(LocalDateTime.now());
                ct.setLyDoXoa("Hủy phiếu thanh lý tổng");
@@ -474,10 +463,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyPhanMem> pmList = chiTietThanhLyPhanMemRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(id);
           for (ChiTietThanhLyPhanMem ct : pmList) {
-               thietBiPhanMemRepository.findById(ct.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
+               thietBiPhanMemRepository.layEntityTheoId(ct.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
                     pm.setThoiGianXoa(null);
                     pm.setLyDoXoa(null);
-                    thietBiPhanMemRepository.save(pm);
+                    thietBiPhanMemRepository.saveEntity(pm);
                });
                ct.setThoiGianXoa(LocalDateTime.now());
                ct.setLyDoXoa("Hủy phiếu thanh lý tổng");
@@ -488,10 +477,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyLinhKien> lkList = chiTietThanhLyLinhKienRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(id);
           for (ChiTietThanhLyLinhKien ct : lkList) {
-               linhKienPhanCungRepository.findById(ct.getLinhKienPhanCungId()).ifPresent(lk -> {
+               linhKienPhanCungRepository.layEntityTheoId(ct.getLinhKienPhanCungId()).ifPresent(lk -> {
                     lk.setThoiGianXoa(null);
                     lk.setLyDoXoa(null);
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
                });
                ct.setThoiGianXoa(LocalDateTime.now());
                ct.setLyDoXoa("Hủy phiếu thanh lý tổng");
@@ -558,10 +547,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           // đẩy sự kiện xuống queue để thực hiện cập nhật báo cáo tồn kho
           for (ChiTietThanhLyPhanCung ct : pcList) {
                if (ct.getDanhSachThietBiPhanCungId() != null) {
-                    thietBiPhanCungRepository.findById(ct.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                    thietBiPhanCungRepository.layEntityTheoId(ct.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                          tb.setThoiGianXoa(LocalDateTime.now());
                          tb.setLyDoXoa("Đã thanh lý xuất kho vĩnh viễn");
-                         thietBiPhanCungRepository.save(tb);
+                         thietBiPhanCungRepository.saveEntity(tb);
 
                          // Phát hành gói tin thanh lý phần cứng ra hàng đợi ngầm
                          com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -586,10 +575,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyPhanMem ct : pmList) {
                if (ct.getDanhSachThietBiPhanMemId() != null) {
-                    thietBiPhanMemRepository.findById(ct.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
+                    thietBiPhanMemRepository.layEntityTheoId(ct.getDanhSachThietBiPhanMemId()).ifPresent(pm -> {
                          pm.setThoiGianXoa(LocalDateTime.now());
                          pm.setLyDoXoa("Đã hủy bản quyền/thanh lý vĩnh viễn");
-                         thietBiPhanMemRepository.save(pm);
+                         thietBiPhanMemRepository.saveEntity(pm);
 
                          // Phát hành gói tin hủy bản quyền phần mềm
                          com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -614,10 +603,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyLinhKien ct : lkList) {
                if (ct.getLinhKienPhanCungId() != null) {
-                    linhKienPhanCungRepository.findById(ct.getLinhKienPhanCungId()).ifPresent(lk -> {
+                    linhKienPhanCungRepository.layEntityTheoId(ct.getLinhKienPhanCungId()).ifPresent(lk -> {
                          lk.setThoiGianXoa(LocalDateTime.now());
                          lk.setLyDoXoa("Đã thanh lý hủy linh kiện vĩnh viễn");
-                         linhKienPhanCungRepository.save(lk);
+                         linhKienPhanCungRepository.saveEntity(lk);
 
                          // Phát hành gói tin tiêu hủy linh kiện rời
                          com.example.backend.shared.dto.BienDongTonKhoEvent eventBus = com.example.backend.shared.dto.BienDongTonKhoEvent
@@ -667,10 +656,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyPhanCung> danhSachPhanCung = chiTietThanhLyPhanCungRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyPhanCung pc : danhSachPhanCung) {
-               thietBiPhanCungRepository.findById(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+               thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                     tb.setThoiGianXoa(null);
                     tb.setLyDoXoa(null);
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
                });
           }
 
@@ -678,10 +667,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyPhanMem> danhSachPhanMem = chiTietThanhLyPhanMemRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyPhanMem pm : danhSachPhanMem) {
-               thietBiPhanMemRepository.findById(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+               thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
                     tb.setThoiGianXoa(null);
                     tb.setLyDoXoa(null);
-                    thietBiPhanMemRepository.save(tb);
+                    thietBiPhanMemRepository.saveEntity(tb);
                });
           }
 
@@ -689,10 +678,10 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           List<ChiTietThanhLyLinhKien> danhSachLinhKien = chiTietThanhLyLinhKienRepository
                     .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
           for (ChiTietThanhLyLinhKien lk : danhSachLinhKien) {
-               linhKienPhanCungRepository.findById(lk.getLinhKienPhanCungId()).ifPresent(linhKien -> {
+               linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(linhKien -> {
                     linhKien.setThoiGianXoa(null);
                     linhKien.setLyDoXoa(null);
-                    linhKienPhanCungRepository.save(linhKien);
+                    linhKienPhanCungRepository.saveEntity(linhKien);
                });
           }
      }
@@ -704,8 +693,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
           if (phieu.getIdNguoiPheDuyet() != null)
                userIds.add(phieu.getIdNguoiPheDuyet());
 
-          Map<Long, String> userMap = nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                    .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<ChiTietThanhLyGeneralResponse> chiTietTaiSan = new ArrayList<>();
 
@@ -715,7 +703,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                          .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietThanhLyPhanCung pc : pcList) {
                     String tenTaiSan = "", soSerial = "", maThe = "";
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.findById(pc.getDanhSachThietBiPhanCungId())
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId())
                               .orElse(null);
                     if (tb != null) {
                          soSerial = tb.getSoSerial();
@@ -740,8 +728,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                          .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietThanhLyPhanMem pm : pmList) {
                     String tenTaiSan = "";
-                    DanhSachThietBiPhanMem pmEntity = thietBiPhanMemRepository
-                              .findById(pm.getDanhSachThietBiPhanMemId())
+                    DanhSachThietBiPhanMem pmEntity = thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId())
                               .orElse(null);
                     if (pmEntity != null && pmEntity.getTaiSanPhanMem() != null) {
                          tenTaiSan = pmEntity.getTaiSanPhanMem().getTenMau();
@@ -763,7 +750,7 @@ public class PhieuThanhLyTaiSanServiceImpl implements PhieuThanhLyTaiSanService 
                          .findByPhieuThanhLyTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietThanhLyLinhKien lk : lkList) {
                     String tenTaiSan = "", soSerial = "";
-                    LinhKienPhanCung lkEntity = linhKienPhanCungRepository.findById(lk.getLinhKienPhanCungId())
+                    LinhKienPhanCung lkEntity = linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId())
                               .orElse(null);
                     if (lkEntity != null) {
                          soSerial = lkEntity.getSoSerial();

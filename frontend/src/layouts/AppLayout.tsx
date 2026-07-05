@@ -84,6 +84,13 @@ export const AppLayout: React.FC = observer(() => {
       icon: <DashboardOutlined />,
       label: <Link to="/">Tổng quan</Link>,
     },
+    authStore.kiemTraQuyen([QUYEN.XEM_BAO_CAO, QUYEN.XEM_QUAN_TRI_TOAN_SAN])
+      ? {
+        key: '/bao-cao',
+        icon: <BarChartOutlined />,
+        label: <Link to="/bao-cao">Báo cáo & Thống kê</Link>,
+      }
+      : null,
     authStore.kiemTraQuyen([
       QUYEN.NHOM_HANG_SAN_XUAT,
       QUYEN.NHOM_LOAI_TAI_SAN,

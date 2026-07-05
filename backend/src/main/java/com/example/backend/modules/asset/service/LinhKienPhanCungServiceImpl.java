@@ -265,4 +265,34 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
                 .thoiGianCapNhat(linhKien.getThoiGianCapNhat())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<com.example.backend.modules.asset.model.LinhKienPhanCung> layEntityTheoId(Long id) {
+        return linhKienRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = { "linh_kien_phan_cung_cache", "linh_kien_phan_cung_list_cache" }, allEntries = true)
+    public void saveEntity(com.example.backend.modules.asset.model.LinhKienPhanCung entity) {
+        linhKienRepository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.LinhKienPhanCung> layTatCaActive() {
+        return linhKienRepository.findAll().stream()
+                .filter(x -> x.getThoiGianXoa() == null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.LinhKienPhanCung> layTheoIds(java.util.Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return linhKienRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids));
+    }
 }

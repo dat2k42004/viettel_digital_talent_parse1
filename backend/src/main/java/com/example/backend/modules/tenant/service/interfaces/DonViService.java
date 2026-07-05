@@ -19,5 +19,8 @@ public interface DonViService {
     void xoaMem(Long id);
     boolean checkDomain(String domain);
     void giaHanHopDong(Long id, GiaHanHopDongRequest request);
+    java.util.List<DonViResponse> layTatCaDonViActive();
+    org.springframework.data.domain.Page<com.example.backend.modules.tenant.model.DonVi> layDonViEntityPage(org.springframework.data.domain.Pageable pageable);
+    long demDonViActive();
 }
 

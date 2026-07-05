@@ -43,9 +43,11 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "tai_san_phan_mem_list_cache", key = "{#keyword, #trangThai, #page, #size, #sort}")
-    public PageResponse<TaiSanPhanMemResponse> layDanhSach(String keyword, String trangThai, int page, int size, String sort) {
+    public PageResponse<TaiSanPhanMemResponse> layDanhSach(String keyword, String trangThai, int page, int size,
+            String sort) {
         String[] sortParts = sort.split(",");
-        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
         String sortBy = sortParts[0];
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
@@ -56,7 +58,8 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
 
             if (trangThai != null && !trangThai.trim().isEmpty()) {
                 try {
-                    predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
+                    predicates.add(cb.equal(root.get("trangThai"),
+                            com.example.backend.shared.model.TrangThaiCoBanEnum.fromValue(trangThai.trim())));
                 } catch (IllegalArgumentException e) {
                     throw new NghiepVuException(e.getMessage(), 400);
                 }
@@ -91,7 +94,7 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache" }, allEntries = true)
     public TaiSanPhanMemResponse themMoi(TaiSanPhanMemRequest request) {
         TaiSanPhanMem taiSanPhanMem = new TaiSanPhanMem();
         capNhatThongTin(taiSanPhanMem, request);
@@ -103,7 +106,7 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache" }, allEntries = true)
     public TaiSanPhanMemResponse capNhat(Long id, TaiSanPhanMemRequest request) {
         TaiSanPhanMem taiSanPhanMem = taiSanPhanMemRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần mềm để cập nhật", 404));
@@ -116,7 +119,7 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache" }, allEntries = true)
     public void xoaMem(Long id) {
         TaiSanPhanMem taiSanPhanMem = taiSanPhanMemRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần mềm để xóa", 404));
@@ -128,7 +131,7 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache"}, allEntries = true)
+    @CacheEvict(value = { "tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache" }, allEntries = true)
     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
         TaiSanPhanMem taiSanPhanMem = taiSanPhanMemRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy mẫu tài sản phần mềm", 404));
@@ -150,8 +153,7 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
     public List<SelectOption> laySelectOptions() {
         Specification<TaiSanPhanMem> spec = (root, query, cb) -> cb.and(
                 cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
-        );
+                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG));
         return taiSanPhanMemRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
@@ -205,5 +207,28 @@ public class TaiSanPhanMemServiceImpl implements TaiSanPhanMemService {
                 .thoiGianTao(entity.getThoiGianTao())
                 .thoiGianCapNhat(entity.getThoiGianCapNhat())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<com.example.backend.modules.asset.model.TaiSanPhanMem> layEntityTheoId(Long id) {
+        return taiSanPhanMemRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = { "tai_san_phan_mem_cache", "tai_san_phan_mem_list_cache" }, allEntries = true)
+    public void saveEntity(com.example.backend.modules.asset.model.TaiSanPhanMem entity) {
+        taiSanPhanMemRepository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.TaiSanPhanMem> layTheoIds(
+            java.util.Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return taiSanPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids));
     }
 }

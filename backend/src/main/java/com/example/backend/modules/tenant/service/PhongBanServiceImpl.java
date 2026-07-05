@@ -204,6 +204,45 @@ public class PhongBanServiceImpl implements PhongBanService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, String> layTenPhongBanTheoIds(java.util.Collection<Long> ids) {
+        java.util.Map<Long, String> map = new java.util.HashMap<>();
+        if (ids == null || ids.isEmpty()) {
+            return map;
+        }
+        phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(new ArrayList<>(ids))
+                .forEach(pb -> map.put(pb.getId(), pb.getTenPhongBan()));
+        return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void validatePhongBan(Long idPhongBan, Long idDonVi) {
+        if (idPhongBan == null) {
+            return;
+        }
+        PhongBan phongBan;
+        if (idDonVi == null) {
+            phongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(idPhongBan)
+                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc đã bị xóa", 400));
+        } else {
+            phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(idPhongBan, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc không thuộc đơn vị của bạn", 400));
+        }
+        if (phongBan.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
+            throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PhongBanResponse> layPhongBanTheoDonViId(Long idDonVi) {
+        return phongBanRepository.findByDonViIdAndThoiGianXoaIsNull(idDonVi).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 }
 
 

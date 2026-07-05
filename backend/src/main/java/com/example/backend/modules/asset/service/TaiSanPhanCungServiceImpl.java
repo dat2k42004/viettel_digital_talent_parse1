@@ -202,4 +202,26 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
                 .thoiGianCapNhat(entity.getThoiGianCapNhat())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<com.example.backend.modules.asset.model.TaiSanPhanCung> layEntityTheoId(Long id) {
+        return taiSanPhanCungRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = { "tai_san_phan_cung_cache", "tai_san_phan_cung_list_cache" }, allEntries = true)
+    public void saveEntity(com.example.backend.modules.asset.model.TaiSanPhanCung entity) {
+        taiSanPhanCungRepository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.TaiSanPhanCung> layTheoIds(java.util.Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids));
+    }
 }

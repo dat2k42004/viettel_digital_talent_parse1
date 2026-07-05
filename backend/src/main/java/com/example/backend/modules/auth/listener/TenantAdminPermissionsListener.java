@@ -1,4 +1,4 @@
-package com.example.backend.modules.tenant.listener;
+package com.example.backend.modules.auth.listener;
 
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.auth.model.NguoiDungQuyen;

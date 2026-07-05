@@ -7,13 +7,14 @@ import com.example.backend.modules.report.repository.ChiTietSuDungRepository;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanMem;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
 import com.example.backend.modules.tenant.model.PhongBan;
-import com.example.backend.modules.tenant.repository.PhongBanRepository;
+import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
+import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 import com.example.backend.shared.dto.BienDongCapPhatEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -36,11 +37,11 @@ public class BaoCaoCapPhatListener {
 
      // Đối soát chính xác 100% tên biến Repository phân hệ Core tĩnh từ mã nguồn của
      // cậu
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final PhongBanRepository phongBanRepository;
-     private final NguoiDungRepository nguoiDungRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final PhongBanService phongBanRepository;
+     private final NguoiDungService nguoiDungRepository;
 
      @RabbitListener(queues = "inventory.bien-dong-cap-phat.queue")
      @Transactional
@@ -58,8 +59,7 @@ public class BaoCaoCapPhatListener {
                // 1. Phân nhánh trích xuất thông tin an toàn từ Entity Core tĩnh của cậu phục
                // vụ cache UI phẳng
                if ("PHAN_CUNG".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pcOpt.isPresent()) {
                          DanhSachThietBiPhanCung pc = pcOpt.get();
                          soSerial = pc.getSoSerial();
@@ -72,8 +72,7 @@ public class BaoCaoCapPhatListener {
                          }
                     }
                } else if ("PHAN_MEM".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pmOpt.isPresent()) {
                          DanhSachThietBiPhanMem pm = pmOpt.get();
                          soSerial = "";
@@ -84,7 +83,7 @@ public class BaoCaoCapPhatListener {
                          }
                     }
                } else if ("LINH_KIEN".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.findById(event.getIdTaiSanCuThe());
+                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (lkOpt.isPresent()) {
                          LinhKienPhanCung lk = lkOpt.get();
                          soSerial = lk.getSoSerial();
@@ -138,8 +137,7 @@ public class BaoCaoCapPhatListener {
                     .findByIdDonViAndIdPhongBanAndIdTaiSanDanhMucAndLoaiTaiSanAndThoiGianXoaIsNull(
                               event.getIdDonVi(), idPhongBan, idDanhMuc, event.getLoaiTaiSan())
                     .orElseGet(() -> {
-                         String tenPB = phongBanRepository.findById(idPhongBan).map(PhongBan::getTenPhongBan)
-                                   .orElse("Phòng ban tiếp nhận");
+                         String tenPB = java.util.Optional.ofNullable(phongBanRepository.layTheoId(idPhongBan)).map(PhongBanResponse::getTenPhongBan).orElse("Phòng ban tiếp nhận");
                          BaoCaoCapPhat newBc = new BaoCaoCapPhat();
                          newBc.setIdDonVi(event.getIdDonVi());
                          newBc.setIdPhongBan(idPhongBan);
@@ -178,16 +176,7 @@ public class BaoCaoCapPhatListener {
           // đính kèm của Đạt
           String hoTenNhanVien = null;
           if (event.getIdNhanVienTiepNhan() != null) {
-               hoTenNhanVien = nguoiDungRepository.findById(event.getIdNhanVienTiepNhan()).map(nd -> {
-                    StringBuilder sb = new StringBuilder();
-                    if (nd.getHoNguoiDung() != null)
-                         sb.append(nd.getHoNguoiDung().trim()).append(" ");
-                    if (nd.getTenDemNguoiDung() != null)
-                         sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
-                    if (nd.getTenNguoiDung() != null)
-                         sb.append(nd.getTenNguoiDung().trim());
-                    return sb.toString().trim();
-               }).orElse(null);
+               hoTenNhanVien = nguoiDungRepository.layTenNguoiDungTheoId(event.getIdNhanVienTiepNhan());
           }
 
           ChiTietSuDung ct = ChiTietSuDung.builder()

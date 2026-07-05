@@ -7,9 +7,9 @@ import com.example.backend.modules.report.repository.ChiTietBaoTriRepository;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanMem;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
 import com.example.backend.shared.dto.BienDongBaoTriEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -30,9 +30,9 @@ public class BaoCaoBaoTriListener {
      private final BaoCaoBaoTriRepository baoCaoBaoTriRepository;
      private final ChiTietBaoTriRepository chiTietBaoTriRepository;
 
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
 
      @RabbitListener(queues = "inventory.bien-dong-bao-tri.queue")
      @Transactional
@@ -48,8 +48,7 @@ public class BaoCaoBaoTriListener {
 
                // 1. Phân nhánh trích xuất thông tin an toàn từ Entity Core
                if ("PHAN_CUNG".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pcOpt.isPresent()) {
                          DanhSachThietBiPhanCung pc = pcOpt.get();
                          soSerial = pc.getSoSerial();
@@ -61,7 +60,7 @@ public class BaoCaoBaoTriListener {
                          }
                     }
                } else if ("LINH_KIEN".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.findById(event.getIdTaiSanCuThe());
+                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (lkOpt.isPresent()) {
                          LinhKienPhanCung lk = lkOpt.get();
                          soSerial = lk.getSoSerial();
@@ -73,8 +72,7 @@ public class BaoCaoBaoTriListener {
                          }
                     }
                } else if ("PHAN_MEM".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pmOpt.isPresent()) {
                          DanhSachThietBiPhanMem pm = pmOpt.get();
                          soSerial = "";

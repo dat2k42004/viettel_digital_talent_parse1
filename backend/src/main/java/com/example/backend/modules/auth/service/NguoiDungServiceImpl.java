@@ -19,8 +19,8 @@ import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
 import com.example.backend.modules.auth.repository.NguoiDungQuyenRepository;
 import com.example.backend.modules.auth.repository.VaiTroRepository;
 import com.example.backend.modules.auth.repository.QuyenRepository;
-import com.example.backend.modules.tenant.model.PhongBan;
-import com.example.backend.modules.tenant.repository.PhongBanRepository;
+import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
+import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
@@ -43,6 +43,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import lombok.extern.slf4j.Slf4j;
 import com.example.backend.modules.auth.model.PhienDangNhap;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.auth.repository.PhienDangNhapRepository;
 import com.example.backend.modules.auth.security.JwtTokenProvider;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -60,7 +63,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final PhienDangNhapRepository phienDangNhapRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider tokenProvider;
-    private final PhongBanRepository phongBanRepository;
+    private final PhongBanService phongBanService;
     private final com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository;
     private final org.springframework.cache.CacheManager cacheManager;
 
@@ -74,7 +77,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             PhienDangNhapRepository phienDangNhapRepository,
             RedisTemplate<String, Object> redisTemplate,
             JwtTokenProvider tokenProvider,
-            PhongBanRepository phongBanRepository,
+            PhongBanService phongBanService,
             com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository,
             org.springframework.cache.CacheManager cacheManager) {
         this.nguoiDungRepository = nguoiDungRepository;
@@ -86,7 +89,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         this.phienDangNhapRepository = phienDangNhapRepository;
         this.redisTemplate = redisTemplate;
         this.tokenProvider = tokenProvider;
-        this.phongBanRepository = phongBanRepository;
+        this.phongBanService = phongBanService;
         this.vaiTroQuyenRepository = vaiTroQuyenRepository;
         this.cacheManager = cacheManager;
     }
@@ -166,11 +169,9 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        java.util.Map<Long, String> mapPhongBan = new java.util.HashMap<>();
-        if (!idPhongBanList.isEmpty()) {
-            phongBanRepository.findAllByIdInAndThoiGianXoaIsNull(idPhongBanList)
-                    .forEach(pb -> mapPhongBan.put(pb.getId(), pb.getTenPhongBan()));
-        }
+        final java.util.Map<Long, String> mapPhongBan = idPhongBanList.isEmpty()
+                ? new java.util.HashMap<>()
+                : phongBanService.layTenPhongBanTheoIds(idPhongBanList);
 
         Page<NguoiDungResponse> responsePage = pageResult.map(nguoiDung -> {
             String tenPhongBan = nguoiDung.getIdPhongBan() != null ? mapPhongBan.get(nguoiDung.getIdPhongBan()) : null;
@@ -326,9 +327,10 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private NguoiDungResponse mapToResponse(NguoiDung nguoiDung) {
         String tenPhongBan = null;
         if (nguoiDung.getIdPhongBan() != null) {
-            tenPhongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdPhongBan())
-                    .map(PhongBan::getTenPhongBan)
-                    .orElse(null);
+            PhongBanResponse pb = phongBanService.layTheoId(nguoiDung.getIdPhongBan());
+            if (pb != null) {
+                tenPhongBan = pb.getTenPhongBan();
+            }
         }
         return mapToResponse(nguoiDung, tenPhongBan);
     }
@@ -376,21 +378,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     }
 
     private void validatePhongBan(Long idPhongBan, Long idDonVi) {
-        if (idPhongBan == null) {
-            return;
-        }
-        PhongBan phongBan;
-        if (idDonVi == null) {
-            phongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(idPhongBan)
-                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc đã bị xóa", 400));
-        } else {
-            phongBan = phongBanRepository.findByIdAndDonViIdAndThoiGianXoaIsNull(idPhongBan, idDonVi)
-                    .orElseThrow(() -> new NghiepVuException("Phòng ban không tồn tại hoặc không thuộc đơn vị của bạn",
-                            400));
-        }
-        if (phongBan.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
-            throw new NghiepVuException("Phòng ban hiện đang bị khóa hoặc ngừng hoạt động", 400);
-        }
+        phongBanService.validatePhongBan(idPhongBan, idDonVi);
     }
 
     @Override
@@ -583,5 +571,53 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         } catch (Exception e) {
             log.error("Lỗi khi chạy dọn dẹp đồng bộ quyền người dùng lúc khởi động: {}", e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NguoiDungResponse> layAdminDonVi(Long idDonVi) {
+        return nguoiDungRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, String> layTenNguoiDungTheoIds(java.util.Collection<Long> ids) {
+        java.util.Map<Long, String> map = new java.util.HashMap<>();
+        if (ids == null || ids.isEmpty()) {
+            return map;
+        }
+        nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids))
+                .forEach(u -> map.put(u.getId(), layHoTen(u)));
+        return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String layTenNguoiDungTheoId(Long id) {
+        if (id == null) return null;
+        return nguoiDungRepository.findByIdAndThoiGianXoaIsNull(id)
+                .map(this::layHoTen)
+                .orElse(null);
+    }
+
+    private String layHoTen(NguoiDung nd) {
+        if (nd == null) return "";
+        StringBuilder sb = new StringBuilder();
+        if (nd.getHoNguoiDung() != null) sb.append(nd.getHoNguoiDung().trim()).append(" ");
+        if (nd.getTenDemNguoiDung() != null) sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
+        if (nd.getTenNguoiDung() != null) sb.append(nd.getTenNguoiDung().trim());
+        String name = sb.toString().trim();
+        return name.isEmpty() ? nd.getTenDangNhap() : name;
+    }
+
+    @Override
+    public Long layIdNguoiDungHienTai() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
+            return userDetails.getNguoiDung().getId();
+        }
+        throw new NghiepVuException("Không tìm thấy thông tin người dùng từ phiên làm việc", 401);
     }
 }

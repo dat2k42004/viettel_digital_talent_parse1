@@ -37,15 +37,4 @@ public class EmailThongBaoJob {
           }
      }
 
-     // Chạy lúc 7:30 sáng hàng ngày để quét nhắc nhở các đợt kiểm kê chưa hoàn thành
-     @Scheduled(cron = "0 30 7 * * ?")
-     public void chayJobNhacNhoKiemKe() {
-          log.info("Bắt đầu Job tự động nhắc nhở đợt kiểm kê đang thực hiện...");
-          try {
-               emailThongBaoService.nhacNhoKiemKe();
-               log.info("Hoàn thành Job tự động nhắc nhở đợt kiểm kê đang thực hiện.");
-          } catch (Exception e) {
-               log.error("Lỗi khi chạy Job tự động nhắc nhở đợt kiểm kê đang thực hiện: {}", e.getMessage(), e);
-          }
-     }
 }

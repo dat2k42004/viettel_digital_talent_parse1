@@ -24,6 +24,9 @@ public class NhatKyThaoTacHeThong {
     @Column(name = "id_tai_khoan_thao_tac")
     private Long idTaiKhoanThaoTac;
 
+    @Column(name = "id_don_vi")
+    private Long idDonVi;
+
     @Column(name = "phuong_thuc_api", length = 10)
     private String phuongThucApi;
 

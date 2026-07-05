@@ -22,4 +22,7 @@ public interface NhaCungCapService {
      void capNhatTrangThai(Long id, TrangThaiRequest request);
 
      void xoaMem(Long id);
+     java.util.Optional<com.example.backend.modules.procurement.model.NhaCungCap> layEntityTheoId(Long id);
+     void saveEntity(com.example.backend.modules.procurement.model.NhaCungCap entity);
+     java.util.Map<Long, String> layTenNhaCungCapTheoIds(java.util.Collection<Long> ids);
 }

@@ -5,10 +5,10 @@ import com.example.backend.modules.maintenance.model.*;
 import com.example.backend.modules.maintenance.repository.*;
 import com.example.backend.modules.maintenance.service.interfaces.KeHoachBaoTriDinhKyService;
 import com.example.backend.modules.asset.model.TaiSanPhanCung;
-import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
+import com.example.backend.modules.asset.service.interfaces.TaiSanPhanCungService;
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.response.PageResponse;
@@ -37,8 +37,8 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
 
      private final KeHoachBaoTriDinhKyRepository keHoachBaoTriDinhKyRepository;
      private final ChiTietKeHoachBaoTriRepository chiTietKeHoachBaoTriRepository;
-     private final TaiSanPhanCungRepository taiSanPhanCungRepository;
-     private final NguoiDungRepository nguoiDungRepository;
+     private final TaiSanPhanCungService taiSanPhanCungRepository;
+     private final NguoiDungService nguoiDungRepository;
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
@@ -48,12 +48,8 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
      }
 
      private Long getCurrentUserId() {
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-          if (auth != null && auth.getPrincipal() instanceof NguoiDungUserDetails user) {
-               return user.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Không tìm thấy thông tin nhân viên thao tác", 401);
-     }
+        return nguoiDungRepository.layIdNguoiDungHienTai();
+    }
 
      private String getHoTenNguoiDung(NguoiDung nd) {
           if (nd == null)
@@ -106,7 +102,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
           KeHoachBaoTriDinhKy savedKh = keHoachBaoTriDinhKyRepository.save(kh);
 
           for (ChiTietKeHoachBaoTriRequest item : request.getDanhSachChiTiet()) {
-               taiSanPhanCungRepository.findById(item.getIdTaiSanPhanCung())
+               taiSanPhanCungRepository.layEntityTheoId(item.getIdTaiSanPhanCung())
                          .orElseThrow(() -> new NghiepVuException(
                                    "Không tìm thấy cấu hình mẫu tài sản phần cứng ID: " + item.getIdTaiSanPhanCung(),
                                    400));
@@ -165,7 +161,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
           // Thêm mới các cái chọn thêm
           for (ChiTietKeHoachBaoTriRequest req : newReqs) {
                if (!oldAssetIds.contains(req.getIdTaiSanPhanCung())) {
-                    taiSanPhanCungRepository.findById(req.getIdTaiSanPhanCung())
+                    taiSanPhanCungRepository.layEntityTheoId(req.getIdTaiSanPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy cấu hình mẫu tài sản bổ sung ID: " + req.getIdTaiSanPhanCung(),
                                         400));
@@ -287,8 +283,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<KeHoachBaoTriDinhKyResponse> content = pageResult.getContent().stream()
                     .map(kh -> KeHoachBaoTriDinhKyResponse.builder()
@@ -334,8 +329,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                userIds.add(kh.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<ChiTietKeHoachBaoTriResponse> chiTietList = new ArrayList<>();
 
@@ -346,7 +340,7 @@ public class KeHoachBaoTriDinhKyServiceImpl implements KeHoachBaoTriDinhKyServic
                Set<Long> assetIds = details.stream().map(ChiTietKeHoachBaoTri::getIdTaiSanPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, TaiSanPhanCung> assetMap = assetIds.isEmpty() ? new HashMap<>()
-                         : taiSanPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(assetIds).stream()
+                         : taiSanPhanCungRepository.layTheoIds(assetIds).stream()
                                    .collect(Collectors.toMap(TaiSanPhanCung::getId,
                                              java.util.function.Function.identity()));
 

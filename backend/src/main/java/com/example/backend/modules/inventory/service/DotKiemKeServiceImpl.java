@@ -5,9 +5,8 @@ import com.example.backend.modules.inventory.dto.DotKiemKeResponse;
 import com.example.backend.modules.inventory.model.DotKiemKe;
 import com.example.backend.modules.inventory.repository.DotKiemKeRepository;
 import com.example.backend.modules.inventory.service.interfaces.DotKiemKeService;
-import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.modules.inventory.model.TrangThaiKiemKeEnum;
 import com.example.backend.shared.response.PageResponse;
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
 public class DotKiemKeServiceImpl implements DotKiemKeService {
 
      private final DotKiemKeRepository dotKiemKeRepository;
-     private final NguoiDungRepository nguoiDungRepository;
+     private final NguoiDungService nguoiDungService;
 
      @Autowired
      @Lazy
@@ -53,25 +52,8 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
      }
 
      private Long getCurrentUserId() {
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-          if (auth != null && auth.getPrincipal() instanceof NguoiDungUserDetails user) {
-               return user.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Phiên làm việc hết hạn, vui lòng đăng nhập lại", 401);
-     }
-
-     private String getHoTenNguoiDung(NguoiDung nd) {
-          if (nd == null)
-               return null;
-          StringBuilder sb = new StringBuilder();
-          if (nd.getHoNguoiDung() != null)
-               sb.append(nd.getHoNguoiDung().trim()).append(" ");
-          if (nd.getTenDemNguoiDung() != null)
-               sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
-          if (nd.getTenNguoiDung() != null)
-               sb.append(nd.getTenNguoiDung().trim());
-          return sb.toString().trim();
-     }
+        return nguoiDungService.layIdNguoiDungHienTai();
+    }
 
      @Override
      @Transactional
@@ -209,8 +191,7 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungService.layTenNguoiDungTheoIds(userIds);
 
           List<DotKiemKeResponse> content = pageResult.getContent().stream()
                     .map(dkk -> DotKiemKeResponse.builder()
@@ -254,8 +235,7 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
                userIds.add(dkk.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungService.layTenNguoiDungTheoIds(userIds);
 
           return DotKiemKeResponse.builder()
                     .id(dkk.getId())

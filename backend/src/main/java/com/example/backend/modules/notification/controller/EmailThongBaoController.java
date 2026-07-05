@@ -29,18 +29,4 @@ public class EmailThongBaoController {
           emailThongBaoService.canhBaoHetHanTaiSan();
           return ApiResponse.success("Đã kích hoạt quét và gửi email cảnh báo tài sản sắp hết hạn");
      }
-
-     @GetMapping("/nhac-nho-kiem-ke")
-     @PreAuthorize("hasAnyAuthority('XEM_BAO_CAO', 'XEM_QUAN_TRI_TOAN_SAN')")
-     public ApiResponse<String> nhacNhoKiemKe() {
-          emailThongBaoService.nhacNhoKiemKe();
-          return ApiResponse.success("Đã kích hoạt quét và gửi email nhắc nhở đợt kiểm kê đang thực hiện");
-     }
-
-     @GetMapping("/nhac-nho-kiem-ke-cu-the")
-     @PreAuthorize("hasAnyAuthority('XEM_BAO_CAO', 'XEM_QUAN_TRI_TOAN_SAN')")
-     public ApiResponse<String> nhacNhoKiemKeCuThe(@RequestParam Long idDotKiemKe) {
-          emailThongBaoService.nhacNhoTruongPhongKiemKe(idDotKiemKe);
-          return ApiResponse.success("Đã kích hoạt gửi email nhắc nhở đợt kiểm kê cụ thể");
-     }
 }

@@ -7,11 +7,12 @@ import com.example.backend.modules.report.repository.ChiTietTonKhoRepository;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanMem;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
 import com.example.backend.modules.tenant.model.ViTri;
-import com.example.backend.modules.tenant.repository.ViTriRepository;
+import com.example.backend.modules.tenant.service.interfaces.ViTriService;
+import com.example.backend.modules.tenant.dto.ViTriResponse;
 import com.example.backend.shared.dto.BienDongTonKhoEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,10 @@ public class BaoCaoTonKhoListener {
      private final BaoCaoTonKhoRepository baoCaoTonKhoRepository;
      private final ChiTietTonKhoRepository chiTietTonKhoRepository;
 
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
-     private final ViTriRepository viTriRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
+     private final ViTriService viTriRepository;
 
      @RabbitListener(queues = "inventory.bien-dong-ton-kho.queue")
      @Transactional
@@ -50,8 +51,7 @@ public class BaoCaoTonKhoListener {
 
                // 1. Phân nhánh trích xuất thông tin an toàn từ các Entity Core tĩnh của cậu
                if ("PHAN_CUNG".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanCung> pcOpt = thietBiPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pcOpt.isPresent()) {
                          DanhSachThietBiPhanCung pc = pcOpt.get();
                          soSerial = pc.getSoSerial();
@@ -63,7 +63,7 @@ public class BaoCaoTonKhoListener {
                          }
                     }
                } else if ("LINH_KIEN".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.findById(event.getIdTaiSanCuThe());
+                    Optional<LinhKienPhanCung> lkOpt = linhKienPhanCungRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (lkOpt.isPresent()) {
                          LinhKienPhanCung lk = lkOpt.get();
                          soSerial = lk.getSoSerial();
@@ -75,8 +75,7 @@ public class BaoCaoTonKhoListener {
                          }
                     }
                } else if ("PHAN_MEM".equalsIgnoreCase(event.getLoaiTaiSan())) {
-                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository
-                              .findById(event.getIdTaiSanCuThe());
+                    Optional<DanhSachThietBiPhanMem> pmOpt = thietBiPhanMemRepository.layEntityTheoId(event.getIdTaiSanCuThe());
                     if (pmOpt.isPresent()) {
                          DanhSachThietBiPhanMem pm = pmOpt.get();
                          soSerial = ""; // Bản quyền phần mềm không có số Serial vật lý
@@ -115,8 +114,7 @@ public class BaoCaoTonKhoListener {
                     .findByIdDonViAndIdViTriAndIdTaiSanDanhMucAndLoaiTaiSanAndThoiGianXoaIsNull(
                               event.getIdDonVi(), idViTri, idDanhMuc, event.getLoaiTaiSan())
                     .orElseGet(() -> {
-                         String tenVT = viTriRepository.findById(idViTri).map(ViTri::getTenViTri)
-                                   .orElse("Phòng kho lưu trữ");
+                         String tenVT = java.util.Optional.ofNullable(viTriRepository.layTheoId(idViTri)).map(ViTriResponse::getTenViTri).orElse("Phòng kho lưu trữ");
                          BaoCaoTonKho newBc = new BaoCaoTonKho();
                          newBc.setIdDonVi(event.getIdDonVi());
                          newBc.setIdViTri(idViTri);

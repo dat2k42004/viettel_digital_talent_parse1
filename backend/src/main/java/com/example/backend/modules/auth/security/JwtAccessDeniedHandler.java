@@ -22,7 +22,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setCharacterEncoding("UTF-8");
 
-        ApiResponse<Object> apiResponse = ApiResponse.error(403, "Bản khng c quyền thực hiện thao tc ny");
+        ApiResponse<Object> apiResponse = ApiResponse.error(403, "Bản không có quyền thực hiện thao tác này");
         ObjectMapper mapper = new ObjectMapper();
         response.getWriter().write(mapper.writeValueAsString(apiResponse));
     }

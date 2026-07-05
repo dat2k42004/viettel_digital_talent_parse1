@@ -13,5 +13,8 @@ public interface PhongBanService {
     void capNhatTrangThai(Long id, TrangThaiRequest request);
     PhongBanResponse layTheoId(Long id);
     java.util.List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi);
+    java.util.Map<Long, String> layTenPhongBanTheoIds(java.util.Collection<Long> ids);
+    void validatePhongBan(Long idPhongBan, Long idDonVi);
+    java.util.List<PhongBanResponse> layPhongBanTheoDonViId(Long idDonVi);
 }
 

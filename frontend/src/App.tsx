@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/auth/login/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import BaoCaoPage from './pages/dashboard/BaoCaoPage';
 import HangSanXuatPage from './pages/asset/hangsanxuat/HangSanXuatPage';
 import LoaiTaiSanPage from './pages/asset/loaitaisan/LoaiTaiSanPage';
 import DanhMucTaiSanPage from './pages/asset/danhmuctaisan/DanhMucTaiSanPage';
@@ -123,6 +124,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'bao-cao',
+        element: <PermittedRoute element={<BaoCaoPage />} quyen={[QUYEN.XEM_BAO_CAO, QUYEN.XEM_QUAN_TRI_TOAN_SAN]} />,
       },
       {
         path: 'tai-san/hang-san-xuat',

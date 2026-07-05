@@ -28,4 +28,8 @@ public interface DanhSachThietBiPhanMemService {
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
     List<SelectOption> laySelectOptions();
+    java.util.Optional<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layEntityTheoId(Long id);
+    void saveEntity(com.example.backend.modules.asset.model.DanhSachThietBiPhanMem entity);
+    java.util.List<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layTatCaActive();
+    java.util.List<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layTheoIds(java.util.Collection<Long> ids);
 }

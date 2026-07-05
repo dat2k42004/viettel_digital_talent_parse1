@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class NhatKyThaoTacEvent {
     private final Long idTaiKhoanThaoTac;
+    private final Long idDonVi;
     private final String phuongThucApi;
     private final String endpointApi;
     private final String thucTheTacDong;

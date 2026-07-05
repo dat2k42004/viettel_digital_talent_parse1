@@ -6,10 +6,7 @@ import com.example.backend.shared.repository.NhatKyThaoTacHeThongRepository;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.service.interfaces.NhatKyThaoTacHeThongService;
 import com.example.backend.shared.tenant.DonViContextHolder;
-import com.example.backend.modules.auth.model.NguoiDung;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Subquery;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,13 +47,7 @@ public class NhatKyThaoTacHeThongServiceImpl implements NhatKyThaoTacHeThongServ
             List<Predicate> predicates = new ArrayList<>();
 
             if (idDonVi != null) {
-                Subquery<Long> subquery = query.subquery(Long.class);
-                Root<NguoiDung> userRoot = subquery.from(NguoiDung.class);
-                subquery.select(userRoot.get("id"));
-                subquery.where(cb.and(
-                        cb.isNull(userRoot.get("thoiGianXoa")),
-                        cb.equal(userRoot.get("idDonVi"), idDonVi)));
-                predicates.add(root.get("idTaiKhoanThaoTac").in(subquery));
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
 
             if (idTaiKhoanThaoTac != null) {

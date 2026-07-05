@@ -21,6 +21,7 @@ public class NhatKyThaoTacListener {
         try {
             NhatKyThaoTacHeThong logEntry = NhatKyThaoTacHeThong.builder()
                     .idTaiKhoanThaoTac(event.getIdTaiKhoanThaoTac())
+                    .idDonVi(event.getIdDonVi())
                     .phuongThucApi(event.getPhuongThucApi())
                     .endpointApi(event.getEndpointApi())
                     .thucTheTacDong(event.getThucTheTacDong())

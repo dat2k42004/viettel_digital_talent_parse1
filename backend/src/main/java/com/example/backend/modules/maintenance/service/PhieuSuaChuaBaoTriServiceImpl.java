@@ -6,14 +6,14 @@ import com.example.backend.modules.maintenance.repository.*;
 import com.example.backend.modules.maintenance.service.interfaces.PhieuSuaChuaBaoTriService;
 import com.example.backend.modules.asset.model.DanhSachThietBiPhanCung;
 import com.example.backend.modules.asset.model.LinhKienPhanCung;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
-import com.example.backend.modules.asset.repository.TaiSanPhanCungRepository;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.TaiSanPhanCungService;
 import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
+import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
+
 import com.example.backend.modules.procurement.model.NhaCungCap;
-import com.example.backend.modules.procurement.repository.NhaCungCapRepository;
+import com.example.backend.modules.procurement.service.interfaces.NhaCungCapService;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.model.TrangThaiVanHanhEnum;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
@@ -50,11 +50,11 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
      private final ChiTietBaoTriThietBiRepository chiTietBaoTriThietBiRepository;
      private final ChiTietBaoTriLinhKienRepository chiTietBaoTriLinhKienRepository;
      private final KeHoachBaoTriDinhKyRepository keHoachBaoTriDinhKyRepository;
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final TaiSanPhanCungRepository taiSanPhanCungRepository;
-     private final NhaCungCapRepository nhaCungCapRepository;
-     private final NguoiDungRepository nguoiDungRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final TaiSanPhanCungService taiSanPhanCungRepository;
+     private final NhaCungCapService nhaCungCapRepository;
+     private final NguoiDungService nguoiDungRepository;
 
      @Autowired
      @Lazy
@@ -68,12 +68,8 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
      }
 
      private Long getCurrentUserId() {
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-          if (auth != null && auth.getPrincipal() instanceof NguoiDungUserDetails user) {
-               return user.getNguoiDung().getId();
-          }
-          throw new NghiepVuException("Không tìm thấy thông tin nhân viên thao tác", 401);
-     }
+        return nguoiDungRepository.layIdNguoiDungHienTai();
+    }
 
      private String getHoTenNguoiDung(NguoiDung nd) {
           if (nd == null)
@@ -120,14 +116,13 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           // Lưu danh sách chi tiết thiết bị & Cập nhật trạng thái thiết bị sang KHÓA
           if (request.getDanhSachThietBi() != null) {
                for (ChiTietBaoTriThietBiRequest item : request.getDanhSachThietBi()) {
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdDanhSachThietBiPhanCung(), tenantId)
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(item.getIdDanhSachThietBiPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy thiết bị phần cứng ID: " + item.getIdDanhSachThietBiPhanCung(),
                                         400));
 
                     tb.setTrangThai(TrangThaiVanHanhEnum.KHOA);
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
 
                     ChiTietBaoTriThietBi ct = new ChiTietBaoTriThietBi();
                     ct.setPhieuSuaChuaBaoTri(savedPhieu);
@@ -145,13 +140,12 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           // Lưu danh sách chi tiết linh kiện & Cập nhật trạng thái linh kiện sang KHÓA
           if (request.getDanhSachLinhKien() != null) {
                for (ChiTietBaoTriLinhKienRequest item : request.getDanhSachLinhKien()) {
-                    LinhKienPhanCung lk = linhKienPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(item.getIdLinhKienPhanCung(), tenantId)
+                    LinhKienPhanCung lk = linhKienPhanCungRepository.layEntityTheoId(item.getIdLinhKienPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy linh kiện ID: " + item.getIdLinhKienPhanCung(), 400));
 
                     lk.setTrangThai(TrangThaiVanHanhEnum.KHOA);
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
 
                     ChiTietBaoTriLinhKien ct = new ChiTietBaoTriLinhKien();
                     ct.setPhieuSuaChuaBaoTri(savedPhieu);
@@ -196,9 +190,9 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           // Xóa cứng các chi tiết bỏ chọn -> Cập nhật thiết bị về HOẠT ĐỘNG
           for (ChiTietBaoTriThietBi oldItem : oldTbList) {
                if (!newTbIds.contains(oldItem.getIdDanhSachThietBiPhanCung())) {
-                    thietBiPhanCungRepository.findById(oldItem.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
+                    thietBiPhanCungRepository.layEntityTheoId(oldItem.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
                          tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                         thietBiPhanCungRepository.save(tb);
+                         thietBiPhanCungRepository.saveEntity(tb);
                     });
                     chiTietBaoTriThietBiRepository.delete(oldItem);
                }
@@ -208,13 +202,12 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                     .collect(Collectors.toMap(ChiTietBaoTriThietBi::getIdDanhSachThietBiPhanCung, x -> x, (a, b) -> a));
           for (ChiTietBaoTriThietBiRequest req : newTbReq) {
                if (!oldTbMap.containsKey(req.getIdDanhSachThietBiPhanCung())) {
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(req.getIdDanhSachThietBiPhanCung(), tenantId)
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(req.getIdDanhSachThietBiPhanCung())
                               .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần cứng bổ sung ID: "
                                         + req.getIdDanhSachThietBiPhanCung(), 400));
 
                     tb.setTrangThai(TrangThaiVanHanhEnum.KHOA);
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
 
                     ChiTietBaoTriThietBi ct = new ChiTietBaoTriThietBi();
                     ct.setPhieuSuaChuaBaoTri(phieu);
@@ -242,9 +235,9 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
 
           for (ChiTietBaoTriLinhKien oldItem : oldLkList) {
                if (!newLkIds.contains(oldItem.getIdLinhKienPhanCung())) {
-                    linhKienPhanCungRepository.findById(oldItem.getIdLinhKienPhanCung()).ifPresent(lk -> {
+                    linhKienPhanCungRepository.layEntityTheoId(oldItem.getIdLinhKienPhanCung()).ifPresent(lk -> {
                          lk.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                         linhKienPhanCungRepository.save(lk);
+                         linhKienPhanCungRepository.saveEntity(lk);
                     });
                     chiTietBaoTriLinhKienRepository.delete(oldItem);
                }
@@ -253,13 +246,12 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                     .collect(Collectors.toMap(ChiTietBaoTriLinhKien::getIdLinhKienPhanCung, x -> x, (a, b) -> a));
           for (ChiTietBaoTriLinhKienRequest req : newLkReq) {
                if (!oldLkMap.containsKey(req.getIdLinhKienPhanCung())) {
-                    LinhKienPhanCung lk = linhKienPhanCungRepository
-                              .findByIdAndIdDonViAndThoiGianXoaIsNull(req.getIdLinhKienPhanCung(), tenantId)
+                    LinhKienPhanCung lk = linhKienPhanCungRepository.layEntityTheoId(req.getIdLinhKienPhanCung())
                               .orElseThrow(() -> new NghiepVuException(
                                         "Không tìm thấy linh kiện bổ sung ID: " + req.getIdLinhKienPhanCung(), 400));
 
                     lk.setTrangThai(TrangThaiVanHanhEnum.KHOA);
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
 
                     ChiTietBaoTriLinhKien ct = new ChiTietBaoTriLinhKien();
                     ct.setPhieuSuaChuaBaoTri(phieu);
@@ -303,9 +295,9 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           for (ChiTietBaoTriThietBi ct : tbList) {
                ct.setThoiGianXoa(now);
                chiTietBaoTriThietBiRepository.save(ct);
-               thietBiPhanCungRepository.findById(ct.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
+               thietBiPhanCungRepository.layEntityTheoId(ct.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanCungRepository.save(tb);
+                    thietBiPhanCungRepository.saveEntity(tb);
                });
           }
 
@@ -315,9 +307,9 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           for (ChiTietBaoTriLinhKien ct : lkList) {
                ct.setThoiGianXoa(now);
                chiTietBaoTriLinhKienRepository.save(ct);
-               linhKienPhanCungRepository.findById(ct.getIdLinhKienPhanCung()).ifPresent(lk -> {
+               linhKienPhanCungRepository.layEntityTheoId(ct.getIdLinhKienPhanCung()).ifPresent(lk -> {
                     lk.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    linhKienPhanCungRepository.save(lk);
+                    linhKienPhanCungRepository.saveEntity(lk);
                });
           }
      }
@@ -401,14 +393,14 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                          ct.setIdLinhKienThayThe(item.getIdLinhKienThayThe());
 
                     // Đồng bộ máy trạng thái vật lý của Thiết bị phần cứng gốc
-                    thietBiPhanCungRepository.findById(ct.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
+                    thietBiPhanCungRepository.layEntityTheoId(ct.getIdDanhSachThietBiPhanCung()).ifPresent(tb -> {
                          if (itemStatusMoi == TrangThaiThucHienEnum.DA_GUI_DI) {
                               tb.setTrangThai(TrangThaiVanHanhEnum.KHOA);
                          } else if (itemStatusMoi == TrangThaiThucHienEnum.DA_THU_LAI) {
                               tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG); // KHI HOÀN THÀNH (ĐÃ THU LẠI) -> ĐỔI VỀ
                                                                                // HOẠT ĐỘNG
                          }
-                         thietBiPhanCungRepository.save(tb);
+                         thietBiPhanCungRepository.saveEntity(tb);
                     });
                     chiTietBaoTriThietBiRepository.save(ct);
 
@@ -429,13 +421,13 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                          ct.setChiPhi(item.getChiPhiThucTe());
 
                     // Đồng bộ máy trạng thái vật lý của Linh kiện rời gốc
-                    linhKienPhanCungRepository.findById(ct.getIdLinhKienPhanCung()).ifPresent(lk -> {
+                    linhKienPhanCungRepository.layEntityTheoId(ct.getIdLinhKienPhanCung()).ifPresent(lk -> {
                          if (itemStatusMoi == TrangThaiThucHienEnum.DA_GUI_DI) {
                               lk.setTrangThai(TrangThaiVanHanhEnum.KHOA);
                          } else if (itemStatusMoi == TrangThaiThucHienEnum.DA_THU_LAI) {
                               lk.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG); // ĐỔI VỀ HOẠT ĐỘNG KHI THU HỒI XONG
                          }
-                         linhKienPhanCungRepository.save(lk);
+                         linhKienPhanCungRepository.saveEntity(lk);
                     });
                     chiTietBaoTriLinhKienRepository.save(ct);
                }
@@ -566,8 +558,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
           }
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<PhieuSuaChuaBaoTriResponse> content = pageResult.getContent().stream()
                     .map(p -> PhieuSuaChuaBaoTriResponse.builder()
@@ -613,8 +604,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                userIds.add(p.getIdNguoiPheDuyet());
 
           Map<Long, String> userMap = userIds.isEmpty() ? new HashMap<>()
-                    : nguoiDungRepository.findAllByIdInAndThoiGianXoaIsNull(userIds).stream()
-                              .collect(Collectors.toMap(NguoiDung::getId, this::getHoTenNguoiDung));
+                    : nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
 
           List<ChiTietBaoTriGeneralResponse> detailsFlat = new ArrayList<>();
 
@@ -627,7 +617,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                Set<Long> tbIds = tbList.stream().map(ChiTietBaoTriThietBi::getIdDanhSachThietBiPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, DanhSachThietBiPhanCung> tbMap = tbIds.isEmpty() ? new HashMap<>()
-                         : thietBiPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(tbIds).stream()
+                         : thietBiPhanCungRepository.layTheoIds(tbIds).stream()
                                    .collect(Collectors
                                              .toMap(DanhSachThietBiPhanCung::getId,
                                                        java.util.function.Function.identity()));
@@ -642,7 +632,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
                Set<Long> lkIds = lkList.stream().map(ChiTietBaoTriLinhKien::getIdLinhKienPhanCung)
                          .collect(Collectors.toSet());
                Map<Long, LinhKienPhanCung> lkMap = lkIds.isEmpty() ? new HashMap<>()
-                         : linhKienPhanCungRepository.findAllByIdInAndThoiGianXoaIsNull(lkIds).stream().collect(
+                         : linhKienPhanCungRepository.layTheoIds(lkIds).stream().collect(
                                    Collectors.toMap(LinhKienPhanCung::getId, java.util.function.Function.identity()));
                lkList.forEach(x -> {
                     if (x.getIdNhaCungCap() != null)
@@ -651,8 +641,7 @@ public class PhieuSuaChuaBaoTriServiceImpl implements PhieuSuaChuaBaoTriService 
 
                // Gom tên nhà cung cấp đối tác dịch vụ
                Map<Long, String> nccMap = nccIds.isEmpty() ? new HashMap<>()
-                         : nhaCungCapRepository.findAllByIdInAndThoiGianXoaIsNull(nccIds).stream()
-                                   .collect(Collectors.toMap(NhaCungCap::getId, NhaCungCap::getTenNhaCungCap));
+                         : nhaCungCapRepository.layTenNhaCungCapTheoIds(nccIds);
 
                // Đưa dữ liệu thiết bị về định dạng mảng phẳng (Flattened Response Layout)
                for (ChiTietBaoTriThietBi ct : tbList) {

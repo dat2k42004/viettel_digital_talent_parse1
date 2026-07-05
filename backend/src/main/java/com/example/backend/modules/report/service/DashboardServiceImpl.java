@@ -9,11 +9,12 @@ import com.example.backend.modules.report.repository.BaoCaoCapPhatRepository;
 import com.example.backend.modules.report.repository.BaoCaoTonKhoRepository;
 import com.example.backend.modules.report.service.interfaces.DashboardService;
 import com.example.backend.modules.tenant.model.DonVi;
-import com.example.backend.modules.tenant.repository.DonViRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanCungRepository;
-import com.example.backend.modules.asset.repository.DanhSachThietBiPhanMemRepository;
-import com.example.backend.modules.asset.repository.LinhKienPhanCungRepository;
-import com.example.backend.modules.lifecycle.repository.PhieuCapPhatTaiSanRepository;
+import com.example.backend.modules.tenant.service.interfaces.DonViService;
+import com.example.backend.modules.tenant.dto.DonViResponse;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
+import com.example.backend.modules.lifecycle.service.interfaces.LifecycleQueryService;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.tenant.DonViContextHolder;
@@ -35,11 +36,11 @@ public class DashboardServiceImpl implements DashboardService {
      private final BaoCaoTonKhoRepository baoCaoTonKhoRepository;
      private final BaoCaoCapPhatRepository baoCaoCapPhatRepository;
      private final BaoCaoBaoTriRepository baoCaoBaoTriRepository;
-     private final DonViRepository donViRepository;
-     private final DanhSachThietBiPhanCungRepository thietBiPhanCungRepository;
-     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
-     private final LinhKienPhanCungRepository linhKienPhanCungRepository;
-     private final PhieuCapPhatTaiSanRepository phieuCapPhatTaiSanRepository;
+     private final DonViService donViRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
+     private final LinhKienPhanCungService linhKienPhanCungRepository;
+     private final LifecycleQueryService phieuCapPhatTaiSanRepository;
 
      @Override
      @Transactional(readOnly = true)
@@ -84,8 +85,7 @@ public class DashboardServiceImpl implements DashboardService {
                               BaoCaoCapPhat::getTenPhongBan,
                               Collectors.summingLong(BaoCaoCapPhat::getSoLuongCap)));
 
-          long choDuyetCapPhat = phieuCapPhatTaiSanRepository.countByIdDonViAndTrangThaiAndThoiGianXoaIsNull(idDonVi,
-                    TrangThaiPhieuEnum.GUI_PHE_DUYET);
+          long choDuyetCapPhat = phieuCapPhatTaiSanRepository.demCapPhatChoPheDuyet(idDonVi);
 
           return ThongKeTongQuanDashboardResponse.builder()
                     .idDonVi(idDonVi)
@@ -103,11 +103,11 @@ public class DashboardServiceImpl implements DashboardService {
      public Map<String, Object> layThongKeToanSanSuperAdmin() {
           Map<String, Object> result = new HashMap<>();
 
-          long tongDonVi = donViRepository.countByThoiGianXoaIsNull();
-          long tongPhanCung = thietBiPhanCungRepository.countByThoiGianXoaIsNull();
-          long tongLinhKien = linhKienPhanCungRepository.countByThoiGianXoaIsNull(); // BỔ SUNG: Đếm số lượng linh kiện
+          long tongDonVi = donViRepository.demDonViActive();
+          long tongPhanCung = thietBiPhanCungRepository.layTatCaActive().size();
+          long tongLinhKien = linhKienPhanCungRepository.layTatCaActive().size(); // BỔ SUNG: Đếm số lượng linh kiện
                                                                                      // rời
-          long tongPhanMem = thietBiPhanMemRepository.countByThoiGianXoaIsNull();
+          long tongPhanMem = thietBiPhanMemRepository.layTatCaActive().size();
 
           result.put("tongTenantDonVi", tongDonVi);
           result.put("tongTaiSanPhanCung", tongPhanCung);
@@ -121,8 +121,7 @@ public class DashboardServiceImpl implements DashboardService {
 
           Map<String, Long> bieuDoSoSanhTenant = new HashMap<>();
           rawTenantCounts.forEach((tenantId, count) -> {
-               String tenDV = donViRepository.findById(tenantId)
-                         .map(DonVi::getTenThuongMai).orElse("Doanh nghiệp #" + tenantId);
+               String tenDV = java.util.Optional.ofNullable(donViRepository.layTheoId(tenantId)).map(DonViResponse::getTenThuongMai).orElse("Doanh nghiệp #" + tenantId);
                bieuDoSoSanhTenant.put(tenDV, count);
           });
           result.put("bieuDoSoSanhTenant", bieuDoSoSanhTenant);

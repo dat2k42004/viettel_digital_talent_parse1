@@ -13,7 +13,6 @@ import com.example.backend.modules.auth.dto.DoiMatKhauRequest;
 import com.example.backend.modules.auth.model.NguoiDung;
 import com.example.backend.modules.auth.model.PhienDangNhap;
 import com.example.backend.modules.auth.model.MaXacThucOTP;
-import com.example.backend.modules.tenant.model.CauHinhDonVi;
 import com.example.backend.modules.auth.repository.PhienDangNhapRepository;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
 import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
@@ -23,13 +22,8 @@ import com.example.backend.modules.auth.repository.QuyenRepository;
 import com.example.backend.modules.auth.repository.MaXacThucOTPRepository;
 import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.modules.auth.security.JwtTokenProvider;
-import com.example.backend.modules.tenant.model.DonVi;
-import com.example.backend.modules.tenant.model.PhongBan;
-import com.example.backend.modules.tenant.repository.DonViRepository;
-import com.example.backend.modules.tenant.repository.PhongBanRepository;
-import com.example.backend.modules.tenant.repository.CauHinhDonViRepository;
-import com.example.backend.modules.tenant.dto.DonViResponse;
-import com.example.backend.modules.tenant.dto.CauHinhDonViResponse;
+import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
+import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -67,8 +61,7 @@ public class XacThucServiceImpl implements XacThucService {
     private final NguoiDungRepository nguoiDungRepository;
     private final NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
     private final NguoiDungQuyenRepository nguoiDungQuyenRepository;
-    private final DonViRepository donViRepository;
-    private final CauHinhDonViRepository cauHinhDonViRepository;
+
     private final MaXacThucOTPRepository maXacThucOTPRepository;
     private final QuyenRepository quyenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -81,7 +74,7 @@ public class XacThucServiceImpl implements XacThucService {
 
     private final NguoiDungService nguoiDungService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final PhongBanRepository phongBanRepository;
+    private final PhongBanService phongBanService;
 
     @Override
     @Transactional
@@ -342,9 +335,10 @@ public class XacThucServiceImpl implements XacThucService {
 
         String tenPhongBan = null;
         if (nguoiDung.getIdPhongBan() != null) {
-            tenPhongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(nguoiDung.getIdPhongBan())
-                    .map(PhongBan::getTenPhongBan)
-                    .orElse(null);
+            PhongBanResponse pb = phongBanService.layTheoId(nguoiDung.getIdPhongBan());
+            if (pb != null) {
+                tenPhongBan = pb.getTenPhongBan();
+            }
         }
 
         return NguoiDungResponse.builder()
@@ -388,48 +382,5 @@ public class XacThucServiceImpl implements XacThucService {
         return nguoiDungService.layTheoId(userId);
     }
 
-    private DonViResponse mapToDonViResponse(DonVi donVi) {
-        if (donVi == null)
-            return null;
-        return DonViResponse.builder()
-                .id(donVi.getId())
-                .maDonVi(donVi.getMaDonVi())
-                .tenPhapLy(donVi.getTenPhapLy())
-                .tenThuongMai(donVi.getTenThuongMai())
-                .maSoThue(donVi.getMaSoThue())
-                .maQuocGiaDienThoai(donVi.getMaQuocGiaDienThoai())
-                .soDienThoaiCoDinh(donVi.getSoDienThoaiCoDinh())
-                .soDienThoaiDiDong(donVi.getSoDienThoaiDiDong())
-                .emailChinhThuc(donVi.getEmailChinhThuc())
-                .tenMienHeThong(donVi.getTenMienHeThong())
-                .duongDanWebsite(donVi.getDuongDanWebsite())
-                .soNhaTenDuong(donVi.getSoNhaTenDuong())
-                .phuongXa(donVi.getPhuongXa())
-                .quanHuyen(donVi.getQuanHuyen())
-                .tinhThanhPho(donVi.getTinhThanhPho())
-                .maBuuChinh(donVi.getMaBuuChinh())
-                .maQuocGia(donVi.getMaQuocGia())
-                .hoNguoiDaiDien(donVi.getHoNguoiDaiDien())
-                .tenNguoiDaiDien(donVi.getTenNguoiDaiDien())
-                .tenDemNguoiDaiDien(donVi.getTenDemNguoiDaiDien())
-                .chucVuNguoiDaiDien(donVi.getChucVuNguoiDaiDien())
-                .trangThai(donVi.getTrangThai() != null ? donVi.getTrangThai().getValue() : null)
-                .thoiGianThanhLap(donVi.getThoiGianThanhLap())
-                .thoiGianBatDauHopDong(donVi.getThoiGianBatDauHopDong())
-                .thoiGianHetHanHopDong(donVi.getThoiGianHetHanHopDong())
-                .thoiGianTao(donVi.getThoiGianTao())
-                .thoiGianCapNhat(donVi.getThoiGianCapNhat())
-                .build();
-    }
 
-    private CauHinhDonViResponse mapToCauHinhResponse(CauHinhDonVi entity) {
-        return CauHinhDonViResponse.builder()
-                .id(entity.getId())
-                .idDonVi(entity.getDonVi().getId())
-                .idDanhMucCauHinh(entity.getDanhMucCauHinh().getId())
-                .maCauHinh(entity.getDanhMucCauHinh().getMaCauHinh())
-                .tenCauHinh(entity.getDanhMucCauHinh().getTenCauHinh())
-                .giaTriCauHinh(entity.getGiaTriCauHinh())
-                .build();
-    }
 }

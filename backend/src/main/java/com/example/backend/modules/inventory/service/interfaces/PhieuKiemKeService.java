@@ -26,4 +26,8 @@ public interface PhieuKiemKeService {
      TaiSanTheoPhongBanResponse layTaiSanTheoPhongBan(Long idPhongBan);
 
      List<LuaChonDotKiemKeResponse> layDotKiemKeKichHoat();
+
+     void nhacNhoKiemKe();
+
+     void nhacNhoTruongPhongKiemKe(Long idDotKiemKe);
 }

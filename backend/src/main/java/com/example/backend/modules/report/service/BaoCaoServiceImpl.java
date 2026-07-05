@@ -5,7 +5,8 @@ import com.example.backend.modules.report.model.*;
 import com.example.backend.modules.report.repository.*;
 import com.example.backend.modules.report.service.interfaces.BaoCaoService;
 import com.example.backend.modules.tenant.model.DonVi;
-import com.example.backend.modules.tenant.repository.DonViRepository;
+import com.example.backend.modules.tenant.service.interfaces.DonViService;
+import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
@@ -40,7 +41,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      private final BaoCaoTonKhoRepository baoCaoTonKhoRepository;
      private final BaoCaoCapPhatRepository baoCaoCapPhatRepository;
      private final BaoCaoBaoTriRepository baoCaoBaoTriRepository;
-     private final DonViRepository donViRepository;
+     private final DonViService donViRepository;
 
      // Hàm rà soát kiểm tra mốc thời gian ràng buộc của bộ lọc
      private void kiemTraRangBuocThoiGian(BaoCaoFilterRequest request) {
@@ -274,7 +275,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
           Specification<DonVi> spec = (root, query, cb) -> cb.isNull(root.get("thoiGianXoa"));
-          Page<DonVi> unitsPage = donViRepository.findAll(spec, pageable);
+          Page<com.example.backend.modules.tenant.model.DonVi> unitsPage = donViRepository.layDonViEntityPage(pageable);
 
           List<BaoCaoToanSanSuperAdminResponse> content = unitsPage.getContent().stream().map(dv -> {
                List<BaoCaoCapPhat> cpList = baoCaoCapPhatRepository.findByIdDonViAndThoiGianXoaIsNull(dv.getId());
@@ -321,9 +322,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           String tenDonVi = "Tất cả đơn vị";
           if (idDonVi != null) {
-               tenDonVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
-                         .map(DonVi::getTenThuongMai)
-                         .orElse("Đơn vị");
+               tenDonVi = java.util.Optional.ofNullable(donViRepository.layTheoId(idDonVi)).map(DonViResponse::getTenThuongMai).orElse("Đơn vị");
           }
 
           try {

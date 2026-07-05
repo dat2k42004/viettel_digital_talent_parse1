@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailService implements com.example.backend.modules.auth.service.interfaces.EmailService {
 
     private final JavaMailSender mailSender;
 

@@ -2,18 +2,10 @@ package com.example.backend.modules.tenant.service;
 
 import com.example.backend.modules.tenant.service.interfaces.DonViService;
 
-import com.example.backend.modules.auth.model.MaXacThucOTP;
-import com.example.backend.modules.auth.model.NguoiDung;
-import com.example.backend.modules.auth.model.Quyen;
-import com.example.backend.modules.auth.model.VaiTro;
-import com.example.backend.modules.auth.model.VaiTroQuyen;
-import com.example.backend.modules.auth.model.NguoiDungVaiTro;
-import com.example.backend.modules.auth.repository.MaXacThucOTPRepository;
-import com.example.backend.modules.auth.repository.NguoiDungRepository;
-import com.example.backend.modules.auth.repository.QuyenRepository;
-import com.example.backend.modules.auth.repository.VaiTroRepository;
-import com.example.backend.modules.auth.repository.VaiTroQuyenRepository;
-import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
+import com.example.backend.shared.dto.DangKyDonViEvent;
+import com.example.backend.shared.dto.XacThucOtpEvent;
+import com.example.backend.shared.dto.DonViXoaEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.util.stream.Collectors;
 import com.example.backend.modules.tenant.dto.DangKyDonViRequest;
 import com.example.backend.modules.tenant.dto.XacThucOtpRequest;
@@ -58,30 +50,18 @@ import java.util.Random;
 public class DonViServiceImpl implements DonViService {
 
     private final DonViRepository donViRepository;
-    private final NguoiDungRepository nguoiDungRepository;
-    private final MaXacThucOTPRepository maXacThucOTPRepository;
-    private final PasswordEncoder passwordEncoder;
     private final PhongBanRepository phongBanRepository;
     private final ViTriRepository viTriRepository;
-    private final VaiTroRepository vaiTroRepository;
     private final CauHinhDonViRepository cauHinhDonViRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     @Lazy
     private RabbitTemplate rabbitTemplate;
-    private final QuyenRepository quyenRepository;
-    private final VaiTroQuyenRepository vaiTroQuyenRepository;
-    private final NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
 
     @Override
     @Transactional
     public void dangKyDonVi(DangKyDonViRequest request) {
-        if (nguoiDungRepository.existsByTenDangNhapAndThoiGianXoaIsNull(request.getTenDangNhapAdmin())) {
-            throw new NghiepVuException("Tên đăng nhập admin đã tồn tại", 400);
-        }
-        if (nguoiDungRepository.existsByEmailAndThoiGianXoaIsNull(request.getEmailAdmin())) {
-            throw new NghiepVuException("Email admin đã được sử dụng", 400);
-        }
         if (donViRepository.existsByTenMienHeThongAndThoiGianXoaIsNull(request.getTenMienHeThong().trim())) {
             throw new NghiepVuException("Tên miền hệ thống này đã bị đăng ký bởi đơn vị khác", 400);
         }
@@ -96,75 +76,33 @@ public class DonViServiceImpl implements DonViService {
         donVi.setTrangThai(TrangThaiCoBanEnum.CHO_XAC_THUC);
         donVi = donViRepository.save(donVi);
 
-        // 2. Tạo Tài khoản Admin Đơn Vị
-        NguoiDung admin = new NguoiDung();
-        admin.setIdDonVi(donVi.getId());
-        admin.setMaNguoiDung("ND-" + (donVi.getId() == null ? 0 : donVi.getId()) + "-" + System.currentTimeMillis());
-        admin.setTenDangNhap(request.getTenDangNhapAdmin());
-        admin.setMatKhau(passwordEncoder.encode(request.getMatKhauAdmin()));
-        admin.setTenNguoiDung(request.getTenAdmin());
-        admin.setEmail(request.getEmailAdmin());
-        admin.setTrangThai(TrangThaiCoBanEnum.CHO_XAC_THUC);
-        admin = nguoiDungRepository.save(admin);
-
-        // 6. Sinh mã OTP
-        String otp = String.format("%06d", new Random().nextInt(999999));
-        log.info("============== MÃ OTP ĐĂNG KÝ ĐƠN VỊ DÀNH CHO EMAIL {} ==============", request.getEmailAdmin());
-        log.info("Mã OTP: {}", otp);
-        log.info("=====================================================================");
-
-        // 7. Lưu mã OTP vào DB (mã hóa BCRYPT)
-        MaXacThucOTP otpEntity = new MaXacThucOTP();
-        otpEntity.setNguoiDung(admin);
-        otpEntity.setIdDonVi(donVi.getId());
-        otpEntity.setMaXacThucHash(passwordEncoder.encode(otp));
-        otpEntity.setLoaiMa("KICH_HOAT_DON_VI");
-        otpEntity.setPhuongThucGui("EMAIL");
-        otpEntity.setSoLanSaiHienTai(0);
-        otpEntity.setTrangThai("HIEU_LUC");
-        otpEntity.setThoiGianHetHan(LocalDateTime.now().plusMinutes(15));
-        maXacThucOTPRepository.save(otpEntity);
-
-        // Gửi sự kiện kích hoạt đơn vị qua RabbitMQ để gửi email nền
-        MailEvent mailEvent = new MailEvent(request.getEmailAdmin(), "KICH_HOAT_DON_VI", otp);
-        rabbitTemplate.convertAndSend("mail.queue", mailEvent);
+        // 2. Đồng bộ tạo tài khoản Admin qua Event
+        eventPublisher.publishEvent(DangKyDonViEvent.builder()
+                .idDonVi(donVi.getId())
+                .tenDangNhapAdmin(request.getTenDangNhapAdmin())
+                .matKhauAdmin(request.getMatKhauAdmin())
+                .tenAdmin(request.getTenAdmin())
+                .emailAdmin(request.getEmailAdmin())
+                .build());
     }
 
     @Override
     @Transactional
     public void xacThucOtp(XacThucOtpRequest request) {
-        MaXacThucOTP otpEntity = maXacThucOTPRepository
-                .findFirstByNguoiDung_EmailAndLoaiMaAndTrangThaiOrderByThoiGianTaoDesc(
-                        request.getEmail(), "KICH_HOAT_DON_VI", "HIEU_LUC")
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy mã OTP hiệu lực cho email này", 400));
+        XacThucOtpEvent event = XacThucOtpEvent.builder()
+                .email(request.getEmail())
+                .otp(request.getOtp())
+                .build();
 
-        if (otpEntity.getThoiGianHetHan().isBefore(LocalDateTime.now())) {
-            otpEntity.setTrangThai("HET_HAN");
-            maXacThucOTPRepository.save(otpEntity);
-            throw new NghiepVuException("Mã OTP đã hết hạn", 400);
+        // Đồng bộ yêu cầu xác thực OTP qua Event
+        eventPublisher.publishEvent(event);
+
+        Long idDonVi = event.getIdDonVi();
+        if (idDonVi == null) {
+            throw new NghiepVuException("Xác thực OTP thất bại", 400);
         }
 
-        if (otpEntity.getSoLanSaiHienTai() >= 5) {
-            otpEntity.setTrangThai("KHOA");
-            maXacThucOTPRepository.save(otpEntity);
-            throw new NghiepVuException("Bạn đã nhập sai quá nhiều lần. Mã OTP bị khóa.", 400);
-        }
-
-        if (!passwordEncoder.matches(request.getOtp(), otpEntity.getMaXacThucHash())) {
-            otpEntity.setSoLanSaiHienTai(otpEntity.getSoLanSaiHienTai() + 1);
-            maXacThucOTPRepository.save(otpEntity);
-            throw new NghiepVuException("Mã OTP không chính xác", 400);
-        }
-
-        // OTP hợp lệ
-        otpEntity.setTrangThai("DA_SU_DUNG");
-        maXacThucOTPRepository.save(otpEntity);
-
-        NguoiDung admin = otpEntity.getNguoiDung();
-        admin.setTrangThai(TrangThaiCoBanEnum.KHOA);
-        nguoiDungRepository.save(admin);
-
-        DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(admin.getIdDonVi())
+        DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(idDonVi)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
         donVi.setTrangThai(TrangThaiCoBanEnum.KHOA);
         donViRepository.save(donVi);
@@ -288,8 +226,13 @@ public class DonViServiceImpl implements DonViService {
         DonVi donVi = donViRepository.findByIdAndThoiGianXoaIsNull(id)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy đơn vị", 404));
 
-        donVi.setTrangThai(TrangThaiCoBanEnum.fromValue(trangThai));
+        TrangThaiCoBanEnum statusEnum = TrangThaiCoBanEnum.fromValue(trangThai);
+        donVi.setTrangThai(statusEnum);
         donViRepository.save(donVi);
+
+        // Cascade update PhongBan and ViTri (belonging to tenant module)
+        phongBanRepository.updateTrangThaiByDonViId(id, statusEnum);
+        viTriRepository.updateTrangThaiByDonViId(id, statusEnum);
 
         // Đẩy sự kiện cascade cập nhật sang các thực thể phụ thuộc qua RabbitMQ
         TenantStatusEvent statusEvent = new TenantStatusEvent(id, trangThai);
@@ -313,13 +256,13 @@ public class DonViServiceImpl implements DonViService {
         donVi.setLyDoXoa(lyDo);
         donViRepository.save(donVi);
 
-        // Cascade xóa mềm các thực thể phụ thuộc
-        nguoiDungRepository.softDeleteByIdDonVi(id, now, "Đơn vị bị xóa");
-        phongBanRepository.softDeleteByDonViId(id, now, "Đơn vị bị xóa");
-        viTriRepository.softDeleteByDonViId(id, now, "Đơn vị bị xóa");
-        vaiTroRepository.softDeleteByIdDonVi(id, now, "Đơn vị bị xóa");
-        cauHinhDonViRepository.softDeleteByDonViId(id, now, "Đơn vị bị xóa");
-        maXacThucOTPRepository.softDeleteByIdDonVi(id, now, "Đơn vị bị xóa");
+        // Cascade xóa mềm các thực thể phụ thuộc của tenant module
+        phongBanRepository.softDeleteByDonViId(id, now, lyDo);
+        viTriRepository.softDeleteByDonViId(id, now, lyDo);
+        cauHinhDonViRepository.softDeleteByDonViId(id, now, lyDo);
+
+        // Phát sự kiện xóa đơn vị để các phân hệ khác (như Auth) tự dọn dẹp dữ liệu
+        eventPublisher.publishEvent(new DonViXoaEvent(id, now, lyDo));
     }
 
     private DonViResponse mapToResponse(DonVi donVi) {
@@ -382,5 +325,27 @@ public class DonViServiceImpl implements DonViService {
 
         donVi.setThoiGianHetHanHopDong(request.getNgayHetHanMoi());
         donViRepository.save(donVi);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<DonViResponse> layTatCaDonViActive() {
+        return donViRepository.findByThoiGianXoaIsNull().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<com.example.backend.modules.tenant.model.DonVi> layDonViEntityPage(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.jpa.domain.Specification<com.example.backend.modules.tenant.model.DonVi> spec = 
+            (root, query, cb) -> cb.isNull(root.get("thoiGianXoa"));
+        return donViRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long demDonViActive() {
+        return donViRepository.countByThoiGianXoaIsNull();
     }
 }

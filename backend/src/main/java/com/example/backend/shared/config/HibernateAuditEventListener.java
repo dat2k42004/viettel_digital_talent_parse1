@@ -1,7 +1,7 @@
 package com.example.backend.shared.config;
 
-import com.example.backend.modules.auth.security.NguoiDungUserDetails;
 import com.example.backend.shared.event.NhatKyThaoTacEvent;
+import com.example.backend.shared.service.interfaces.CurrentUserProvider;
 import com.example.backend.shared.model.BaseEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +27,7 @@ public class HibernateAuditEventListener implements PostInsertEventListener, Pos
 
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
+    private final CurrentUserProvider currentUserProvider;
 
     @Override
     public void onPostInsert(PostInsertEvent event) {
@@ -188,14 +189,6 @@ public class HibernateAuditEventListener implements PostInsertEventListener, Pos
     }
 
     private Long getCurrentUserId() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.getPrincipal() instanceof NguoiDungUserDetails userDetails) {
-                return userDetails.getNguoiDung().getId();
-            }
-        } catch (Exception e) {
-            // Không có authentication context
-        }
-        return null;
+        return currentUserProvider.getCurrentUserId();
     }
 }

@@ -307,4 +307,34 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 .thoiGianCapNhat(thietBi.getThoiGianCapNhat())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layEntityTheoId(Long id) {
+        return thietBiPhanMemRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = { "thiet_bi_phan_mem_cache", "thiet_bi_phan_mem_list_cache" }, allEntries = true)
+    public void saveEntity(com.example.backend.modules.asset.model.DanhSachThietBiPhanMem entity) {
+        thietBiPhanMemRepository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layTatCaActive() {
+        return thietBiPhanMemRepository.findAll().stream()
+                .filter(x -> x.getThoiGianXoa() == null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<com.example.backend.modules.asset.model.DanhSachThietBiPhanMem> layTheoIds(java.util.Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return thietBiPhanMemRepository.findAllByIdInAndThoiGianXoaIsNull(new java.util.HashSet<>(ids));
+    }
 }

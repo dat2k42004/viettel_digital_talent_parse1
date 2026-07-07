@@ -12,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +39,9 @@ import com.example.backend.modules.procurement.service.interfaces.PhieuNhapTaiSa
 import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 
 import com.example.backend.modules.auth.model.NguoiDung;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
+import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService;
+import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
 import com.example.backend.modules.asset.service.interfaces.TaiSanPhanCungService;
 import com.example.backend.modules.asset.service.interfaces.TaiSanPhanMemService;
 import com.example.backend.modules.asset.model.TaiSanPhanCung;
@@ -66,13 +67,13 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      private final ChiTietDonHangPhanCungRepository chiTietDonHangPhanCungRepository;
      private final ChiTietDonHangPhanMemRepository chiTietDonHangPhanMemRepository;
 
-     private final NguoiDungService nguoiDungRepository;
-     private final TaiSanPhanCungService taiSanPhanCungRepository;
-     private final TaiSanPhanMemService taiSanPhanMemRepository;
+     private final NguoiDungService nguoiDungService;
+     private final TaiSanPhanCungService taiSanPhanCungService;
+     private final TaiSanPhanMemService taiSanPhanMemService;
 
-     private final com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService thietBiPhanCungRepository;
-     private final com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanMemService thietBiPhanMemRepository;
-     private final com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService linhKienPhanCungRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungService;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemService;
+     private final LinhKienPhanCungService linhKienPhanCungService;
      private final org.springframework.cache.CacheManager cacheManager;
 
      @Autowired
@@ -82,13 +83,16 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
           if (tenantId == null) {
+               if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                    return null;
+               }
                throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
           }
           return tenantId;
      }
 
      private Long getCurrentUserId() {
-        return nguoiDungRepository.layIdNguoiDungHienTai();
+        return nguoiDungService.layIdNguoiDungHienTai();
     }
 
      @Override
@@ -147,7 +151,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
+               userMap = nguoiDungService.layTenNguoiDungTheoIds(userIds);
           }
 
           final java.util.Map<Long, String> finalUserMap = userMap;
@@ -161,12 +165,18 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
 
      @Override
      @Transactional(readOnly = true)
-     public PhieuNhapTaiSanResponse layTheoId(Long id) {
-          Long currentTenantId = getRequiredTenantId();
-          PhieuNhapTaiSan pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
-                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu nhập kho tài sản hợp lệ", 404));
-          return mapToResponseWithDetails(pnts);
-     }
+      public PhieuNhapTaiSanResponse layTheoId(Long id) {
+           Long currentTenantId = getRequiredTenantId();
+           PhieuNhapTaiSan pnts;
+           if (currentTenantId == null) {
+                pnts = phieuNhapTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
+                          .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu nhập kho tài sản hợp lệ", 404));
+           } else {
+                pnts = phieuNhapTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
+                          .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu nhập kho tài sản hợp lệ", 404));
+           }
+           return mapToResponseWithDetails(pnts);
+      }
 
      @Override
      @Transactional
@@ -377,9 +387,9 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
           for (ChiTietNhapPhanCung pc : pcList) {
                if (pc.getIdDanhSachThietBiPhanCung() != null) {
-                    thietBiPhanCungRepository.layEntityTheoId(pc.getIdDanhSachThietBiPhanCung()).ifPresent(device -> {
+                    thietBiPhanCungService.layEntityTheoId(pc.getIdDanhSachThietBiPhanCung()).ifPresent(device -> {
                          device.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
-                         thietBiPhanCungRepository.saveEntity(device);
+                         thietBiPhanCungService.saveEntity(device);
                     });
                }
           }
@@ -388,9 +398,9 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
           for (ChiTietNhapLinhKien lk : lkList) {
                if (lk.getIdLinhKienPhanCung() != null) {
-                    linhKienPhanCungRepository.layEntityTheoId(lk.getIdLinhKienPhanCung()).ifPresent(comp -> {
+                    linhKienPhanCungService.layEntityTheoId(lk.getIdLinhKienPhanCung()).ifPresent(comp -> {
                          comp.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
-                         linhKienPhanCungRepository.saveEntity(comp);
+                         linhKienPhanCungService.saveEntity(comp);
                     });
                }
           }
@@ -399,9 +409,9 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
                     .findByPhieuNhapTaiSanAndThoiGianXoaIsNull(pnts);
           for (ChiTietNhapPhanMem pm : pmList) {
                if (pm.getIdDanhSachThietBiPhanMem() != null) {
-                    thietBiPhanMemRepository.layEntityTheoId(pm.getIdDanhSachThietBiPhanMem()).ifPresent(soft -> {
+                    thietBiPhanMemService.layEntityTheoId(pm.getIdDanhSachThietBiPhanMem()).ifPresent(soft -> {
                          soft.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG);
-                         thietBiPhanMemRepository.saveEntity(soft);
+                         thietBiPhanMemService.saveEntity(soft);
                     });
                }
           }
@@ -528,7 +538,7 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
 
           java.util.Map<Long, String> userMap = new java.util.HashMap<>();
           if (!userIds.isEmpty()) {
-               userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
+               userMap = nguoiDungService.layTenNguoiDungTheoIds(userIds);
           }
 
           PhieuNhapTaiSanResponse response = mapToResponseWithoutDetails(model, userMap);
@@ -566,13 +576,13 @@ public class PhieuNhapTaiSanServiceImpl implements PhieuNhapTaiSanService {
           // Fetch asset names in batch
           java.util.Map<Long, String> pcNameMap = new java.util.HashMap<>();
           if (!pcIds.isEmpty()) {
-               pcNameMap = taiSanPhanCungRepository.layTheoIds(pcIds).stream()
+               pcNameMap = taiSanPhanCungService.layTheoIds(pcIds).stream()
                          .collect(Collectors.toMap(TaiSanPhanCung::getId, TaiSanPhanCung::getTenMau));
           }
 
           java.util.Map<Long, String> pmNameMap = new java.util.HashMap<>();
           if (!pmIds.isEmpty()) {
-               pmNameMap = taiSanPhanMemRepository.layTheoIds(pmIds).stream()
+               pmNameMap = taiSanPhanMemService.layTheoIds(pmIds).stream()
                          .collect(Collectors.toMap(TaiSanPhanMem::getId, TaiSanPhanMem::getTenMau));
           }
 

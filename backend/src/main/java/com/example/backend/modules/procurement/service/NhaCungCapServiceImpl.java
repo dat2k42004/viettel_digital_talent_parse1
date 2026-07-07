@@ -33,6 +33,9 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
           if (tenantId == null) {
+               if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                    return null;
+               }
                throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
           }
           return tenantId;
@@ -85,9 +88,15 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
      @Transactional(readOnly = true)
      public NhaCungCapResponse layTheoId(Long id) {
           Long currentTenantId = getRequiredTenantId();
-          NhaCungCap ncc = nhaCungCapRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
-                    .orElseThrow(() -> new NghiepVuException(
-                              "Không tìm thấy nhà cung cấp hoặc dữ liệu không thuộc quyền quản lý", 404));
+          NhaCungCap ncc;
+          if (currentTenantId == null) {
+               ncc = nhaCungCapRepository.findByIdAndThoiGianXoaIsNull(id)
+                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy nhà cung cấp", 404));
+          } else {
+               ncc = nhaCungCapRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, currentTenantId)
+                         .orElseThrow(() -> new NghiepVuException(
+                                   "Không tìm thấy nhà cung cấp hoặc dữ liệu không thuộc quyền quản lý", 404));
+          }
           return mapToResponse(ncc);
      }
 
@@ -95,8 +104,15 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
      @Transactional(readOnly = true)
      public List<SelectOption> laySelectOptions() {
           Long currentTenantId = getRequiredTenantId();
-          List<NhaCungCap> danhSach = nhaCungCapRepository
-                    .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, TrangThaiCoBanEnum.HOAT_DONG);
+          List<NhaCungCap> danhSach;
+          if (currentTenantId == null) {
+               danhSach = nhaCungCapRepository.findAll().stream()
+                         .filter(ncc -> ncc.getThoiGianXoa() == null && ncc.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
+                         .collect(Collectors.toList());
+          } else {
+               danhSach = nhaCungCapRepository
+                         .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, TrangThaiCoBanEnum.HOAT_DONG);
+          }
           return danhSach.stream()
                     .map(ncc -> SelectOption.builder()
                               .id(ncc.getId())

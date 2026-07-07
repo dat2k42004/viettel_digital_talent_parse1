@@ -42,6 +42,9 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
     private Long getRequiredTenantId() {
         Long tenantId = DonViContextHolder.getTenantId();
         if (tenantId == null) {
+            if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                return null;
+            }
             throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
         }
         return tenantId;
@@ -167,9 +170,15 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
     @Cacheable(value = "thiet_bi_phan_mem_cache", key = "{#id, T(com.example.backend.shared.tenant.DonViContextHolder).getTenantId()}")
     public DanhSachThietBiPhanMemResponse layTheoId(Long id) {
         Long idDonVi = getRequiredTenantId();
-        DanhSachThietBiPhanMem thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
-                .orElseThrow(() -> new NghiepVuException(
-                        "Không tìm thấy key bản quyền thuộc đơn vị của bạn với ID: " + id, 404));
+        DanhSachThietBiPhanMem thietBi;
+        if (idDonVi == null) {
+            thietBi = thietBiPhanMemRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy key bản quyền với ID: " + id, 404));
+        } else {
+            thietBi = thietBiPhanMemRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException(
+                            "Không tìm thấy key bản quyền thuộc đơn vị của bạn với ID: " + id, 404));
+        }
         return mapToResponse(thietBi);
     }
 
@@ -250,10 +259,15 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
     @Transactional(readOnly = true)
     public List<SelectOption> laySelectOptions() {
         Long idDonVi = getRequiredTenantId();
-        Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("idDonVi"), idDonVi),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+        Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
+            predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         return thietBiPhanMemRepository.findAll(spec).stream()
                 .map(item -> SelectOption.builder()
                         .id(item.getId())

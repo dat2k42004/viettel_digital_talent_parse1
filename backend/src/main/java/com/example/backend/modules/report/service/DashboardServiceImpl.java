@@ -8,7 +8,6 @@ import com.example.backend.modules.report.repository.BaoCaoBaoTriRepository;
 import com.example.backend.modules.report.repository.BaoCaoCapPhatRepository;
 import com.example.backend.modules.report.repository.BaoCaoTonKhoRepository;
 import com.example.backend.modules.report.service.interfaces.DashboardService;
-import com.example.backend.modules.tenant.model.DonVi;
 import com.example.backend.modules.tenant.service.interfaces.DonViService;
 import com.example.backend.modules.tenant.dto.DonViResponse;
 import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanCungService;
@@ -16,7 +15,6 @@ import com.example.backend.modules.asset.service.interfaces.DanhSachThietBiPhanM
 import com.example.backend.modules.asset.service.interfaces.LinhKienPhanCungService;
 import com.example.backend.modules.lifecycle.service.interfaces.LifecycleQueryService;
 import com.example.backend.shared.exception.NghiepVuException;
-import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.tenant.DonViContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,33 +34,35 @@ public class DashboardServiceImpl implements DashboardService {
      private final BaoCaoTonKhoRepository baoCaoTonKhoRepository;
      private final BaoCaoCapPhatRepository baoCaoCapPhatRepository;
      private final BaoCaoBaoTriRepository baoCaoBaoTriRepository;
-     private final DonViService donViRepository;
-     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
-     private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
-     private final LinhKienPhanCungService linhKienPhanCungRepository;
-     private final LifecycleQueryService phieuCapPhatTaiSanRepository;
+     private final DonViService donViService;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungService;
+     private final DanhSachThietBiPhanMemService thietBiPhanMemService;
+     private final LinhKienPhanCungService linhKienPhanCungService;
+     private final LifecycleQueryService lifecycleQueryService;
 
      @Override
      @Transactional(readOnly = true)
      public ThongKeTongQuanDashboardResponse layThongKeDonViAdmin() {
           Long idDonVi = DonViContextHolder.getTenantId();
-          if (idDonVi == null) {
+          boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+          if (idDonVi == null && !laSuperAdmin) {
                throw new NghiepVuException("Quyền truy cập bị từ chối. Không xác định được đơn vị quản lý", 403);
           }
 
-          // CHUẨN PHÂN QUYỀN MỚI: Check theo danh sách chuỗi Authority tĩnh trong
-          // UserDetails của mày
-          boolean laQuanTriToanSan = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                    .anyMatch(a -> "XEM_QUAN_TRI_TOAN_SAN".equalsIgnoreCase(a.getAuthority()));
-          if (laQuanTriToanSan) {
-               throw new NghiepVuException("Quyền truy cập bị từ chối. Bạn chỉ được phép xem số liệu tổng hợp toàn sàn",
-                         403);
-          }
-
           // Thu thập số liệu tĩnh từ các Read Model Summary để render siêu tốc
-          List<BaoCaoTonKho> listTonKho = baoCaoTonKhoRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-          List<BaoCaoCapPhat> listCapPhat = baoCaoCapPhatRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
-          List<BaoCaoBaoTri> listBaoTri = baoCaoBaoTriRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
+          List<BaoCaoTonKho> listTonKho;
+          List<BaoCaoCapPhat> listCapPhat;
+          List<BaoCaoBaoTri> listBaoTri;
+
+          if (idDonVi == null) {
+               listTonKho = baoCaoTonKhoRepository.findAll().stream().filter(x -> x.getThoiGianXoa() == null).collect(Collectors.toList());
+               listCapPhat = baoCaoCapPhatRepository.findAll().stream().filter(x -> x.getThoiGianXoa() == null).collect(Collectors.toList());
+               listBaoTri = baoCaoBaoTriRepository.findAll().stream().filter(x -> x.getThoiGianXoa() == null).collect(Collectors.toList());
+          } else {
+               listTonKho = baoCaoTonKhoRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
+               listCapPhat = baoCaoCapPhatRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
+               listBaoTri = baoCaoBaoTriRepository.findByIdDonViAndThoiGianXoaIsNull(idDonVi);
+          }
 
           long tongTonKho = listTonKho.stream().mapToLong(BaoCaoTonKho::getSoLuongTonKho).sum();
           long tongCapPhat = listCapPhat.stream().mapToLong(BaoCaoCapPhat::getSoLuongCap).sum();
@@ -85,7 +85,7 @@ public class DashboardServiceImpl implements DashboardService {
                               BaoCaoCapPhat::getTenPhongBan,
                               Collectors.summingLong(BaoCaoCapPhat::getSoLuongCap)));
 
-          long choDuyetCapPhat = phieuCapPhatTaiSanRepository.demCapPhatChoPheDuyet(idDonVi);
+          long choDuyetCapPhat = lifecycleQueryService.demCapPhatChoPheDuyet(idDonVi);
 
           return ThongKeTongQuanDashboardResponse.builder()
                     .idDonVi(idDonVi)
@@ -103,11 +103,11 @@ public class DashboardServiceImpl implements DashboardService {
      public Map<String, Object> layThongKeToanSanSuperAdmin() {
           Map<String, Object> result = new HashMap<>();
 
-          long tongDonVi = donViRepository.demDonViActive();
-          long tongPhanCung = thietBiPhanCungRepository.layTatCaActive().size();
-          long tongLinhKien = linhKienPhanCungRepository.layTatCaActive().size(); // BỔ SUNG: Đếm số lượng linh kiện
-                                                                                     // rời
-          long tongPhanMem = thietBiPhanMemRepository.layTatCaActive().size();
+          long tongDonVi = donViService.demDonViActive();
+          long tongPhanCung = thietBiPhanCungService.layTatCaActive().size();
+          long tongLinhKien = linhKienPhanCungService.layTatCaActive().size(); // BỔ SUNG: Đếm số lượng linh kiện
+                                                                               // rời
+          long tongPhanMem = thietBiPhanMemService.layTatCaActive().size();
 
           result.put("tongTenantDonVi", tongDonVi);
           result.put("tongTaiSanPhanCung", tongPhanCung);
@@ -121,7 +121,8 @@ public class DashboardServiceImpl implements DashboardService {
 
           Map<String, Long> bieuDoSoSanhTenant = new HashMap<>();
           rawTenantCounts.forEach((tenantId, count) -> {
-               String tenDV = java.util.Optional.ofNullable(donViRepository.layTheoId(tenantId)).map(DonViResponse::getTenThuongMai).orElse("Doanh nghiệp #" + tenantId);
+               String tenDV = java.util.Optional.ofNullable(donViService.layTheoId(tenantId))
+                         .map(DonViResponse::getTenThuongMai).orElse("Doanh nghiệp #" + tenantId);
                bieuDoSoSanhTenant.put(tenDV, count);
           });
           result.put("bieuDoSoSanhTenant", bieuDoSoSanhTenant);

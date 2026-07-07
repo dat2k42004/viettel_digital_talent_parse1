@@ -13,6 +13,8 @@ import com.example.backend.shared.model.TrangThaiCoBanEnum;
 
 public interface NhaCungCapRepository extends JpaRepository<NhaCungCap, Long>, JpaSpecificationExecutor<NhaCungCap> {
 
+     Optional<NhaCungCap> findByIdAndThoiGianXoaIsNull(Long id);
+
      Optional<NhaCungCap> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 
      List<NhaCungCap> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, TrangThaiCoBanEnum trangThai);

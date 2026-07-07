@@ -19,4 +19,6 @@ public interface PhieuCapPhatTaiSanRepository
     boolean existsByMaPhiepCapPhatAndIdDonViAndThoiGianXoaIsNull(String maPhiepCapPhat, Long idDonVi);
 
     long countByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, TrangThaiPhieuEnum trangThai);
+
+    long countByTrangThaiAndThoiGianXoaIsNull(TrangThaiPhieuEnum trangThai);
 }

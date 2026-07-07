@@ -42,6 +42,9 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
     private Long getRequiredTenantId() {
         Long tenantId = DonViContextHolder.getTenantId();
         if (tenantId == null) {
+            if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                return null;
+            }
             throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
         }
         return tenantId;
@@ -120,9 +123,15 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
     @Cacheable(value = "linh_kien_phan_cung_cache", key = "{#id, T(com.example.backend.shared.tenant.DonViContextHolder).getTenantId()}")
     public LinhKienPhanCungResponse layTheoId(Long id) {
         Long idDonVi = getRequiredTenantId();
-        LinhKienPhanCung linhKien = linhKienRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
-                .orElseThrow(() -> new NghiepVuException(
-                        "Không tìm thấy linh kiện phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
+        LinhKienPhanCung linhKien;
+        if (idDonVi == null) {
+            linhKien = linhKienRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy linh kiện phần cứng với ID: " + id, 404));
+        } else {
+            linhKien = linhKienRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException(
+                            "Không tìm thấy linh kiện phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
+        }
         return mapToResponse(linhKien);
     }
 
@@ -204,7 +213,9 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
         Specification<LinhKienPhanCung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
             predicates.add(
                     cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
             if (idTaiSanPhanCung != null) {

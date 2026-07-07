@@ -8,6 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface DotKiemKeRepository extends JpaRepository<DotKiemKe, Long>, JpaSpecificationExecutor<DotKiemKe> {
+     Optional<DotKiemKe> findByIdAndThoiGianXoaIsNull(Long id);
+
      Optional<DotKiemKe> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
      java.util.List<DotKiemKe> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, com.example.backend.modules.inventory.model.TrangThaiKiemKeEnum trangThai);
 }

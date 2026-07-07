@@ -41,7 +41,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      private final BaoCaoTonKhoRepository baoCaoTonKhoRepository;
      private final BaoCaoCapPhatRepository baoCaoCapPhatRepository;
      private final BaoCaoBaoTriRepository baoCaoBaoTriRepository;
-     private final DonViService donViRepository;
+     private final DonViService donViService;
 
      // Hàm rà soát kiểm tra mốc thời gian ràng buộc của bộ lọc
      private void kiemTraRangBuocThoiGian(BaoCaoFilterRequest request) {
@@ -275,7 +275,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
           Specification<DonVi> spec = (root, query, cb) -> cb.isNull(root.get("thoiGianXoa"));
-          Page<com.example.backend.modules.tenant.model.DonVi> unitsPage = donViRepository.layDonViEntityPage(pageable);
+          Page<com.example.backend.modules.tenant.model.DonVi> unitsPage = donViService.layDonViEntityPage(pageable);
 
           List<BaoCaoToanSanSuperAdminResponse> content = unitsPage.getContent().stream().map(dv -> {
                List<BaoCaoCapPhat> cpList = baoCaoCapPhatRepository.findByIdDonViAndThoiGianXoaIsNull(dv.getId());
@@ -322,7 +322,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
           String tenDonVi = "Tất cả đơn vị";
           if (idDonVi != null) {
-               tenDonVi = java.util.Optional.ofNullable(donViRepository.layTheoId(idDonVi)).map(DonViResponse::getTenThuongMai).orElse("Đơn vị");
+               tenDonVi = java.util.Optional.ofNullable(donViService.layTheoId(idDonVi)).map(DonViResponse::getTenThuongMai).orElse("Đơn vị");
           }
 
           try {

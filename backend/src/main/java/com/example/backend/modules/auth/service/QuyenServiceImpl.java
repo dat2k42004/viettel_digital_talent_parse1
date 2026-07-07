@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +26,7 @@ public class QuyenServiceImpl implements QuyenService {
             return java.util.Collections.emptyList();
         }
 
-        boolean laSuperAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> "XEM_QUAN_TRI_TOAN_SAN".equalsIgnoreCase(a.getAuthority()));
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
         List<Quyen> allQuyens = quyenRepository.findByThoiGianXoaIsNull();
 
@@ -65,8 +63,7 @@ public class QuyenServiceImpl implements QuyenService {
             return java.util.Collections.emptyMap();
         }
 
-        boolean laSuperAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> "XEM_QUAN_TRI_TOAN_SAN".equalsIgnoreCase(a.getAuthority()));
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
         List<Quyen> activePermissions = quyenRepository.findByThoiGianXoaIsNull().stream()
                 .filter(q -> q.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)

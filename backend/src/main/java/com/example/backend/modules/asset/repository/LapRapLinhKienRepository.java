@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface LapRapLinhKienRepository
           extends JpaRepository<LapRapLinhKien, Long>, JpaSpecificationExecutor<LapRapLinhKien> {
 
+     Optional<LapRapLinhKien> findByIdAndThoiGianXoaIsNull(Long id);
+
      // Tìm kiếm bản ghi hợp lệ theo ID, cô lập Tenant và đảm bảo chưa bị xóa mềm
      Optional<LapRapLinhKien> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 }

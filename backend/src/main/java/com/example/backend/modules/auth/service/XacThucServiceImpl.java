@@ -5,7 +5,6 @@ import com.example.backend.shared.model.TrangThaiCoBanEnum;
 import com.example.backend.modules.auth.service.interfaces.NguoiDungService;
 import com.example.backend.modules.auth.dto.XacThucResponse;
 import com.example.backend.modules.auth.dto.DangNhapRequest;
-import com.example.backend.modules.auth.dto.RefreshTokenRequest;
 import com.example.backend.modules.auth.dto.QuenMatKhauRequest;
 import com.example.backend.modules.auth.dto.DatLaiMatKhauRequest;
 import com.example.backend.modules.auth.dto.NguoiDungResponse;
@@ -17,7 +16,6 @@ import com.example.backend.modules.auth.repository.PhienDangNhapRepository;
 import com.example.backend.modules.auth.repository.NguoiDungRepository;
 import com.example.backend.modules.auth.repository.NguoiDungVaiTroRepository;
 import com.example.backend.modules.auth.repository.NguoiDungQuyenRepository;
-import com.example.backend.modules.auth.repository.VaiTroRepository;
 import com.example.backend.modules.auth.repository.QuyenRepository;
 import com.example.backend.modules.auth.repository.MaXacThucOTPRepository;
 import com.example.backend.modules.auth.security.NguoiDungUserDetails;
@@ -39,7 +37,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.backend.shared.dto.MailEvent;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +62,7 @@ public class XacThucServiceImpl implements XacThucService {
     private final MaXacThucOTPRepository maXacThucOTPRepository;
     private final QuyenRepository quyenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    // private final EmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired

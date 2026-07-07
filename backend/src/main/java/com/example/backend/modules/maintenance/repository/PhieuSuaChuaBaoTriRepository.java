@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface PhieuSuaChuaBaoTriRepository
           extends JpaRepository<PhieuSuaChuaBaoTri, Long>, JpaSpecificationExecutor<PhieuSuaChuaBaoTri> {
+     Optional<PhieuSuaChuaBaoTri> findByIdAndThoiGianXoaIsNull(Long id);
+
      Optional<PhieuSuaChuaBaoTri> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 }

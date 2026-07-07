@@ -24,7 +24,6 @@ import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.response.PageResponse;
 import com.example.backend.shared.tenant.DonViContextHolder;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,7 +39,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.cache.annotation.CacheEvict;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.example.backend.modules.auth.model.PhienDangNhap;
 import org.springframework.security.core.Authentication;
@@ -52,6 +54,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NguoiDungServiceImpl implements NguoiDungService {
 
     private final NguoiDungRepository nguoiDungRepository;
@@ -59,6 +62,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final NguoiDungQuyenRepository nguoiDungQuyenRepository;
     private final VaiTroRepository vaiTroRepository;
     private final QuyenRepository quyenRepository;
+    @Lazy
     private final PasswordEncoder passwordEncoder;
     private final PhienDangNhapRepository phienDangNhapRepository;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -66,33 +70,6 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     private final PhongBanService phongBanService;
     private final com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository;
     private final org.springframework.cache.CacheManager cacheManager;
-
-    public NguoiDungServiceImpl(
-            NguoiDungRepository nguoiDungRepository,
-            NguoiDungVaiTroRepository nguoiDungVaiTroRepository,
-            NguoiDungQuyenRepository nguoiDungQuyenRepository,
-            VaiTroRepository vaiTroRepository,
-            QuyenRepository quyenRepository,
-            @org.springframework.context.annotation.Lazy PasswordEncoder passwordEncoder,
-            PhienDangNhapRepository phienDangNhapRepository,
-            RedisTemplate<String, Object> redisTemplate,
-            JwtTokenProvider tokenProvider,
-            PhongBanService phongBanService,
-            com.example.backend.modules.auth.repository.VaiTroQuyenRepository vaiTroQuyenRepository,
-            org.springframework.cache.CacheManager cacheManager) {
-        this.nguoiDungRepository = nguoiDungRepository;
-        this.nguoiDungVaiTroRepository = nguoiDungVaiTroRepository;
-        this.nguoiDungQuyenRepository = nguoiDungQuyenRepository;
-        this.vaiTroRepository = vaiTroRepository;
-        this.quyenRepository = quyenRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.phienDangNhapRepository = phienDangNhapRepository;
-        this.redisTemplate = redisTemplate;
-        this.tokenProvider = tokenProvider;
-        this.phongBanService = phongBanService;
-        this.vaiTroQuyenRepository = vaiTroQuyenRepository;
-        this.cacheManager = cacheManager;
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -113,7 +90,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
             // Phân quyền cô lập dữ liệu theo Đơn vị (Tenant Isolation)
-            if (idDonVi != null) {
+            boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+            if (idDonVi != null && !laSuperAdmin) {
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
 
@@ -433,7 +411,8 @@ public class NguoiDungServiceImpl implements NguoiDungService {
         }
 
         Long tenantId = DonViContextHolder.getTenantId();
-        if (tenantId != null && !tenantId.equals(nguoiDung.getIdDonVi())) {
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+        if (tenantId != null && !tenantId.equals(nguoiDung.getIdDonVi()) && !laSuperAdmin) {
             throw new NghiepVuException("Bạn không có quyền xem thông tin người dùng thuộc đơn vị khác", 403);
         }
 
@@ -530,7 +509,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
             if (idPhongBan != null) {
                 predicates.add(cb.equal(root.get("idPhongBan"), idPhongBan));
-            } else if (idDonVi != null) {
+            } else if (idDonVi != null && !com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
 
@@ -596,18 +575,23 @@ public class NguoiDungServiceImpl implements NguoiDungService {
     @Override
     @Transactional(readOnly = true)
     public String layTenNguoiDungTheoId(Long id) {
-        if (id == null) return null;
+        if (id == null)
+            return null;
         return nguoiDungRepository.findByIdAndThoiGianXoaIsNull(id)
                 .map(this::layHoTen)
                 .orElse(null);
     }
 
     private String layHoTen(NguoiDung nd) {
-        if (nd == null) return "";
+        if (nd == null)
+            return "";
         StringBuilder sb = new StringBuilder();
-        if (nd.getHoNguoiDung() != null) sb.append(nd.getHoNguoiDung().trim()).append(" ");
-        if (nd.getTenDemNguoiDung() != null) sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
-        if (nd.getTenNguoiDung() != null) sb.append(nd.getTenNguoiDung().trim());
+        if (nd.getHoNguoiDung() != null)
+            sb.append(nd.getHoNguoiDung().trim()).append(" ");
+        if (nd.getTenDemNguoiDung() != null)
+            sb.append(nd.getTenDemNguoiDung().trim()).append(" ");
+        if (nd.getTenNguoiDung() != null)
+            sb.append(nd.getTenNguoiDung().trim());
         String name = sb.toString().trim();
         return name.isEmpty() ? nd.getTenDangNhap() : name;
     }

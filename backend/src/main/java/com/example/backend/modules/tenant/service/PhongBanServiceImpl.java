@@ -37,12 +37,13 @@ public class PhongBanServiceImpl implements PhongBanService {
     @Override
     public PageResponse<PhongBanResponse> layDanhSach(String tenPhongBan, String maPhongBan, String trangThai, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
         Specification<PhongBan> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
             
-            if (idDonVi == null) {
+            if (idDonVi == null || laSuperAdmin) {
                 if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {
                         predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
@@ -169,8 +170,9 @@ public class PhongBanServiceImpl implements PhongBanService {
     @Override
     public PhongBanResponse layTheoId(Long id) {
         Long idDonVi = DonViContextHolder.getTenantId();
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
         PhongBan phongBan;
-        if (idDonVi == null) {
+        if (idDonVi == null || laSuperAdmin) {
             phongBan = phongBanRepository.findByIdAndThoiGianXoaIsNull(id)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy phòng ban hoặc phòng ban đã bị xóa", 404));
         } else {
@@ -189,14 +191,19 @@ public class PhongBanServiceImpl implements PhongBanService {
     @Transactional(readOnly = true)
     public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi) {
         Long targetUnitId = idDonVi != null ? idDonVi : DonViContextHolder.getTenantId();
-        if (targetUnitId == null) {
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+        if (targetUnitId == null && !laSuperAdmin) {
             return new ArrayList<>();
         }
-        Specification<PhongBan> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("donVi").get("id"), targetUnitId),
-                cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG)
-        );
+        Specification<PhongBan> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
+            if (targetUnitId != null) {
+                predicates.add(cb.equal(root.get("donVi").get("id"), targetUnitId));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         return phongBanRepository.findAll(spec).stream()
                 .map(pb -> com.example.backend.modules.asset.dto.SelectOption.builder()
                         .id(pb.getId())

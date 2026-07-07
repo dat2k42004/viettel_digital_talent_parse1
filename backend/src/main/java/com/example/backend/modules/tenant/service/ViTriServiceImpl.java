@@ -25,7 +25,6 @@ import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +36,13 @@ public class ViTriServiceImpl implements ViTriService {
     @Override
     public PageResponse<ViTriResponse> layDanhSach(String tenViTri, String maViTri, String trangThai, String loaiViTri, int page, int size) {
         Long idDonVi = DonViContextHolder.getTenantId();
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
         Specification<ViTri> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
             
-            if (idDonVi == null) {
+            if (idDonVi == null || laSuperAdmin) {
                 if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {
                         predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
@@ -175,8 +175,9 @@ public class ViTriServiceImpl implements ViTriService {
     @Override
     public ViTriResponse layTheoId(Long id) {
         Long idDonVi = DonViContextHolder.getTenantId();
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
         ViTri viTri;
-        if (idDonVi == null) {
+        if (idDonVi == null || laSuperAdmin) {
             viTri = viTriRepository.findByIdAndThoiGianXoaIsNull(id)
                     .orElseThrow(() -> new NghiepVuException("Không tìm thấy vị trí hoặc vị trí đã bị xóa", 404));
         } else {

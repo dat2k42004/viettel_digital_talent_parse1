@@ -13,7 +13,6 @@ import com.example.backend.modules.lifecycle.dto.*;
 import com.example.backend.modules.lifecycle.model.*;
 import com.example.backend.modules.lifecycle.repository.*;
 import com.example.backend.modules.lifecycle.service.interfaces.PhieuCapPhatTaiSanService;
-import com.example.backend.modules.tenant.model.PhongBan;
 import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
 import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
@@ -33,8 +32,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,27 +55,30 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
     private final ChiTietThuHoiPhanMemRepository chiTietThuHoiPhanMemRepository;
     private final ChiTietThuHoiLinhKienRepository chiTietThuHoiLinhKienRepository;
 
-    private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
-    private final DanhSachThietBiPhanMemService thietBiPhanMemRepository;
-    private final LinhKienPhanCungService linhKienPhanCungRepository;
+    private final DanhSachThietBiPhanCungService thietBiPhanCungService;
+    private final DanhSachThietBiPhanMemService thietBiPhanMemService;
+    private final LinhKienPhanCungService linhKienPhanCungService;
 
     @Autowired
     @Lazy
     private final RabbitTemplate rabbitTemplate;
 
-    private final NguoiDungService nguoiDungRepository;
-    private final PhongBanService phongBanRepository;
+    private final NguoiDungService nguoiDungService;
+    private final PhongBanService phongBanService;
 
     private Long getRequiredTenantId() {
         Long tenantId = DonViContextHolder.getTenantId();
         if (tenantId == null) {
+            if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                return null;
+            }
             throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
         }
         return tenantId;
     }
 
     private Long getCurrentUserId() {
-        return nguoiDungRepository.layIdNguoiDungHienTai();
+        return nguoiDungService.layIdNguoiDungHienTai();
     }
 
     private String getHoTenNguoiDung(NguoiDung nd) {
@@ -153,8 +152,14 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
     @Transactional(readOnly = true)
     public PhieuCapPhatTaiSanResponse layTheoId(Long id) {
         Long tenantId = getRequiredTenantId();
-        PhieuCapPhatTaiSan phieu = phieuCapPhatTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu cấp phát", 404));
+        PhieuCapPhatTaiSan phieu;
+        if (tenantId == null) {
+            phieu = phieuCapPhatTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu cấp phát", 404));
+        } else {
+            phieu = phieuCapPhatTaiSanRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy phiếu cấp phát", 404));
+        }
         return mapToResponse(phieu, true);
     }
 
@@ -383,9 +388,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanCung pc : danhSachPhanCung) {
             if (pc.getDanhSachThietBiPhanCungId() != null) {
-                thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                thietBiPhanCungService.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanCungRepository.saveEntity(tb);
+                    thietBiPhanCungService.saveEntity(tb);
                 });
             }
         }
@@ -395,9 +400,10 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanMem pm : danhSachPhanMem) {
             if (pm.getDanhSachThietBiPhanMemId() != null) {
-                thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                thietBiPhanMemService.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                    tb.setTongSoGhe((tb.getTongSoGhe() != null ? tb.getTongSoGhe() : 0) + 1);
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanMemRepository.saveEntity(tb);
+                    thietBiPhanMemService.saveEntity(tb);
                 });
             }
         }
@@ -407,9 +413,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatLinhKien lk : danhSachLinhKien) {
             if (lk.getLinhKienPhanCungId() != null) {
-                linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(linhKien -> {
+                linhKienPhanCungService.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(linhKien -> {
                     linhKien.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    linhKienPhanCungRepository.saveEntity(linhKien);
+                    linhKienPhanCungService.saveEntity(linhKien);
                 });
             }
         }
@@ -437,7 +443,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
         // 1. Luu phan cung
         if (request.getDanhSachPhanCung() != null) {
             for (ChiTietCapPhatPhanCungRequest rq : request.getDanhSachPhanCung()) {
-                DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(rq.getDanhSachThietBiPhanCungId())
+                DanhSachThietBiPhanCung tb = thietBiPhanCungService.layEntityTheoId(rq.getDanhSachThietBiPhanCungId())
                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần cứng ID "
                                 + rq.getDanhSachThietBiPhanCungId() + " trong đơn vị", 400));
 
@@ -448,7 +454,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
 
                 // Chuyen trang thai thiet bi
                 tb.setTrangThai(TrangThaiVanHanhEnum.CAP_PHAT);
-                thietBiPhanCungRepository.saveEntity(tb);
+                thietBiPhanCungService.saveEntity(tb);
 
                 // Tao chi tiet cap phat
                 ChiTietCapPhatPhanCung ct = new ChiTietCapPhatPhanCung();
@@ -467,7 +473,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
         // 2. Luu phan mem
         if (request.getDanhSachPhanMem() != null) {
             for (ChiTietCapPhatPhanMemRequest rq : request.getDanhSachPhanMem()) {
-                DanhSachThietBiPhanMem tb = thietBiPhanMemRepository.layEntityTheoId(rq.getDanhSachThietBiPhanMemId())
+                DanhSachThietBiPhanMem tb = thietBiPhanMemService.layEntityTheoId(rq.getDanhSachThietBiPhanMemId())
                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần mềm ID "
                                 + rq.getDanhSachThietBiPhanMemId() + " trong đơn vị", 400));
 
@@ -477,9 +483,20 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                             400);
                 }
 
-                // Chuyen trang thai thiet bi
-                tb.setTrangThai(TrangThaiVanHanhEnum.CAP_PHAT);
-                thietBiPhanMemRepository.saveEntity(tb);
+                if (tb.getTongSoGhe() == null || tb.getTongSoGhe() <= 0) {
+                    throw new NghiepVuException(
+                            "Phần mềm với key " + tb.getKeyBanQuyen() + " đã hết số lượng ghế để cấp phát",
+                            400);
+                }
+
+                // Giam so luong ghe con lai
+                tb.setTongSoGhe(tb.getTongSoGhe() - 1);
+                if (tb.getTongSoGhe() == 0) {
+                    tb.setTrangThai(TrangThaiVanHanhEnum.CAP_PHAT);
+                } else {
+                    tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
+                }
+                thietBiPhanMemService.saveEntity(tb);
 
                 // Tao chi tiet
                 ChiTietCapPhatPhanMem ct = new ChiTietCapPhatPhanMem();
@@ -499,7 +516,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
         // 3. Luu linh kien
         if (request.getDanhSachLinhKien() != null) {
             for (ChiTietCapPhatLinhKienRequest rq : request.getDanhSachLinhKien()) {
-                LinhKienPhanCung lk = linhKienPhanCungRepository.layEntityTheoId(rq.getLinhKienPhanCungId())
+                LinhKienPhanCung lk = linhKienPhanCungService.layEntityTheoId(rq.getLinhKienPhanCungId())
                         .orElseThrow(() -> new NghiepVuException(
                                 "Không tìm thấy linh kiện ID " + rq.getLinhKienPhanCungId() + " trong đơn vị", 400));
 
@@ -511,7 +528,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
 
                 // Chuyen trang thai lk
                 lk.setTrangThai(TrangThaiVanHanhEnum.CAP_PHAT);
-                linhKienPhanCungRepository.saveEntity(lk);
+                linhKienPhanCungService.saveEntity(lk);
 
                 // Tao chi tiet
                 ChiTietCapPhatLinhKien ct = new ChiTietCapPhatLinhKien();
@@ -531,9 +548,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanCung pc : pcList) {
             if (pc.getDanhSachThietBiPhanCungId() != null) {
-                thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                thietBiPhanCungService.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanCungRepository.saveEntity(tb);
+                    thietBiPhanCungService.saveEntity(tb);
                 });
             }
         }
@@ -546,9 +563,10 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanMem pm : pmList) {
             if (pm.getDanhSachThietBiPhanMemId() != null) {
-                thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                thietBiPhanMemService.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                    tb.setTongSoGhe((tb.getTongSoGhe() != null ? tb.getTongSoGhe() : 0) + 1);
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanMemRepository.saveEntity(tb);
+                    thietBiPhanMemService.saveEntity(tb);
                 });
             }
         }
@@ -561,9 +579,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatLinhKien lk : lkList) {
             if (lk.getLinhKienPhanCungId() != null) {
-                linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(lkEntity -> {
+                linhKienPhanCungService.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(lkEntity -> {
                     lkEntity.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    linhKienPhanCungRepository.saveEntity(lkEntity);
+                    linhKienPhanCungService.saveEntity(lkEntity);
                 });
             }
         }
@@ -578,9 +596,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanCung pc : pcList) {
             if (pc.getDanhSachThietBiPhanCungId() != null) {
-                thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
+                thietBiPhanCungService.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).ifPresent(tb -> {
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanCungRepository.saveEntity(tb);
+                    thietBiPhanCungService.saveEntity(tb);
                 });
             }
             pc.setThoiGianXoa(LocalDateTime.now());
@@ -593,9 +611,10 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatPhanMem pm : pmList) {
             if (pm.getDanhSachThietBiPhanMemId() != null) {
-                thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                thietBiPhanMemService.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).ifPresent(tb -> {
+                    tb.setTongSoGhe((tb.getTongSoGhe() != null ? tb.getTongSoGhe() : 0) + 1);
                     tb.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    thietBiPhanMemRepository.saveEntity(tb);
+                    thietBiPhanMemService.saveEntity(tb);
                 });
             }
             pm.setThoiGianXoa(LocalDateTime.now());
@@ -608,9 +627,9 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 .findByPhieuCapPhatTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
         for (ChiTietCapPhatLinhKien lk : lkList) {
             if (lk.getLinhKienPhanCungId() != null) {
-                linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(lkEntity -> {
+                linhKienPhanCungService.layEntityTheoId(lk.getLinhKienPhanCungId()).ifPresent(lkEntity -> {
                     lkEntity.setTrangThai(TrangThaiVanHanhEnum.HOAT_DONG);
-                    linhKienPhanCungRepository.saveEntity(lkEntity);
+                    linhKienPhanCungService.saveEntity(lkEntity);
                 });
             }
             lk.setThoiGianXoa(LocalDateTime.now());
@@ -637,8 +656,8 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 deptIds.add(p.getIdPhongBanNhan());
         }
 
-        Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
-        Map<Long, String> deptMap = phongBanRepository.layTenPhongBanTheoIds(deptIds);
+        Map<Long, String> userMap = nguoiDungService.layTenNguoiDungTheoIds(userIds);
+        Map<Long, String> deptMap = phongBanService.layTenPhongBanTheoIds(deptIds);
 
         List<PhieuCapPhatTaiSanResponse> responses = new ArrayList<>();
         for (PhieuCapPhatTaiSan phieu : phieuList) {
@@ -668,22 +687,22 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
     private PhieuCapPhatTaiSanResponse mapToResponse(PhieuCapPhatTaiSan phieu, boolean includeDetails) {
         String tenNguoiNhan = null;
         if (phieu.getIdNguoiNhan() != null) {
-            tenNguoiNhan = nguoiDungRepository.layTenNguoiDungTheoId(phieu.getIdNguoiNhan());
+            tenNguoiNhan = nguoiDungService.layTenNguoiDungTheoId(phieu.getIdNguoiNhan());
         }
 
         String tenPhongBanNhan = null;
         if (phieu.getIdPhongBanNhan() != null) {
-            tenPhongBanNhan = java.util.Optional.ofNullable(phongBanRepository.layTheoId(phieu.getIdPhongBanNhan())).map(PhongBanResponse::getTenPhongBan).orElse(null);
+            tenPhongBanNhan = java.util.Optional.ofNullable(phongBanService.layTheoId(phieu.getIdPhongBanNhan())).map(PhongBanResponse::getTenPhongBan).orElse(null);
         }
 
         String tenNguoiLap = null;
         if (phieu.getIdNguoiLap() != null) {
-            tenNguoiLap = nguoiDungRepository.layTenNguoiDungTheoId(phieu.getIdNguoiLap());
+            tenNguoiLap = nguoiDungService.layTenNguoiDungTheoId(phieu.getIdNguoiLap());
         }
 
         String tenNguoiPheDuyet = null;
         if (phieu.getIdNguoiPheDuyet() != null) {
-            tenNguoiPheDuyet = nguoiDungRepository.layTenNguoiDungTheoId(phieu.getIdNguoiPheDuyet());
+            tenNguoiPheDuyet = nguoiDungService.layTenNguoiDungTheoId(phieu.getIdNguoiPheDuyet());
         }
 
         List<ChiTietCapPhatGeneralResponse> danhSachTaiSan = new ArrayList<>();
@@ -696,7 +715,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 String soSerial = "";
                 String maThe = "";
                 if (pc.getDanhSachThietBiPhanCungId() != null) {
-                    var tb = thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).orElse(null);
+                    var tb = thietBiPhanCungService.layEntityTheoId(pc.getDanhSachThietBiPhanCungId()).orElse(null);
                     if (tb != null) {
                         soSerial = tb.getSoSerial();
                         maThe = tb.getMaTheTaiSan();
@@ -727,7 +746,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 String tenTaiSan = "";
                 String keyBanQuyen = "";
                 if (pm.getDanhSachThietBiPhanMemId() != null) {
-                    var tb = thietBiPhanMemRepository.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).orElse(null);
+                    var tb = thietBiPhanMemService.layEntityTheoId(pm.getDanhSachThietBiPhanMemId()).orElse(null);
                     if (tb != null) {
                         keyBanQuyen = tb.getKeyBanQuyen();
                         if (tb.getTaiSanPhanMem() != null) {
@@ -757,7 +776,7 @@ public class PhieuCapPhatTaiSanServiceImpl implements PhieuCapPhatTaiSanService 
                 String tenTaiSan = "";
                 String soSerial = "";
                 if (lk.getLinhKienPhanCungId() != null) {
-                    var lkEntity = linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId()).orElse(null);
+                    var lkEntity = linhKienPhanCungService.layEntityTheoId(lk.getLinhKienPhanCungId()).orElse(null);
                     if (lkEntity != null) {
                         soSerial = lkEntity.getSoSerial();
                         if (lkEntity.getTaiSanPhanCung() != null) {

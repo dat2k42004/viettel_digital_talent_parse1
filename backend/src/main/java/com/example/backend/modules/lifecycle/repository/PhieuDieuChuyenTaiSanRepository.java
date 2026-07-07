@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface PhieuDieuChuyenTaiSanRepository
           extends JpaRepository<PhieuDieuChuyenTaiSan, Long>, JpaSpecificationExecutor<PhieuDieuChuyenTaiSan> {
+     Optional<PhieuDieuChuyenTaiSan> findByIdAndThoiGianXoaIsNull(Long id);
+
      Optional<PhieuDieuChuyenTaiSan> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 }

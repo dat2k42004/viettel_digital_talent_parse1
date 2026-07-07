@@ -11,9 +11,7 @@ import com.example.backend.modules.lifecycle.dto.*;
 import com.example.backend.modules.lifecycle.model.*;
 import com.example.backend.modules.lifecycle.repository.*;
 import com.example.backend.modules.lifecycle.service.interfaces.PhieuDieuChuyenTaiSanService;
-import com.example.backend.modules.tenant.model.PhongBan;
 import com.example.backend.modules.tenant.service.interfaces.PhongBanService;
-import com.example.backend.modules.tenant.dto.PhongBanResponse;
 import com.example.backend.shared.exception.NghiepVuException;
 import com.example.backend.shared.model.TrangThaiPhieuEnum;
 import com.example.backend.shared.response.PageResponse;
@@ -29,8 +27,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,10 +46,10 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      private final ChiTietCapPhatPhanCungRepository chiTietCapPhatPhanCungRepository;
      private final ChiTietCapPhatLinhKienRepository chiTietCapPhatLinhKienRepository;
      private final PhieuCapPhatTaiSanRepository phieuCapPhatTaiSanRepository;
-     private final DanhSachThietBiPhanCungService thietBiPhanCungRepository;
-     private final LinhKienPhanCungService linhKienPhanCungRepository;
-     private final NguoiDungService nguoiDungRepository;
-     private final PhongBanService phongBanRepository;
+     private final DanhSachThietBiPhanCungService thietBiPhanCungService;
+     private final LinhKienPhanCungService linhKienPhanCungService;
+     private final NguoiDungService nguoiDungService;
+     private final PhongBanService phongBanService;
 
      @Autowired
      @Lazy
@@ -62,13 +58,16 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
           if (tenantId == null) {
+               if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                    return null;
+               }
                throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc của hệ thống SaaS", 403);
           }
           return tenantId;
      }
 
      private Long getCurrentUserId() {
-        return nguoiDungRepository.layIdNguoiDungHienTai();
+        return nguoiDungService.layIdNguoiDungHienTai();
     }
 
      private String getHoTenNguoiDung(NguoiDung nd) {
@@ -146,8 +145,8 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                     pbIds.add(p.getIdPhongBanNhan());
           }
 
-          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
-          Map<Long, String> pbMap = phongBanRepository.layTenPhongBanTheoIds(pbIds);
+          Map<Long, String> userMap = nguoiDungService.layTenNguoiDungTheoIds(userIds);
+          Map<Long, String> pbMap = phongBanService.layTenPhongBanTheoIds(pbIds);
 
           List<PhieuDieuChuyenTaiSanResponse> responses = new ArrayList<>();
           for (PhieuDieuChuyenTaiSan phieu : phieuList) {
@@ -180,10 +179,17 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
      @Transactional(readOnly = true)
      public PhieuDieuChuyenTaiSanResponse layTheoId(Long id) {
           Long tenantId = getRequiredTenantId();
-          PhieuDieuChuyenTaiSan phieu = phieuDieuChuyenTaiSanRepository
-                    .findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
-                    .orElseThrow(() -> new NghiepVuException(
-                              "Không tìm thấy thông tin phiếu điều chuyển tài sản yêu cầu", 404));
+          PhieuDieuChuyenTaiSan phieu;
+          if (tenantId == null) {
+               phieu = phieuDieuChuyenTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
+                         .orElseThrow(() -> new NghiepVuException(
+                                   "Không tìm thấy thông tin phiếu điều chuyển tài sản yêu cầu", 404));
+          } else {
+               phieu = phieuDieuChuyenTaiSanRepository
+                         .findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
+                         .orElseThrow(() -> new NghiepVuException(
+                                   "Không tìm thấy thông tin phiếu điều chuyển tài sản yêu cầu", 404));
+          }
           return mapToResponse(phieu, true);
      }
 
@@ -666,8 +672,8 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
           if (phieu.getIdPhongBanNhan() != null)
                pbIds.add(phieu.getIdPhongBanNhan());
 
-          Map<Long, String> userMap = nguoiDungRepository.layTenNguoiDungTheoIds(userIds);
-          Map<Long, String> pbMap = phongBanRepository.layTenPhongBanTheoIds(pbIds);
+          Map<Long, String> userMap = nguoiDungService.layTenNguoiDungTheoIds(userIds);
+          Map<Long, String> pbMap = phongBanService.layTenPhongBanTheoIds(pbIds);
 
           List<ChiTietDieuChuyenGeneralResponse> chiTietTaiSan = new ArrayList<>();
 
@@ -678,7 +684,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                          .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietDieuChuyenPhanCung pc : pcList) {
                     String tenTaiSan = "", soSerial = "", maThe = "";
-                    DanhSachThietBiPhanCung tb = thietBiPhanCungRepository.layEntityTheoId(pc.getDanhSachThietBiPhanCungId())
+                    DanhSachThietBiPhanCung tb = thietBiPhanCungService.layEntityTheoId(pc.getDanhSachThietBiPhanCungId())
                               .orElse(null);
                     if (tb != null) {
                          soSerial = tb.getSoSerial();
@@ -708,7 +714,7 @@ public class PhieuDieuChuyenTaiSanServiceImpl implements PhieuDieuChuyenTaiSanSe
                          .findByPhieuDieuChuyenTaiSanIdAndThoiGianXoaIsNull(phieu.getId());
                for (ChiTietDieuChuyenLinhKien lk : lkList) {
                     String tenTaiSan = "", soSerial = "";
-                    LinhKienPhanCung lkEntity = linhKienPhanCungRepository.layEntityTheoId(lk.getLinhKienPhanCungId())
+                    LinhKienPhanCung lkEntity = linhKienPhanCungService.layEntityTheoId(lk.getLinhKienPhanCungId())
                               .orElse(null);
                     if (lkEntity != null) {
                          soSerial = lkEntity.getSoSerial();

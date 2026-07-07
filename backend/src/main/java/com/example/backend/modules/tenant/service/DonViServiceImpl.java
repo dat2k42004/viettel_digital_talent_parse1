@@ -28,21 +28,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
-import com.example.backend.shared.dto.MailEvent;
 import com.example.backend.shared.dto.TenantStatusEvent;
 import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -114,7 +111,8 @@ public class DonViServiceImpl implements DonViService {
     @Override
     public DonViResponse layTheoId(Long id) {
         Long tenantId = DonViContextHolder.getTenantId();
-        if (tenantId != null && !tenantId.equals(id)) {
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+        if (tenantId != null && !tenantId.equals(id) && !laSuperAdmin) {
             throw new NghiepVuException("Bạn không có quyền xem thông tin đơn vị khác", 403);
         }
 
@@ -132,12 +130,13 @@ public class DonViServiceImpl implements DonViService {
     public PageResponse<DonViResponse> layDanhSach(String ten, String maDonVi, String trangThai, String maSoThue,
             int page, int size) {
         Long tenantId = DonViContextHolder.getTenantId();
+        boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
         Specification<DonVi> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
 
-            if (tenantId != null) {
+            if (tenantId != null && !laSuperAdmin) {
                 predicates.add(cb.equal(root.get("id"), tenantId));
             }
 

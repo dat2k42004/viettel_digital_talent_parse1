@@ -22,8 +22,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +44,12 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
 
      private Long getRequiredTenantId() {
           Long tenantId = DonViContextHolder.getTenantId();
-          if (tenantId == null)
+          if (tenantId == null) {
+               if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                    return null;
+               }
                throw new NghiepVuException("Không tìm thấy thông tin đơn vị xử lý", 403);
+          }
           return tenantId;
      }
 
@@ -220,9 +222,14 @@ public class DotKiemKeServiceImpl implements DotKiemKeService {
      @Transactional(readOnly = true)
      public DotKiemKeResponse layTheoId(Long id) {
           Long tenantId = getRequiredTenantId();
-          DotKiemKe dkk = dotKiemKeRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
-                    .orElseThrow(
-                              () -> new NghiepVuException("Không tìm thấy thông tin đợt kiểm kê tài sản yêu cầu", 404));
+          DotKiemKe dkk;
+          if (tenantId == null) {
+               dkk = dotKiemKeRepository.findByIdAndThoiGianXoaIsNull(id)
+                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đợt kiểm kê tài sản yêu cầu", 404));
+          } else {
+               dkk = dotKiemKeRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, tenantId)
+                         .orElseThrow(() -> new NghiepVuException("Không tìm thấy thông tin đợt kiểm kê tài sản yêu cầu", 404));
+          }
 
           return mapToResponse(dkk);
      }

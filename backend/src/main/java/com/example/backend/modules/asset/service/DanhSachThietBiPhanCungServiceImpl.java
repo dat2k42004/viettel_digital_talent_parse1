@@ -42,6 +42,9 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
     private Long getRequiredTenantId() {
         Long tenantId = DonViContextHolder.getTenantId();
         if (tenantId == null) {
+            if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
+                return null;
+            }
             throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
         }
         return tenantId;
@@ -158,9 +161,15 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
     @Cacheable(value = "thiet_bi_phan_cung_cache", key = "{#id, T(com.example.backend.shared.tenant.DonViContextHolder).getTenantId()}")
     public DanhSachThietBiPhanCungResponse layTheoId(Long id) {
         Long idDonVi = getRequiredTenantId();
-        DanhSachThietBiPhanCung thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
-                .orElseThrow(() -> new NghiepVuException(
-                        "Không tìm thấy thiết bị phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
+        DanhSachThietBiPhanCung thietBi;
+        if (idDonVi == null) {
+            thietBi = thietBiPhanCungRepository.findByIdAndThoiGianXoaIsNull(id)
+                    .orElseThrow(() -> new NghiepVuException("Không tìm thấy thiết bị phần cứng với ID: " + id, 404));
+        } else {
+            thietBi = thietBiPhanCungRepository.findByIdAndIdDonViAndThoiGianXoaIsNull(id, idDonVi)
+                    .orElseThrow(() -> new NghiepVuException(
+                            "Không tìm thấy thiết bị phần cứng thuộc đơn vị của bạn với ID: " + id, 404));
+        }
         return mapToResponse(thietBi);
     }
 
@@ -244,7 +253,9 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> {
             List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
-            predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            if (idDonVi != null) {
+                predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
+            }
             predicates.add(
                     cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
             if (idTaiSanPhanCung != null) {

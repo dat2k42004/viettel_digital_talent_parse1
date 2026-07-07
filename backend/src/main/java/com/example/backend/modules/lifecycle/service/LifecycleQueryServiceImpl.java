@@ -114,6 +114,9 @@ public class LifecycleQueryServiceImpl implements LifecycleQueryService {
     @Override
     @Transactional(readOnly = true)
     public long demCapPhatChoPheDuyet(Long idDonVi) {
+        if (idDonVi == null) {
+            return phieuCapPhatTaiSanRepository.countByTrangThaiAndThoiGianXoaIsNull(TrangThaiPhieuEnum.GUI_PHE_DUYET);
+        }
         return phieuCapPhatTaiSanRepository.countByIdDonViAndTrangThaiAndThoiGianXoaIsNull(idDonVi, TrangThaiPhieuEnum.GUI_PHE_DUYET);
     }
 }

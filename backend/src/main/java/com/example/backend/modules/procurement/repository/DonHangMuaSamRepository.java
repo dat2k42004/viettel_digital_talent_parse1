@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface DonHangMuaSamRepository
           extends JpaRepository<DonHangMuaSam, Long>, JpaSpecificationExecutor<DonHangMuaSam> {
+     Optional<DonHangMuaSam> findByIdAndThoiGianXoaIsNull(Long id);
+
      Optional<DonHangMuaSam> findByIdAndIdDonViAndThoiGianXoaIsNull(Long id, Long idDonVi);
 
      List<DonHangMuaSam> findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(Long idDonVi, com.example.backend.shared.model.TrangThaiPhieuEnum trangThai);

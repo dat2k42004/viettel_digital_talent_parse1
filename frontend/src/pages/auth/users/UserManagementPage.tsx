@@ -237,7 +237,7 @@ export const UserManagementPage: React.FC = observer(() => {
           key: 'idDonVi',
           sorter: (a: NguoiDungResponse, b: NguoiDungResponse) => (a.idDonVi || 0) - (b.idDonVi || 0),
           defaultSortOrder: 'ascend' as const,
-          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val')}</Tag>,
+          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val', { val })}</Tag>,
         },
       ]
       : []),
@@ -249,11 +249,11 @@ export const UserManagementPage: React.FC = observer(() => {
         const fullname = [record.hoNguoiDung, record.tenDemNguoiDung, record.tenNguoiDung].filter(Boolean).join(' ');
         return (
           <div>
-            <div style={{ fontWeight: 'bold' }}>{t('userManagementPage.fullname_chua_cap_nhat')}</div>
-            <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.ten_dang_nhap_val')}</div>
+            <div style={{ fontWeight: 'bold' }}>{fullname || t('userManagementPage.chua_cap_nhat_ten')}</div>
+            <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.ten_dang_nhap')}: {val}</div>
             {record.maNguoiDung && (
               <div style={{ fontSize: 12, color: '#1890ff', fontWeight: 500 }}>
-                Mã nhân viên: {record.maNguoiDung}
+                {t('userManagementPage.ma_nhan_vien')}: {record.maNguoiDung}
               </div>
             )}
           </div>
@@ -266,8 +266,8 @@ export const UserManagementPage: React.FC = observer(() => {
       key: 'email',
       render: (val: string, record: NguoiDungResponse) => (
         <div>
-          <div>{t('userManagementPage.email_val_chua_thiet')}</div>
-          <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.sdt_recordsodienthoai_chua_thiet')}</div>
+          <div>Email: {val || t('userManagementPage.chua_thiet_lap')}</div>
+          <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.sdt')}: {record.soDienThoai || t('userManagementPage.chua_thiet_lap')}</div>
         </div>
       )
     },
@@ -527,7 +527,7 @@ export const UserManagementPage: React.FC = observer(() => {
               <strong>{detailUser.tenDangNhap}</strong>
             </Descriptions.Item>
             <Descriptions.Item label={t('userManagementPage.ma_nhan_vien')}>
-              <strong>{t('userManagementPage.detailusermanguoidung_chua_cap_nhat')}</strong>
+              <strong>{detailUser.maNguoiDung || t('userManagementPage.chua_cap_nhat')}</strong>
             </Descriptions.Item>
             <Descriptions.Item label={t('userManagementPage.ho_ten')}>
               {[detailUser.hoNguoiDung, detailUser.tenDemNguoiDung, detailUser.tenNguoiDung].filter(Boolean).join(' ') || t('userManagementPage.chua_cap_nhat')}
@@ -545,7 +545,7 @@ export const UserManagementPage: React.FC = observer(() => {
               {detailUser.tenPhongBan || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
             <Descriptions.Item label={t('donViManagementPage.ma_don_vi')}>
-              <Tag color="orange">{t('userManagementPage.don_vi_detailuseriddonvi')}</Tag>
+              <Tag color="orange">{t('userManagementPage.don_vi_val', { val: detailUser.idDonVi })}</Tag>
             </Descriptions.Item>
             <Descriptions.Item label={t('loaiTaiSanFormModal.trang_thai')}>
               <Tag color={detailUser.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>

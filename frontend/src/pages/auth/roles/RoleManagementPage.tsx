@@ -195,7 +195,7 @@ export const RoleManagementPage: React.FC = observer(() => {
           title: t('userManagementPage.don_vi_saas'),
           dataIndex: 'idDonVi',
           key: 'idDonVi',
-          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val')}</Tag>,
+          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val', { val })}</Tag>,
         },
       ]
       : []),
@@ -218,7 +218,7 @@ export const RoleManagementPage: React.FC = observer(() => {
       dataIndex: 'laHeThong',
       key: 'laHeThong',
       render: (val: boolean) => (
-        <Tag color={val ? 'blue' : 'default'}>{t('roleManagementPage.val_he_thong_tuy')}</Tag>
+        <Tag color={val ? 'blue' : 'default'}>{val ? t('roleManagementPage.he_thong') : t('roleManagementPage.tuy_bien')}</Tag>
       ),
     },
     ...(authStore.laSuperAdmin ? [{
@@ -228,7 +228,7 @@ export const RoleManagementPage: React.FC = observer(() => {
       render: (val?: number) => {
         if (!val) return <Tag color="blue">{t('danhMucCauHinhPage.he_thong')}</Tag>;
         const dv = danhSachDonVi.find(d => d.id === val);
-        return <span>{t('roleManagementPage.dvtenphaply_don_vi_id')}</span>;
+        return <span>{dv?.tenPhapLy || t('roleManagementPage.don_vi_id', { id: val })}</span>;
       }
     }] : []),
     {
@@ -236,14 +236,14 @@ export const RoleManagementPage: React.FC = observer(() => {
       dataIndex: 'capDoUuTien',
       key: 'capDoUuTien',
       sorter: (a: VaiTroResponse, b: VaiTroResponse) => (a.capDoUuTien || 0) - (b.capDoUuTien || 0),
-      render: (val: number) => <Tag color="cyan">{t('roleManagementPage.cap_val_0')}</Tag>
+      render: (val: number) => <Tag color="cyan">{t('roleManagementPage.cap_bac', { cap: val || 0 })}</Tag>
     },
     { title: t('viTriFormModal.mo_ta_chi_tiet'), dataIndex: 'moTa', key: 'moTa', render: (val: string) => val || t('roleManagementPage.chua_thiet_lap_mo') },
     {
       title: t('roleManagementPage.tong_so_quyen_gan'),
       dataIndex: 'danhSachQuyen',
       key: 'danhSachQuyen',
-      render: (list?: any[]) => <Tag color="cyan">{t('roleManagementPage.listlength_0_quyen_han')}</Tag>,
+      render: (list?: any[]) => <Tag color="cyan">{t('roleManagementPage.so_quyen_gan', { count: list?.length || 0 })}</Tag>,
     },
     {
       title: t('loaiTaiSanFormModal.trang_thai'),
@@ -426,17 +426,21 @@ export const RoleManagementPage: React.FC = observer(() => {
               {detailRole.moTa || t('roleManagementPage.khong_co_mo_ta')}
             </Descriptions.Item>
             <Descriptions.Item label={t('roleManagementPage.phan_loai')}>
-              <Tag color={detailRole.laHeThong ? 'blue' : 'default'}>{t('roleManagementPage.detailrolelahethong_vai_tro_he')}</Tag>
+              <Tag color={detailRole.laHeThong ? 'blue' : 'default'}>
+                {detailRole.laHeThong ? t('roleManagementPage.he_thong') : t('roleManagementPage.tuy_bien')}
+              </Tag>
             </Descriptions.Item>
             <Descriptions.Item label={t('roleManagementPage.do_uu_tien')}>
-              Cấp {detailRole.capDoUuTien || 0}
+              {t('roleManagementPage.cap_bac', { cap: detailRole.capDoUuTien || 0 })}
             </Descriptions.Item>
             <Descriptions.Item label={t('loaiTaiSanFormModal.trang_thai')}>
-              <Tag color={detailRole.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>{t('roleManagementPage.detailroletrangthai_hoat_dong_hoat_dong')}</Tag>
+              <Tag color={detailRole.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>
+                {detailRole.trangThai === 'HOAT_DONG' ? t('userManagementPage.hoat_dong') : t('userManagementPage.bi_khoa')}
+              </Tag>
             </Descriptions.Item>
             <Descriptions.Item label={t('roleManagementPage.don_vi_gan')}>
               <Tag color="orange">
-                {!detailRole.idDonVi ? t('roleManagementPage.he_thong_toan_san') : (danhSachDonVi.find(d => d.id === detailRole.idDonVi)?.tenPhapLy || t('roleManagementPage.don_vi_id_detailrole_iddonvi', { idDonVi: detailRole.idDonVi }))}
+                {!detailRole.idDonVi ? t('roleManagementPage.he_thong_toan_san') : (danhSachDonVi.find(d => d.id === detailRole.idDonVi)?.tenPhapLy || t('roleManagementPage.don_vi_id', { id: detailRole.idDonVi }))}
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label={t('roleManagementPage.quyen_han_cua_vai')}>

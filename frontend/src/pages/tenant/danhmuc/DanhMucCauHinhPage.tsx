@@ -141,7 +141,7 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
       case 'TIEU_CHUAN':
         return <Tag color="gold">{t('danhMucCauHinhPage.tieu_chuan')}</Tag>;
       default:
-        return <Tag>{t('danhMucCauHinhPage.nhom_khac')}</Tag>;
+        return <Tag>{nhom || t('danhMucCauHinhPage.khac')}</Tag>;
     }
   };
 

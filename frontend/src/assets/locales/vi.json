@@ -215,7 +215,7 @@
     "lam_moi": "Làm mới",
     "phan_loai_tai_san_theo": "Phân loại tài sản theo các danh mục nghiệp vụ hệ thống.",
     "them_danh_muc": "Thêm danh mục",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} danh mục tài sản thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} danh mục tài sản thành công!"
   },
   "danhMucThuocTinhFormModal": {
     "thu_tu_hien_thi": "Thứ tự hiển thị",
@@ -300,7 +300,7 @@
     "quan_ly_danh_sach_cac": "Quản lý danh sách các thuộc tính cấu hình mở rộng cho từng loại thực thể tài sản (RAM, Disk, OS, License Seats...).",
     "them_thuoc_tinh": "Thêm thuộc tính",
     "bat_buoc_1": "Bắt buộc?",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} thuộc tính thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} thuộc tính thành công!"
   },
   "hangSanXuatFormModal": {
     "vi_du_1800xxxx": "Ví dụ: 1800-xxxx",
@@ -364,7 +364,7 @@
     "lam_moi": "Làm mới",
     "quan_ly_danh_sach_cac": "Quản lý danh sách các nhà sản xuất, thương hiệu cung cấp thiết bị phần cứng/phần mềm.",
     "them_hang_san_xuat": "Thêm hãng sản xuất",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} hãng sản xuất thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} hãng sản xuất thành công!"
   },
   "lapRapLinhKienFormModal": {
     "chon_linh_kien_co": "Chọn linh kiện có sẵn trong kho (RAM, SSD...)",
@@ -447,7 +447,7 @@
     "huy": "Hủy",
     "tim_kiem_theo_ma": "Tìm kiếm theo mã loại, tên loại...",
     "lam_moi": "Làm mới",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} loại tài sản thành công!",
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} loại tài sản thành công!",
     "val_thang": "{{val}} tháng"
   },
   "taiSanPhanCungFormModal": {
@@ -528,7 +528,7 @@
     "lam_moi": "Làm mới",
     "quan_ly_danh_sach_cac": "Quản lý danh sách các mẫu mã, cấu hình chuẩn thiết bị phần cứng.",
     "them_mau_thiet_bi": "Thêm mẫu thiết bị",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} mẫu thiết bị thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} mẫu thiết bị thành công!"
   },
   "taiSanPhanMemFormModal": {
     "mo_ta_thong_so": "Mô tả thông số chi tiết của mẫu...",
@@ -610,7 +610,7 @@
     "lam_moi": "Làm mới",
     "quan_ly_danh_sach_cac": "Quản lý danh sách các mẫu phần mềm, hệ điều hành và giấy phép bản quyền chuẩn.",
     "them_mau_phan_mem": "Thêm mẫu phần mềm",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} mẫu phần mềm thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} mẫu phần mềm thành công!"
   },
   "danhSachThietBiPhanCungFormModal": {
     "ma_the_tai_san": "Mã thẻ tài sản",
@@ -692,8 +692,8 @@
     "lam_moi": "Làm mới",
     "danh_sach_thuc_the_cac": "Danh sách thực thể các thiết bị phần cứng (máy tính, màn hình, bàn phím...) đang quản lý tại các đơn vị.",
     "them_thiet_bi": "Thêm thiết bị",
-    "val_tolocalestring_vi_vn_d": "{{val.toLocaleString('vi-VN')}} đ",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} thiết bị thành công!"
+    "val_tolocalestring_vi_vn_d": "{{toLocaleStringviVN}} đ",
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} thiết bị thành công!"
   },
   "giaTriThuocTinhModal": {
     "nhap_gia_tri_khac": "Nhập giá trị khác nếu không có trong danh sách chọn",
@@ -706,12 +706,12 @@
     "khong_co_thuoc_tinh_dong_2": "Không có thuộc tính động nào được cấu hình áp dụng cho Linh kiện phần cứng.",
     "khong_the_tai_du_lieu": "Không thể tải dữ liệu thuộc tính tài sản!",
     "cau_hinh_thuoc_tinh_assetname": "Cấu hình thuộc tính - {{assetName}}",
-    "vui_long_chon_attr_tenthuoctinh": "Vui lòng chọn {{attr.tenThuocTinh}}!",
-    "chon_attr_tenthuoctinh": "Chọn {{attr.tenThuocTinh}}",
-    "attr_tenthuoctinh_gia_tri_khac": "{{attr.tenThuocTinh}} (Giá trị khác/tùy biến)",
-    "vui_long_nhap_attr_tenthuoctinh": "Vui lòng nhập {{attr.tenThuocTinh}}!",
-    "nhap_so_cho_attr_tenthuoctinh": "Nhập số cho {{attr.tenThuocTinh}}",
-    "nhap_attr_tenthuoctinh": "Nhập {{attr.tenThuocTinh}}",
+    "vui_long_chon_attr_tenthuoctinh": "Vui lòng chọn {{tenThuocTinh}}!",
+    "chon_attr_tenthuoctinh": "Chọn {{tenThuocTinh}}",
+    "attr_tenthuoctinh_gia_tri_khac": "{{tenThuocTinh}} (Giá trị khác/tùy biến)",
+    "vui_long_nhap_attr_tenthuoctinh": "Vui lòng nhập {{tenThuocTinh}}!",
+    "nhap_so_cho_attr_tenthuoctinh": "Nhập số cho {{tenThuocTinh}}",
+    "nhap_attr_tenthuoctinh": "Nhập {{tenThuocTinh}}",
     "cau_hinh_thuoc_tinh_linh": "Cấu hình thuộc tính linh kiện - {{assetName}}"
   },
   "danhSachThietBiPhanMemFormModal": {
@@ -798,7 +798,7 @@
     "lam_moi": "Làm mới",
     "quan_ly_danh_sach_cac": "Quản lý danh sách các key bản quyền, license và thời hạn sử dụng phần mềm tại đơn vị.",
     "them_ban_quyen": "Thêm bản quyền",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} bản quyền thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} bản quyền thành công!"
   },
   "linhKienPhanCungFormModal": {
     "nhap_so_serial_linh": "Nhập số Serial linh kiện (RAM, SSD, HDD...)",
@@ -878,7 +878,7 @@
     "lam_moi": "Làm mới",
     "danh_sach_thuc_the_cac": "Danh sách thực thể các linh kiện phần cứng (RAM, SSD, CPU...) phục vụ lắp ráp, nâng cấp thiết bị.",
     "them_linh_kien": "Thêm linh kiện",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} linh kiện thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} linh kiện thành công!"
   },
   "forgetPasswordModal": {
     "khoi_phuc_mat_khau": "Khôi phục mật khẩu qua Email OTP",
@@ -1019,7 +1019,7 @@
     "val_he_thong_tuy": "{val ? 'Hệ thống' : 'Tùy biến'}",
     "cap_val_0": "Cấp {val || 0}",
     "quan_ly_vai_tro": "Quản lý vai trò & phân quyền (IAM Matrix)",
-    "don_vi_val": "Đơn vị {val}",
+    "don_vi_val": "Đơn vị {{val}}",
     "trang_thai": "Trạng thái",
     "hanh_dong": "Hành động",
     "huy": "Hủy",
@@ -1035,14 +1035,16 @@
     "khong_the_tai_danh_sach_don_vi": "Không thể tải danh sách đơn vị",
     "don_vi_id": "Đơn vị (ID: {{id}})",
     "don_vi_id_detailrole_iddonvi": "Đơn vị (ID: {{detailRole.idDonVi}})",
-    "khong_the_tai_danh_sach_quyen": "Không thể tải danh sách quyền"
+    "khong_the_tai_danh_sach_quyen": "Không thể tải danh sách quyền",
+    "cap_bac": "Cấp {{cap}}",
+    "so_quyen_gan": "{{count}} Quyền hạn"
   },
   "roleMatrixModal": {
     "luu_cau_hinh": "Lưu cấu hình",
     "huy_bo": "Hủy bỏ",
     "lua_chon_phan_chia_quyen": "Lựa chọn phân chia quyền năng hệ thống theo nhóm chức năng. Tích chọn để trao quyền và bỏ tích để thu hồi quyền ngay lập tức.",
     "phan_he_tennhom": "Phân hệ {tenNhom}",
-    "thiet_lap_ma_tran_quyen": "Thiết lập Ma trận quyền hạn: {{selectedRole?.tenVaiTro}}"
+    "thiet_lap_ma_tran_quyen": "Thiết lập Ma trận quyền hạn: {{tenVaiTro}}"
   },
   "userFormModal": {
     "vi_du_nguyen": "Ví dụ: Nguyễn",
@@ -1134,7 +1136,7 @@
     "quan_ly_tai_khoan": "Quản lý tài khoản người dùng",
     "detailusermanguoidung_chua_cap_nhat": "{detailUser.maNguoiDung || 'Chưa cập nhật'}",
     "email_val_chua_thiet": "Email: {val || 'Chưa thiết lập'}",
-    "don_vi_val": "Đơn vị {val}",
+    "don_vi_val": "Đơn vị {{val}}",
     "dang_hoat_dong": "Đang hoạt động",
     "trang_thai": "Trạng thái",
     "kich_hoat_tai_khoan": "Kích hoạt tài khoản người dùng thành công!",
@@ -1164,13 +1166,14 @@
     "khong_the_lay_danh_sach_phong_ban": "Không thể lấy danh sách phòng ban",
     "khong_the_lay_danh_muc_vai_tro": "Không thể lấy danh mục vai trò",
     "cap_nhat_quyen_truc_tiep": "Cập nhật quyền trực tiếp (Override) thành công!",
-    "doi_trang_thai_tai_khoan_1": "Đổi trạng thái tài khoản người dùng sang {{active ? t('userManagementPage.hoat_dong') : t('userManagementPage.khoa')}} thành công!"
+    "doi_trang_thai_tai_khoan_1": "Đổi trạng thái tài khoản người dùng sang {{khoa}} thành công!",
+    "sdt": "SĐT"
   },
   "userQuyenModal": {
     "don_vi": "ĐƠN VỊ",
     "ma_tran_quyen_han": "Ma trận quyền hạn trực tiếp (Override Role Permissions)",
     "xac_nhan_cap_nhat": "Xác nhận cập nhật",
-    "cap_quyen_truc_tiep_cho": "Cấp quyền trực tiếp cho tài khoản: {{selectedUser?.tenDangNhap}}"
+    "cap_quyen_truc_tiep_cho": "Cấp quyền trực tiếp cho tài khoản: {{tenDangNhap}}"
   },
   "baoCaoPage": {
     "vui_long_chon_don": "Vui lòng chọn đơn vị!",
@@ -1251,7 +1254,7 @@
     "bordered_default_return_null_cac": "bordered\n          />\n        );\n      default:\n        return null;\n    }\n  };\n\n  // Các tabs được phân quyền hiển thị\n  const items = [];\n  if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {\n    items.push(\n      { key:",
     "co_loi_xay_ra_khi_xuat_file_bao_cao": "Có lỗi xảy ra khi xuất file báo cáo!",
     "tong_so_luong_phan_cung": "Tổng số lượng phần cứng",
-    "xuat_file_bao_cao_dang": "Xuất file báo cáo dạng {{dinhDangFile.toUpperCase()}} thành công!",
+    "xuat_file_bao_cao_dang": "Xuất file báo cáo dạng {{toUpperCase}} thành công!",
     "val_gio": "{{val}} giờ"
   },
   "dashboardPage": {
@@ -1300,7 +1303,7 @@
     "card_col_row_div_2": ")} />\n                )}\n              </Card>\n            </Col>\n          </Row>\n        </div>\n      )}\n\n      {/* ====================================================================== */}\n      {/* 2. GIAO DIỆN DÀNH CHO ADMIN ĐƠN VỊ (XEM BÁO CÁO CHI TIẾT)             */}\n      {/* ====================================================================== */}\n      {authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && thongKeDonVi ? (\n        <div>\n          <div style={{ marginBottom: 16 }}>\n            <Tag color=",
     "khong_co_du_lieu_so_sanh_don_vi": "Không có dữ liệu so sánh đơn vị",
     "don_vi_id_authstore_madonvi": "| Đơn vị ID: {{authStore.maDonVi}}",
-    "number_value_0_tolocalestring_vi": "{{Number(value || 0).toLocaleString('vi-VN')}} thiết bị",
+    "number_value_0_tolocalestring_vi": "{{toLocaleStringviVN}} thiết bị",
     "value_thiet_bi": "{{value}} thiết bị",
     "don_vi_id": "Đơn vị ID: {{id}}"
   },
@@ -1421,7 +1424,7 @@
     "gui_bao_cao_hoan_thanh": "Gửi báo cáo hoàn thành",
     "ghichu_x_ghichu_form_setfieldsvalue": ",\n                        ghiChu: x.ghiChu,\n                    }));\n\n                    form.setFieldsValue({\n                        danhSachThietBi,\n                        danhSachLinhKien,\n                        danhSachPhanMem,\n                    });\n                } else {\n                    // Populate basic form\n                    form.setFieldsValue({\n                        dotKiemKeId: selectedRecord.dotKiemKeId,\n                        idPhongBanKiemKe: selectedRecord.idPhongBanKiemKe,\n                        // idKhoKiemKe: selectedRecord.idKhoKiemKe,\n                    });\n                }\n            } else {\n                form.resetFields();\n                // Set default department from current user\n                if (authStore.currentUserProfile?.idPhongBan) {\n                    form.setFieldsValue({\n                        idPhongBanKiemKe: authStore.currentUserProfile.idPhongBan,\n                    });\n                }\n            }\n        }\n    }, [open, selectedRecord, form, isExecute]);\n\n    const handleSaveBasicClick = async () => {\n        try {\n            const values = await form.validateFields();\n            await onSaveBasic(values);\n        } catch (e) {\n            // Validate fail\n        }\n    };\n\n    const handleSaveExecuteClick = async (submit: boolean) => {\n        try {\n            const values = await form.validateFields();\n            const payload: ExecuteKiemKeRequest = {\n                isSubmit: submit,\n                danhSachThietBi: values.danhSachThietBi || [],\n                danhSachLinhKien: values.danhSachLinhKien || [],\n                danhSachPhanMem: values.danhSachPhanMem || [],\n            };\n            await onSaveExecute(payload);\n        } catch (e) {\n            // Validate fail\n        }\n    };\n\n    const getTitle = () => {\n        if (isExecute) return `Thực hiện đối soát hiện trường phiếu: ${selectedRecord?.maPhieuKiemKe}`;\n        if (isView) return t(",
     "selectedrecord_luu_cap_nhat_tao": "{selectedRecord ? 'Lưu cập nhật' : 'Tạo phiếu'}",
-    "thuc_hien_doi_soat_hien": "Thực hiện đối soát hiện trường phiếu: {{selectedRecord?.maPhieuKiemKe}}"
+    "thuc_hien_doi_soat_hien": "Thực hiện đối soát hiện trường phiếu: {{maPhieuKiemKe}}"
   },
   "phieuKiemKePage": {
     "ban_chac_chan_muon": "Bạn chắc chắn muốn xóa phiếu kiểm kê này?",
@@ -1477,7 +1480,7 @@
     "lap_phieu_kiem_ke_moi": "Lập phiếu kiểm kê mới",
     "onchange_page_size_setcurrentpage_page": "),\n                        onChange: (page, size) => {\n                            setCurrentPage(page);\n                            setPageSize(size);\n                        }\n                    }}\n                />\n            </Card>\n\n            <PhieuKiemKeFormModal\n                open={isFormOpen}\n                onCancel={() => setIsFormOpen(false)}\n                selectedRecord={selectedItem}\n                mode={formMode}\n                onSaveBasic={handleSaveBasic}\n                onSaveExecute={handleSaveExecute}\n                loading={modalLoading}\n            />\n\n            <Modal\n                title={`Theo dõi tiến độ kiểm kê phiếu: ${selectedPhieu?.maPhieuKiemKe ||",
     "thuc_hien_doi_soat_1": "Thực hiện đối soát",
-    "theo_doi_tien_do_kiem": "Theo dõi tiến độ kiểm kê phiếu: {{selectedPhieu?.maPhieuKiemKe || ''}}",
+    "theo_doi_tien_do_kiem": "Theo dõi tiến độ kiểm kê phiếu: {{maPhieuKiemKe}}",
     "co_loi_xay_ra_khi_luu_phieu_kiem_ke": "Có lỗi xảy ra khi lưu phiếu kiểm kê!"
   },
   "phieuCapPhatFormModal": {
@@ -1654,9 +1657,9 @@
     "danh_sach_dieu_chuyen_thiet": "Danh sách Điều chuyển - Thiết bị phần cứng",
     "danh_sach_dieu_chuyen_ban": "Danh sách Điều chuyển - Bản quyền phần mềm",
     "nhap_ly_do_dieu_chuyen": "Nhập lý do điều chuyển!",
-    "item_mathetaisan_item_soserial_item": "{{item.maTheTaiSan || item.soSerial || ''}} - {{item.tenTaiSan}} (Đã chọn)",
-    "id_lich_su_cap_opt_keyidfield": "ID Lịch sử cấp: {{opt[keyIdField]}}",
-    "id_lich_su_cap_item": "ID Lịch sử cấp: {{item.chiTietCapPhatId}}"
+    "item_mathetaisan_item_soserial_item": "{{soSerial}} - {{tenTaiSan}} (Đã chọn)",
+    "id_lich_su_cap_opt_keyidfield": "ID Lịch sử cấp: {{optkeyIdField}}",
+    "id_lich_su_cap_item": "ID Lịch sử cấp: {{chiTietCapPhatId}}"
   },
   "phieuDieuChuyenPage": {
     "ban_co_chac_chan": "Bạn có chắc chắn muốn xóa phiếu điều chuyển này?",
@@ -1860,8 +1863,8 @@
     "danh_sach_thu_hoi_thiet": "Danh sách Thu hồi - Thiết bị phần cứng",
     "danh_sach_thu_hoi_ban": "Danh sách Thu hồi - Bản quyền phần mềm",
     "nhap_ly_do_thu_hoi": "Nhập lý do thu hồi!",
-    "id_phieu_cap_opt_keyidfield": "ID Phiếu Cấp: {{opt[keyIdField]}}",
-    "id_phieu_cap_item_idchitietcapphat": "ID Phiếu Cấp: {{item.idChiTietCapPhat}}"
+    "id_phieu_cap_opt_keyidfield": "ID Phiếu Cấp: {{optkeyIdField}}",
+    "id_phieu_cap_item_idchitietcapphat": "ID Phiếu Cấp: {{idChiTietCapPhat}}"
   },
   "phieuThuHoiPage": {
     "xac_nhan_tu_choi": "Xác nhận từ chối",
@@ -2122,7 +2125,7 @@
     "loading_loading_pagination_current_currentpage": "loading={loading}\n                        pagination={{\n                            current: currentPage,\n                            pageSize,\n                            total: totalCount,\n                            onChange: (p, s) => { setCurrentPage(p); setPageSize(s); },\n                            showSizeChanger: true,\n                        }}\n                    />\n                </Card>\n\n                <PhieuSuaChuaFormModal\n                    open={isFormOpen}\n                    loading={modalLoading}\n                    selectedRecord={selectedItem}\n                    mode={formMode}\n                    onCancel={() => { setIsFormOpen(false); setSelectedItem(null); }}\n                    onSave={handleSaveForm}\n                />\n\n                <Modal\n                    title={`Cập nhật tiến độ thực hiện: ${selectedItem?.maPhieuSuaChua ||",
     "cap_nhat_tien_do_thuc": "Cập nhật tiến độ thực hiện sửa chữa thành công!",
     "cap_nhat_tien_do_that_bai": "Cập nhật tiến độ thất bại!",
-    "cap_nhat_tien_do_thuc_1": "Cập nhật tiến độ thực hiện: {{selectedItem?.maPhieuSuaChua || ''}}",
+    "cap_nhat_tien_do_thuc_1": "Cập nhật tiến độ thực hiện: {{maPhieuSuaChua}}",
     "xoa_phieu_sua_chua_thanh_cong": "Xóa phiếu sửa chữa thành công!"
   },
   "donHangMuaSamFormModal": {
@@ -2281,7 +2284,7 @@
     "them_nha_cung_cap": "Thêm nhà cung cấp",
     "import_laydanhsach14_todo_tro_dung": ";\nimport {\n    layDanhSach14, // TODO: Trỏ đúng tên hàm Orval sinh ra (VD: layDanhSach20)\n    themMoi14,\n    capNhat14,\n    capNhatTrangThai8,\n    xoaMem14,\n} from",
     "xoa_nha_cung_cap_thanh_cong": "Xóa nhà cung cấp thành công!",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} nhà cung cấp thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} nhà cung cấp thành công!"
   },
   "phieuNhapTaiSanFormModal": {
     "mau_phan_cung": "Mẫu phần cứng",
@@ -2339,11 +2342,11 @@
     "selectedrecord_luu_cap_nhat_tao": "{selectedRecord ? 'Lưu cập nhật' : 'Tạo phiếu nhập'}",
     "danh_sach_thuc_nhan_thiet": "Danh sách thực nhận - Thiết bị phần cứng",
     "danh_sach_thuc_nhan_ban": "Danh sách thực nhận - Bản quyền Phần mềm",
-    "dong_item_id_item_tentaisan": "Dòng {{item.id}} - {{item.tenTaiSan}} (Đã nhận: {{item.soLuongDaNhap}}/{{item.soLuongDat}})",
-    "dong_currentvalid_matcheditem_tentaisan_da": "Dòng {{currentValId}} - {{matchedItem.tenTaiSan}} (Đã lưu)",
-    "thiet_bi_matcheditem_tentaisan": "Thiết bị: {{matchedItem.tenTaiSan}}",
-    "phan_mem_matcheditem_tentaisan": "Phần mềm: {{matchedItem.tenTaiSan}}",
-    "linh_kien_matcheditem_tentaisan": "Linh kiện: {{matchedItem.tenTaiSan}}",
+    "dong_item_id_item_tentaisan": "Dòng {{id}} - {{tenTaiSan}} (Đã nhận: {{soLuongDaNhap}}/{{soLuongDat}})",
+    "dong_currentvalid_matcheditem_tentaisan_da": "Dòng {{currentValId}} - {{tenTaiSan}} (Đã lưu)",
+    "thiet_bi_matcheditem_tentaisan": "Thiết bị: {{tenTaiSan}}",
+    "phan_mem_matcheditem_tentaisan": "Phần mềm: {{tenTaiSan}}",
+    "linh_kien_matcheditem_tentaisan": "Linh kiện: {{tenTaiSan}}",
     "dong_id_currentvalid": "Dòng ID: {{currentValId}}"
   },
   "phieuNhapTaiSanPage": {
@@ -2707,7 +2710,7 @@
     "nextstatus_hoat_dong_mo_khoa": "{{nextStatus === 'HOAT_DONG' ? 'Mở khóa' : 'Khóa'}} đơn vị thành công!",
     "co_loi_xay_ra_khi_cap_nhat": "Có lỗi xảy ra khi cập nhật!",
     "co_loi_xay_ra_khi_gia_han": "Có lỗi xảy ra khi gia hạn!",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.mo_khoa') : t('viTriManagementPage.khoa')}} đơn vị thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} đơn vị thành công!"
   },
   "xacThucOtpPage": {
     "nhap_6_ky_so": "Nhập 6 ký số OTP",
@@ -2778,7 +2781,7 @@
     "quan_ly_phong_ban": "Quản lý Phòng ban",
     "danh_sach_phong_ban_bo": "Danh sách phòng ban, bộ phận cấu trúc trực thuộc đơn vị của bạn.",
     "them_phong_ban": "Thêm phòng ban",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa')}} phòng ban thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} phòng ban thành công!"
   },
   "viTriFormModal": {
     "mo_ta_chi_tiet": "Mô tả chi tiết",
@@ -2851,7 +2854,7 @@
     "quan_ly_vi_tri_kho_bai": "Quản lý Vị trí & Kho bãi",
     "danh_sach_cac_vi_tri": "Danh sách các vị trí lưu trữ tài sản, phòng lab, trung tâm dữ liệu hoặc kho bãi trực thuộc đơn vị.",
     "them_vi_tri": "Thêm vị trí",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.mo_khoa') : t('viTriManagementPage.khoa')}} vị trí thành công!"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} vị trí thành công!"
   },
   "appLayout": {
     "logoutSuccess": "Đăng xuất khỏi hệ thống thành công!",

@@ -215,7 +215,7 @@
     "lam_moi": "Refresh",
     "phan_loai_tai_san_theo": "Classify assets according to system operational categories.",
     "them_danh_muc": "Add categories",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa danh muc tai san thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} asset category successfully!"
   },
   "danhMucThuocTinhFormModal": {
     "thu_tu_hien_thi": "Display order",
@@ -300,7 +300,7 @@
     "quan_ly_danh_sach_cac": "Manage lists of extended configuration properties for each asset entity type (RAM, Disk, OS, License Seats...).",
     "them_thuoc_tinh": "Add properties",
     "bat_buoc_1": "Bat buoc",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa thuoc tinh thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} attribute successfully!"
   },
   "hangSanXuatFormModal": {
     "vi_du_1800xxxx": "For example: 1800-xxxx",
@@ -364,7 +364,7 @@
     "lam_moi": "Refresh",
     "quan_ly_danh_sach_cac": "Manage the list of manufacturers and brands providing hardware/software equipment.",
     "them_hang_san_xuat": "Add manufacturer",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa hang san xuat thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} manufacturer successfully!"
   },
   "lapRapLinhKienFormModal": {
     "chon_linh_kien_co": "Choose components available in stock (RAM, SSD...)",
@@ -447,7 +447,7 @@
     "huy": "Cancel",
     "tim_kiem_theo_ma": "Search by type code, type name...",
     "lam_moi": "Refresh",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa loai tai san thanh cong",
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} asset type successfully!",
     "val_thang": "Val thang"
   },
   "taiSanPhanCungFormModal": {
@@ -528,7 +528,7 @@
     "lam_moi": "Refresh",
     "quan_ly_danh_sach_cac": "Manage the list of models and standard hardware device configurations.",
     "them_mau_thiet_bi": "Add device model",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa mau thiet bi thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} hardware model successfully!"
   },
   "taiSanPhanMemFormModal": {
     "mo_ta_thong_so": "Describe detailed parameters of the model...",
@@ -610,7 +610,7 @@
     "lam_moi": "Refresh",
     "quan_ly_danh_sach_cac": "Manage a list of software models, operating systems and standard licenses.",
     "them_mau_phan_mem": "Add software samples",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa mau phan mem thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} software model successfully!"
   },
   "danhSachThietBiPhanCungFormModal": {
     "ma_the_tai_san": "Asset card code",
@@ -692,8 +692,8 @@
     "lam_moi": "Refresh",
     "danh_sach_thuc_the_cac": "List of hardware devices (computers, monitors, keyboards...) being managed at the units.",
     "them_thiet_bi": "Add device",
-    "val_tolocalestring_vi_vn_d": "Val tolocalestring vi vn d",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa thiet bi thanh cong"
+    "val_tolocalestring_vi_vn_d": "{{toLocaleStringviVN}} VND",
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} device successfully!"
   },
   "giaTriThuocTinhModal": {
     "nhap_gia_tri_khac": "Enter another value if not in the selection list",
@@ -706,12 +706,12 @@
     "khong_co_thuoc_tinh_dong_2": "There are no dynamic properties configured that apply to the Hardware Component.",
     "khong_the_tai_du_lieu": "Khong the tai du lieu thuoc tinh tai san",
     "cau_hinh_thuoc_tinh_assetname": "Cau hinh thuoc tinh assetname",
-    "vui_long_chon_attr_tenthuoctinh": "Vui long chon attr tenthuoctinh",
-    "chon_attr_tenthuoctinh": "Chon attr tenthuoctinh",
-    "attr_tenthuoctinh_gia_tri_khac": "Attr tenthuoctinh gia tri khac tuy bien",
-    "vui_long_nhap_attr_tenthuoctinh": "Vui long nhap attr tenthuoctinh",
-    "nhap_so_cho_attr_tenthuoctinh": "Nhap so cho attr tenthuoctinh",
-    "nhap_attr_tenthuoctinh": "Nhap attr tenthuoctinh",
+    "vui_long_chon_attr_tenthuoctinh": "Please select {{tenThuocTinh}}!",
+    "chon_attr_tenthuoctinh": "Select {{tenThuocTinh}}",
+    "attr_tenthuoctinh_gia_tri_khac": "{{tenThuocTinh}} (Custom value)",
+    "vui_long_nhap_attr_tenthuoctinh": "Please enter {{tenThuocTinh}}!",
+    "nhap_so_cho_attr_tenthuoctinh": "Enter number for {{tenThuocTinh}}",
+    "nhap_attr_tenthuoctinh": "Enter {{tenThuocTinh}}",
     "cau_hinh_thuoc_tinh_linh": "Cau hinh thuoc tinh linh kien assetname"
   },
   "danhSachThietBiPhanMemFormModal": {
@@ -798,7 +798,7 @@
     "lam_moi": "Refresh",
     "quan_ly_danh_sach_cac": "Manage the list of copyright keys, licenses and software expiration dates at the unit.",
     "them_ban_quyen": "Add copyright",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa ban quyen thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} license successfully!"
   },
   "linhKienPhanCungFormModal": {
     "nhap_so_serial_linh": "Enter the component Serial number (RAM, SSD, HDD...)",
@@ -878,7 +878,7 @@
     "lam_moi": "Refresh",
     "danh_sach_thuc_the_cac": "List of hardware components (RAM, SSD, CPU...) for assembling and upgrading devices.",
     "them_linh_kien": "Add components",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa linh kien thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} component successfully!"
   },
   "forgetPasswordModal": {
     "khoi_phuc_mat_khau": "Recover password via Email OTP",
@@ -1006,7 +1006,7 @@
     "he_thong_toan_san": "System (All tenants)",
     "hoat_dong": "Work",
     "luu_thong_tin_vai": "Save role information failed!",
-    "tuy_bien": "Customization",
+    "tuy_bien": "Custom",
     "khong_the_tai_thong": "Unable to load role details!",
     "cap_nhat_thong_tin": "Updated role information successfully!",
     "listlength_0_quyen_han": "{list?.length || 0} Authority",
@@ -1019,7 +1019,7 @@
     "val_he_thong_tuy": "{val ? 'Hệ thống' : 'Tùy biến'}",
     "cap_val_0": "Level {val || 0}",
     "quan_ly_vai_tro": "Role management & authorization (IAM Matrix)",
-    "don_vi_val": "Unit {val}",
+    "don_vi_val": "Unit {{val}}",
     "trang_thai": "Status",
     "hanh_dong": "Act",
     "huy": "Cancel",
@@ -1035,14 +1035,16 @@
     "khong_the_tai_danh_sach_don_vi": "Khong the tai danh sach don vi",
     "don_vi_id": "Unit (ID: {{id}})",
     "don_vi_id_detailrole_iddonvi": "Don vi id detailrole iddonvi",
-    "khong_the_tai_danh_sach_quyen": "Khong the tai danh sach quyen"
+    "khong_the_tai_danh_sach_quyen": "Khong the tai danh sach quyen",
+    "cap_bac": "Level {{cap}}",
+    "so_quyen_gan": "{{count}} Privileges"
   },
   "roleMatrixModal": {
     "luu_cau_hinh": "Save configuration",
     "huy_bo": "Cancel",
     "lua_chon_phan_chia_quyen": "Choose to divide system power by functional group. Check to grant permissions and uncheck to revoke permissions immediately.",
     "phan_he_tennhom": "Subsystem {tenNhom}",
-    "thiet_lap_ma_tran_quyen": "Thiet lap ma tran quyen han selectedrole tenvaitro"
+    "thiet_lap_ma_tran_quyen": "Set up Permission Matrix: {{tenVaiTro}}"
   },
   "userFormModal": {
     "vi_du_nguyen": "For example: Nguyen",
@@ -1075,7 +1077,7 @@
   },
   "userManagementPage": {
     "thu_hoi_toan_bo": "Revoke this user's entire login session from Redis?",
-    "ma_nhan_vien": "Employee code",
+    "ma_nhan_vien": "Employee ID",
     "ban_co_chac_chan": "Are you sure you want to delete this user account?",
     "vai_tro_gan": "Role assignment",
     "chuc_danh": "Position...",
@@ -1088,7 +1090,7 @@
     "danh_sach_quyen_phan": "List of permissions resolved from role",
     "chuc_vu": "Position",
     "ho_ten": "Full name",
-    "ten_dang_nhap": "Login name",
+    "ten_dang_nhap": "Username",
     "phong_ban": "Departments",
     "xac_nhan_cuong_che": "Confirm forced exit?",
     "ma_don_vi": "Unit code",
@@ -1097,7 +1099,7 @@
     "trang_thai_hoat_dong": "Operating status",
     "khong_the_xoa_tai": "Cannot delete user account!",
     "cap_nhat_quyen_truc": "Update permissions directly failed!",
-    "chua_cap_nhat_ten": "Name not updated yet",
+    "chua_cap_nhat_ten": "Name not updated",
     "sdt_recordsodienthoai": "}}>Tel: {record.soDienThoai ||",
     "tai_khoan_thanh_vien": "Member account",
     "bi_khoa": "Locked",
@@ -1114,7 +1116,7 @@
     "vai_tro_phan_bo": "Allocation role",
     "don_vi_saas": "Unit (SaaS)",
     "thu_hoi_phien_that": "Session recall failed!",
-    "chua_thiet_lap": "Not set up yet",
+    "chua_thiet_lap": "Not set",
     "da_gui_yeu_cau": "Request to force exit from account session successfully sent!",
     "xoa_tai_khoan_nguoi": "User account deleted successfully!",
     "hoat_dong": "Work",
@@ -1134,7 +1136,7 @@
     "quan_ly_tai_khoan": "Manage user accounts",
     "detailusermanguoidung_chua_cap_nhat": "{detailUser.maNguoiDung || 'Chưa cập nhật'}",
     "email_val_chua_thiet": "Email: {val || 'Chưa thiết lập'}",
-    "don_vi_val": "Unit {val}",
+    "don_vi_val": "Unit {{val}}",
     "dang_hoat_dong": "Active",
     "trang_thai": "Status",
     "kich_hoat_tai_khoan": "User account activation successful!",
@@ -1164,13 +1166,14 @@
     "khong_the_lay_danh_sach_phong_ban": "Khong the lay danh sach phong ban",
     "khong_the_lay_danh_muc_vai_tro": "Khong the lay danh muc vai tro",
     "cap_nhat_quyen_truc_tiep": "Cap nhat quyen truc tiep override thanh cong",
-    "doi_trang_thai_tai_khoan_1": "Doi trang thai tai khoan nguoi dung sang active t usermanagementpage hoat dong t usermanagementpage khoa thanh cong"
+    "doi_trang_thai_tai_khoan_1": "Change status of user account to {{khoa}} successfully!",
+    "sdt": "Phone"
   },
   "userQuyenModal": {
     "don_vi": "UNIT",
     "ma_tran_quyen_han": "Override Role Permissions",
     "xac_nhan_cap_nhat": "Confirm update",
-    "cap_quyen_truc_tiep_cho": "Cap quyen truc tiep cho tai khoan selecteduser tendangnhap"
+    "cap_quyen_truc_tiep_cho": "Direct privilege assignment for account: {{tenDangNhap}}"
   },
   "baoCaoPage": {
     "vui_long_chon_don": "Please select a unit!",
@@ -1251,7 +1254,7 @@
     "bordered_default_return_null_cac": "bordered\n          />\n        );\n      default:\n        return null;\n    }\n  };\n\n  // Permissioned tabs are displayed\n  const items = [];\n  if (authStore.quiemTravel(QUYEN.VIEW_BAO_CAO)) {\n    items.push(\n      { key:",
     "co_loi_xay_ra_khi_xuat_file_bao_cao": "Co loi xay ra khi xuat file bao cao",
     "tong_so_luong_phan_cung": "Tong so luong phan cung",
-    "xuat_file_bao_cao_dang": "Xuat file bao cao dang dinhdangfile touppercase thanh cong",
+    "xuat_file_bao_cao_dang": "Export report file as {{toUpperCase}} successfully!",
     "val_gio": "Val gio"
   },
   "dashboardPage": {
@@ -1300,8 +1303,8 @@
     "card_col_row_div_2": ")} />\n                )}\n              </Card>\n            </Col>\n          </Row>\n        </div>\n      )}\n\n      {/* ====================================================================== */}\n      {/* 2. GIAO DIỆN DÀNH CHO ADMIN ĐƠN VỊ (XEM BÁO CÁO CHI TIẾT)             */}\n      {/* ====================================================================== */}\n      {authStore.kiemTraQuyen(QUYEN.XEM_BAO_HIGH) && thongKeDonVi ? (\n        <div>\n          <div style={{ marginBottom: 16 }}>\n            <Tag color=",
     "khong_co_du_lieu_so_sanh_don_vi": "Khong co du lieu so sanh don vi",
     "don_vi_id_authstore_madonvi": "Don vi id authstore madonvi",
-    "number_value_0_tolocalestring_vi": "Number value 0 tolocalestring vi vn thiet bi",
-    "value_thiet_bi": "Value thiet bi",
+    "number_value_0_tolocalestring_vi": "{{toLocaleStringviVN}} devices",
+    "value_thiet_bi": "{{value}} devices",
     "don_vi_id": "Unit ID: {{id}}"
   },
   "dotKiemKeFormModal": {
@@ -1421,7 +1424,7 @@
     "gui_bao_cao_hoan_thanh": "Submit completed report",
     "ghichu_x_ghichu_form_setfieldsvalue": ",\n                        writeChu: x.ghiChu,\n                    }));\n\n                    form.setFieldsValue({\n                        danhSachThietBi,\n                        danhSachLinhKien,\n                        danhSachPhanMem,\n                    });\n                } else {\n                    // Populate basic form\n                    form.setFieldsValue({\n                        dotKiemKeId: selectedRecord.dotKiemKeId,\n                        idPhongBanKiemKe: selectedRecord.idPhongBanKiemKe,\n                        // idKhoKiemKe: selectedRecord.idKhoKiemKe,\n                    });\n                }\n            } else {\n                form.resetFields();\n                // Set default department from current user\n                if (authStore.currentUserProfile?.idPhongBan) {\n                    form.setFieldsValue({\n                        idPhongBanKiemKe: authStore.currentUserProfile.idPhongBan,\n                    });\n                }\n            }\n        }\n    }, [open, selectedRecord, form, isExecute]);\n\n    const handleSaveBasicClick = async () => {\n        try {\n            const values = await form.validateFields();\n            await onSaveBasic(values);\n        } catch (e) {\n            // Validate fail\n        }\n    };\n\n    const handleSaveExecuteClick = async (submit: boolean) => {\n        try {\n            const values = await form.validateFields();\n            const payload: ExecuteKiemKeRequest = {\n                isSubmit: submit,\n                danhSachThietBi: values.danhSachThietBi || [],\n                danhSachLinhKien: values.danhSachLinhKien || [],\n                danhSachPhanMem: values.danhSachPhanMem || [],\n            };\n            await onSaveExecute(payload);\n        } catch (e) {\n            // Validate fail\n        }\n    };\n\n    const getTitle = () => {\n        if (isExecute) return `Perform field reconciliation of ticket: ${selectedRecord?.maPhieuKiemKe}`;\n        if (isView) return t(",
     "selectedrecord_luu_cap_nhat_tao": "Selectedrecord luu cap nhat tao phieu",
-    "thuc_hien_doi_soat_hien": "Thuc hien doi soat hien truong phieu selectedrecord maphieukiemke"
+    "thuc_hien_doi_soat_hien": "Perform field audit on ticket: {{maPhieuKiemKe}}"
   },
   "phieuKiemKePage": {
     "ban_chac_chan_muon": "Are you sure you want to delete this inventory ticket?",
@@ -1477,7 +1480,7 @@
     "lap_phieu_kiem_ke_moi": "Create a new inventory sheet",
     "onchange_page_size_setcurrentpage_page": "),\n                        onChange: (page, size) => {\n                            setCurrentPage(page);\n                            setPageSize(size);\n                        }\n                    }}\n                />\n            </Card>\n\n            <PhieuKiemKeFormModal\n                open={isFormOpen}\n                onCancel={() => setIsFormOpen(false)}\n                selectedRecord={selectedItem}\n                mode={formMode}\n                onSaveBasic={handleSaveBasic}\n                onSaveExecute={handleSaveExecute}\n                loading={modalLoading}\n            />\n\n            <Modal\n                title={`Follow the progress of ballot counting: ${selectedPhieu?.maPhieuKiemKe ||",
     "thuc_hien_doi_soat_1": "Thuc hien doi soat",
-    "theo_doi_tien_do_kiem": "Theo doi tien do kiem ke phieu selectedphieu maphieukiemke",
+    "theo_doi_tien_do_kiem": "Track inventory progress for ticket: {{maPhieuKiemKe}}",
     "co_loi_xay_ra_khi_luu_phieu_kiem_ke": "Co loi xay ra khi luu phieu kiem ke"
   },
   "phieuCapPhatFormModal": {
@@ -1654,9 +1657,9 @@
     "danh_sach_dieu_chuyen_thiet": "Danh sach dieu chuyen thiet bi phan cung",
     "danh_sach_dieu_chuyen_ban": "Danh sach dieu chuyen ban quyen phan mem",
     "nhap_ly_do_dieu_chuyen": "Nhap ly do dieu chuyen",
-    "item_mathetaisan_item_soserial_item": "Item mathetaisan item soserial item tentaisan da chon",
-    "id_lich_su_cap_opt_keyidfield": "Id lich su cap opt keyidfield",
-    "id_lich_su_cap_item": "Id lich su cap item chitietcapphatid"
+    "item_mathetaisan_item_soserial_item": "{{soSerial}} - {{tenTaiSan}} (Selected)",
+    "id_lich_su_cap_opt_keyidfield": "Allocation History ID: {{optkeyIdField}}",
+    "id_lich_su_cap_item": "Allocation History ID: {{chiTietCapPhatId}}"
   },
   "phieuDieuChuyenPage": {
     "ban_co_chac_chan": "Are you sure you want to delete this transfer ticket?",
@@ -1860,8 +1863,8 @@
     "danh_sach_thu_hoi_thiet": "Danh sach thu hoi thiet bi phan cung",
     "danh_sach_thu_hoi_ban": "Danh sach thu hoi ban quyen phan mem",
     "nhap_ly_do_thu_hoi": "Nhap ly do thu hoi",
-    "id_phieu_cap_opt_keyidfield": "Id phieu cap opt keyidfield",
-    "id_phieu_cap_item_idchitietcapphat": "Id phieu cap item idchitietcapphat"
+    "id_phieu_cap_opt_keyidfield": "Allocation Ticket ID: {{optkeyIdField}}",
+    "id_phieu_cap_item_idchitietcapphat": "Allocation Ticket ID: {{idChiTietCapPhat}}"
   },
   "phieuThuHoiPage": {
     "xac_nhan_tu_choi": "Confirmed refusal",
@@ -2122,7 +2125,7 @@
     "loading_loading_pagination_current_currentpage": "loading={loading}\n                        pagination={{\n                            current: currentPage,\n                            pageSize,\n                            total: totalCount,\n                            onChange: (p, s) => { setCurrentPage(p); setPageSize(s); },\n                            showSizeChanger: true,\n                        }}\n                    />\n                </Card>\n\n                <PhieuSuaChuaFormModal\n                    open={isFormOpen}\n                    loading={modalLoading}\n                    selectedRecord={selectedItem}\n                    mode={formMode}\n                    onCancel={() => { setIsFormOpen(false); setSelectedItem(null); }}\n                    onSave={handleSaveForm}\n                />\n\n                <Modal\n                    title={`Update progress: ${selectedItem?.maPhieuSuaChua ||",
     "cap_nhat_tien_do_thuc": "Cap nhat tien do thuc hien sua chua thanh cong",
     "cap_nhat_tien_do_that_bai": "Cap nhat tien do that bai",
-    "cap_nhat_tien_do_thuc_1": "Cap nhat tien do thuc hien selecteditem maphieusuachua",
+    "cap_nhat_tien_do_thuc_1": "Update implementation progress: {{maPhieuSuaChua}}",
     "xoa_phieu_sua_chua_thanh_cong": "Xoa phieu sua chua thanh cong"
   },
   "donHangMuaSamFormModal": {
@@ -2246,7 +2249,7 @@
     "trang_thai_hop_tac": "Cooperation status",
     "co_loi_xay_ra": "An error occurred!",
     "khong_the_xoa_nha": "Cannot delete provider!",
-    "chua_cap_nhat_dai": "Representative has not been updated",
+    "chua_cap_nhat_dai": "Representative not updated",
     "ten_nha_cung_cap": "Supplier/Partner name",
     "xoa_nha_cung_cap": "Delete provider",
     "xoa_that_bai": "Delete failed!",
@@ -2281,7 +2284,7 @@
     "them_nha_cung_cap": "Add supplier",
     "import_laydanhsach14_todo_tro_dung": ";\nimport {\n    layDanhSach14, // TODO: Trỏ đúng tên hàm Orval sinh ra (VD: layDanhSach20)\n    themMoi14,\n    capNhat14,\n    capNhatTrangThai8,\n    xoaMem14,\n} from",
     "xoa_nha_cung_cap_thanh_cong": "Xoa nha cung cap thanh cong",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa nha cung cap thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} supplier successfully!"
   },
   "phieuNhapTaiSanFormModal": {
     "mau_phan_cung": "Hardware sample",
@@ -2339,11 +2342,11 @@
     "selectedrecord_luu_cap_nhat_tao": "Selectedrecord luu cap nhat tao phieu nhap",
     "danh_sach_thuc_nhan_thiet": "Danh sach thuc nhan thiet bi phan cung",
     "danh_sach_thuc_nhan_ban": "Danh sach thuc nhan ban quyen phan mem",
-    "dong_item_id_item_tentaisan": "Dong item id item tentaisan da nhan item soluongdanhap item soluongdat",
-    "dong_currentvalid_matcheditem_tentaisan_da": "Dong currentvalid matcheditem tentaisan da luu",
-    "thiet_bi_matcheditem_tentaisan": "Thiet bi matcheditem tentaisan",
-    "phan_mem_matcheditem_tentaisan": "Phan mem matcheditem tentaisan",
-    "linh_kien_matcheditem_tentaisan": "Linh kien matcheditem tentaisan",
+    "dong_item_id_item_tentaisan": "Row {{id}} - {{tenTaiSan}} (Received: {{soLuongDaNhap}}/{{soLuongDat}})",
+    "dong_currentvalid_matcheditem_tentaisan_da": "Row {{currentValId}} - {{tenTaiSan}} (Saved)",
+    "thiet_bi_matcheditem_tentaisan": "Device: {{tenTaiSan}}",
+    "phan_mem_matcheditem_tentaisan": "Software: {{tenTaiSan}}",
+    "linh_kien_matcheditem_tentaisan": "Component: {{tenTaiSan}}",
     "dong_id_currentvalid": "Dong id currentvalid"
   },
   "phieuNhapTaiSanPage": {
@@ -2707,7 +2710,7 @@
     "nextstatus_hoat_dong_mo_khoa": "Nextstatus hoat dong mo khoa khoa don vi thanh cong",
     "co_loi_xay_ra_khi_cap_nhat": "Co loi xay ra khi cap nhat",
     "co_loi_xay_ra_khi_gia_han": "Co loi xay ra khi gia han",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage mo khoa t vitrimanagementpage khoa don vi thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} unit successfully!"
   },
   "xacThucOtpPage": {
     "nhap_6_ky_so": "Enter 6 digits OTP",
@@ -2778,7 +2781,7 @@
     "quan_ly_phong_ban": "Department Management",
     "danh_sach_phong_ban_bo": "List of departments and structural divisions under your unit.",
     "them_phong_ban": "Add departments",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage kich hoat t vitrimanagementpage khoa phong ban thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} department successfully!"
   },
   "viTriFormModal": {
     "mo_ta_chi_tiet": "Detailed description",
@@ -2851,7 +2854,7 @@
     "quan_ly_vi_tri_kho_bai": "Location & Warehouse Management",
     "danh_sach_cac_vi_tri": "List of asset storage locations, labs, data centers or warehouses under the unit.",
     "them_vi_tri": "Add location",
-    "nextstatus_hoat_dong_t_vitrimanagementpage": "Nextstatus hoat dong t vitrimanagementpage mo khoa t vitrimanagementpage khoa vi tri thanh cong"
+    "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} location successfully!"
   },
   "appLayout": {
     "logoutSuccess": "Log out of the system successfully!",

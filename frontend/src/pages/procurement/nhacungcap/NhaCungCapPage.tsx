@@ -169,7 +169,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
             key: 'thongTinLienHe',
             render: (_: any, record: NhaCungCapResponse) => (
                 <div>
-                    <div>{t('nhaCungCapPage.recordnguoilienhe_chua_cap_nhat')}</div>
+                    <div>{record.nguoiLienHe || t('nhaCungCapPage.chua_cap_nhat_dai')}</div>
                     <Text type="secondary" style={{ fontSize: 12 }}>
                         SĐT: {record.soDienThoai || 'N/A'} | Email: {record.email || 'N/A'}
                     </Text>

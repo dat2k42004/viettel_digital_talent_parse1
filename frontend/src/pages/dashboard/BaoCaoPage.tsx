@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Tag, Typography, message, Row, Col, Select, DatePicker, Tabs, Form, Input, Divider } from 'antd';
 import { SearchOutlined, ReloadOutlined, FileExcelOutlined, FilePdfOutlined, ApartmentOutlined, EnvironmentOutlined } from '@ant-design/icons';
@@ -25,6 +26,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const BaoCaoPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState<string>('TON_KHO');
 
@@ -128,7 +130,7 @@ export const BaoCaoPage: React.FC = observer(() => {
         }
       }
     } catch (error: any) {
-      message.error(error?.message || 'Không thể lấy dữ liệu báo cáo!');
+      message.error(error?.message || t('baoCaoPage.khong_the_lay_du'));
     } finally {
       setLoading(false);
     }
@@ -181,9 +183,9 @@ export const BaoCaoPage: React.FC = observer(() => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success(`Xuất file báo cáo dạng ${dinhDangFile.toUpperCase()} thành công!`);
+      message.success(t('baoCaoPage.xuat_file_bao_cao_dang', { toUpperCase: dinhDangFile.toUpperCase() }));
     } catch (error: any) {
-      message.error(error?.message || 'Có lỗi xảy ra khi xuất file báo cáo!');
+      message.error(error?.message || t('baoCaoPage.co_loi_xay_ra_khi_xuat_file_bao_cao'));
     } finally {
       setLoading(false);
     }
@@ -204,9 +206,9 @@ export const BaoCaoPage: React.FC = observer(() => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success('Xuất báo cáo toàn sản thành công!');
+      message.success(t('baoCaoPage.xuat_bao_cao_toan'));
     } catch (error: any) {
-      message.error(error?.message || 'Có lỗi xảy ra khi xuất báo cáo toàn sản!');
+      message.error(error?.message || t('baoCaoPage.co_loi_xay_ra'));
     } finally {
       setLoading(false);
     }
@@ -214,10 +216,10 @@ export const BaoCaoPage: React.FC = observer(() => {
 
   // Định nghĩa các cột cho Table Tồn Kho
   const columnsTonKho = [
-    { title: 'Mã danh mục', dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
-    { title: 'Tên danh mục tài sản', dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
+    { title: t('baoCaoPage.ma_danh_muc'), dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
+    { title: t('baoCaoPage.ten_danh_muc_tai'), dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
     {
-      title: 'Loại tài sản',
+      title: t('baoCaoPage.loai_tai_san'),
       dataIndex: 'loaiTaiSan',
       key: 'loaiTaiSan',
       render: (val: string) => {
@@ -225,15 +227,15 @@ export const BaoCaoPage: React.FC = observer(() => {
         return <Tag color={color}>{val}</Tag>;
       },
     },
-    { title: 'Vị trí kho', dataIndex: 'tenViTri', key: 'tenViTri', render: (val: string) => val || 'Chưa xác định' },
+    { title: t('baoCaoPage.vi_tri_kho'), dataIndex: 'tenViTri', key: 'tenViTri', render: (val: string) => val || t('baoCaoPage.chua_xac_dinh') },
     {
-      title: 'Số lượng tồn',
+      title: t('baoCaoPage.so_luong_ton'),
       dataIndex: 'soLuongTonKho',
       key: 'soLuongTonKho',
       render: (val: number) => <Tag color={val > 0 ? 'green' : 'red'} style={{ fontSize: 14 }}>{val}</Tag>,
     },
     {
-      title: 'Cập nhật cuối',
+      title: t('baoCaoPage.cap_nhat_cuoi'),
       dataIndex: 'thoiGianCapNhat',
       key: 'thoiGianCapNhat',
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -243,12 +245,12 @@ export const BaoCaoPage: React.FC = observer(() => {
   // Hàng mở rộng cho Table Tồn Kho (Chi tiết các tài sản cụ thể)
   const expandedRowTonKho = (record: BaoCaoTonKhoResponse) => {
     const detailColumns = [
-      { title: 'Mã thẻ tài sản', dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
-      { title: 'Tên tài sản cụ thể', dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
-      { title: 'Số Serial', dataIndex: 'soSerial', key: 'soSerial', render: (val: string) => val || '—' },
-      { title: 'Vị trí cụ thể', dataIndex: 'viTriKho', key: 'viTriKho' },
+      { title: t('baoCaoPage.ma_the_tai_san'), dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
+      { title: t('baoCaoPage.ten_tai_san_cu'), dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
+      { title: t('baoCaoPage.so_serial'), dataIndex: 'soSerial', key: 'soSerial', render: (val: string) => val || '—' },
+      { title: t('baoCaoPage.vi_tri_cu_the'), dataIndex: 'viTriKho', key: 'viTriKho' },
       {
-        title: 'Trạng thái',
+        title: t('loaiTaiSanFormModal.trang_thai'),
         dataIndex: 'trangThai',
         key: 'trangThai',
         render: (val: string) => {
@@ -260,10 +262,10 @@ export const BaoCaoPage: React.FC = observer(() => {
           return <Tag color={color}>{val}</Tag>;
         },
       },
-      { title: 'Đợt kiểm kê gần nhất', dataIndex: 'tenDotKiemKeGanNhat', key: 'tenDotKiemKeGanNhat', render: (val: string) => val || 'Chưa kiểm kê' },
-      { title: 'Ghi chú', dataIndex: 'ghiChu', key: 'ghiChu', render: (val: string) => val || '—' },
+      { title: t('baoCaoPage.dot_kiem_ke_gan'), dataIndex: 'tenDotKiemKeGanNhat', key: 'tenDotKiemKeGanNhat', render: (val: string) => val || t('baoCaoPage.chua_kiem_ke') },
+      { title: t('loaiTaiSanFormModal.ghi_chu'), dataIndex: 'ghiChu', key: 'ghiChu', render: (val: string) => val || '—' },
       {
-        title: 'Thời gian ghi nhận',
+        title: t('baoCaoPage.thoi_gian_ghi_nhan'),
         dataIndex: 'thoiGianGhiNhan',
         key: 'thoiGianGhiNhan',
         render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -284,11 +286,11 @@ export const BaoCaoPage: React.FC = observer(() => {
 
   // Định nghĩa các cột cho Table Cấp Phát
   const columnsCapPhat = [
-    { title: 'Mã danh mục', dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
-    { title: 'Tên danh mục tài sản', dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
-    { title: 'Phòng ban nhận', dataIndex: 'tenPhongBan', key: 'tenPhongBan' },
+    { title: t('baoCaoPage.ma_danh_muc'), dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
+    { title: t('baoCaoPage.ten_danh_muc_tai'), dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
+    { title: t('phieuCapPhatPage.phong_ban_nhan'), dataIndex: 'tenPhongBan', key: 'tenPhongBan' },
     {
-      title: 'Loại tài sản',
+      title: t('baoCaoPage.loai_tai_san'),
       dataIndex: 'loaiTaiSan',
       key: 'loaiTaiSan',
       render: (val: string) => {
@@ -296,15 +298,15 @@ export const BaoCaoPage: React.FC = observer(() => {
         return <Tag color={color}>{val}</Tag>;
       },
     },
-    { title: 'Số lượng cấp', dataIndex: 'soLuongCap', key: 'soLuongCap', render: (val: number) => <Text strong>{val}</Text> },
+    { title: t('baoCaoPage.so_luong_cap'), dataIndex: 'soLuongCap', key: 'soLuongCap', render: (val: number) => <Text strong>{val}</Text> },
     {
-      title: 'Tổng giá trị cấp',
+      title: t('baoCaoPage.tong_gia_tri_cap'),
       dataIndex: 'tongGiaTriCap',
       key: 'tongGiaTriCap',
       render: (val: number) => <Text type="danger" strong>{val ? val.toLocaleString('vi-VN') + ' VND' : '0 VND'}</Text>,
     },
     {
-      title: 'Thời gian cấp',
+      title: t('baoCaoPage.thoi_gian_cap'),
       dataIndex: 'thoiGianCapNhat',
       key: 'thoiGianCapNhat',
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -314,14 +316,14 @@ export const BaoCaoPage: React.FC = observer(() => {
   // Hàng mở rộng cho Table Cấp Phát (Chi tiết sử dụng của nhân viên)
   const expandedRowCapPhat = (record: BaoCaoCapPhatResponse) => {
     const detailColumns = [
-      { title: 'Mã thẻ tài sản', dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
-      { title: 'Tên tài sản cụ thể', dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
-      { title: 'Số Serial', dataIndex: 'soSerial', key: 'soSerial', render: (val: string) => val || '—' },
-      { title: 'Nhân viên tiếp nhận', dataIndex: 'hoTenNhanVienTiepNhan', key: 'hoTenNhanVienTiepNhan' },
-      { title: 'Mã chứng từ gốc', dataIndex: 'maChungTuGoc', key: 'maChungTuGoc', render: (val: string) => val || '—' },
-      { title: 'Tình trạng bàn giao', dataIndex: 'tinhTrangBanGiao', key: 'tinhTrangBanGiao', render: (val: string) => val || 'Bình thường' },
+      { title: t('baoCaoPage.ma_the_tai_san'), dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
+      { title: t('baoCaoPage.ten_tai_san_cu'), dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
+      { title: t('baoCaoPage.so_serial'), dataIndex: 'soSerial', key: 'soSerial', render: (val: string) => val || '—' },
+      { title: t('phieuDieuChuyenFormModal.nhan_vien_tiep_nhan'), dataIndex: 'hoTenNhanVienTiepNhan', key: 'hoTenNhanVienTiepNhan' },
+      { title: t('baoCaoPage.ma_chung_tu_goc'), dataIndex: 'maChungTuGoc', key: 'maChungTuGoc', render: (val: string) => val || '—' },
+      { title: t('baoCaoPage.tinh_trang_ban_giao'), dataIndex: 'tinhTrangBanGiao', key: 'tinhTrangBanGiao', render: (val: string) => val || t('baoCaoPage.binh_thuong') },
       {
-        title: 'Thời gian bàn giao',
+        title: t('baoCaoPage.thoi_gian_ban_giao'),
         dataIndex: 'thoiGianThucHien',
         key: 'thoiGianThucHien',
         render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -342,10 +344,10 @@ export const BaoCaoPage: React.FC = observer(() => {
 
   // Định nghĩa các cột cho Table Bảo Trì
   const columnsBaoTri = [
-    { title: 'Mã danh mục', dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
-    { title: 'Tên danh mục tài sản', dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
+    { title: t('baoCaoPage.ma_danh_muc'), dataIndex: 'maTaiSanDanhMuc', key: 'maTaiSanDanhMuc', render: (val: string) => <Text strong>{val}</Text> },
+    { title: t('baoCaoPage.ten_danh_muc_tai'), dataIndex: 'tenTaiSanDanhMuc', key: 'tenTaiSanDanhMuc' },
     {
-      title: 'Loại tài sản',
+      title: t('baoCaoPage.loai_tai_san'),
       dataIndex: 'loaiTaiSan',
       key: 'loaiTaiSan',
       render: (val: string) => {
@@ -353,21 +355,21 @@ export const BaoCaoPage: React.FC = observer(() => {
         return <Tag color={color}>{val}</Tag>;
       },
     },
-    { title: 'Số lượng bảo trì', dataIndex: 'soLuong', key: 'soLuong' },
+    { title: t('baoCaoPage.so_luong_bao_tri'), dataIndex: 'soLuong', key: 'soLuong' },
     {
-      title: 'Tổng chi phí bảo trì',
+      title: t('baoCaoPage.tong_chi_phi_bao'),
       dataIndex: 'tongChiPhi',
       key: 'tongChiPhi',
       render: (val: number) => <Text type="danger" strong>{val ? val.toLocaleString('vi-VN') + ' VND' : '0 VND'}</Text>,
     },
     {
-      title: 'Tổng thời gian gián đoạn',
+      title: t('baoCaoPage.tong_thoi_gian_gian'),
       dataIndex: 'tongThoiGian',
       key: 'tongThoiGian',
-      render: (val: number) => <Tag color="warning">{val ? `${val} giờ` : '0 giờ'}</Tag>,
+      render: (val: number) => <Tag color="warning">{t('baoCaoPage.val_val_gio_0')}</Tag>,
     },
     {
-      title: 'Cập nhật cuối',
+      title: t('baoCaoPage.cap_nhat_cuoi'),
       dataIndex: 'thoiGianCapNhat',
       key: 'thoiGianCapNhat',
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -377,19 +379,19 @@ export const BaoCaoPage: React.FC = observer(() => {
   // Hàng mở rộng cho Table Bảo Trì (Chi tiết lịch sử sửa chữa/bảo trì)
   const expandedRowBaoTri = (record: BaoCaoBaoTriResponse) => {
     const detailColumns = [
-      { title: 'Mã thẻ tài sản', dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
-      { title: 'Tên tài sản cụ thể', dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
-      { title: 'Mã phiếu sửa chữa', dataIndex: 'maPhieuSuaChua', key: 'maPhieuSuaChua' },
+      { title: t('baoCaoPage.ma_the_tai_san'), dataIndex: 'maTheTaiSan', key: 'maTheTaiSan', render: (val: string) => <Text copyable>{val}</Text> },
+      { title: t('baoCaoPage.ten_tai_san_cu'), dataIndex: 'tenTaiSanCuThe', key: 'tenTaiSanCuThe' },
+      { title: t('baoCaoPage.ma_phieu_sua_chua'), dataIndex: 'maPhieuSuaChua', key: 'maPhieuSuaChua' },
       {
-        title: 'Chi phí thực tế',
+        title: t('baoCaoPage.chi_phi_thuc_te'),
         dataIndex: 'chiPhiThucTe',
         key: 'chiPhiThucTe',
         render: (val: number) => <Text strong>{val ? val.toLocaleString('vi-VN') + ' VND' : '—'}</Text>,
       },
-      { title: 'Thời gian gián đoạn', dataIndex: 'thoiGianGianDoan', key: 'thoiGianGianDoan', render: (val: number) => val ? `${val} giờ` : '—' },
-      { title: 'Nội dung khắc phục', dataIndex: 'noiDungKhacPhuc', key: 'noiDungKhacPhuc', render: (val: string) => val || '—' },
+      { title: t('baoCaoPage.thoi_gian_gian_doan'), dataIndex: 'thoiGianGianDoan', key: 'thoiGianGianDoan', render: (val: number) => val ? t('baoCaoPage.val_gio', { val: val }) : '—' },
+      { title: t('baoCaoPage.noi_dung_khac_phuc'), dataIndex: 'noiDungKhacPhuc', key: 'noiDungKhacPhuc', render: (val: string) => val || '—' },
       {
-        title: 'Thời gian nghiệm thu',
+        title: t('baoCaoPage.thoi_gian_nghiem_thu'),
         dataIndex: 'thoiGianNghiemThu',
         key: 'thoiGianNghiemThu',
         render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '—',
@@ -410,22 +412,22 @@ export const BaoCaoPage: React.FC = observer(() => {
 
   // Định nghĩa các cột cho Table Toàn Sản (Super Admin)
   const columnsToanSan = [
-    { title: 'ID Đơn vị', dataIndex: 'idDonVi', key: 'idDonVi', render: (val: number) => <Text strong>{val}</Text> },
-    { title: 'Tên đơn vị (Tenant)', dataIndex: 'tenDonVi', key: 'tenDonVi', render: (val: string) => <Text type="secondary" strong>{val}</Text> },
+    { title: t('baoCaoPage.id_don_vi'), dataIndex: 'idDonVi', key: 'idDonVi', render: (val: number) => <Text strong>{val}</Text> },
+    { title: t('baoCaoPage.ten_don_vi_tenant'), dataIndex: 'tenDonVi', key: 'tenDonVi', render: (val: string) => <Text type="secondary" strong>{val}</Text> },
     {
-      title: 'Tổng số lượng phần cứng',
+      title: t('baoCaoPage.tong_so_luong_phan_cung'),
       dataIndex: 'tongSoLuongPhanCung',
       key: 'tongSoLuongPhanCung',
       render: (val: number) => <Tag color="blue">{val || 0}</Tag>,
     },
     {
-      title: 'Tổng số lượng phần mềm',
+      title: t('baoCaoPage.tong_so_luong_phan'),
       dataIndex: 'tongSoLuongPhanMem',
       key: 'tongSoLuongPhanMem',
       render: (val: number) => <Tag color="orange">{val || 0}</Tag>,
     },
     {
-      title: 'Tổng giá trị ước tính',
+      title: t('dashboardPage.tong_gia_tri_uoc'),
       dataIndex: 'tongGiaTriUocTinhVnd',
       key: 'tongGiaTriUocTinhVnd',
       render: (val: number) => <Text type="danger" strong>{val ? val.toLocaleString('vi-VN') + ' VND' : '0 VND'}</Text>,
@@ -512,13 +514,13 @@ export const BaoCaoPage: React.FC = observer(() => {
   const items = [];
   if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {
     items.push(
-      { key: 'TON_KHO', label: 'Báo cáo tồn kho' },
-      { key: 'CAP_PHAT', label: 'Báo cáo cấp phát' },
-      { key: 'BAO_TRI', label: 'Báo cáo sửa chữa & bảo trì' }
+      { key: 'TON_KHO', label: t('baoCaoPage.bao_cao_ton_kho') },
+      { key: 'CAP_PHAT', label: t('baoCaoPage.bao_cao_cap_phat') },
+      { key: 'BAO_TRI', label: t('baoCaoPage.bao_cao_sua_chua') }
     );
   }
   if (authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
-    items.push({ key: 'TOAN_SAN', label: 'Tổng hợp toàn sản hệ thống (SuperAdmin)' });
+    items.push({ key: 'TOAN_SAN', label: t('baoCaoPage.tong_hop_toan_san') });
   }
 
   return (
@@ -576,9 +578,9 @@ export const BaoCaoPage: React.FC = observer(() => {
           <Form form={form} layout="vertical" onFinish={handleTimKiem}>
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={6}>
-                <Form.Item name="idPhongBan" label="Lọc theo Phòng ban">
+                <Form.Item name="idPhongBan" label={t('baoCaoPage.loc_theo_phong_ban')}>
                   <Select
-                    placeholder="Chọn phòng ban nhận"
+                    placeholder={t('baoCaoPage.chon_phong_ban_nhan')}
                     allowClear
                     suffixIcon={<ApartmentOutlined />}
                     options={phongBanList.map((x) => ({ value: x.id, label: x.ten }))}
@@ -586,9 +588,9 @@ export const BaoCaoPage: React.FC = observer(() => {
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Form.Item name="idViTri" label="Lọc theo Vị trí / Kho">
+                <Form.Item name="idViTri" label={t('baoCaoPage.loc_theo_vi_tri')}>
                   <Select
-                    placeholder="Chọn vị trí lưu trữ"
+                    placeholder={t('baoCaoPage.chon_vi_tri_luu')}
                     allowClear
                     suffixIcon={<EnvironmentOutlined />}
                     options={viTriList.map((x) => ({ value: x.id, label: x.tenViTri }))}
@@ -596,13 +598,13 @@ export const BaoCaoPage: React.FC = observer(() => {
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Form.Item name="rangePicker" label="Thời gian giao dịch">
-                  <RangePicker style={{ width: '100%' }} placeholder={['Từ ngày', 'Đến ngày']} />
+                <Form.Item name="rangePicker" label={t('baoCaoPage.thoi_gian_giao_dich')}>
+                  <RangePicker style={{ width: '100%' }} placeholder={[t('phieuKiemKePage.tu_ngay'), t('phieuKiemKePage.den_ngay')]} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Form.Item name="tuKhoaTimKiem" label="Tìm theo Tag / Serial">
-                  <Input placeholder="Mã Asset Tag, Số Serial..." prefix={<SearchOutlined />} allowClear />
+                <Form.Item name="tuKhoaTimKiem" label={t('baoCaoPage.tim_theo_tag_serial')}>
+                  <Input placeholder={t('baoCaoPage.ma_asset_tag_so')} prefix={<SearchOutlined />} allowClear />
                 </Form.Item>
               </Col>
             </Row>

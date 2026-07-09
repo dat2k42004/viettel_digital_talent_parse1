@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker } from 'antd';
 import type { MenuProps } from 'antd';
@@ -21,6 +22,7 @@ import { GiaTriThuocTinhModal } from './GiaTriThuocTinhModal';
 const { Title, Text } = Typography;
 
 export const LinhKienPhanCungPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSach, setDanhSach] = useState<LinhKienPhanCungResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -63,7 +65,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách linh kiện phần cứng!');
+      message.error(e?.message || t('linhKienPhanCungPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch(() => message.error('Không thể tải lại danh sách!'))
+      .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -101,24 +103,24 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
       if (selectedItem && selectedItem.id) {
         const res = await capNhat17(selectedItem.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật linh kiện thành công!');
+          message.success(t('linhKienPhanCungPage.cap_nhat_linh_kien'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi17(values);
         if (res.code === 200) {
-          message.success('Thêm mới linh kiện thành công!');
+          message.success(t('linhKienPhanCungPage.them_moi_linh_kien'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -129,13 +131,13 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai11(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} linh kiện thành công!`);
+        message.success(t('linhKienPhanCungPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -143,24 +145,24 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
     try {
       const res = await xoaMem17(id);
       if (res.code === 200) {
-        message.success('Xóa linh kiện thành công!');
+        message.success(t('linhKienPhanCungPage.xoa_linh_kien_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa linh kiện!');
+      message.error(e?.message || t('linhKienPhanCungPage.khong_the_xoa_linh'));
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Hoạt động</Tag>;
+        return <Tag color="green">{t('userManagementPage.hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Khóa</Tag>;
+        return <Tag color="red">{t('viTriManagementPage.khoa')}</Tag>;
       case 'CAP_PHAT':
-        return <Tag color="blue">Cấp phát</Tag>;
+        return <Tag color="blue">{t('dashboardPage.cap_phat')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -169,13 +171,13 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
   const renderTrangThaiKho = (status: string) => {
     switch (status) {
       case 'TON_KHO':
-        return <Tag color="cyan">Tồn kho</Tag>;
+        return <Tag color="cyan">{t('linhKienPhanCungPage.ton_kho')}</Tag>;
       case 'CAP_PHAT':
-        return <Tag color="green">Đã lắp ráp</Tag>;
+        return <Tag color="green">{t('linhKienPhanCungPage.da_lap_rap')}</Tag>;
       case 'BAO_TRI':
-        return <Tag color="orange">Đang bảo trì</Tag>;
+        return <Tag color="orange">{t('linhKienPhanCungPage.dang_bao_tri')}</Tag>;
       case 'THANH_LY':
-        return <Tag color="red">Đã thanh lý</Tag>;
+        return <Tag color="red">{t('linhKienPhanCungPage.da_thanh_ly')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -183,13 +185,13 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Tên mẫu thiết bị',
+      title: t('linhKienPhanCungPage.ten_mau_thiet_bi'),
       dataIndex: 'tenTaiSanPhanCung',
       key: 'tenTaiSanPhanCung',
       sorter: (a: any, b: any) => (a.tenTaiSanPhanCung || '').localeCompare(b.tenTaiSanPhanCung || ''),
     },
     {
-      title: 'Số Serial',
+      title: t('baoCaoPage.so_serial'),
       dataIndex: 'soSerial',
       key: 'soSerial',
       width: 150,
@@ -197,41 +199,41 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Mã mẫu thiết bị gốc',
+      title: t('linhKienPhanCungPage.ma_mau_thiet_bi'),
       dataIndex: 'maMauTaiSanPhanCung',
       key: 'maMauTaiSanPhanCung',
       width: 160,
     },
     {
-      title: 'Giá mua',
+      title: t('linhKienPhanCungPage.gia_mua'),
       dataIndex: 'giaMua',
       key: 'giaMua',
       width: 130,
-      render: (val: number) => val !== undefined ? `${val.toLocaleString('vi-VN')} đ` : '-',
+      render: (val: number) => val !== undefined ? t('danhSachThietBiPhanCungPage.val_tolocalestring_vi_vn_d', { toLocaleStringviVN: val.toLocaleString('vi-VN') }) : '-',
     },
     {
-      title: 'Thời gian mua',
+      title: t('linhKienPhanCungPage.thoi_gian_mua'),
       dataIndex: 'thoiGianMua',
       key: 'thoiGianMua',
       width: 130,
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
     },
     {
-      title: 'Trạng thái kho',
+      title: t('linhKienPhanCungPage.trang_thai_kho'),
       dataIndex: 'trangThaiKho',
       key: 'trangThaiKho',
       width: 130,
       render: (val: string) => renderTrangThaiKho(val),
     },
     {
-      title: 'Trạng thái vận hành',
+      title: t('linhKienPhanCungPage.trang_thai_van_hanh'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 120,
       render: (_: any, record: LinhKienPhanCungResponse) => {
@@ -239,7 +241,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.XEM_LINH_KIEN_PHAN_CUNG)
             ? {
               key: 'view',
-              label: 'Chi tiết',
+              label: t('linhKienPhanCungPage.chi_tiet'),
               icon: <EyeOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -251,7 +253,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_LINH_KIEN_PHAN_CUNG)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -263,7 +265,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.XEM_GIA_TRI_THUOC_TINH)
             ? {
               key: 'attributes',
-              label: 'Thuộc tính động',
+              label: t('linhKienPhanCungPage.thuoc_tinh_dong'),
               icon: <SettingOutlined />,
               onClick: () => {
                 setAttrTargetId(record.id!);
@@ -275,7 +277,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_LINH_KIEN_PHAN_CUNG)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa linh kiện' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('linhKienPhanCungPage.khoa_linh_kien') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -285,13 +287,13 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa linh kiện này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('linhKienPhanCungPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoa(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa linh kiện</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('linhKienPhanCungPage.xoa_linh_kien')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -341,7 +343,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={6}>
               <Input
-                placeholder="Số Serial, mã thiết bị..."
+                placeholder={t('linhKienPhanCungPage.so_serial_ma_thiet')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -352,36 +354,36 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 style={{ width: '100%' }}
                 value={dateRange}
                 onChange={(dates) => setDateRange(dates as any)}
-                placeholder={['Từ ngày mua', 'Đến ngày mua']}
+                placeholder={[t('linhKienPhanCungPage.tu_ngay_mua'), t('linhKienPhanCungPage.den_ngay_mua')]}
                 format="DD/MM/YYYY"
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Trạng thái kho"
+                placeholder={t('linhKienPhanCungPage.trang_thai_kho')}
                 style={{ width: '100%' }}
                 value={trangThaiKho}
                 onChange={setTrangThaiKho}
                 allowClear
                 options={[
-                  { value: 'TON_KHO', label: 'Tồn kho' },
-                  { value: 'CAP_PHAT', label: 'Đã lắp ráp' },
-                  { value: 'BAO_TRI', label: 'Đang bảo trì' },
-                  { value: 'THANH_LY', label: 'Đã thanh lý' },
+                  { value: 'TON_KHO', label: t('linhKienPhanCungPage.ton_kho') },
+                  { value: 'CAP_PHAT', label: t('linhKienPhanCungPage.da_lap_rap') },
+                  { value: 'BAO_TRI', label: t('linhKienPhanCungPage.dang_bao_tri') },
+                  { value: 'THANH_LY', label: t('linhKienPhanCungPage.da_thanh_ly') },
                 ]}
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Vận hành"
+                placeholder={t('linhKienPhanCungPage.van_hanh')}
                 style={{ width: '100%' }}
                 value={trangThai}
                 onChange={setTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Hoạt động' },
-                  { value: 'KHOA', label: 'Khóa' },
-                  { value: 'CAP_PHAT', label: 'Cấp phát' },
+                  { value: 'HOAT_DONG', label: t('userManagementPage.hoat_dong') },
+                  { value: 'KHOA', label: t('viTriManagementPage.khoa') },
+                  { value: 'CAP_PHAT', label: t('dashboardPage.cap_phat') },
                 ]}
               />
             </Col>
@@ -390,7 +392,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

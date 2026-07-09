@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -19,6 +20,7 @@ import { NhaCungCapFormModal } from './NhaCungCapFormModal';
 const { Title, Text } = Typography;
 
 export const NhaCungCapPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<NhaCungCapResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -48,7 +50,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                 setTotalCount(res.data.page_info?.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách nhà cung cấp!');
+            message.error(e?.message || t('nhaCungCapPage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                     setTotalCount(res.data.page_info?.total_elements || 0);
                 }
             })
-            .catch(() => message.error('Không thể tải lại danh sách!'))
+            .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
             .finally(() => setLoading(false));
     };
 
@@ -84,24 +86,24 @@ export const NhaCungCapPage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat14(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật thông tin nhà cung cấp thành công!');
+                    message.success(t('nhaCungCapPage.cap_nhat_thong_tin'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi14(values);
                 if (res.code === 200) {
-                    message.success('Thêm mới nhà cung cấp thành công!');
+                    message.success(t('nhaCungCapPage.them_moi_nha_cung'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+            message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
         }
     };
 
@@ -112,13 +114,13 @@ export const NhaCungCapPage: React.FC = observer(() => {
         try {
             const res = await capNhatTrangThai8(record.id, { trangThai: nextStatus });
             if (res.code === 200) {
-                message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} nhà cung cấp thành công!`);
+                message.success(t('nhaCungCapPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
                 taiDuLieu(currentPage, pageSize);
             } else {
-                message.error(res.message || 'Cập nhật trạng thái thất bại!');
+                message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra!');
+            message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
         }
     };
 
@@ -126,22 +128,22 @@ export const NhaCungCapPage: React.FC = observer(() => {
         try {
             const res = await xoaMem14(id);
             if (res.code === 200) {
-                message.success('Xóa nhà cung cấp thành công!');
+                message.success(t('nhaCungCapPage.xoa_nha_cung_cap_thanh_cong'));
                 taiDuLieu(currentPage, pageSize);
             } else {
-                message.error(res.message || 'Xóa thất bại!');
+                message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa nhà cung cấp!');
+            message.error(e?.message || t('nhaCungCapPage.khong_the_xoa_nha'));
         }
     };
 
     const renderStatus = (status: string) => {
         switch (status) {
             case 'HOAT_DONG':
-                return <Tag color="green">Đang hoạt động</Tag>;
+                return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
             case 'KHOA':
-                return <Tag color="red">Ngừng hợp tác</Tag>;
+                return <Tag color="red">{t('nhaCungCapPage.ngung_hop_tac')}</Tag>;
             default:
                 return <Tag>{status}</Tag>;
         }
@@ -149,7 +151,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
 
     const columns = [
         {
-            title: 'Mã NCC',
+            title: t('nhaCungCapPage.ma_ncc'),
             dataIndex: 'maNhaCungCap',
             key: 'maNhaCungCap',
             width: 140,
@@ -158,16 +160,16 @@ export const NhaCungCapPage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Tên nhà cung cấp / Đối tác',
+            title: t('nhaCungCapPage.ten_nha_cung_cap'),
             dataIndex: 'tenNhaCungCap',
             key: 'tenNhaCungCap',
         },
         {
-            title: 'Thông tin liên hệ',
+            title: t('nhaCungCapPage.thong_tin_lien_he'),
             key: 'thongTinLienHe',
             render: (_: any, record: NhaCungCapResponse) => (
                 <div>
-                    <div>{record.nguoiLienHe || 'Chưa cập nhật đại diện'}</div>
+                    <div>{t('nhaCungCapPage.recordnguoilienhe_chua_cap_nhat')}</div>
                     <Text type="secondary" style={{ fontSize: 12 }}>
                         SĐT: {record.soDienThoai || 'N/A'} | Email: {record.email || 'N/A'}
                     </Text>
@@ -175,14 +177,14 @@ export const NhaCungCapPage: React.FC = observer(() => {
             ),
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 150,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 120,
             render: (_: any, record: NhaCungCapResponse) => {
@@ -190,7 +192,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.XEM_NHA_CUNG_CAP)
                         ? {
                             key: 'view',
-                            label: 'Xem chi tiết',
+                            label: t('donViManagementPage.xem_chi_tiet'),
                             icon: <EyeOutlined />,
                             onClick: () => {
                                 setSelectedItem(record);
@@ -202,7 +204,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.SUA_NHA_CUNG_CAP)
                         ? {
                             key: 'edit',
-                            label: 'Cập nhật',
+                            label: t('viTriManagementPage.cap_nhat'),
                             icon: <EditOutlined />,
                             onClick: () => {
                                 setSelectedItem(record);
@@ -214,7 +216,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_NHA_CUNG_CAP)
                         ? {
                             key: 'toggle_status',
-                            label: record.trangThai === 'HOAT_DONG' ? 'Ngừng hợp tác' : 'Kích hoạt lại',
+                            label: record.trangThai === 'HOAT_DONG' ? t('nhaCungCapPage.ngung_hop_tac') : t('nhaCungCapPage.kich_hoat_lai'),
                             icon: <SafetyOutlined />,
                             onClick: () => handleToggleStatus(record),
                         }
@@ -224,13 +226,13 @@ export const NhaCungCapPage: React.FC = observer(() => {
                             key: 'delete',
                             label: (
                                 <Popconfirm
-                                    title="Xác nhận xóa"
-                                    description="Bạn có chắc chắn muốn xóa nhà cung cấp này?"
-                                    okText="Xóa"
-                                    cancelText="Hủy"
+                                    title={t('viTriManagementPage.xac_nhan_xoa')}
+                                    description={t('nhaCungCapPage.ban_co_chac_chan')}
+                                    okText={t('viTriManagementPage.xoa')}
+                                    cancelText={t('viTriManagementPage.huy')}
                                     onConfirm={() => handleXoa(record.id!)}
                                 >
-                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa nhà cung cấp</span>
+                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('nhaCungCapPage.xoa_nha_cung_cap')}</span>
                                 </Popconfirm>
                             ),
                             icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -280,7 +282,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={12}>
                             <Input
-                                placeholder="Tìm kiếm theo mã hoặc tên nhà cung cấp..."
+                                placeholder={t('nhaCungCapPage.tim_kiem_theo_ma')}
                                 value={keyword}
                                 onChange={(e) => setKeyword(e.target.value)}
                                 prefix={<SearchOutlined />}
@@ -289,14 +291,14 @@ export const NhaCungCapPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={6}>
                             <Select
-                                placeholder="Trạng thái hợp tác"
+                                placeholder={t('nhaCungCapPage.trang_thai_hop_tac')}
                                 style={{ width: '100%' }}
                                 value={trangThai}
                                 onChange={setTrangThai}
                                 allowClear
                                 options={[
-                                    { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                                    { value: 'KHOA', label: 'Ngừng hợp tác' },
+                                    { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                                    { value: 'KHOA', label: t('nhaCungCapPage.ngung_hop_tac') },
                                 ]}
                             />
                         </Col>
@@ -305,7 +307,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                                     Tìm kiếm
                                 </Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>

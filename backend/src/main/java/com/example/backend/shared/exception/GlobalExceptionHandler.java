@@ -8,17 +8,31 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private final MessageSource messageSource;
+
+    public GlobalExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     @ExceptionHandler(NghiepVuException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(NghiepVuException ex) {
         log.error("NghiepVuException: {}", ex.getMessage());
+        String translatedMessage = messageSource.getMessage(
+                ex.getMessage(),
+                ex.getArgs(),
+                ex.getMessage(),
+                LocaleContextHolder.getLocale()
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getCode(), ex.getMessage()));
+                .body(ApiResponse.error(ex.getCode(), translatedMessage));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

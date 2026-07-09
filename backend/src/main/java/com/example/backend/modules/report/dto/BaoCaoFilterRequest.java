@@ -12,6 +12,7 @@ public class BaoCaoFilterRequest {
      private String loaiBaoCao; // TON_KHO, CAP_PHAT, BAO_TRI
      private Long idPhongBan;
      private Long idViTri;
+     private Long idDonVi;
      private LocalDate tuNgay;
      private LocalDate denNgay;
      private String tuKhoaTimKiem; // Tìm kiếm theo mã Asset Tag, Số Serial

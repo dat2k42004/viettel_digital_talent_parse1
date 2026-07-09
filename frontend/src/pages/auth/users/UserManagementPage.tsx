@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Tag, Button, Space, Input, Switch, Tooltip, message, Popconfirm, Typography, Modal, Descriptions, Select, Row, Col, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
@@ -20,6 +21,7 @@ import { authStore } from '../../../stores/AuthStore';
 const { Title, Text } = Typography;
 
 export const UserManagementPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachNguoiDung, setDanhSachNguoiDung] = useState<NguoiDungResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -53,17 +55,17 @@ export const UserManagementPage: React.FC = observer(() => {
         setIsDetailModalOpen(true);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải thông tin chi tiết người dùng!');
+      message.error(e?.message || t('userManagementPage.khong_the_tai_thong'));
     }
   };
 
   const handleXoaNguoiDung = async (id: number) => {
     try {
       await xoaMem15(id);
-      message.success('Xóa tài khoản người dùng thành công!');
+      message.success(t('userManagementPage.xoa_tai_khoan_nguoi'));
       taiDuLieu(currentPage, pageSize, searchText, filterTrangThai, filterPhongBan, filterChucVu, filterMaNguoiDung);
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa tài khoản người dùng!');
+      message.error(e?.message || t('userManagementPage.khong_the_xoa_tai'));
     }
   };
 
@@ -82,7 +84,7 @@ export const UserManagementPage: React.FC = observer(() => {
         setDanhSachPhongBan(res.data.content);
       }
     } catch (e) {
-      console.error('Không thể lấy danh sách phòng ban', e);
+      console.error(t('userManagementPage.khong_the_lay_danh_sach_phong_ban'), e);
     }
   };
 
@@ -111,7 +113,7 @@ export const UserManagementPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách người dùng từ hệ thống!');
+      message.error(e?.message || t('userManagementPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -124,7 +126,7 @@ export const UserManagementPage: React.FC = observer(() => {
         setDanhSachVaiTro(res.data);
       }
     } catch (e) {
-      console.error('Không thể lấy danh mục vai trò', e);
+      console.error(t('userManagementPage.khong_the_lay_danh_muc_vai_tro'), e);
     }
   };
 
@@ -135,7 +137,7 @@ export const UserManagementPage: React.FC = observer(() => {
         setDanhSachQuyen(res.data);
       }
     } catch (e) {
-      console.error('Không thể lấy danh mục quyền hạn', e);
+      console.error(t('userManagementPage.khong_the_lay_danh'), e);
     }
   };
 
@@ -165,15 +167,15 @@ export const UserManagementPage: React.FC = observer(() => {
     try {
       if (selectedUser?.id) {
         await capNhat15(selectedUser.id, values);
-        message.success('Cập nhật thông tin tài khoản người dùng thành công!');
+        message.success(t('userManagementPage.cap_nhat_thong_tin'));
       } else {
         await themMoi15(values);
-        message.success('Tạo mới tài khoản người dùng thành công!');
+        message.success(t('userManagementPage.tao_moi_tai_khoan'));
       }
       setIsEditModalOpen(false);
       taiDuLieu(currentPage, pageSize, searchText, filterTrangThai, filterPhongBan, filterChucVu, filterMaNguoiDung);
     } catch (e: any) {
-      message.error(e?.message || 'Lưu thông tin thất bại, vui lòng kiểm tra lại!');
+      message.error(e?.message || t('userManagementPage.luu_thong_tin_that'));
     }
   };
 
@@ -183,10 +185,10 @@ export const UserManagementPage: React.FC = observer(() => {
     const trangThaiMoi = active ? 'HOAT_DONG' : 'KHOA';
     try {
       await capNhatTrangThai9(user.id, { trangThai: trangThaiMoi });
-      message.success(`Đổi trạng thái tài khoản người dùng sang ${active ? 'Hoạt động' : 'khóa'} thành công!`);
+      message.success(t('userManagementPage.doi_trang_thai_tai_khoan_1', { khoa: active ? t('userManagementPage.hoat_dong') : t('userManagementPage.khoa') }));
       taiDuLieu(currentPage, pageSize, searchText, filterTrangThai, filterPhongBan, filterChucVu, filterMaNguoiDung);
     } catch (e: any) {
-      message.error(e?.message || 'Cập nhật trạng thái thất bại!');
+      message.error(e?.message || t('viTriManagementPage.cap_nhat_trang_thai'));
     }
   };
 
@@ -194,9 +196,9 @@ export const UserManagementPage: React.FC = observer(() => {
   const handleCuongCheLogout = async (id: number) => {
     try {
       await thuHoiPhien(id);
-      message.success('Đã gửi yêu cầu cưỡng chế thoát phiên làm việc tài khoản thành công!');
+      message.success(t('userManagementPage.da_gui_yeu_cau'));
     } catch (e: any) {
-      message.error(e?.message || 'Thu hồi phiên thất bại!');
+      message.error(e?.message || t('userManagementPage.thu_hoi_phien_that'));
     }
   };
 
@@ -211,11 +213,11 @@ export const UserManagementPage: React.FC = observer(() => {
     if (!selectedUser?.id) return;
     try {
       await capNhatQuyen1(selectedUser.id, values);
-      message.success('Cập nhật quyền trực tiếp (Override) thành công!');
+      message.success(t('userManagementPage.cap_nhat_quyen_truc_tiep'));
       setIsQuyenModalOpen(false);
       taiDuLieu(currentPage, pageSize, searchText, filterTrangThai, filterPhongBan, filterChucVu, filterMaNguoiDung);
     } catch (e: any) {
-      message.error(e?.message || 'Cập nhật quyền trực tiếp thất bại!');
+      message.error(e?.message || t('userManagementPage.cap_nhat_quyen_truc'));
     }
   };
 
@@ -230,25 +232,25 @@ export const UserManagementPage: React.FC = observer(() => {
     ...(authStore.laSuperAdmin
       ? [
         {
-          title: 'Đơn vị (SaaS)',
+          title: t('userManagementPage.don_vi_saas'),
           dataIndex: 'idDonVi',
           key: 'idDonVi',
           sorter: (a: NguoiDungResponse, b: NguoiDungResponse) => (a.idDonVi || 0) - (b.idDonVi || 0),
           defaultSortOrder: 'ascend' as const,
-          render: (val: any) => <Tag color="orange">Đơn vị {val}</Tag>,
+          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val')}</Tag>,
         },
       ]
       : []),
     {
-      title: 'Tài khoản thành viên',
+      title: t('userManagementPage.tai_khoan_thanh_vien'),
       dataIndex: 'tenDangNhap',
       key: 'tenDangNhap',
       render: (val: string, record: NguoiDungResponse) => {
         const fullname = [record.hoNguoiDung, record.tenDemNguoiDung, record.tenNguoiDung].filter(Boolean).join(' ');
         return (
           <div>
-            <div style={{ fontWeight: 'bold' }}>{fullname || 'Chưa cập nhật tên'}</div>
-            <div style={{ fontSize: 12, color: '#8c8c8c' }}>Tên đăng nhập: {val}</div>
+            <div style={{ fontWeight: 'bold' }}>{t('userManagementPage.fullname_chua_cap_nhat')}</div>
+            <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.ten_dang_nhap_val')}</div>
             {record.maNguoiDung && (
               <div style={{ fontSize: 12, color: '#1890ff', fontWeight: 500 }}>
                 Mã nhân viên: {record.maNguoiDung}
@@ -259,20 +261,20 @@ export const UserManagementPage: React.FC = observer(() => {
       },
     },
     {
-      title: 'Thông tin liên hệ',
+      title: t('nhaCungCapPage.thong_tin_lien_he'),
       dataIndex: 'email',
       key: 'email',
       render: (val: string, record: NguoiDungResponse) => (
         <div>
-          <div>Email: {val || 'Chưa thiết lập'}</div>
-          <div style={{ fontSize: 12, color: '#8c8c8c' }}>SĐT: {record.soDienThoai || 'Chưa thiết lập'}</div>
+          <div>{t('userManagementPage.email_val_chua_thiet')}</div>
+          <div style={{ fontSize: 12, color: '#8c8c8c' }}>{t('userManagementPage.sdt_recordsodienthoai_chua_thiet')}</div>
         </div>
       )
     },
-    { title: 'Chức danh', dataIndex: 'chucVu', key: 'chucVu', render: (val: string) => val || 'Nhân viên' },
-    { title: 'Phòng ban', dataIndex: 'tenPhongBan', key: 'tenPhongBan', render: (val: string) => val || 'Mặc định' },
+    { title: t('appLayout.title'), dataIndex: 'chucVu', key: 'chucVu', render: (val: string) => val || t('userManagementPage.nhan_vien') },
+    { title: t('phieuKiemKePage.phong_ban'), dataIndex: 'tenPhongBan', key: 'tenPhongBan', render: (val: string) => val || t('userManagementPage.mac_dinh') },
     {
-      title: 'Vai trò phân bổ',
+      title: t('userManagementPage.vai_tro_phan_bo'),
       dataIndex: 'danhSachVaiTro',
       key: 'danhSachVaiTro',
       render: (roles?: VaiTroDropdownResponse[]) => (
@@ -280,18 +282,18 @@ export const UserManagementPage: React.FC = observer(() => {
           {roles?.map(r => (
             <Tag color="blue" key={r.id}>{r.tenVaiTro}</Tag>
           ))}
-          {(!roles || roles.length === 0) && <Text type="secondary">Chưa gán vai trò</Text>}
+          {(!roles || roles.length === 0) && <Text type="secondary">{t('userManagementPage.chua_gan_vai_tro')}</Text>}
         </Space>
       ),
     },
     {
-      title: 'Trạng thái hoạt động',
+      title: t('userManagementPage.trang_thai_hoat_dong'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       render: (val: string, record: NguoiDungResponse) => {
         const coQuyenTacDong = true;
         return (
-          <QuyenHanGuard quyenYeuCau="CAP_NHAT_TRANG_THAI_NGUOI_DUNG" fallback={<Tag color={val === 'HOAT_DONG' ? 'green' : 'red'}>{val === 'HOAT_DONG' ? 'Đang hoạt động' : 'Bị khóa'}</Tag>}>
+          <QuyenHanGuard quyenYeuCau="CAP_NHAT_TRANG_THAI_NGUOI_DUNG" fallback={<Tag color={val === 'HOAT_DONG' ? 'green' : 'red'}>{t('userManagementPage.val_hoat_dong_dang_hoat')}</Tag>}>
             <Switch
               disabled={!coQuyenTacDong}
               checkedChildren={<UnlockOutlined />}
@@ -304,7 +306,7 @@ export const UserManagementPage: React.FC = observer(() => {
       },
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       render: (_: any, record: NguoiDungResponse) => {
         const coQuyenTacDong = true;
@@ -313,30 +315,30 @@ export const UserManagementPage: React.FC = observer(() => {
           {
             key: 'detail',
             icon: <EyeOutlined />,
-            label: 'Xem chi tiết',
+            label: t('donViManagementPage.xem_chi_tiet'),
             onClick: () => record.id && handleOpenDetail(record.id),
           },
           coQuyenTacDong && authStore.kiemTraQuyen('SUA_NGUOI_DUNG') && {
             key: 'edit',
             icon: <EditOutlined />,
-            label: 'Chỉnh sửa tài khoản',
+            label: t('userManagementPage.chinh_sua_tai_khoan'),
             onClick: () => handleOpenEdit(record),
           },
           coQuyenTacDong && authStore.kiemTraQuyen('CAP_NHAT_QUYEN_NGUOI_DUNG') && {
             key: 'quyen',
             icon: <KeyOutlined />,
-            label: 'Gán quyền trực tiếp',
+            label: t('userManagementPage.gan_quyen_truc_tiep'),
             onClick: () => handleOpenQuyenTrucTiep(record),
           },
           coQuyenTacDong && authStore.kiemTraQuyen('CAP_NHAT_TRANG_THAI_NGUOI_DUNG') && {
             key: 'logout',
             label: (
               <Popconfirm
-                title="Xác nhận cưỡng chế thoát?"
-                description="Thu hồi toàn bộ phiên đăng nhập của người dùng này khỏi Redis?"
+                title={t('userManagementPage.xac_nhan_cuong_che')}
+                description={t('userManagementPage.thu_hoi_toan_bo')}
                 onConfirm={() => record.id && handleCuongCheLogout(record.id)}
-                okText="Đồng ý"
-                cancelText="Hủy"
+                okText={t('userManagementPage.dong_y')}
+                cancelText={t('viTriManagementPage.huy')}
               >
                 <span style={{ color: '#fa8c16', display: 'block', width: '100%' }}>
                   <SafetyOutlined style={{ marginRight: 8 }} /> Cưỡng chế đăng xuất
@@ -348,11 +350,11 @@ export const UserManagementPage: React.FC = observer(() => {
             key: 'delete',
             label: (
               <Popconfirm
-                title="Xác nhận xóa tài khoản?"
-                description="Bạn có chắc chắn muốn xóa tài khoản người dùng này không?"
+                title={t('userManagementPage.xac_nhan_xoa_tai')}
+                description={t('userManagementPage.ban_co_chac_chan')}
                 onConfirm={() => record.id && handleXoaNguoiDung(record.id)}
-                okText="Xác nhận"
-                cancelText="Hủy"
+                okText={t('userManagementPage.xac_nhan')}
+                cancelText={t('viTriManagementPage.huy')}
                 okButtonProps={{ danger: true }}
               >
                 <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>
@@ -369,13 +371,13 @@ export const UserManagementPage: React.FC = observer(() => {
               <Button size="small" icon={<EyeOutlined />} onClick={() => record.id && handleOpenDetail(record.id)}>
                 Chi tiết
               </Button>
-              <Text type="secondary" style={{ fontSize: 12 }}>Khóa cứng UI</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>{t('userManagementPage.khoa_cung_ui')}</Text>
             </Space>
           );
         }
 
-        if (actItems.length === 0) {
-          return <Text type="secondary" style={{ fontSize: 12 }}>Không có quyền</Text>;
+        if (!actItems || actItems.length === 0) {
+          return <Text type="secondary" style={{ fontSize: 12 }}>{t('userManagementPage.khong_co_quyen')}</Text>;
         }
 
         return (
@@ -396,8 +398,8 @@ export const UserManagementPage: React.FC = observer(() => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontSize: 24 }}>Quản lý tài khoản người dùng</Title>
-          <Text type="secondary">Cấp phát tài khoản nhân viên, khóa/mở quyền hệ thống, cưỡng chế thoát phiên và ghi đè cấp quyền trực tiếp.</Text>
+          <Title level={2} style={{ margin: 0, fontSize: 24 }}>{t('userManagementPage.quan_ly_tai_khoan')}</Title>
+          <Text type="secondary">{t('userManagementPage.cap_phat_tai_khoan')}</Text>
         </div>
         <QuyenHanGuard quyenYeuCau="THEM_NGUOI_DUNG">
           <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenEdit(null)}>
@@ -410,7 +412,7 @@ export const UserManagementPage: React.FC = observer(() => {
         <Row gutter={[12, 12]} align="middle">
           <Col xs={24} sm={12} md={6}>
             <Input
-              placeholder="Tìm kiếm họ tên, email, tài khoản..."
+              placeholder={t('userManagementPage.tim_kiem_ho_ten')}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -420,19 +422,19 @@ export const UserManagementPage: React.FC = observer(() => {
           </Col>
           <Col xs={24} sm={12} md={4}>
             <Select
-              placeholder="Trạng thái"
+              placeholder={t('loaiTaiSanFormModal.trang_thai')}
               style={{ width: '100%' }}
               value={filterTrangThai}
               onChange={setFilterTrangThai}
               allowClear
             >
-              <Select.Option value="HOAT_DONG">Đang hoạt động</Select.Option>
-              <Select.Option value="BI_KHOA">Bị khóa</Select.Option>
+              <Select.Option value="HOAT_DONG">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Select.Option>
+              <Select.Option value="BI_KHOA">{t('userManagementPage.bi_khoa')}</Select.Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={5}>
             <Select
-              placeholder="Phòng ban"
+              placeholder={t('phieuKiemKePage.phong_ban')}
               style={{ width: '100%' }}
               value={filterPhongBan}
               onChange={setFilterPhongBan}
@@ -449,7 +451,7 @@ export const UserManagementPage: React.FC = observer(() => {
           </Col>
           <Col xs={24} sm={12} md={4}>
             <Input
-              placeholder="Chức danh..."
+              placeholder={t('userManagementPage.chuc_danh')}
               value={filterChucVu}
               onChange={(e) => setFilterChucVu(e.target.value)}
               onPressEnter={handleSearch}
@@ -459,15 +461,15 @@ export const UserManagementPage: React.FC = observer(() => {
           <Col xs={24} sm={12} md={5}>
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
               <Input
-                placeholder="Mã nhân viên..."
+                placeholder={t('userManagementPage.ma_nhan_vien_1')}
                 value={filterMaNguoiDung}
                 onChange={(e) => setFilterMaNguoiDung(e.target.value)}
                 onPressEnter={handleSearch}
                 allowClear
                 style={{ width: 140 }}
               />
-              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
-              <Button onClick={handleResetFilters}>Làm mới</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+              <Button onClick={handleResetFilters}>{t('viTriManagementPage.lam_moi')}</Button>
             </Space>
           </Col>
         </Row>
@@ -509,7 +511,7 @@ export const UserManagementPage: React.FC = observer(() => {
       />
 
       <Modal
-        title="Chi tiết tài khoản người dùng"
+        title={t('userManagementPage.chi_tiet_tai_khoan')}
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={[
@@ -521,54 +523,54 @@ export const UserManagementPage: React.FC = observer(() => {
       >
         {detailUser && (
           <Descriptions bordered column={2} size="small" style={{ marginTop: 16 }}>
-            <Descriptions.Item label="Tên đăng nhập" span={2}>
+            <Descriptions.Item label={t('donViCreateModal.ten_dang_nhap')} span={2}>
               <strong>{detailUser.tenDangNhap}</strong>
             </Descriptions.Item>
-            <Descriptions.Item label="Mã nhân viên">
-              <strong>{detailUser.maNguoiDung || 'Chưa cập nhật'}</strong>
+            <Descriptions.Item label={t('userManagementPage.ma_nhan_vien')}>
+              <strong>{t('userManagementPage.detailusermanguoidung_chua_cap_nhat')}</strong>
             </Descriptions.Item>
-            <Descriptions.Item label="Họ tên">
-              {[detailUser.hoNguoiDung, detailUser.tenDemNguoiDung, detailUser.tenNguoiDung].filter(Boolean).join(' ') || 'Chưa cập nhật'}
+            <Descriptions.Item label={t('userManagementPage.ho_ten')}>
+              {[detailUser.hoNguoiDung, detailUser.tenDemNguoiDung, detailUser.tenNguoiDung].filter(Boolean).join(' ') || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
             <Descriptions.Item label="Email">
-              {detailUser.email || 'Chưa cập nhật'}
+              {detailUser.email || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
-            <Descriptions.Item label="Số điện thoại">
-              {detailUser.soDienThoai || 'Chưa cập nhật'}
+            <Descriptions.Item label={t('appLayout.phone')}>
+              {detailUser.soDienThoai || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
-            <Descriptions.Item label="Chức vụ">
-              {detailUser.chucVu || 'Chưa cập nhật'}
+            <Descriptions.Item label={t('donViFormModal.chuc_vu')}>
+              {detailUser.chucVu || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
-            <Descriptions.Item label="Phòng ban">
-              {detailUser.tenPhongBan || 'Chưa cập nhật'}
+            <Descriptions.Item label={t('phieuKiemKePage.phong_ban')}>
+              {detailUser.tenPhongBan || t('userManagementPage.chua_cap_nhat')}
             </Descriptions.Item>
-            <Descriptions.Item label="Mã đơn vị">
-              <Tag color="orange">Đơn vị {detailUser.idDonVi}</Tag>
+            <Descriptions.Item label={t('donViManagementPage.ma_don_vi')}>
+              <Tag color="orange">{t('userManagementPage.don_vi_detailuseriddonvi')}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
+            <Descriptions.Item label={t('loaiTaiSanFormModal.trang_thai')}>
               <Tag color={detailUser.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>
-                {detailUser.trangThai === 'HOAT_DONG' ? 'Hoạt động' : 'Bị khóa'}
+                {detailUser.trangThai === 'HOAT_DONG' ? t('userManagementPage.hoat_dong') : t('userManagementPage.bi_khoa')}
               </Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Vai trò gán" span={2}>
+            <Descriptions.Item label={t('userManagementPage.vai_tro_gan')} span={2}>
               <Space wrap>
                 {detailUser.danhSachVaiTro?.map(r => (
                   <Tag color="blue" key={r.id}>{r.tenVaiTro} ({r.maVaiTro})</Tag>
-                )) || <Text type="secondary">Chưa gán vai trò</Text>}
+                )) || <Text type="secondary">{t('userManagementPage.chua_gan_vai_tro')}</Text>}
               </Space>
             </Descriptions.Item>
-            <Descriptions.Item label="Quyền hạn trực tiếp (Override)" span={2}>
+            <Descriptions.Item label={t('userManagementPage.quyen_han_truc_tiep')} span={2}>
               <Space wrap>
                 {detailUser.danhSachQuyen?.map(q => (
                   <Tag color="purple" key={q.id}>{q.tenQuyen} ({q.maQuyen})</Tag>
-                )) || <Text type="secondary">Không có quyền trực tiếp</Text>}
+                )) || <Text type="secondary">{t('userManagementPage.khong_co_quyen_truc')}</Text>}
               </Space>
             </Descriptions.Item>
-            <Descriptions.Item label="Danh sách quyền phân giải từ vai trò" span={2}>
+            <Descriptions.Item label={t('userManagementPage.danh_sach_quyen_phan')} span={2}>
               <Space wrap>
                 {detailUser.danhSachQuyenPhanGiai?.map(q => (
                   <Tag color="cyan" key={q}>{q}</Tag>
-                )) || <Text type="secondary">Không có quyền</Text>}
+                )) || <Text type="secondary">{t('userManagementPage.khong_co_quyen')}</Text>}
               </Space>
             </Descriptions.Item>
           </Descriptions>

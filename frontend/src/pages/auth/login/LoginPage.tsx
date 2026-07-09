@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, Typography, message, Space } from 'antd';
 import { useNavigate, Link } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { ForgetPasswordModal } from './ForgetPasswordModal';
 const { Title, Text } = Typography;
 
 export const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [isForgetOpen, setIsForgetOpen] = useState(false);
@@ -37,13 +39,13 @@ export const LoginPage: React.FC = () => {
           }
         }
 
-        message.success('Đăng nhập hệ thống ITAM thành công!');
+        message.success(t('loginPage.dang_nhap_he_thong'));
         navigate('/');
       } else {
-        message.error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin tài khoản!');
+        message.error(t('loginPage.dang_nhap_that_bai'));
       }
     } catch (error: any) {
-      const errorMsg = error?.message || 'Sai tên đăng nhập hoặc mật khẩu!';
+      const errorMsg = error?.message || t('loginPage.sai_ten_dang_nhap');
       message.error(errorMsg);
     } finally {
       setLoading(false);
@@ -71,7 +73,7 @@ export const LoginPage: React.FC = () => {
           <Title level={3} style={{ margin: 0 }}>
             Hệ thống ITAM
           </Title>
-          <Text type="secondary">Quản lý vòng đời tài sản CNTT đa doanh nghiệp</Text>
+          <Text type="secondary">{t('loginPage.quan_ly_vong_doi')}</Text>
         </div>
 
         <Form
@@ -83,18 +85,18 @@ export const LoginPage: React.FC = () => {
         >
           <Form.Item
             name="tenDangNhap"
-            label="Tên đăng nhập"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+            label={t('donViCreateModal.ten_dang_nhap')}
+            rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ten') }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Tên tài khoản hoặc email" />
+            <Input prefix={<UserOutlined />} placeholder={t('loginPage.ten_tai_khoan_hoac')} />
           </Form.Item>
 
           <Form.Item
             name="matKhau"
-            label="Mật khẩu"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            label={t('donViCreateModal.mat_khau')}
+            rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_mat') }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu tài khoản" />
+            <Input.Password prefix={<LockOutlined />} placeholder={t('loginPage.mat_khau_tai_khoan')} />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 8 }}>
@@ -109,8 +111,8 @@ export const LoginPage: React.FC = () => {
             Quên mật khẩu?
           </a>
           <Space>
-            <Text type="secondary">Chưa có đơn vị?</Text>
-            <Link to="/dang-ky">Đăng ký</Link>
+            <Text type="secondary">{t('loginPage.chua_co_don_vi')}</Text>
+            <Link to="/dang-ky">{t('loginPage.dang_ky')}</Link>
           </Space>
         </div>
       </Card>

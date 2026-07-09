@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Button, Dropdown, Avatar, Space,
@@ -19,11 +20,13 @@ import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 import ItamIcon from '../assets/icon.png';
 import { keys } from 'mobx';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
 export const AppLayout: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { token } = theme.useToken();
   const location = useLocation();
@@ -57,7 +60,7 @@ export const AppLayout: React.FC = observer(() => {
       // Cho phép thoát ở client kể cả khi API gặp sự cố
     }
     authStore.dangXuat();
-    message.success('Đăng xuất khỏi hệ thống thành công!');
+    message.success(t('appLayout.logoutSuccess'));
     navigate('/login');
   };
 
@@ -68,11 +71,11 @@ export const AppLayout: React.FC = observer(() => {
         matKhauCu: values.matKhauCu,
         matKhauMoi: values.matKhauMoi,
       });
-      message.success(res.message || 'Đổi mật khẩu tài khoản thành công!');
+      message.success(res.message || t('appLayout.changePasswordSuccess'));
       setIsPasswordModalOpen(false);
       formDoiMatKhau.resetFields();
     } catch (error: any) {
-      const msg = error?.message || 'Đổi mật khẩu thất bại, vui lòng kiểm tra lại mật khẩu cũ!';
+      const msg = error?.message || t('appLayout.changePasswordFailed');
       message.error(msg);
     }
   };
@@ -82,13 +85,13 @@ export const AppLayout: React.FC = observer(() => {
     {
       key: '/',
       icon: <DashboardOutlined />,
-      label: <Link to="/">Tổng quan</Link>,
+      label: <Link to="/">{t('menu.dashboard')}</Link>,
     },
     authStore.kiemTraQuyen([QUYEN.XEM_BAO_CAO, QUYEN.XEM_QUAN_TRI_TOAN_SAN])
       ? {
         key: '/bao-cao',
         icon: <BarChartOutlined />,
-        label: <Link to="/bao-cao">Báo cáo & Thống kê</Link>,
+        label: <Link to="/bao-cao">{t('menu.reports')}</Link>,
       }
       : null,
     authStore.kiemTraQuyen([
@@ -103,41 +106,41 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: '/tai-san',
         icon: <LaptopOutlined />,
-        label: 'Quản lý Tài sản',
+        label: t('appLayout.quan_ly_tai_san'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_HANG_SAN_XUAT)
             ? {
               key: '/tai-san/hang-san-xuat',
-              label: <Link to="/tai-san/hang-san-xuat">Hãng sản xuất</Link>,
+              label: <Link to="/tai-san/hang-san-xuat">{t('taiSanPhanMemPage.hang_san_xuat')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_LOAI_TAI_SAN)
             ? {
               key: '/tai-san/loai-tai-san',
-              label: <Link to="/tai-san/loai-tai-san">Loại tài sản</Link>,
+              label: <Link to="/tai-san/loai-tai-san">{t('baoCaoPage.loai_tai_san')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_TAI_SAN)
             ? {
               key: '/tai-san/danh-muc-tai-san',
-              label: <Link to="/tai-san/danh-muc-tai-san">Danh mục tài sản</Link>,
+              label: <Link to="/tai-san/danh-muc-tai-san">{t('taiSanPhanMemFormModal.danh_muc_tai_san')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_MAU_TAI_SAN)
             ? {
               key: '/tai-san/mau-tai-san',
-              label: 'Mẫu tài sản',
+              label: t('appLayout.mau_tai_san'),
               children: [
                 authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_CUNG)
                   ? {
                     key: '/tai-san/mau-ma-tai-san/tai-san-phan-cung',
-                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-cung">Mẫu mã phần cứng</Link>,
+                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-cung">{t('menu.hardwareModels')}</Link>,
                   }
                   : null,
                 authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_MEM)
                   ? {
                     key: '/tai-san/mau-ma-tai-san/tai-san-phan-mem',
-                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-mem">Mẫu mã phần mềm</Link>,
+                    label: <Link to="/tai-san/mau-ma-tai-san/tai-san-phan-mem">{t('menu.softwareModels')}</Link>,
                   }
                   : null,
               ]
@@ -145,24 +148,24 @@ export const AppLayout: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.NHOM_THIET_BI_THUC_THE)
             ? {
               key: '/tai-san/thiet-bi',
-              label: "Thiết bị thực",
+              label: t('menu.actualAssets'),
               children: [
                 authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_CUNG)
                   ? {
                     key: '/tai-san/thiet-bi/danh-sach-thiet-bi-phan-cung',
-                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-cung">Thiết bị phần cứng</Link>,
+                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-cung">{t('phieuSuaChuaFormModal.thiet_bi_phan_cung')}</Link>,
                   }
                   : null,
                 authStore.kiemTraQuyen(QUYEN.XEM_THIET_BI_PHAN_MEM)
                   ? {
                     key: '/tai-san/thiet-bi/danh-sach-thiet-bi-phan-mem',
-                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-mem">Thiết bị phần mềm</Link>,
+                    label: <Link to="/tai-san/thiet-bi/danh-sach-thiet-bi-phan-mem">{t('menu.softwareLicenses')}</Link>,
                   }
                   : null,
                 authStore.kiemTraQuyen(QUYEN.XEM_LINH_KIEN_PHAN_CUNG)
                   ? {
                     key: '/tai-san/thiet-bi/linh-kien-phan-cung',
-                    label: <Link to="/tai-san/thiet-bi/linh-kien-phan-cung">Linh kiện phần cứng</Link>,
+                    label: <Link to="/tai-san/thiet-bi/linh-kien-phan-cung">{t('phieuCapPhatFormModal.linh_kien_phan_cung')}</Link>,
                   }
                   : null,
               ]
@@ -170,13 +173,13 @@ export const AppLayout: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_THUOC_TINH)
             ? {
               key: '/tai-san/danh-muc-thuoc-tinh',
-              label: <Link to="/tai-san/danh-muc-thuoc-tinh">Danh mục thuộc tính</Link>,
+              label: <Link to="/tai-san/danh-muc-thuoc-tinh">{t('menu.attributes')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_LAP_RAP_LINH_KIEN)
             ? {
               key: '/tai-san/lap-rap-linh-kien',
-              label: <Link to="/tai-san/lap-rap-linh-kien">Lắp ráp linh kiện</Link>,
+              label: <Link to="/tai-san/lap-rap-linh-kien">{t('menu.assembly')}</Link>,
             }
             : null,
         ].filter(Boolean) as MenuProps['items'],
@@ -191,26 +194,26 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: '/vong-doi',
         icon: <FileTextOutlined />,
-        label: 'Vòng đời tài sản',
+        label: t('menu.lifecycle'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_CAP_PHAT) ? {
             key: '/vong-doi/cap-phat',
-            label: 'Phiếu cấp phát',
+            label: t('appLayout.phieu_cap_phat'),
             onClick: () => navigate('/vong-doi/cap-phat'),
           } : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_THU_HOI) ? {
             key: '/vong-doi/thu-hoi',
-            label: 'Phiếu thu hồi',
+            label: t('appLayout.phieu_thu_hoi'),
             onClick: () => navigate('/vong-doi/thu-hoi'),
           } : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_DIEU_CHUYEN) ? {
             key: '/vong-doi/dieu-chuyen',
-            label: 'Phiếu điều chuyển',
+            label: t('appLayout.phieu_dieu_chuyen'),
             onClick: () => navigate('/vong-doi/dieu-chuyen'),
           } : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_THANH_LY) ? {
             key: '/vong-doi/thanh-ly',
-            label: 'Phiếu thanh lý',
+            label: t('appLayout.phieu_thanh_ly'),
             onClick: () => navigate('/vong-doi/thanh-ly'),
           } : null,
         ]
@@ -220,18 +223,18 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: '/bao-tri',
         icon: <ToolOutlined />,
-        label: 'Bảo hành và bảo trì',
+        label: t('appLayout.bao_hanh_va_bao_tri'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_KE_HOACH_BAO_TRI)
             ? {
               key: '/bao-tri/ke-hoach',
-              label: <Link to="/bao-tri/ke-hoach">Kế hoạch bảo trì</Link>,
+              label: <Link to="/bao-tri/ke-hoach">{t('menu.maintenancePlans')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_SUA_CHUA)
             ? {
               key: '/bao-tri/sua-chua',
-              label: <Link to="/bao-tri/sua-chua">Phiếu sửa chữa</Link>,
+              label: <Link to="/bao-tri/sua-chua">{t('menu.repairTickets')}</Link>,
             }
             : null,
         ].filter(Boolean) as MenuProps['items'],
@@ -241,18 +244,18 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: '/kiem-ke',
         icon: <ScanOutlined />,
-        label: 'Quản lý kiểm kê',
+        label: t('appLayout.quan_ly_kiem_ke'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_DOT_KIEM_KE)
             ? {
               key: '/kiem-ke/dot-kiem-ke',
-              label: <Link to="/kiem-ke/dot-kiem-ke">Đợt kiểm kê</Link>,
+              label: <Link to="/kiem-ke/dot-kiem-ke">{t('menu.inventoryRounds')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_KIEM_KE)
             ? {
               key: '/kiem-ke/phieu-kiem-ke',
-              label: <Link to="/kiem-ke/phieu-kiem-ke">Phiếu kiểm kê</Link>,
+              label: <Link to="/kiem-ke/phieu-kiem-ke">{t('menu.inventoryTickets')}</Link>,
             }
             : null,
         ].filter(Boolean) as MenuProps['items'],
@@ -265,24 +268,24 @@ export const AppLayout: React.FC = observer(() => {
       QUYEN.NHOM_PHIEU_NHAP_KHO]) ? {
       key: '/mua-sam',
       icon: <ShoppingCartOutlined />,
-      label: 'Quản lý mua sắm',
+      label: t('menu.procurement'),
       children: [
         authStore.kiemTraQuyen(QUYEN.NHOM_NHA_CUNG_CAP) ? {
           key: '/mua-sam/nha-cung-cap',
           // icon: <ShopOutlined />,
-          label: 'Nhà cung cấp',
+          label: t('donHangMuaSamPage.nha_cung_cap'),
           onClick: () => navigate('/mua-sam/nha-cung-cap'),
         } : null,
         authStore.kiemTraQuyen(QUYEN.NHOM_DON_HANG_MUA_SAM) ? {
           key: '/mua-sam/don-hang-mua-sam',
           // icon: <FileDoneOutlined />,
-          label: 'Đơn hàng mua sắm',
+          label: t('menu.purchaseOrders'),
           onClick: () => navigate('/mua-sam/don-hang-mua-sam'),
         } : null,
         authStore.kiemTraQuyen(QUYEN.NHOM_PHIEU_NHAP_KHO) ? {
           key: '/mua-sam/phieu-nhap-tai-san',
           // icon: <InboxOutlined />,
-          label: 'Phiếu nhập tài sản',
+          label: t('appLayout.phieu_nhap_tai_san'),
           onClick: () => navigate('/mua-sam/phieu-nhap-tai-san'),
         } : null,
       ].filter(Boolean),
@@ -297,36 +300,36 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: 'quan-ly-don-vi',
         icon: <BankOutlined />,
-        label: 'Quản lý Đơn vị',
+        label: t('appLayout.quan_ly_don_vi'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_DON_VI)
             ? {
               key: '/quan-ly-don-vi/don-vi',
-              label: <Link to="/quan-ly-don-vi/don-vi">Danh sách đơn vị</Link>,
+              label: <Link to="/quan-ly-don-vi/don-vi">{t('appLayout.danh_sach_don_vi')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_PHONG_BAN)
             ? {
               key: '/quan-ly-don-vi/phong-ban',
-              label: <Link to="/quan-ly-don-vi/phong-ban">Phòng ban</Link>,
+              label: <Link to="/quan-ly-don-vi/phong-ban">{t('phieuKiemKePage.phong_ban')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_QUAN_LY_VI_TRI)
             ? {
               key: '/quan-ly-don-vi/vi-tri',
-              label: <Link to="/quan-ly-don-vi/vi-tri">Vị trí & Kho bãi</Link>,
+              label: <Link to="/quan-ly-don-vi/vi-tri">{t('menu.locations')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_DANH_MUC_CAU_HINH)
             ? {
               key: '/quan-ly-don-vi/danh-muc',
-              label: <Link to="/quan-ly-don-vi/danh-muc">Danh mục hệ thống</Link>,
+              label: <Link to="/quan-ly-don-vi/danh-muc">{t('menu.systemConfigs')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_CAU_HINH_DON_VI)
             ? {
               key: '/quan-ly-don-vi/cau-hinh',
-              label: <Link to="/quan-ly-don-vi/cau-hinh">Cấu hình đơn vị</Link>,
+              label: <Link to="/quan-ly-don-vi/cau-hinh">{t('menu.unitConfigs')}</Link>,
             }
             : null,
         ].filter(Boolean) as MenuProps['items'],
@@ -337,24 +340,24 @@ export const AppLayout: React.FC = observer(() => {
       ? {
         key: '/quan-ly-nguoi-dung',
         icon: <SettingOutlined />,
-        label: 'Người dùng',
+        label: t('appLayout.nguoi_dung'),
         children: [
           authStore.kiemTraQuyen(QUYEN.NHOM_NGUOI_DUNG)
             ? {
               key: '/quan-ly-nguoi-dung/nguoi-dung',
-              label: <Link to="/quan-ly-nguoi-dung/nguoi-dung">Quản lý tài khoản</Link>,
+              label: <Link to="/quan-ly-nguoi-dung/nguoi-dung">{t('menu.accounts')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.NHOM_VAI_TRO)
             ? {
               key: '/quan-ly-nguoi-dung/vai-tro',
-              label: <Link to="/quan-ly-nguoi-dung/vai-tro">Vai trò & Quyền hạn</Link>,
+              label: <Link to="/quan-ly-nguoi-dung/vai-tro">{t('menu.roles')}</Link>,
             }
             : null,
           authStore.kiemTraQuyen(QUYEN.XEM_NHAT_KY_THAO_TAC)
             ? {
               key: '/quan-ly-nguoi-dung/nhat-ky-thao-tac',
-              label: <Link to="/quan-ly-nguoi-dung/nhat-ky-thao-tac">Nhật ký thao tác</Link>,
+              label: <Link to="/quan-ly-nguoi-dung/nhat-ky-thao-tac">{t('menu.auditLogs')}</Link>,
             }
             : null,
         ].filter(Boolean),
@@ -369,13 +372,13 @@ export const AppLayout: React.FC = observer(() => {
     {
       key: 'profile',
       icon: <SolutionOutlined />,
-      label: 'Hồ sơ cá nhân',
+      label: t('appLayout.profile'),
       onClick: () => setIsProfileModalOpen(true),
     },
     {
       key: 'change-password',
       icon: <KeyOutlined />,
-      label: 'Đổi mật khẩu',
+      label: t('appLayout.changePassword'),
       onClick: () => setIsPasswordModalOpen(true),
     },
     {
@@ -384,7 +387,7 @@ export const AppLayout: React.FC = observer(() => {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Đăng xuất tài khoản',
+      label: t('appLayout.logout'),
       danger: true,
       onClick: handleDangXuat,
     },
@@ -422,51 +425,51 @@ export const AppLayout: React.FC = observer(() => {
   // Chuyển đổi tên đường dẫn sang tiếng Việt có dấu trên Breadcrumb
   const translatePath = (path: string) => {
     const maps: Record<string, string> = {
-      'tai-san': 'Quản lý Tài sản',
-      'hang-san-xuat': 'Hãng sản xuất',
-      'loai-tai-san': 'Loại tài sản',
-      'danh-muc-tai-san': 'Danh mục tài sản',
-      'mau-ma-tai-san': 'Mẫu mã tài sản',
-      'tai-san-phan-cung': 'Mẫu mã phần cứng',
-      'tai-san-phan-mem': 'Mẫu mã phần mềm',
-      'danh-sach-thiet-bi-phan-cung': 'Thiết bị phần cứng',
-      'danh-sach-thiet-bi-phan-mem': 'Thiết bị phần mềm',
-      'linh-kien-phan-cung': 'Linh kiện phần cứng',
-      'danh-muc-thuoc-tinh': 'Danh mục thuộc tính',
-      'lap-rap-linh-kien': 'Lắp ráp linh kiện',
-      'nha-cung-cap': 'Nhà cung cấp',
-      'don-hang-mua-sam': 'Đơn hàng mua săm',
-      'phieu-nhap-tai-san': 'Phiếu nhập tài sản',
-      'nguoi-dung': 'Quản lý tài khoản',
-      'vai-tro': 'Vai trò & Quyền hạn',
-      'quan-ly-don-vi': 'Quản lý đơn vị',
-      'don-vi': 'Đơn vị',
-      'phong-ban': 'Phòng ban',
-      'vi-tri': 'Vị trí & Kho bãi',
-      'danh-muc': 'Danh mục hệ thống',
-      'cau-hinh': 'Cấu hình đơn vị',
-      'vong-doi': 'Vòng đời tài sản',
-      'cap-phat': 'Cấp phát tài sản',
-      'thu-hoi': 'Thu hồi tài sản',
-      'dieu-chuyen': "Điều chuyển tài sản",
-      'thanh-ly': 'Thanh lý tài sản',
-      'quan-ly-nguoi-dung': 'Quản lý người dùng',
-      'mua-sam': 'Quản lý mua sắm',
-      'thiet-bi': 'Thiết bị thực',
-      'nhat-ky-thao-tac': 'Nhật ký thao tác',
-      'bao-tri': "Bảo hành & bảo trì",
-      'ke-hoach': 'Kế hoạch bảo trì',
-      'sua-chua': 'Phiếu sửa chữa',
-      'kiem-ke': 'Kiểm kê tài sản',
-      'dot-kiem-ke': "Đợt kiểm kê",
-      'phieu-kiem-ke': 'Phiếu kiểm kê',
+      'tai-san': t('appLayout.quan_ly_tai_san'),
+      'hang-san-xuat': t('taiSanPhanMemPage.hang_san_xuat'),
+      'loai-tai-san': t('baoCaoPage.loai_tai_san'),
+      'danh-muc-tai-san': t('taiSanPhanMemFormModal.danh_muc_tai_san'),
+      'mau-ma-tai-san': t('menu.assetModels'),
+      'tai-san-phan-cung': t('menu.hardwareModels'),
+      'tai-san-phan-mem': t('menu.softwareModels'),
+      'danh-sach-thiet-bi-phan-cung': t('phieuSuaChuaFormModal.thiet_bi_phan_cung'),
+      'danh-sach-thiet-bi-phan-mem': t('menu.softwareLicenses'),
+      'linh-kien-phan-cung': t('phieuCapPhatFormModal.linh_kien_phan_cung'),
+      'danh-muc-thuoc-tinh': t('menu.attributes'),
+      'lap-rap-linh-kien': t('menu.assembly'),
+      'nha-cung-cap': t('donHangMuaSamPage.nha_cung_cap'),
+      'don-hang-mua-sam': t('appLayout.don_hang_mua_sam'),
+      'phieu-nhap-tai-san': t('appLayout.phieu_nhap_tai_san'),
+      'nguoi-dung': t('menu.accounts'),
+      'vai-tro': t('menu.roles'),
+      'quan-ly-don-vi': t('menu.unitManagement'),
+      'don-vi': t('menu.units'),
+      'phong-ban': t('phieuKiemKePage.phong_ban'),
+      'vi-tri': t('menu.locations'),
+      'danh-muc': t('menu.systemConfigs'),
+      'cau-hinh': t('menu.unitConfigs'),
+      'vong-doi': t('menu.lifecycle'),
+      'cap-phat': t('menu.allocation'),
+      'thu-hoi': t('menu.revocation'),
+      'dieu-chuyen': t('menu.transfer'),
+      'thanh-ly': t('menu.liquidation'),
+      'quan-ly-nguoi-dung': t('menu.userManagement'),
+      'mua-sam': t('menu.procurement'),
+      'thiet-bi': t('menu.actualAssets'),
+      'nhat-ky-thao-tac': t('menu.auditLogs'),
+      'bao-tri': t('menu.warrantyMaintenance'),
+      'ke-hoach': t('menu.maintenancePlans'),
+      'sua-chua': t('menu.repairTickets'),
+      'kiem-ke': t('menu.inventory'),
+      'dot-kiem-ke': t('menu.inventoryRounds'),
+      'phieu-kiem-ke': t('menu.inventoryTickets'),
     };
     return maps[path] || path;
   };
 
   const pathParts = location.pathname.split('/').filter(Boolean);
   const breadcrumbItems = [
-    { title: <Link to="/">Trang chủ</Link> },
+    { title: <Link to="/">{t('common.home')}</Link> },
     ...pathParts.map((part, i) => ({
       title: <Link to={`/${pathParts.slice(0, i + 1).join('/')}`}>{translatePath(part)}</Link>,
     })),
@@ -559,7 +562,7 @@ export const AppLayout: React.FC = observer(() => {
             {/* Phải: Dark Mode + Role Selector + Profile */}
             <Space size="middle">
               {/* Bộ chuyển đổi giao diện Sáng/Tối */}
-              <Tooltip title={isDarkMode ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'}>
+              <Tooltip title={isDarkMode ? t('common.switch_light') : t('common.switch_dark')}>
                 <Button
                   type="text"
                   icon={isDarkMode ? <SunOutlined style={{ color: '#fadb14', fontSize: 16 }} /> : <MoonOutlined style={{ fontSize: 16 }} />}
@@ -567,7 +570,7 @@ export const AppLayout: React.FC = observer(() => {
                 />
               </Tooltip>
 
-
+              <LanguageSwitcher />
 
               <Dropdown menu={{ items: avatarMenuItems }} trigger={['click']}>
                 <Space style={{ cursor: 'pointer' }}>
@@ -594,7 +597,7 @@ export const AppLayout: React.FC = observer(() => {
 
         {/* ===== MODAL: HỒ SƠ CÁ NHÂN (Tiếng Việt) ===== */}
         <Modal
-          title="Hồ sơ tài khoản cá nhân"
+          title={t('appLayout.profileTitle')}
           open={isProfileModalOpen}
           onCancel={() => setIsProfileModalOpen(false)}
           footer={[
@@ -605,25 +608,25 @@ export const AppLayout: React.FC = observer(() => {
         >
           {authStore.currentUserProfile ? (
             <Descriptions bordered column={1} size="small" style={{ marginTop: 16 }}>
-              <Descriptions.Item label="Họ và tên">{authStore.tenNguoiDung}</Descriptions.Item>
-              <Descriptions.Item label="Địa chỉ Email">{authStore.currentUserProfile.email || 'Chưa thiết lập'}</Descriptions.Item>
-              <Descriptions.Item label="Số điện thoại">{authStore.currentUserProfile.soDienThoai || 'Chưa thiết lập'}</Descriptions.Item>
-              <Descriptions.Item label="Chức danh">{authStore.currentUserProfile.chucVu || 'Chuyên viên kỹ thuật'}</Descriptions.Item>
-              <Descriptions.Item label="Đơn vị phòng ban">{authStore.currentUserProfile.tenPhongBan || 'Phòng ban mặc định'}</Descriptions.Item>
-              <Descriptions.Item label="Quyền hạn đang phân bổ">
+              <Descriptions.Item label={t('appLayout.fullName')}>{authStore.tenNguoiDung}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.email')}>{t('appLayout.authstore_currentuserprofile_email_chua_thiet')}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.phone')}>{t('appLayout.authstore_currentuserprofile_sodienthoai_chua_thiet')}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.title')}>{t('appLayout.authstore_currentuserprofile_chucvu_chuyen_vien')}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.department')}>{t('appLayout.authstore_currentuserprofile_tenphongban_phong_ban')}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.roles')}>
                 {authStore.danhSachQuyenHan.map((role) => (
                   <Tag color="purple" key={role} style={{ marginBottom: 4 }}>{role}</Tag>
                 ))}
               </Descriptions.Item>
             </Descriptions>
           ) : (
-            <Text type="secondary">Không tải được thông tin từ máy chủ.</Text>
+            <Text type="secondary">{t('appLayout.loadFailed')}</Text>
           )}
         </Modal>
 
         {/* ===== MODAL: ĐỔI MẬT KHẨU (Tiếng Việt) ===== */}
         <Modal
-          title="Thay đổi mật khẩu tài khoản"
+          title={t('appLayout.changePasswordTitle')}
           open={isPasswordModalOpen}
           onCancel={() => setIsPasswordModalOpen(false)}
           footer={null}
@@ -631,24 +634,24 @@ export const AppLayout: React.FC = observer(() => {
           <Form form={formDoiMatKhau} onFinish={handleDoiMatKhau} layout="vertical" style={{ marginTop: 16 }}>
             <Form.Item
               name="matKhauCu"
-              label="Mật khẩu hiện tại"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
+              label={t('appLayout.currentPassword')}
+              rules={[{ required: true, message: t('appLayout.currentPasswordRequired') }]}
             >
-              <Input.Password prefix={<KeyOutlined />} placeholder="Nhập mật khẩu hiện tại" />
+              <Input.Password prefix={<KeyOutlined />} placeholder={t('appLayout.currentPasswordPlaceholder')} />
             </Form.Item>
             <Form.Item
               name="matKhauMoi"
-              label="Mật khẩu mới"
+              label={t('appLayout.newPassword')}
               rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-                { min: 6, message: 'Mật khẩu phải dài tối thiểu 6 ký tự!' }
+                { required: true, message: t('appLayout.newPasswordRequired') },
+                { min: 6, message: t('appLayout.newPasswordMinLength') }
               ]}
             >
-              <Input.Password prefix={<KeyOutlined />} placeholder="Nhập mật khẩu mới" />
+              <Input.Password prefix={<KeyOutlined />} placeholder={t('appLayout.newPasswordPlaceholder')} />
             </Form.Item>
             <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
               <Space>
-                <Button onClick={() => setIsPasswordModalOpen(false)}>Hủy bỏ</Button>
+                <Button onClick={() => setIsPasswordModalOpen(false)}>{t('appLayout.cancel')}</Button>
                 <Button type="primary" htmlType="submit">
                   Xác nhận thay đổi
                 </Button>

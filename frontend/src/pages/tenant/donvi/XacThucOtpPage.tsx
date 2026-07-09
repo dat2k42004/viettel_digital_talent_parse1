@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Button, Typography, message } from 'antd';
 import { MailOutlined, KeyOutlined } from '@ant-design/icons';
@@ -8,6 +9,7 @@ import type { XacThucOtpRequest } from '../../../api-generated/models/xacThucOtp
 const { Title, Paragraph, Text } = Typography;
 
 export const XacThucOtpPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [form] = Form.useForm<XacThucOtpRequest>();
@@ -30,13 +32,13 @@ export const XacThucOtpPage: React.FC = () => {
       });
 
       if (res.code === 200) {
-        message.success(res.message || 'Xác thực OTP và kích hoạt tài khoản đơn vị thành công!');
+        message.success(res.message || t('xacThucOtpPage.xac_thuc_otp_va'));
         navigate('/login');
       } else {
-        message.error(res.message || 'Mã OTP không chính xác hoặc đã hết hạn!');
+        message.error(res.message || t('xacThucOtpPage.ma_otp_khong_chinh'));
       }
     } catch (error: any) {
-      message.error(error?.message || 'Xác thực OTP thất bại!');
+      message.error(error?.message || t('xacThucOtpPage.xac_thuc_otp_that'));
     } finally {
       setLoading(false);
     }
@@ -77,10 +79,10 @@ export const XacThucOtpPage: React.FC = () => {
         >
           <Form.Item
             name="email"
-            label="Địa chỉ email đăng ký"
+            label={t('xacThucOtpPage.dia_chi_email_dang')}
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' }
+              { required: true, message: t('xacThucOtpPage.vui_long_nhap_email') },
+              { type: 'email', message: t('xacThucOtpPage.email_khong_hop_le') }
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="admin@congty.com" disabled={!!emailFromState} />
@@ -88,13 +90,13 @@ export const XacThucOtpPage: React.FC = () => {
 
           <Form.Item
             name="otp"
-            label="Mã OTP xác thực"
+            label={t('xacThucOtpPage.ma_otp_xac_thuc')}
             rules={[
-              { required: true, message: 'Vui lòng nhập mã OTP!' },
-              { len: 6, message: 'Mã OTP phải có độ dài đúng 6 số!' }
+              { required: true, message: t('xacThucOtpPage.vui_long_nhap_ma') },
+              { len: 6, message: t('xacThucOtpPage.ma_otp_phai_co') }
             ]}
           >
-            <Input prefix={<KeyOutlined />} placeholder="Nhập 6 ký số OTP" maxLength={6} style={{ letterSpacing: 4, textAlign: 'center', fontSize: 16 }} />
+            <Input prefix={<KeyOutlined />} placeholder={t('xacThucOtpPage.nhap_6_ky_so')} maxLength={6} style={{ letterSpacing: 4, textAlign: 'center', fontSize: 16 }} />
           </Form.Item>
 
           <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
@@ -102,9 +104,9 @@ export const XacThucOtpPage: React.FC = () => {
               Kích hoạt đơn vị
             </Button>
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <Link to="/dang-ky">Quay lại đăng ký</Link>
+              <Link to="/dang-ky">{t('xacThucOtpPage.quay_lai_dang_ky')}</Link>
               <Text type="secondary" style={{ margin: '0 8px' }}>|</Text>
-              <Link to="/login">Đăng nhập</Link>
+              <Link to="/login">{t('xacThucOtpPage.dang_nhap')}</Link>
             </div>
           </Form.Item>
         </Form>

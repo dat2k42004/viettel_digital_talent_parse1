@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Popconfirm, Dropdown, Row, Col } from 'antd';
 import type { MenuProps } from 'antd';
@@ -13,6 +14,7 @@ import { CauHinhDonViFormModal } from './CauHinhDonViFormModal';
 const { Title, Text } = Typography;
 
 export const CauHinhDonViPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachCauHinh, setDanhSachCauHinh] = useState<CauHinhDonViResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -39,7 +41,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách cấu hình của đơn vị!');
+      message.error(e?.message || t('cauHinhDonViPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch((e) => message.error('Không thể tải lại danh sách!'))
+      .catch((e) => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -75,24 +77,24 @@ export const CauHinhDonViPage: React.FC = observer(() => {
       if (selectedRecord && selectedRecord.id) {
         const res = await capNhat25(selectedRecord.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật cấu hình đơn vị thành công!');
+          message.success(t('cauHinhDonViPage.cap_nhat_cau_hinh'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi26(values);
         if (res.code === 200) {
-          message.success('Thêm cấu hình riêng cho đơn vị thành công!');
+          message.success(t('cauHinhDonViPage.them_cau_hinh_rieng'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Lưu thất bại!');
+          message.error(res.message || t('cauHinhDonViPage.luu_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -100,35 +102,35 @@ export const CauHinhDonViPage: React.FC = observer(() => {
     try {
       const res = await xoaMem26(id);
       if (res.code === 200) {
-        message.success('Xóa cấu hình thành công!');
+        message.success(t('danhMucCauHinhPage.xoa_cau_hinh_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa cấu hình!');
+      message.error(e?.message || t('danhMucCauHinhPage.khong_the_xoa_cau'));
     }
   };
 
   const columns = [
     {
-      title: 'Mã cấu hình',
+      title: t('danhMucCauHinhPage.ma_cau_hinh'),
       dataIndex: 'maCauHinh',
       key: 'maCauHinh',
       width: 220,
     },
     {
-      title: 'Tên cấu hình',
+      title: t('danhMucCauHinhPage.ten_cau_hinh'),
       dataIndex: 'tenCauHinh',
       key: 'tenCauHinh',
     },
     {
-      title: 'Giá trị cấu hình riêng',
+      title: t('cauHinhDonViPage.gia_tri_cau_hinh'),
       dataIndex: 'giaTriCauHinh',
       key: 'giaTriCauHinh',
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 110,
       render: (_: any, record: CauHinhDonViResponse) => {
@@ -136,7 +138,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_CAU_HINH_DON_VI)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedRecord(record);
@@ -149,13 +151,13 @@ export const CauHinhDonViPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa cấu hình riêng này? Hệ thống sẽ sử dụng giá trị mặc định."
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('cauHinhDonViPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoaCauHinh(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa cấu hình</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('danhMucCauHinhPage.xoa_cau_hinh')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -204,7 +206,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={16}>
               <Input
-                placeholder="Tìm kiếm theo tên cấu hình..."
+                placeholder={t('cauHinhDonViPage.tim_kiem_theo_ten')}
                 value={searchTen}
                 onChange={(e) => setSearchTen(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -215,7 +217,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

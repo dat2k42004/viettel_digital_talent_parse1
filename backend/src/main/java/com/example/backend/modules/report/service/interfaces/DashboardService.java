@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface DashboardService {
 
-     ThongKeTongQuanDashboardResponse layThongKeDonViAdmin();
+     ThongKeTongQuanDashboardResponse layThongKeDonViAdmin(Long idDonVi);
 
      Map<String, Object> layThongKeToanSanSuperAdmin();
 }

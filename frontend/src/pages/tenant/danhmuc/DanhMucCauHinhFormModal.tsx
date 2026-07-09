@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Select, Button, Row, Col } from 'antd';
 import type { DanhMucCauHinhResponse } from '../../../api-generated/models/danhMucCauHinhResponse';
@@ -16,6 +17,7 @@ export const DanhMucCauHinhFormModal: React.FC<DanhMucCauHinhFormModalProps> = (
   selectedRecord,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DanhMucCauHinhRequest>();
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export const DanhMucCauHinhFormModal: React.FC<DanhMucCauHinhFormModalProps> = (
 
   return (
     <Modal
-      title={selectedRecord ? 'Cập nhật danh mục cấu hình' : 'Thêm mới danh mục cấu hình'}
+      title={selectedRecord ? t('danhMucCauHinhFormModal.cap_nhat_danh_muc') : t('danhMucCauHinhFormModal.them_moi_danh_muc')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -62,35 +64,35 @@ export const DanhMucCauHinhFormModal: React.FC<DanhMucCauHinhFormModalProps> = (
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Form.Item
           name="maCauHinh"
-          label="Mã định danh cấu hình"
-          rules={[{ required: true, message: 'Vui lòng nhập mã định danh!' }]}
+          label={t('danhMucCauHinhFormModal.ma_dinh_danh_cau')}
+          rules={[{ required: true, message: t('danhMucCauHinhFormModal.vui_long_nhap_ma') }]}
         >
-          <Input placeholder="Ví dụ: SYSTEM_SMTP_PORT" disabled={!!selectedRecord} />
+          <Input placeholder={t('danhMucCauHinhFormModal.vi_du_system_smtp_port')} disabled={!!selectedRecord} />
         </Form.Item>
 
         <Form.Item
           name="tenCauHinh"
-          label="Tên cấu hình"
-          rules={[{ required: true, message: 'Vui lòng nhập tên cấu hình!' }]}
+          label={t('danhMucCauHinhPage.ten_cau_hinh')}
+          rules={[{ required: true, message: t('danhMucCauHinhFormModal.vui_long_nhap_ten') }]}
         >
-          <Input placeholder="Ví dụ: Cổng SMTP Server" />
+          <Input placeholder={t('danhMucCauHinhFormModal.vi_du_cong_smtp')} />
         </Form.Item>
 
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
               name="nhomCauHinh"
-              label="Nhóm cấu hình"
-              rules={[{ required: true, message: 'Vui lòng chọn nhóm cấu hình!' }]}
+              label={t('danhMucCauHinhFormModal.nhom_cau_hinh')}
+              rules={[{ required: true, message: t('danhMucCauHinhFormModal.vui_long_chon_nhom') }]}
             >
               <Select
-                placeholder="Chọn nhóm"
+                placeholder={t('danhMucCauHinhFormModal.chon_nhom')}
                 options={[
-                  { value: 'HE_THONG', label: 'Cấu hình Hệ thống' },
-                  { value: 'BMTT', label: 'Bảo mật & Xác thực' },
-                  { value: 'EMAIL', label: 'Email & Thông báo' },
-                  { value: 'TIEU_CHUAN', label: 'Tiêu chuẩn & Quy trình' },
-                  { value: 'KHAC', label: 'Khác' },
+                  { value: 'HE_THONG', label: t('danhMucCauHinhFormModal.cau_hinh_he_thong') },
+                  { value: 'BMTT', label: t('danhMucCauHinhFormModal.bao_mat_xac_thuc') },
+                  { value: 'EMAIL', label: t('danhMucCauHinhFormModal.email_thong_bao') },
+                  { value: 'TIEU_CHUAN', label: t('danhMucCauHinhFormModal.tieu_chuan_quy_trinh') },
+                  { value: 'KHAC', label: t('viTriFormModal.khac') },
                 ]}
               />
             </Form.Item>
@@ -98,28 +100,28 @@ export const DanhMucCauHinhFormModal: React.FC<DanhMucCauHinhFormModalProps> = (
           <Col span={12}>
             <Form.Item
               name="loaiDuLieu"
-              label="Loại dữ liệu"
-              rules={[{ required: true, message: 'Vui lòng chọn loại dữ liệu!' }]}
+              label={t('danhMucCauHinhPage.loai_du_lieu')}
+              rules={[{ required: true, message: t('danhMucCauHinhFormModal.vui_long_chon_loai') }]}
             >
               <Select
-                placeholder="Chọn loại dữ liệu"
+                placeholder={t('danhMucCauHinhFormModal.chon_loai_du_lieu')}
                 options={[
-                  { value: 'STRING', label: 'Chuỗi ký tự (String)' },
-                  { value: 'NUMBER', label: 'Số (Number)' },
-                  { value: 'BOOLEAN', label: 'Đúng/Sai (Boolean)' },
-                  { value: 'JSON', label: 'Cấu trúc JSON' },
+                  { value: 'STRING', label: t('danhMucCauHinhFormModal.chuoi_ky_tu_string') },
+                  { value: 'NUMBER', label: t('danhMucCauHinhFormModal.so_number') },
+                  { value: 'BOOLEAN', label: t('danhMucCauHinhFormModal.dungsai_boolean') },
+                  { value: 'JSON', label: t('danhMucCauHinhFormModal.cau_truc_json') },
                 ]}
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item name="giaTriMacDinh" label="Giá trị mặc định ban đầu">
-          <Input placeholder="Ví dụ: 587 hoặc true" />
+        <Form.Item name="giaTriMacDinh" label={t('danhMucCauHinhFormModal.gia_tri_mac_dinh')}>
+          <Input placeholder={t('danhMucCauHinhFormModal.vi_du_587_hoac')} />
         </Form.Item>
 
-        <Form.Item name="moTaCauHinh" label="Mô tả chức năng">
-          <Input.TextArea rows={3} placeholder="Mô tả công dụng và hướng dẫn cấu hình của trường này..." />
+        <Form.Item name="moTaCauHinh" label={t('danhMucCauHinhFormModal.mo_ta_chuc_nang')}>
+          <Input.TextArea rows={3} placeholder={t('danhMucCauHinhFormModal.mo_ta_cong_dung')} />
         </Form.Item>
       </Form>
     </Modal>

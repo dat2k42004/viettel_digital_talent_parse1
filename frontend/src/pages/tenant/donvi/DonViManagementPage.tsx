@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Popconfirm, Dropdown, Row, Col, Select, Descriptions, Modal } from 'antd';
 import type { MenuProps } from 'antd';
@@ -17,6 +18,7 @@ import { DonViCreateModal } from './DonViCreateModal';
 const { Title, Text } = Typography;
 
 export const DonViManagementPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachDonVi, setDanhSachDonVi] = useState<DonViResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -43,14 +45,14 @@ export const DonViManagementPage: React.FC = observer(() => {
     try {
       const res = await dangKyDonVi(values);
       if (res.code === 200) {
-        message.success('Tạo đơn vị thành công, vui lòng nhắc khách hàng check email lấy mã OTP');
+        message.success(t('donViManagementPage.tao_don_vi_thanh'));
         setIsCreateOpen(false);
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Tạo đơn vị thất bại!');
+        message.error(res.message || t('donViManagementPage.tao_don_vi_that'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi tạo đơn vị!');
+      message.error(e?.message || t('donViManagementPage.co_loi_xay_ra_khi_tao_don_vi'));
     } finally {
       setCreateLoading(false);
     }
@@ -72,7 +74,7 @@ export const DonViManagementPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách đơn vị!');
+      message.error(e?.message || t('donViManagementPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,7 @@ export const DonViManagementPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch((e) => message.error('Không thể tải lại danh sách!'))
+      .catch((e) => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -114,7 +116,7 @@ export const DonViManagementPage: React.FC = observer(() => {
         setIsDetailOpen(true);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể lấy thông tin chi tiết đơn vị!');
+      message.error(e?.message || t('donViManagementPage.khong_the_lay_thong'));
     }
   };
 
@@ -123,14 +125,14 @@ export const DonViManagementPage: React.FC = observer(() => {
     try {
       const res = await capNhatThongTin(selectedDonVi.id, values);
       if (res.code === 200) {
-        message.success('Cập nhật thông tin đơn vị thành công!');
+        message.success(t('donViManagementPage.cap_nhat_thong_tin'));
         setIsFormOpen(false);
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi cập nhật!');
+      message.error(e?.message || t('donViManagementPage.co_loi_xay_ra_khi_cap_nhat'));
     }
   };
 
@@ -139,14 +141,14 @@ export const DonViManagementPage: React.FC = observer(() => {
     try {
       const res = await giaHanHopDong(selectedDonVi.id, values);
       if (res.code === 200) {
-        message.success('Gia hạn hợp đồng đơn vị thành công!');
+        message.success(t('donViManagementPage.gia_han_hop_dong'));
         setIsGiaHanOpen(false);
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Gia hạn thất bại!');
+        message.error(res.message || t('donViManagementPage.gia_han_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi gia hạn!');
+      message.error(e?.message || t('donViManagementPage.co_loi_xay_ra_khi_gia_han'));
     }
   };
 
@@ -157,13 +159,13 @@ export const DonViManagementPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai13(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Mở khóa' : 'Khóa'} đơn vị thành công!`);
+        message.success(t('donViManagementPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.mo_khoa') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Thay đổi trạng thái thất bại!');
+        message.error(res.message || t('donViManagementPage.thay_doi_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -171,24 +173,24 @@ export const DonViManagementPage: React.FC = observer(() => {
     try {
       const res = await xoaMem21(id);
       if (res.code === 200) {
-        message.success('Xóa đơn vị thành công!');
+        message.success(t('donViManagementPage.xoa_don_vi_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa đơn vị!');
+      message.error(e?.message || t('donViManagementPage.khong_the_xoa_don'));
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Đã tạm khóa</Tag>;
+        return <Tag color="red">{t('donViManagementPage.da_tam_khoa')}</Tag>;
       case 'CHO_XAC_THUC':
-        return <Tag color="orange">Chờ xác thực</Tag>;
+        return <Tag color="orange">{t('donViManagementPage.cho_xac_thuc')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -196,7 +198,7 @@ export const DonViManagementPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã đơn vị',
+      title: t('donViManagementPage.ma_don_vi'),
       dataIndex: 'maDonVi',
       key: 'maDonVi',
       width: 140,
@@ -204,51 +206,51 @@ export const DonViManagementPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên pháp lý',
+      title: t('donViManagementPage.ten_phap_ly'),
       dataIndex: 'tenPhapLy',
       key: 'tenPhapLy',
     },
     {
-      title: 'Mã số thuế',
+      title: t('donViManagementPage.ma_so_thue'),
       dataIndex: 'maSoThue',
       key: 'maSoThue',
       width: 120,
     },
     {
-      title: 'Tên miền',
+      title: t('donViManagementPage.ten_mien'),
       dataIndex: 'tenMienHeThong',
       key: 'tenMienHeThong',
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hạn hợp đồng',
+      title: t('donViManagementPage.han_hop_dong'),
       dataIndex: 'thoiGianHetHanHopDong',
       key: 'thoiGianHetHanHopDong',
       width: 130,
-      render: (val: string) => val ? new Date(val).toLocaleDateString('vi-VN') : 'Không giới hạn',
+      render: (val: string) => val ? new Date(val).toLocaleDateString('vi-VN') : t('viTriManagementPage.khong_gioi_han'),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 110,
       render: (_: any, record: DonViResponse) => {
         const items: MenuProps['items'] = [
           {
             key: 'detail',
-            label: 'Xem chi tiết',
+            label: t('donViManagementPage.xem_chi_tiet'),
             icon: <EyeOutlined />,
             onClick: () => handleOpenDetail(record.id!),
           },
           authStore.kiemTraQuyen(QUYEN.SUA_DON_VI)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedDonVi(record);
@@ -259,7 +261,7 @@ export const DonViManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.KHOA_DON_VI) && authStore.laSuperAdmin
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa đơn vị' : 'Mở khóa',
+              label: record.trangThai === 'HOAT_DONG' ? t('donViManagementPage.khoa_don_vi') : t('viTriManagementPage.mo_khoa'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -267,7 +269,7 @@ export const DonViManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.GIA_HAN_DON_VI) && authStore.laSuperAdmin
             ? {
               key: 'gia_han',
-              label: 'Gia hạn',
+              label: t('donViManagementPage.gia_han'),
               icon: <PlusOutlined />,
               onClick: () => {
                 setSelectedDonVi(record);
@@ -280,13 +282,13 @@ export const DonViManagementPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa đơn vị này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('donViManagementPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoaDonVi(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa đơn vị</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('donViManagementPage.xoa_don_vi')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -332,7 +334,7 @@ export const DonViManagementPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={6}>
               <Input
-                placeholder="Tìm tên pháp lý đơn vị..."
+                placeholder={t('donViManagementPage.tim_ten_phap_ly')}
                 value={searchTen}
                 onChange={(e) => setSearchTen(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -340,29 +342,29 @@ export const DonViManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={5}>
               <Input
-                placeholder="Mã đơn vị..."
+                placeholder={t('donViManagementPage.ma_don_vi_1')}
                 value={searchMa}
                 onChange={(e) => setSearchMa(e.target.value)}
               />
             </Col>
             <Col xs={24} md={5}>
               <Input
-                placeholder="Mã số thuế..."
+                placeholder={t('donViManagementPage.ma_so_thue_1')}
                 value={searchMaSoThue}
                 onChange={(e) => setSearchMaSoThue(e.target.value)}
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Trạng thái"
+                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                 style={{ width: '100%' }}
                 value={searchTrangThai}
                 onChange={setSearchTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
-                  { value: 'CHO_XAC_THUC', label: 'Chờ xác thực' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
+                  { value: 'CHO_XAC_THUC', label: t('donViManagementPage.cho_xac_thuc') },
                 ]}
               />
             </Col>
@@ -371,7 +373,7 @@ export const DonViManagementPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>
@@ -423,7 +425,7 @@ export const DonViManagementPage: React.FC = observer(() => {
         />
 
         <Modal
-          title="Thông tin chi tiết Đơn vị"
+          title={t('donViManagementPage.thong_tin_chi_tiet')}
           open={isDetailOpen}
           onCancel={() => {
             setIsDetailOpen(false);
@@ -438,25 +440,25 @@ export const DonViManagementPage: React.FC = observer(() => {
         >
           {detailDonVi && (
             <Descriptions bordered column={2} size="small" style={{ marginTop: 16 }}>
-              <Descriptions.Item label="Mã đơn vị">{detailDonVi.maDonVi}</Descriptions.Item>
-              <Descriptions.Item label="Mã số thuế">{detailDonVi.maSoThue || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Tên pháp lý" span={2}>{detailDonVi.tenPhapLy}</Descriptions.Item>
-              <Descriptions.Item label="Tên viết tắt" span={2}>{detailDonVi.tenThuongMai || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Tên miền">{detailDonVi.tenMienHeThong}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ma_don_vi')}>{detailDonVi.maDonVi}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ma_so_thue')}>{detailDonVi.maSoThue || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ten_phap_ly')} span={2}>{detailDonVi.tenPhapLy}</Descriptions.Item>
+              <Descriptions.Item label={t('phongBanManagementPage.ten_viet_tat')} span={2}>{detailDonVi.tenThuongMai || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ten_mien')}>{detailDonVi.tenMienHeThong}</Descriptions.Item>
               <Descriptions.Item label="Website">{detailDonVi.duongDanWebsite || 'N/A'}</Descriptions.Item>
               <Descriptions.Item label="Email">{detailDonVi.emailChinhThuc || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="SĐT di động">{detailDonVi.soDienThoaiDiDong || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="SĐT cố định">{detailDonVi.soDienThoaiCoDinh || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Người đại diện">{[detailDonVi.hoNguoiDaiDien, detailDonVi.tenDemNguoiDaiDien, detailDonVi.tenNguoiDaiDien].filter(Boolean).join(' ') || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Chức vụ đại diện">{detailDonVi.chucVuNguoiDaiDien || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Hạn hợp đồng">{detailDonVi.thoiGianHetHanHopDong ? new Date(detailDonVi.thoiGianHetHanHopDong).toLocaleDateString('vi-VN') : 'Không giới hạn'}</Descriptions.Item>
-              <Descriptions.Item label="Tỉnh/Thành phố">{detailDonVi.tinhThanhPho || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Quận/Huyện">{detailDonVi.quanHuyen || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Phường/Xã">{detailDonVi.phuongXa || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Địa chỉ cụ thể" span={2}>{detailDonVi.soNhaTenDuong || 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Ngày thành lập">{detailDonVi.thoiGianThanhLap ? new Date(detailDonVi.thoiGianThanhLap).toLocaleDateString('vi-VN') : 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Ngày bắt đầu HĐ">{detailDonVi.thoiGianBatDauHopDong ? new Date(detailDonVi.thoiGianBatDauHopDong).toLocaleDateString('vi-VN') : 'N/A'}</Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">{renderStatus(detailDonVi.trangThai || '')}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.sdt_di_dong')}>{detailDonVi.soDienThoaiDiDong || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.sdt_co_dinh')}>{detailDonVi.soDienThoaiCoDinh || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.nguoi_dai_dien')}>{[detailDonVi.hoNguoiDaiDien, detailDonVi.tenDemNguoiDaiDien, detailDonVi.tenNguoiDaiDien].filter(Boolean).join(' ') || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.chuc_vu_dai_dien')}>{detailDonVi.chucVuNguoiDaiDien || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.han_hop_dong')}>{t('donViManagementPage.detaildonvithoigianhethanhopdong_new_datedetaildonvithoigianhethanhopdongtolocaledatestringvivn_khong')}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.tinhthanh_pho')}>{detailDonVi.tinhThanhPho || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.quanhuyen')}>{detailDonVi.quanHuyen || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.phuongxa')}>{detailDonVi.phuongXa || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.dia_chi_cu_the')} span={2}>{detailDonVi.soNhaTenDuong || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ngay_thanh_lap')}>{detailDonVi.thoiGianThanhLap ? new Date(detailDonVi.thoiGianThanhLap).toLocaleDateString('vi-VN') : 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('donViManagementPage.ngay_bat_dau_hd')}>{detailDonVi.thoiGianBatDauHopDong ? new Date(detailDonVi.thoiGianBatDauHopDong).toLocaleDateString('vi-VN') : 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label={t('loaiTaiSanFormModal.trang_thai')}>{renderStatus(detailDonVi.trangThai || '')}</Descriptions.Item>
             </Descriptions>
           )}
         </Modal>

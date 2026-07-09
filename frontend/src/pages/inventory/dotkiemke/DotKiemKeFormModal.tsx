@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -21,6 +22,7 @@ export const DotKiemKeFormModal: React.FC<DotKiemKeFormModalProps> = ({
     onSave,
     loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<DotKiemKeRequest>();
     const isView = mode === 'view';
 
@@ -53,8 +55,8 @@ export const DotKiemKeFormModal: React.FC<DotKiemKeFormModalProps> = ({
     };
 
     const getTitle = () => {
-        if (isView) return 'Chi tiết Đợt kiểm kê tài sản';
-        return selectedRecord ? 'Cập nhật Đợt kiểm kê tài sản' : 'Tạo Đợt kiểm kê tài sản mới';
+        if (isView) return t('dotKiemKeFormModal.chi_tiet_dot_kiem');
+        return selectedRecord ? t('dotKiemKeFormModal.cap_nhat_dot_kiem') : t('dotKiemKeFormModal.tao_dot_kiem_ke_tai_san_moi');
     };
 
     return (
@@ -65,11 +67,11 @@ export const DotKiemKeFormModal: React.FC<DotKiemKeFormModalProps> = ({
             confirmLoading={loading}
             footer={
                 isView ? [
-                    <Button key="close" onClick={onCancel}>Đóng</Button>
+                    <Button key="close" onClick={onCancel}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ] : [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
-                        {selectedRecord ? 'Lưu cập nhật' : 'Tạo đợt kiểm kê'}
+                        {selectedRecord ? t('phieuNhapTaiSanFormModal.luu_cap_nhat') : t('dotKiemKeFormModal.tao_dot_kiem_ke')}
                     </Button>
                 ]
             }
@@ -79,18 +81,18 @@ export const DotKiemKeFormModal: React.FC<DotKiemKeFormModalProps> = ({
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
                 <Form.Item
                     name="tenDotKiemKe"
-                    label="Tên đợt kiểm kê"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên đợt kiểm kê!' }]}
+                    label={t('phieuKiemKePage.ten_dot_kiem_ke')}
+                    rules={[{ required: true, message: t('dotKiemKeFormModal.vui_long_nhap_ten') }]}
                 >
-                    <Input disabled={isView} placeholder="Ví dụ: Đợt kiểm kê tài sản định kỳ năm 2026" />
+                    <Input disabled={isView} placeholder={t('dotKiemKeFormModal.vi_du_dot_kiem')} />
                 </Form.Item>
 
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
                             name="thoiGianBatDauDuKien"
-                            label="Thời gian bắt đầu dự kiến"
-                            rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
+                            label={t('dotKiemKeFormModal.thoi_gian_bat_dau')}
+                            rules={[{ required: true, message: t('phieuSuaChuaFormModal.vui_long_chon_ngay') }]}
                         >
                             <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
                         </Form.Item>
@@ -98,8 +100,8 @@ export const DotKiemKeFormModal: React.FC<DotKiemKeFormModalProps> = ({
                     <Col span={12}>
                         <Form.Item
                             name="thoiGianKetThucDuKien"
-                            label="Thời gian kết thúc dự kiến"
-                            rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
+                            label={t('dotKiemKeFormModal.thoi_gian_ket_thuc')}
+                            rules={[{ required: true, message: t('keHoachBaoTriFormModal.vui_long_chon_ngay') }]}
                         >
                             <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
                         </Form.Item>

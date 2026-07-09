@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Collapse, Checkbox, Row, Col, Tooltip, Typography } from 'antd';
 import type { VaiTroResponse } from '../../../api-generated/models/vaiTroResponse';
@@ -21,6 +22,7 @@ export const RoleMatrixModal: React.FC<RoleMatrixModalProps> = ({
   maTranQuyen,
   onSave
 }) => {
+  const { t } = useTranslation();
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -42,13 +44,13 @@ export const RoleMatrixModal: React.FC<RoleMatrixModalProps> = ({
 
   return (
     <Modal
-      title={`Thiết lập Ma trận quyền hạn: ${selectedRole?.tenVaiTro}`}
+      title={t('roleMatrixModal.thiet_lap_ma_tran_quyen', { tenVaiTro: selectedRole?.tenVaiTro })}
       open={open}
       onCancel={onCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
-      okText="Lưu cấu hình"
-      cancelText="Hủy bỏ"
+      okText={t('roleMatrixModal.luu_cau_hinh')}
+      cancelText={t('appLayout.cancel')}
       width={700}
     >
       <Paragraph type="secondary" style={{ marginTop: 12 }}>

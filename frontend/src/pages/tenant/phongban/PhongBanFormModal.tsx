@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col } from 'antd';
 import type { PhongBanResponse } from '../../../api-generated/models/phongBanResponse';
@@ -16,6 +17,7 @@ export const PhongBanFormModal: React.FC<PhongBanFormModalProps> = ({
   selectedPhongBan,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<PhongBanRequest>();
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export const PhongBanFormModal: React.FC<PhongBanFormModalProps> = ({
 
   return (
     <Modal
-      title={selectedPhongBan ? 'Cập nhật phòng ban' : 'Thêm mới phòng ban'}
+      title={selectedPhongBan ? t('phongBanFormModal.cap_nhat_phong_ban') : t('phongBanFormModal.them_moi_phong_ban')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -61,38 +63,38 @@ export const PhongBanFormModal: React.FC<PhongBanFormModalProps> = ({
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         {selectedPhongBan && (
-          <Form.Item name="maPhongBan" label="Mã phòng ban">
-            <Input disabled placeholder="Mã phòng ban tự động" />
+          <Form.Item name="maPhongBan" label={t('phongBanFormModal.ma_phong_ban')}>
+            <Input disabled placeholder={t('phongBanFormModal.ma_phong_ban_tu')} />
           </Form.Item>
         )}
 
         <Form.Item
           name="tenPhongBan"
-          label="Tên phòng ban"
-          rules={[{ required: true, message: 'Vui lòng nhập tên phòng ban!' }]}
+          label={t('phongBanManagementPage.ten_phong_ban')}
+          rules={[{ required: true, message: t('phongBanFormModal.vui_long_nhap_ten') }]}
         >
-          <Input placeholder="Ví dụ: Phòng Phát triển Phần mềm" />
+          <Input placeholder={t('phongBanFormModal.vi_du_phong_phat')} />
         </Form.Item>
 
-        <Form.Item name="tenVietTat" label="Tên viết tắt">
-          <Input placeholder="Ví dụ: PTPM" />
+        <Form.Item name="tenVietTat" label={t('phongBanManagementPage.ten_viet_tat')}>
+          <Input placeholder={t('phongBanFormModal.vi_du_ptpm')} />
         </Form.Item>
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="emailNhom" label="Email nhóm">
+            <Form.Item name="emailNhom" label={t('phongBanManagementPage.email_nhom')}>
               <Input type="email" placeholder="dev-team@congty.com" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="soHotlinePhong" label="Số Hotline phòng">
-              <Input placeholder="Ví dụ: 024-xxx-xxx" />
+            <Form.Item name="soHotlinePhong" label={t('phongBanFormModal.so_hotline_phong')}>
+              <Input placeholder={t('phongBanFormModal.vi_du_024xxxxxx')} />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item name="moTaChucNang" label="Mô tả chức năng nhiệm vụ">
-          <Input.TextArea rows={3} placeholder="Mô tả tóm tắt chức năng phòng ban..." />
+        <Form.Item name="moTaChucNang" label={t('phongBanFormModal.mo_ta_chuc_nang')}>
+          <Input.TextArea rows={3} placeholder={t('phongBanFormModal.mo_ta_tom_tat')} />
         </Form.Item>
       </Form>
     </Modal>

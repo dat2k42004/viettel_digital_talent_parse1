@@ -70,9 +70,11 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      public PageResponse<BaoCaoTonKhoResponse> layBaoCaoTonKho(BaoCaoFilterRequest request, int page, int size) {
           xacThucQuyenNguoiDungCoSo();
           kiemTraRangBuocThoiGian(request);
-          Long idDonVi = DonViContextHolder.getTenantId();
-
+          final Long idDonVi = DonViContextHolder.getTenantId() != null ? DonViContextHolder.getTenantId() : request.getIdDonVi();
           Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+          if (idDonVi == null) {
+               return PageResponse.from(new PageImpl<>(new ArrayList<>(), pageable, 0));
+          }
 
           Specification<BaoCaoTonKho> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
@@ -138,9 +140,11 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      public PageResponse<BaoCaoCapPhatResponse> layBaoCaoCapPhat(BaoCaoFilterRequest request, int page, int size) {
           xacThucQuyenNguoiDungCoSo();
           kiemTraRangBuocThoiGian(request);
-          Long idDonVi = DonViContextHolder.getTenantId();
-
+          final Long idDonVi = DonViContextHolder.getTenantId() != null ? DonViContextHolder.getTenantId() : request.getIdDonVi();
           Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+          if (idDonVi == null) {
+               return PageResponse.from(new PageImpl<>(new ArrayList<>(), pageable, 0));
+          }
 
           Specification<BaoCaoCapPhat> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
@@ -206,9 +210,11 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      public PageResponse<BaoCaoBaoTriResponse> layBaoCaoBaoTri(BaoCaoFilterRequest request, int page, int size) {
           xacThucQuyenNguoiDungCoSo();
           kiemTraRangBuocThoiGian(request);
-          Long idDonVi = DonViContextHolder.getTenantId();
-
+          final Long idDonVi = DonViContextHolder.getTenantId() != null ? DonViContextHolder.getTenantId() : request.getIdDonVi();
           Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "thoiGianCapNhat"));
+          if (idDonVi == null) {
+               return PageResponse.from(new PageImpl<>(new ArrayList<>(), pageable, 0));
+          }
 
           Specification<BaoCaoBaoTri> spec = (root, query, cb) -> {
                List<Predicate> predicates = new ArrayList<>();
@@ -311,13 +317,16 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      public byte[] xuatFileBaoCao(BaoCaoFilterRequest request, String dinhDangFile) {
           xacThucQuyenNguoiDungCoSo();
           kiemTraRangBuocThoiGian(request);
-          Long idDonVi = DonViContextHolder.getTenantId();
+          final Long idDonVi = DonViContextHolder.getTenantId() != null ? DonViContextHolder.getTenantId() : request.getIdDonVi();
+          if (idDonVi == null) {
+               throw new NghiepVuException("exception.report.select_unit_export", 400);
+          }
 
           boolean laExcel = "xlsx".equalsIgnoreCase(dinhDangFile);
           boolean laPdf = "pdf".equalsIgnoreCase(dinhDangFile);
 
           if (!laExcel && !laPdf) {
-               throw new NghiepVuException("Hệ thống chỉ hỗ trợ xuất file báo cáo định dạng Excel (.xlsx) hoặc PDF (.pdf)", 400);
+               throw new NghiepVuException("exception.report.unsupported_format", 400);
           }
 
           String tenDonVi = "Tất cả đơn vị";
@@ -326,8 +335,8 @@ public class BaoCaoServiceImpl implements BaoCaoService {
           }
 
           try {
-               if (request.getIdViTri() != null) {
-                    // 1. Phân hệ Tồn Kho
+                if ("TON_KHO".equalsIgnoreCase(request.getLoaiBaoCao())) {
+                     // 1. Phân hệ Tồn Kho
                     Specification<BaoCaoTonKho> spec = (root, query, cb) -> {
                          List<Predicate> predicates = new ArrayList<>();
                          if (idDonVi != null) {
@@ -363,8 +372,8 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                          return com.example.backend.modules.report.util.BaoCaoPdfTemplateHelper.taoTemplateTonKhoPdf(dataTonKho, tenDonVi);
                     }
 
-               } else if (request.getIdPhongBan() != null) {
-                    // 2. Phân hệ Cấp Phát Sử Dụng
+                } else if ("CAP_PHAT".equalsIgnoreCase(request.getLoaiBaoCao())) {
+                     // 2. Phân hệ Cấp Phát Sử Dụng
                     Specification<BaoCaoCapPhat> spec = (root, query, cb) -> {
                          List<Predicate> predicates = new ArrayList<>();
                          if (idDonVi != null) {
@@ -437,7 +446,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                }
           } catch (IOException e) {
                log.error("Lỗi khi kết xuất file báo cáo dạng Excel/PDF: {}", e.getMessage(), e);
-               throw new NghiepVuException("Lỗi hệ thống trong quá trình sinh file văn bản dữ liệu", 500);
+               throw new NghiepVuException("exception.report.document_generation_error", 500);
           }
      }
 

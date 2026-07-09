@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker, Modal } from 'antd';
 import type { MenuProps } from 'antd';
@@ -29,6 +30,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const PhieuDieuChuyenPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<any[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -78,7 +80,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                 setTotalCount(pageInfo.total_elements || (res.data as any).totalElements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách phiếu điều chuyển!');
+            message.error(e?.message || t('phieuDieuChuyenPage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -116,7 +118,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết phiếu điều chuyển');
+                message.error(t('phieuDieuChuyenPage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -129,24 +131,24 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat12(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật phiếu thành công!');
+                    message.success(t('phieuSuaChuaPage.cap_nhat_phieu_thanh'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi12(values);
                 if (res.code === 200) {
-                    message.success('Tạo phiếu điều chuyển thành công!');
+                    message.success(t('phieuDieuChuyenPage.tao_phieu_dieu_chuyen'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu!');
+            message.error(e?.message || t('phieuNhapTaiSanPage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -157,57 +159,57 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             let res;
             if (action === 'delete') {
                 res = await xoaMem12(id);
-                if (res.code === 200) message.success('Xóa phiếu thành công!');
+                if (res.code === 200) message.success(t('phieuThuHoiPage.xoa_phieu_thanh_cong'));
             } else if (action === 'yeuCauPheDuyet') {
                 res = await yeuCauPheDuyet3(id);
-                if (res.code === 200) message.success('Đã gửi yêu cầu phê duyệt!');
+                if (res.code === 200) message.success(t('phieuThuHoiPage.da_gui_yeu_cau'));
             } else if (action === 'pheDuyet') {
                 res = await pheDuyet3(id);
-                if (res.code === 200) message.success('Phê duyệt phiếu thành công!');
+                if (res.code === 200) message.success(t('phieuThuHoiPage.phe_duyet_phieu_thanh'));
             } else if (action === 'hoanThanh') {
                 res = await hoanThanh2(id);
-                if (res.code === 200) message.success('Xác nhận hoàn thành điều chuyển thành công!');
+                if (res.code === 200) message.success(t('phieuDieuChuyenPage.xac_nhan_hoan_thanh'));
             }
             if (res?.code === 200) taiDuLieu(currentPage, pageSize);
-            else message.error(res?.message || 'Thao tác thất bại!');
+            else message.error(res?.message || t('phieuThuHoiPage.thao_tac_that_bai'));
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi kết nối tới máy chủ');
+            message.error(e?.message || t('phieuThuHoiPage.loi_ket_noi_toi'));
         }
     };
 
     const handleXacNhanTuChoi = async () => {
         if (!lyDoTuChoi.trim()) {
-            message.warning('Vui lòng nhập lý do từ chối!');
+            message.warning(t('phieuCapPhatPage.vui_long_nhap_ly_do_tu_choi'));
             return;
         }
         try {
             const res = await tuChoiPheDuyet2(rejectId!, { lyDoTuChoi });
             if (res.code === 200) {
-                message.success('Đã từ chối phê duyệt phiếu điều chuyển!');
+                message.success(t('phieuDieuChuyenPage.da_tu_choi_phe'));
                 setIsRejectModalOpen(false);
                 taiDuLieu(currentPage, pageSize);
             } else {
-                message.error(res.message || 'Từ chối thất bại!');
+                message.error(res.message || t('phieuThuHoiPage.tu_choi_that_bai'));
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi kết nối tới máy chủ');
+            message.error(e?.message || t('phieuThuHoiPage.loi_ket_noi_toi'));
         }
     };
 
     const renderStatus = (status: string) => {
         switch (status) {
-            case 'TAO_MOI': return <Tag color="default">Tạo mới</Tag>;
-            case 'GUI_PHE_DUYET': return <Tag color="warning">Chờ phê duyệt</Tag>;
-            case 'DA_PHE_DUYET': return <Tag color="processing">Đã phê duyệt</Tag>;
-            case 'HOAN_THANH': return <Tag color="success">Hoàn thành</Tag>;
-            case 'TU_CHOI': return <Tag color="error">Từ chối</Tag>;
+            case 'TAO_MOI': return <Tag color="default">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
+            case 'GUI_PHE_DUYET': return <Tag color="warning">{t('donHangMuaSamPage.cho_phe_duyet')}</Tag>;
+            case 'DA_PHE_DUYET': return <Tag color="processing">{t('donHangMuaSamPage.da_phe_duyet')}</Tag>;
+            case 'HOAN_THANH': return <Tag color="success">{t('phieuSuaChuaPage.hoan_thanh')}</Tag>;
+            case 'TU_CHOI': return <Tag color="error">{t('keHoachBaoTriPage.tu_choi')}</Tag>;
             default: return <Tag>{status}</Tag>;
         }
     };
 
     const columns = [
         {
-            title: 'Mã phiếu',
+            title: t('phieuSuaChuaPage.ma_phieu'),
             dataIndex: 'maPhieuDieuChuyen',
             key: 'maPhieuDieuChuyen',
             width: 130,
@@ -216,7 +218,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Bên giao (Chuyển)',
+            title: t('phieuDieuChuyenPage.ben_giao_chuyen'),
             key: 'benGiao',
             render: (_: any, record: any) => (
                 <div>
@@ -226,7 +228,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             )
         },
         {
-            title: 'Bên nhận (Đến)',
+            title: t('phieuDieuChuyenPage.ben_nhan_den'),
             key: 'benNhan',
             render: (_: any, record: any) => (
                 <div>
@@ -236,25 +238,25 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             )
         },
         {
-            title: 'Người lập',
+            title: t('donHangMuaSamPage.nguoi_lap'),
             dataIndex: 'tenNguoiLap',
             key: 'tenNguoiLap',
         },
         {
-            title: 'Ngày tạo',
+            title: t('phieuThuHoiPage.ngay_tao'),
             dataIndex: 'thoiGianTao',
             key: 'thoiGianTao',
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '-',
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 140,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 110,
             align: 'center' as const,
@@ -262,28 +264,28 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                 const items: MenuProps['items'] = [
                     authStore.kiemTraQuyen(QUYEN.XEM_PHIEU_DIEU_CHUYEN) ? {
                         key: 'view',
-                        label: 'Xem chi tiết',
+                        label: t('donViManagementPage.xem_chi_tiet'),
                         icon: <EyeOutlined />,
                         onClick: () => handleOpenModal('view', record),
                     } : null,
 
                     (record.trangThai === 'TAO_MOI' && authStore.kiemTraQuyen(QUYEN.SUA_PHIEU_DIEU_CHUYEN)) ? {
                         key: 'edit',
-                        label: 'Chỉnh sửa phiếu',
+                        label: t('phieuNhapTaiSanPage.chinh_sua_phieu'),
                         icon: <EditOutlined />,
                         onClick: () => handleOpenModal('edit', record),
                     } : null,
 
                     (record.trangThai === 'TAO_MOI' && authStore.kiemTraQuyen(QUYEN.YEU_CAU_PHE_DUYET_DIEU_CHUYEN)) ? {
                         key: 'submit',
-                        label: 'Gửi phê duyệt',
+                        label: t('donHangMuaSamPage.gui_phe_duyet'),
                         icon: <SendOutlined />,
                         onClick: () => handleHanhDong('yeuCauPheDuyet', record.id!),
                     } : null,
 
                     (record.trangThai === 'GUI_PHE_DUYET' && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_DIEU_CHUYEN)) ? {
                         key: 'approve',
-                        label: 'Phê duyệt',
+                        label: t('phieuSuaChuaPage.phe_duyet'),
                         icon: <CheckCircleOutlined style={{ color: '#1890ff' }} />,
                         onClick: () => handleHanhDong('pheDuyet', record.id!),
                     } : null,
@@ -291,7 +293,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                     // Tài liệu ghi quyền "THAO_TAC_TAI_SAN" cho việc từ chối
                     (record.trangThai === 'GUI_PHE_DUYET' && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_DIEU_CHUYEN)) ? {
                         key: 'reject',
-                        label: 'Từ chối phê duyệt',
+                        label: t('phieuThuHoiPage.tu_choi_phe_duyet'),
                         icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
                         onClick: () => {
                             setRejectId(record.id!);
@@ -302,7 +304,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
 
                     (record.trangThai === 'DA_PHE_DUYET' && authStore.kiemTraQuyen(QUYEN.HOAN_THANH_DIEU_CHUYEN)) ? {
                         key: 'complete',
-                        label: 'Hoàn thành điều chuyển',
+                        label: t('phieuDieuChuyenPage.hoan_thanh_dieu_chuyen'),
                         icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
                         onClick: () => handleHanhDong('hoanThanh', record.id!),
                     } : null,
@@ -310,19 +312,19 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                     (record.trangThai === 'TAO_MOI' && authStore.kiemTraQuyen(QUYEN.XOA_PHIEU_DIEU_CHUYEN)) ? {
                         key: 'delete',
                         label: (
-                            <Popconfirm title="Xác nhận xóa" description="Bạn có chắc chắn muốn xóa phiếu điều chuyển này?" onConfirm={() => handleHanhDong('delete', record.id!)} okText="Xóa" cancelText="Hủy">
-                                <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa phiếu</span>
+                            <Popconfirm title={t('viTriManagementPage.xac_nhan_xoa')} description={t('phieuDieuChuyenPage.ban_co_chac_chan')} onConfirm={() => handleHanhDong('delete', record.id!)} okText={t('viTriManagementPage.xoa')} cancelText={t('viTriManagementPage.huy')}>
+                                <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('phieuSuaChuaPage.xoa_phieu')}</span>
                             </Popconfirm>
                         ),
                         icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
                     } : null,
                 ].filter(Boolean) as MenuProps['items'];
 
-                if (items.length === 0) return '-';
+                if (!items || items.length === 0) return '-';
 
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
-                        <Button size="small">Thao tác <DownOutlined /></Button>
+                        <Button size="small">{t('phieuNhapTaiSanPage.thao_tac')}<DownOutlined /></Button>
                     </Dropdown>
                 );
             },
@@ -334,8 +336,8 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
             <div style={{ padding: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <div>
-                        <Title level={3} style={{ margin: 0 }}>Phiếu điều chuyển tài sản</Title>
-                        <Text type="secondary">Quản lý việc luân chuyển, bàn giao tài sản từ nhân sự/phòng ban này sang nhân sự/phòng ban khác.</Text>
+                        <Title level={3} style={{ margin: 0 }}>{t('phieuDieuChuyenPage.phieu_dieu_chuyen_tai')}</Title>
+                        <Text type="secondary">{t('phieuDieuChuyenPage.quan_ly_viec_luan')}</Text>
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_PHIEU_DIEU_CHUYEN}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -348,23 +350,23 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={5}>
                             <Select
-                                placeholder="Trạng thái"
+                                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                                 style={{ width: '100%' }}
                                 value={trangThai}
                                 onChange={setTrangThai}
                                 allowClear
                                 options={[
-                                    { value: 'TAO_MOI', label: 'Tạo mới' },
-                                    { value: 'GUI_PHE_DUYET', label: 'Chờ phê duyệt' },
-                                    { value: 'DA_PHE_DUYET', label: 'Đã phê duyệt' },
-                                    { value: 'HOAN_THANH', label: 'Hoàn thành' },
-                                    { value: 'TU_CHOI', label: 'Từ chối' },
+                                    { value: 'TAO_MOI', label: t('phieuNhapTaiSanPage.tao_moi') },
+                                    { value: 'GUI_PHE_DUYET', label: t('donHangMuaSamPage.cho_phe_duyet') },
+                                    { value: 'DA_PHE_DUYET', label: t('donHangMuaSamPage.da_phe_duyet') },
+                                    { value: 'HOAN_THANH', label: t('phieuSuaChuaPage.hoan_thanh') },
+                                    { value: 'TU_CHOI', label: t('keHoachBaoTriPage.tu_choi') },
                                 ]}
                             />
                         </Col>
                         <Col xs={24} md={5}>
                             <Select
-                                placeholder="Lọc theo người chuyển"
+                                placeholder={t('phieuDieuChuyenPage.loc_theo_nguoi_chuyen')}
                                 style={{ width: '100%' }}
                                 value={idNguoiChuyen}
                                 onChange={setIdNguoiChuyen}
@@ -376,7 +378,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={5}>
                             <Select
-                                placeholder="Lọc theo người nhận"
+                                placeholder={t('phieuDieuChuyenPage.loc_theo_nguoi_nhan')}
                                 style={{ width: '100%' }}
                                 value={idNguoiNhan}
                                 onChange={setIdNguoiNhan}
@@ -392,13 +394,13 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                                 format="DD/MM/YYYY"
                                 value={dateRange}
                                 onChange={setDateRange}
-                                placeholder={['Từ ngày lập', 'Đến ngày lập']}
+                                placeholder={[t('phieuSuaChuaPage.tu_ngay_lap'), t('phieuSuaChuaPage.den_ngay_lap')]}
                             />
                         </Col>
                         <Col xs={24} md={4}>
                             <Space>
-                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>Tìm kiếm</Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>
@@ -430,18 +432,18 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
                 />
 
                 <Modal
-                    title="Xác nhận từ chối phê duyệt"
+                    title={t('phieuCapPhatPage.xac_nhan_tu_choi_phe_duyet')}
                     open={isRejectModalOpen}
                     onCancel={() => setIsRejectModalOpen(false)}
                     onOk={handleXacNhanTuChoi}
-                    okText="Xác nhận từ chối"
-                    cancelText="Hủy"
+                    okText={t('keHoachBaoTriPage.xac_nhan_tu_choi')}
+                    cancelText={t('viTriManagementPage.huy')}
                     okButtonProps={{ danger: true }}
                 >
-                    <div style={{ marginBottom: 8 }}>Vui lòng nhập lý do từ chối điều chuyển (bắt buộc):</div>
+                    <div style={{ marginBottom: 8 }}>{t('phieuDieuChuyenPage.vui_long_nhap_ly')}</div>
                     <Input.TextArea
                         rows={3}
-                        placeholder="Lý do..."
+                        placeholder={t('phieuThuHoiPage.ly_do')}
                         value={lyDoTuChoi}
                         onChange={(e) => setLyDoTuChoi(e.target.value)}
                     />

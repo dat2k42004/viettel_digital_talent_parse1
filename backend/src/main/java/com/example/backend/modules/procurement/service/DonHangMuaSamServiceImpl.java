@@ -59,7 +59,7 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
                if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
                     return null;
                }
-               throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
+               throw new NghiepVuException("exception.common.no_tenant_info", 403);
           }
           return tenantId;
      }

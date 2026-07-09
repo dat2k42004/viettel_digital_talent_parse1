@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
 import { layDanhSach25 } from '../../../api-generated/endpoints/danh-muc-cau-hinh-controller/danh-muc-cau-hinh-controller';
@@ -18,6 +19,7 @@ export const CauHinhDonViFormModal: React.FC<CauHinhDonViFormModalProps> = ({
   selectedRecord,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<CauHinhDonViRequest>();
   const [danhSachDanhMuc, setDanhSachDanhMuc] = useState<DanhMucCauHinhResponse[]>([]);
   const [loadingList, setLoadingList] = useState(false);
@@ -44,7 +46,7 @@ export const CauHinhDonViFormModal: React.FC<CauHinhDonViFormModalProps> = ({
         setDanhSachDanhMuc(res.data.content || []);
       }
     } catch (e) {
-      console.error('Không thể tải danh mục cấu hình', e);
+      console.error(t('cauHinhDonViFormModal.khong_the_tai_danh'), e);
     } finally {
       setLoadingList(false);
     }
@@ -64,7 +66,7 @@ export const CauHinhDonViFormModal: React.FC<CauHinhDonViFormModalProps> = ({
 
   return (
     <Modal
-      title={selectedRecord ? 'Cập nhật cấu hình đơn vị' : 'Thêm cấu hình đơn vị'}
+      title={selectedRecord ? t('cauHinhDonViFormModal.cap_nhat_cau_hinh') : t('cauHinhDonViFormModal.them_cau_hinh_don')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -79,11 +81,11 @@ export const CauHinhDonViFormModal: React.FC<CauHinhDonViFormModalProps> = ({
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Form.Item
           name="idDanhMucCauHinh"
-          label="Chọn trường cấu hình"
-          rules={[{ required: true, message: 'Vui lòng chọn trường cấu hình!' }]}
+          label={t('cauHinhDonViFormModal.chon_truong_cau_hinh')}
+          rules={[{ required: true, message: t('cauHinhDonViFormModal.vui_long_chon_truong') }]}
         >
           <Select
-            placeholder="Chọn trường cấu hình"
+            placeholder={t('cauHinhDonViFormModal.chon_truong_cau_hinh')}
             disabled={!!selectedRecord}
             loading={loadingList}
             options={danhSachDanhMuc.map((d) => ({
@@ -95,10 +97,10 @@ export const CauHinhDonViFormModal: React.FC<CauHinhDonViFormModalProps> = ({
 
         <Form.Item
           name="giaTriCauHinh"
-          label="Giá trị cấu hình riêng"
-          rules={[{ required: true, message: 'Vui lòng nhập giá trị cấu hình!' }]}
+          label={t('cauHinhDonViPage.gia_tri_cau_hinh')}
+          rules={[{ required: true, message: t('cauHinhDonViFormModal.vui_long_nhap_gia') }]}
         >
-          <Input placeholder="Nhập giá trị cấu hình riêng cho đơn vị" />
+          <Input placeholder={t('cauHinhDonViFormModal.nhap_gia_tri_cau')} />
         </Form.Item>
       </Form>
     </Modal>

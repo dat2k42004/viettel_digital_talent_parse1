@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, Typography, message, Row, Col } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, BankOutlined } from '@ant-design/icons';
@@ -8,6 +9,7 @@ import type { DangKyDonViRequest } from '../../../api-generated/models/dangKyDon
 const { Title, Text } = Typography;
 
 export const DangKyPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form] = Form.useForm<DangKyDonViRequest>();
   const [loading, setLoading] = useState(false);
@@ -28,13 +30,13 @@ export const DangKyPage: React.FC = () => {
 
       const res = await dangKyDonVi(payload);
       if (res.code === 200) {
-        message.success(res.message || 'Đăng ký thông tin đơn vị thành công! Chuyển tới màn hình xác thực OTP.');
+        message.success(res.message || t('dangKyPage.dang_ky_thong_tin'));
         navigate('/xac-thuc-otp', { state: { email: values.emailAdmin } });
       } else {
-        message.error(res.message || 'Đăng ký đơn vị thất bại!');
+        message.error(res.message || t('dangKyPage.dang_ky_don_vi'));
       }
     } catch (error: any) {
-      message.error(error?.message || 'Có lỗi xảy ra trong quá trình đăng ký!');
+      message.error(error?.message || t('dangKyPage.co_loi_xay_ra'));
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,7 @@ export const DangKyPage: React.FC = () => {
           <Title level={3} style={{ margin: 0 }}>
             Đăng ký Đơn vị
           </Title>
-          <Text type="secondary">Cung cấp thông tin để khởi tạo đơn vị mới trên hệ thống ITAM</Text>
+          <Text type="secondary">{t('dangKyPage.cung_cap_thong_tin')}</Text>
         </div>
 
         <Form
@@ -78,19 +80,19 @@ export const DangKyPage: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="tenPhapLy"
-                label="Tên pháp lý Đơn vị"
-                rules={[{ required: true, message: 'Vui lòng nhập tên pháp lý!' }]}
+                label={t('donViFormModal.ten_phap_ly_don')}
+                rules={[{ required: true, message: t('dangKyDonViPage.vui_long_nhap_ten_phap_ly') }]}
               >
-                <Input prefix={<BankOutlined />} placeholder="Ví dụ: Công ty Cổ phần A" />
+                <Input prefix={<BankOutlined />} placeholder={t('donViFormModal.vi_du_cong_ty')} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="tenMienHeThong"
-                label="Tên miền hệ thống (Domain)"
-                rules={[{ required: true, message: 'Vui lòng nhập tên miền!' }]}
+                label={t('donViCreateModal.ten_mien_he_thong')}
+                rules={[{ required: true, message: t('dangKyPage.vui_long_nhap_ten_mien') }]}
               >
-                <Input placeholder="Ví dụ: congtya.com" />
+                <Input placeholder={t('donViFormModal.vi_du_congtyacom')} />
               </Form.Item>
             </Col>
           </Row>
@@ -99,18 +101,18 @@ export const DangKyPage: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="maSoThue"
-                label="Mã số thuế"
+                label={t('donViManagementPage.ma_so_thue')}
               >
-                <Input placeholder="Mã số thuế doanh nghiệp" />
+                <Input placeholder={t('dangKyPage.ma_so_thue_doanh')} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="tenNguoiDaiDien"
-                label="Họ tên người đại diện pháp luật"
-                rules={[{ required: true, message: 'Vui lòng nhập họ tên người đại diện!' }]}
+                label={t('donViCreateModal.ho_ten_nguoi_dai')}
+                rules={[{ required: true, message: t('dangKyDonViPage.vui_long_nhap_ho_ten_nguoi_dai_dien') }]}
               >
-                <Input prefix={<UserOutlined />} placeholder="Ví dụ: Nguyễn Văn A" />
+                <Input prefix={<UserOutlined />} placeholder={t('dangKyDonViPage.vi_du_nguyen_van_a')} />
               </Form.Item>
             </Col>
           </Row>
@@ -123,19 +125,19 @@ export const DangKyPage: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="tenAdmin"
-                label="Họ tên Admin"
-                rules={[{ required: true, message: 'Vui lòng nhập họ tên Admin!' }]}
+                label={t('donViCreateModal.ho_ten_admin')}
+                rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ho') }]}
               >
-                <Input prefix={<UserOutlined />} placeholder="Ví dụ: Nguyễn Văn Quản Trị" />
+                <Input prefix={<UserOutlined />} placeholder={t('donViCreateModal.vi_du_nguyen_van')} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="emailAdmin"
-                label="Email nhận OTP"
+                label={t('dangKyPage.email_nhan_otp')}
                 rules={[
-                  { required: true, message: 'Vui lòng nhập email!' },
-                  { type: 'email', message: 'Email không đúng định dạng!' }
+                  { required: true, message: t('xacThucOtpPage.vui_long_nhap_email') },
+                  { type: 'email', message: t('dangKyPage.email_khong_dung_dinh') }
                 ]}
               >
                 <Input prefix={<MailOutlined />} placeholder="admin@congtya.com" />
@@ -147,29 +149,29 @@ export const DangKyPage: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="tenDangNhapAdmin"
-                label="Tên đăng nhập Admin"
-                rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+                label={t('donViCreateModal.ten_dang_nhap_admin')}
+                rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ten') }]}
               >
-                <Input prefix={<UserOutlined />} placeholder="Tên đăng nhập" />
+                <Input prefix={<UserOutlined />} placeholder={t('donViCreateModal.ten_dang_nhap')} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="matKhauAdmin"
-                label="Mật khẩu tài khoản Admin"
+                label={t('donViCreateModal.mat_khau_tai_khoan')}
                 rules={[
-                  { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                  { min: 6, message: 'Mật khẩu phải từ 6 ký tự trở lên!' }
+                  { required: true, message: t('donViCreateModal.vui_long_nhap_mat') },
+                  { min: 6, message: t('dangKyPage.mat_khau_phai_tu') }
                 ]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
+                <Input.Password prefix={<LockOutlined />} placeholder={t('donViCreateModal.mat_khau')} />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Link to="/login">Quay lại đăng nhập</Link>
+              <Link to="/login">{t('dangKyPage.quay_lai_dang_nhap')}</Link>
               <Button type="primary" htmlType="submit" loading={loading} size="large">
                 Tiếp tục đăng ký
               </Button>

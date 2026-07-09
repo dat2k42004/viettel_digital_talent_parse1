@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, Card, Divider } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -29,6 +30,7 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
     onSave,
     loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<PhieuCapPhatTaiSanRequest>();
     const isView = mode === 'view';
 
@@ -147,8 +149,8 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
     };
 
     const getTitle = () => {
-        if (isView) return 'Chi tiết Phiếu cấp phát';
-        return selectedRecord ? 'Cập nhật Phiếu cấp phát' : 'Lập Phiếu cấp phát mới';
+        if (isView) return t('phieuCapPhatFormModal.chi_tiet_phieu_cap');
+        return selectedRecord ? t('phieuCapPhatFormModal.cap_nhat_phieu_cap') : t('phieuCapPhatFormModal.lap_phieu_cap_phat');
     };
 
     return (
@@ -159,11 +161,11 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
             confirmLoading={loading}
             footer={
                 isView ? [
-                    <Button key="close" onClick={onCancel}>Đóng</Button>
+                    <Button key="close" onClick={onCancel}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ] : [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
-                        {selectedRecord ? 'Lưu cập nhật' : 'Tạo phiếu'}
+                        {selectedRecord ? t('phieuNhapTaiSanFormModal.luu_cap_nhat') : t('phieuThuHoiFormModal.tao_phieu')}
                     </Button>
                 ]
             }
@@ -171,14 +173,14 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
             style={{ top: 20 }}
         >
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-                <Divider orientation={'left' as any}>Thông tin chung</Divider>
+                <Divider orientation={'left' as any}>{t('donHangMuaSamFormModal.thong_tin_chung')}</Divider>
 
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item name="idPhongBanNhan" label="Phòng ban tiếp nhận" rules={[{ required: true, message: 'Vui lòng chọn phòng ban!' }]}>
+                        <Form.Item name="idPhongBanNhan" label={t('phieuDieuChuyenFormModal.phong_ban_tiep_nhan')} rules={[{ required: true, message: t('phieuCapPhatFormModal.vui_long_chon_phong_ban') }]}>
                             <Select
                                 disabled={isView}
-                                placeholder="Chọn phòng ban"
+                                placeholder={t('phieuThuHoiFormModal.chon_phong_ban')}
                                 showSearch
                                 optionFilterProp="label"
                                 options={phongBanOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
@@ -189,10 +191,10 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item name="idNguoiNhan" label="Nhân viên tiếp nhận" rules={[{ required: true, message: 'Vui lòng chọn người nhận!' }]}>
+                        <Form.Item name="idNguoiNhan" label={t('phieuDieuChuyenFormModal.nhan_vien_tiep_nhan')} rules={[{ required: true, message: t('phieuCapPhatFormModal.vui_long_chon_nguoi') }]}>
                             <Select
                                 disabled={isView || !idPhongBanNhan}
-                                placeholder={idPhongBanNhan ? "Chọn nhân sự" : "Vui lòng chọn phòng ban trước"}
+                                placeholder={idPhongBanNhan ? t('phieuThuHoiFormModal.chon_nhan_su') : t('phieuThuHoiFormModal.vui_long_chon_phong')}
                                 showSearch
                                 optionFilterProp="label"
                                 options={nguoiDungOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
@@ -201,12 +203,12 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                     </Col>
                 </Row>
 
-                <Form.Item name="mucDichSuDung" label="Mục đích sử dụng" rules={[{ required: true, message: 'Nhập mục đích sử dụng!' }]}>
-                    <Input.TextArea disabled={isView} rows={2} placeholder="Nhập lý do/mục đích cấp phát cho nhân sự..." />
+                <Form.Item name="mucDichSuDung" label={t('phieuCapPhatFormModal.muc_dich_su_dung')} rules={[{ required: true, message: t('phieuCapPhatFormModal.nhap_muc_dich_su') }]}>
+                    <Input.TextArea disabled={isView} rows={2} placeholder={t('phieuCapPhatFormModal.nhap_ly_domuc_dich')} />
                 </Form.Item>
 
                 {/* 1. MẢNG CẤP PHÁT THIẾT BỊ PHẦN CỨNG */}
-                <Divider orientation={'left' as any}>Danh sách Cấp phát - Thiết bị phần cứng</Divider>
+                <Divider orientation={'left' as any}>{t('phieuCapPhatFormModal.danh_sach_cap_phat_thiet')}</Divider>
                 <Form.List name="danhSachPhanCung">
                     {(fields, { add, remove }) => (
                         <>
@@ -214,23 +216,23 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 12 }}>
                                     <Row gutter={12} align="middle">
                                         <Col span={8}>
-                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanCungId']} label="Thiết bị phần cứng" rules={[{ required: true, message: 'Chọn thiết bị!' }]}>
-                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder="Tìm theo Mã thẻ hoặc Serial" options={getOptionsWithFallback(thietBiPhanCungOptions, 'PHAN_CUNG')} />
+                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanCungId']} label={t('phieuSuaChuaFormModal.thiet_bi_phan_cung')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_thiet_bi') }]}>
+                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder={t('phieuCapPhatFormModal.tim_theo_ma_the')} options={getOptionsWithFallback(thietBiPhanCungOptions, 'PHAN_CUNG')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'tinhTrangLucGiao']} label="Tình trạng lúc giao" rules={[{ required: true, message: 'Nhập tình trạng!' }]}>
-                                                <Input disabled={isView} placeholder="Ví dụ: Mới 100%, Xước nhẹ..." />
+                                            <Form.Item {...restField} name={[name, 'tinhTrangLucGiao']} label={t('phieuCapPhatFormModal.tinh_trang_luc_giao')} rules={[{ required: true, message: t('phieuSuaChuaFormModal.nhap_tinh_trang') }]}>
+                                                <Input disabled={isView} placeholder={t('phieuCapPhatFormModal.vi_du_moi_100_xuoc_nhe')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'phuKienKemTheo']} label="Phụ kiện kèm theo">
-                                                <Input disabled={isView} placeholder="Sạc, chuột..." />
+                                            <Form.Item {...restField} name={[name, 'phuKienKemTheo']} label={t('phieuCapPhatFormModal.phu_kien_kem_theo')}>
+                                                <Input disabled={isView} placeholder={t('phieuThuHoiFormModal.sac_chuot')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'ghiChu']} label="Ghi chú">
-                                                <Input disabled={isView} placeholder="Nhập chú thích..." />
+                                            <Form.Item {...restField} name={[name, 'ghiChu']} label={t('loaiTaiSanFormModal.ghi_chu')}>
+                                                <Input disabled={isView} placeholder={t('phieuThuHoiFormModal.nhap_chu_thich')} />
                                             </Form.Item>
                                         </Col>
                                         {!isView && (
@@ -253,7 +255,7 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                 </Form.List>
 
                 {/* 2. MẢNG CẤP PHÁT BẢN QUYỀN PHẦN MỀM */}
-                <Divider orientation={'left' as any}>Danh sách Cấp phát - Bản quyền phần mềm</Divider>
+                <Divider orientation={'left' as any}>{t('phieuCapPhatFormModal.danh_sach_cap_phat_ban')}</Divider>
                 <Form.List name="danhSachPhanMem">
                     {(fields, { add, remove }) => (
                         <>
@@ -261,18 +263,18 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 12 }}>
                                     <Row gutter={12} align="middle">
                                         <Col span={9}>
-                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanMemId']} label="Bản quyền phần mềm" rules={[{ required: true, message: 'Chọn phần mềm!' }]}>
-                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder="Tìm key/phần mềm" options={getOptionsWithFallback(thietBiPhanMemOptions, 'PHAN_MEM')} />
+                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanMemId']} label={t('phieuThanhLyFormModal.ban_quyen_phan_mem')} rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}>
+                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder={t('phieuCapPhatFormModal.tim_keyphan_mem')} options={getOptionsWithFallback(thietBiPhanMemOptions, 'PHAN_MEM')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={7}>
-                                            <Form.Item {...restField} name={[name, 'maKeyKichHoat']} label="Mã kích hoạt gửi User">
-                                                <Input disabled={isView} placeholder="Key / Tài khoản đăng nhập..." />
+                                            <Form.Item {...restField} name={[name, 'maKeyKichHoat']} label={t('phieuCapPhatFormModal.ma_kich_hoat_gui')}>
+                                                <Input disabled={isView} placeholder={t('phieuCapPhatFormModal.key_tai_khoan_dang')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={7}>
-                                            <Form.Item {...restField} name={[name, 'ghiChu']} label="Ghi chú">
-                                                <Input disabled={isView} placeholder="Chú thích cài đặt..." />
+                                            <Form.Item {...restField} name={[name, 'ghiChu']} label={t('loaiTaiSanFormModal.ghi_chu')}>
+                                                <Input disabled={isView} placeholder={t('phieuCapPhatFormModal.chu_thich_cai_dat')} />
                                             </Form.Item>
                                         </Col>
                                         {!isView && (
@@ -295,7 +297,7 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                 </Form.List>
 
                 {/* 3. MẢNG CẤP PHÁT LINH KIÊN PHẦN CỨNG */}
-                <Divider orientation={'left' as any}>Danh sách Cấp phát - Linh kiện rời</Divider>
+                <Divider orientation={'left' as any}>{t('phieuCapPhatFormModal.danh_sach_cap_phat')}</Divider>
                 <Form.List name="danhSachLinhKien">
                     {(fields, { add, remove }) => (
                         <>
@@ -303,23 +305,23 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 12 }}>
                                     <Row gutter={12} align="middle">
                                         <Col span={8}>
-                                            <Form.Item {...restField} name={[name, 'danhSachLinhKienPhanCungId']} label="Linh kiện phần cứng" rules={[{ required: true, message: 'Chọn linh kiện!' }]}>
-                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder="Tìm kiếm Serial linh kiện" options={getOptionsWithFallback(thietBiLinhKienOptions, 'LINH_KIEN')} />
+                                            <Form.Item {...restField} name={[name, 'danhSachLinhKienPhanCungId']} label={t('phieuCapPhatFormModal.linh_kien_phan_cung')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_linh_kien') }]}>
+                                                <Select disabled={isView} showSearch optionFilterProp="label" placeholder={t('phieuCapPhatFormModal.tim_kiem_serial_linh')} options={getOptionsWithFallback(thietBiLinhKienOptions, 'LINH_KIEN')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'tinhTrangLucGiao']} label="Tình trạng lúc giao" rules={[{ required: true, message: 'Nhập tình trạng!' }]}>
-                                                <Input disabled={isView} placeholder="Ví dụ: Mới 100%, Nguyên seal..." />
+                                            <Form.Item {...restField} name={[name, 'tinhTrangLucGiao']} label={t('phieuCapPhatFormModal.tinh_trang_luc_giao')} rules={[{ required: true, message: t('phieuSuaChuaFormModal.nhap_tinh_trang') }]}>
+                                                <Input disabled={isView} placeholder={t('phieuCapPhatFormModal.vi_du_moi_100')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'phuKienKemTheo']} label="Phụ kiện kèm theo">
-                                                <Input disabled={isView} placeholder="Cáp, vỏ hộp..." />
+                                            <Form.Item {...restField} name={[name, 'phuKienKemTheo']} label={t('phieuCapPhatFormModal.phu_kien_kem_theo')}>
+                                                <Input disabled={isView} placeholder={t('phieuThuHoiFormModal.cap_vo_hop')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'ghiChu']} label="Ghi chú">
-                                                <Input disabled={isView} placeholder="Nhập chú thích..." />
+                                            <Form.Item {...restField} name={[name, 'ghiChu']} label={t('loaiTaiSanFormModal.ghi_chu')}>
+                                                <Input disabled={isView} placeholder={t('phieuThuHoiFormModal.nhap_chu_thich')} />
                                             </Form.Item>
                                         </Col>
                                         {!isView && (

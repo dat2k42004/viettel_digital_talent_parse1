@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select } from 'antd';
 import type { HangSanXuatResponse } from '../../../api-generated/models/hangSanXuatResponse';
@@ -18,6 +19,7 @@ export const HangSanXuatFormModal: React.FC<HangSanXuatFormModalProps> = ({
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<HangSanXuatRequest>();
   const isView = mode === 'view';
 
@@ -53,8 +55,8 @@ export const HangSanXuatFormModal: React.FC<HangSanXuatFormModalProps> = ({
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết hãng sản xuất';
-    return selectedHangSanXuat ? 'Cập nhật hãng sản xuất' : 'Thêm mới hãng sản xuất';
+    if (isView) return t('hangSanXuatFormModal.chi_tiet_hang_san');
+    return selectedHangSanXuat ? t('hangSanXuatFormModal.cap_nhat_hang_san') : t('hangSanXuatFormModal.them_moi_hang_san');
   };
 
   return (
@@ -85,21 +87,21 @@ export const HangSanXuatFormModal: React.FC<HangSanXuatFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="maHang"
-              label="Mã hãng sản xuất"
+              label={t('hangSanXuatFormModal.ma_hang_san_xuat')}
             >
-              <Input disabled placeholder="Mã hệ thống tự động sinh" />
+              <Input disabled placeholder={t('loaiTaiSanFormModal.ma_he_thong_tu')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenHang"
-              label="Tên hãng sản xuất"
+              label={t('hangSanXuatPage.ten_hang_san_xuat')}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên hãng!' },
-                { max: 100, message: 'Tên hãng không vượt quá 100 ký tự!' },
+                { required: true, message: t('hangSanXuatFormModal.vui_long_nhap_ten') },
+                { max: 100, message: t('hangSanXuatFormModal.ten_hang_khong_vuot') },
               ]}
             >
-              <Input disabled={isView} placeholder="Nhập tên hãng sản xuất" />
+              <Input disabled={isView} placeholder={t('hangSanXuatFormModal.nhap_ten_hang_san')} />
             </Form.Item>
           </Col>
         </Row>
@@ -108,19 +110,19 @@ export const HangSanXuatFormModal: React.FC<HangSanXuatFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="websiteHoTro"
-              label="Website hỗ trợ"
-              rules={[{ max: 255, message: 'Website không vượt quá 255 ký tự!' }]}
+              label={t('hangSanXuatPage.website_ho_tro')}
+              rules={[{ max: 255, message: t('hangSanXuatFormModal.website_khong_vuot_qua') }]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: https://dell.com" />
+              <Input disabled={isView} placeholder={t('hangSanXuatFormModal.vi_du_httpsdellcom')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="hotlineHoTro"
-              label="Hotline hỗ trợ"
-              rules={[{ max: 20, message: 'Hotline không vượt quá 20 ký tự!' }]}
+              label={t('hangSanXuatFormModal.hotline_ho_tro')}
+              rules={[{ max: 20, message: t('hangSanXuatFormModal.hotline_khong_vuot_qua') }]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: 1800-xxxx" />
+              <Input disabled={isView} placeholder={t('hangSanXuatFormModal.vi_du_1800xxxx')} />
             </Form.Item>
           </Col>
         </Row>
@@ -129,32 +131,32 @@ export const HangSanXuatFormModal: React.FC<HangSanXuatFormModalProps> = ({
           <Col span={isView ? 12 : 24}>
             <Form.Item
               name="emailHoTro"
-              label="Email hỗ trợ"
+              label={t('hangSanXuatPage.email_ho_tro')}
               rules={[
-                { type: 'email', message: 'Email hỗ trợ không đúng định dạng!' },
-                { max: 100, message: 'Email không vượt quá 100 ký tự!' },
+                { type: 'email', message: t('hangSanXuatFormModal.email_ho_tro_khong') },
+                { max: 100, message: t('hangSanXuatFormModal.email_khong_vuot_qua') },
               ]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: support@dell.com" />
+              <Input disabled={isView} placeholder={t('hangSanXuatFormModal.vi_du_supportdellcom')} />
             </Form.Item>
           </Col>
           {isView && (
             <Col span={12}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái"
+                label={t('loaiTaiSanFormModal.trang_thai')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]} />
               </Form.Item>
             </Col>
           )}
         </Row>
 
-        <Form.Item name="ghiChu" label="Ghi chú">
-          <Input.TextArea disabled={isView} rows={3} placeholder="Nhập ghi chú (nếu có)..." />
+        <Form.Item name="ghiChu" label={t('loaiTaiSanFormModal.ghi_chu')}>
+          <Input.TextArea disabled={isView} rows={3} placeholder={t('loaiTaiSanFormModal.nhap_ghi_chu_neu')} />
         </Form.Item>
       </Form>
     </Modal>

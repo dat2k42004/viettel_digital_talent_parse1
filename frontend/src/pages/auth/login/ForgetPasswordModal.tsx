@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { Modal, Steps, Form, Input, Button, Space, Typography, message } from 'antd';
 import { MailOutlined, SafetyOutlined, LockOutlined } from '@ant-design/icons';
@@ -13,6 +14,7 @@ interface ForgetPasswordModalProps {
 }
 
 export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, onCancel }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState('');
   const [form] = Form.useForm<QuenMatKhauRequest & DatLaiMatKhauRequest>();
@@ -24,9 +26,9 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
       await quenMatKhau(values);
       setEmail(values.email || '');
       setStep(1);
-      message.success('Mã OTP khôi phục mật khẩu đã được gửi đến email của bạn!');
+      message.success(t('forgetPasswordModal.ma_otp_khoi_phuc'));
     } catch (error: any) {
-      message.error(error?.message || 'Không thể gửi mã OTP, vui lòng kiểm tra lại!');
+      message.error(error?.message || t('forgetPasswordModal.khong_the_gui_ma'));
     } finally {
       setLoading(false);
     }
@@ -40,12 +42,12 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
         maOtp: values.maOtp,
         matKhauMoi: values.matKhauMoi,
       });
-      message.success('Đặt lại mật khẩu thành công! Bạn có thể sử dụng mật khẩu mới để đăng nhập.');
+      message.success(t('forgetPasswordModal.dat_lai_mat_khau_thanh'));
       onCancel();
       setStep(0);
       form.resetFields();
     } catch (error: any) {
-      message.error(error?.message || 'Mã OTP không chính xác hoặc đã hết hạn!');
+      message.error(error?.message || t('xacThucOtpPage.ma_otp_khong_chinh'));
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
 
   return (
     <Modal
-      title="Khôi phục mật khẩu qua Email OTP"
+      title={t('forgetPasswordModal.khoi_phuc_mat_khau')}
       open={open}
       onCancel={handleClose}
       footer={null}
@@ -68,7 +70,7 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
       <Steps
         current={step}
         size="small"
-        items={[{ title: 'Gửi mã OTP' }, { title: 'Đặt lại mật khẩu' }]}
+        items={[{ title: t('forgetPasswordModal.gui_ma_otp') }, { title: t('forgetPasswordModal.dat_lai_mat_khau') }]}
         style={{ marginBottom: 24, marginTop: 12 }}
       />
 
@@ -76,17 +78,17 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
         <Form form={form} onFinish={handleGuiOtp} layout="vertical">
           <Form.Item
             name="email"
-            label="Địa chỉ Email khôi phục"
+            label={t('forgetPasswordModal.dia_chi_email_khoi')}
             rules={[
-              { required: true, message: 'Vui lòng nhập email khôi phục tài khoản!' },
-              { type: 'email', message: 'Địa chỉ email không đúng định dạng!' }
+              { required: true, message: t('forgetPasswordModal.vui_long_nhap_email') },
+              { type: 'email', message: t('forgetPasswordModal.dia_chi_email_khong') }
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="nhanvien@congty.com" />
           </Form.Item>
           <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
             <Space>
-              <Button onClick={handleClose}>Hủy bỏ</Button>
+              <Button onClick={handleClose}>{t('appLayout.cancel')}</Button>
               <Button type="primary" htmlType="submit" loading={loading}>
                 Gửi mã xác thực
               </Button>
@@ -100,24 +102,24 @@ export const ForgetPasswordModal: React.FC<ForgetPasswordModalProps> = ({ open, 
           </Paragraph>
           <Form.Item
             name="maOtp"
-            label="Mã xác thực OTP"
-            rules={[{ required: true, message: 'Vui lòng nhập mã OTP nhận được!' }]}
+            label={t('forgetPasswordModal.ma_xac_thuc_otp')}
+            rules={[{ required: true, message: t('forgetPasswordModal.vui_long_nhap_ma') }]}
           >
-            <Input prefix={<SafetyOutlined />} placeholder="Nhập mã OTP 6 ký tự số" />
+            <Input prefix={<SafetyOutlined />} placeholder={t('forgetPasswordModal.nhap_ma_otp_6')} />
           </Form.Item>
           <Form.Item
             name="matKhauMoi"
-            label="Mật khẩu mới"
+            label={t('appLayout.newPassword')}
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-              { min: 6, message: 'Mật khẩu phải có độ dài tối thiểu 6 ký tự!' }
+              { required: true, message: t('appLayout.newPasswordRequired') },
+              { min: 6, message: t('forgetPasswordModal.mat_khau_phai_co') }
             ]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu mới" />
+            <Input.Password prefix={<LockOutlined />} placeholder={t('appLayout.newPasswordPlaceholder')} />
           </Form.Item>
           <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
             <Space>
-              <Button onClick={() => setStep(0)}>Quay lại</Button>
+              <Button onClick={() => setStep(0)}>{t('forgetPasswordModal.quay_lai')}</Button>
               <Button type="primary" htmlType="submit" loading={loading}>
                 Xác nhận đổi mật khẩu
               </Button>

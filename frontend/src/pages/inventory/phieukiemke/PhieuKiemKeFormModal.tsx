@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Select, Button, Row, Col, Tabs, Card, Input, Space, Divider, Typography } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons';
@@ -36,6 +37,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
     onSaveExecute,
     loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<any>();
     const isView = mode === 'view';
     const isExecute = mode === 'execute';
@@ -140,7 +142,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             res.data.forEach(x => {
                                 const detail = details.find(d => d.loaiTaiSan === 'THIET_BI' && d.idTaiSanGoc === x.id);
                                 const optId = detail ? detail.id! : x.id!;
-                                tbMap.set(optId, x.ten || 'Thiết bị phần cứng');
+                                tbMap.set(optId, x.ten || t('phieuSuaChuaFormModal.thiet_bi_phan_cung'));
                             });
                             setThietBiOptions(Array.from(tbMap.entries()).map(([id, ten]) => ({ id, ten })));
                         }
@@ -151,7 +153,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             res.data.forEach(x => {
                                 const detail = details.find(d => d.loaiTaiSan === 'LINH_KIEN' && d.idTaiSanGoc === x.id);
                                 const optId = detail ? detail.id! : x.id!;
-                                lkMap.set(optId, x.ten || 'Linh kiện phần cứng');
+                                lkMap.set(optId, x.ten || t('phieuCapPhatFormModal.linh_kien_phan_cung'));
                             });
                             setLinhKienOptions(Array.from(lkMap.entries()).map(([id, ten]) => ({ id, ten })));
                         }
@@ -162,7 +164,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             res.data.forEach(x => {
                                 const detail = details.find(d => d.loaiTaiSan === 'PHAN_MEM' && d.idTaiSanGoc === x.id);
                                 const optId = detail ? detail.id! : x.id!;
-                                pmMap.set(optId, x.ten || 'Bản quyền phần mềm');
+                                pmMap.set(optId, x.ten || t('phieuThanhLyFormModal.ban_quyen_phan_mem'));
                             });
                             setPhanMemOptions(Array.from(pmMap.entries()).map(([id, ten]) => ({ id, ten })));
                         }
@@ -245,9 +247,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
     };
 
     const getTitle = () => {
-        if (isExecute) return `Thực hiện đối soát hiện trường phiếu: ${selectedRecord?.maPhieuKiemKe}`;
-        if (isView) return 'Chi tiết Phiếu kiểm kê tài sản';
-        return selectedRecord ? 'Cập nhật Phiếu kiểm kê tài sản' : 'Lập Phiếu kiểm kê tài sản mới';
+        if (isExecute) return t('phieuKiemKeFormModal.thuc_hien_doi_soat_hien', { maPhieuKiemKe: selectedRecord?.maPhieuKiemKe });
+        if (isView) return t('phieuKiemKeFormModal.chi_tiet_phieu_kiem');
+        return selectedRecord ? t('phieuKiemKeFormModal.cap_nhat_phieu_kiem') : t('phieuKiemKeFormModal.lap_phieu_kiem_ke');
     };
 
     // Helper to render asset label by idChiTiet or fallback
@@ -256,7 +258,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
         if (item) {
             return `[S/N: ${item.soSerial || 'N/A'}] ${item.tenTaiSan}`;
         }
-        return 'Tài sản không xác định';
+        return t('phieuKiemKeFormModal.tai_san_khong_xac');
     };
 
     return (
@@ -267,7 +269,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
             confirmLoading={loading}
             footer={
                 isExecute ? [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="draft" icon={<SaveOutlined />} onClick={() => handleSaveExecuteClick(false)} loading={loading}>
                         Lưu nháp tiến độ
                     </Button>,
@@ -275,11 +277,11 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                         Gửi báo cáo hoàn thành
                     </Button>
                 ] : isView ? [
-                    <Button key="close" onClick={onCancel}>Đóng</Button>
+                    <Button key="close" onClick={onCancel}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ] : [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="submit" type="primary" onClick={handleSaveBasicClick} loading={loading}>
-                        {selectedRecord ? 'Lưu cập nhật' : 'Tạo phiếu'}
+                        {selectedRecord ? t('phieuNhapTaiSanFormModal.luu_cap_nhat') : t('phieuThuHoiFormModal.tao_phieu')}
                     </Button>
                 ]
             }
@@ -291,10 +293,10 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                     <>
                         <Form.Item
                             name="dotKiemKeId"
-                            label="Đợt kiểm kê tổng hợp (đang kích hoạt)"
-                            rules={[{ required: true, message: 'Vui lòng chọn đợt kiểm kê!' }]}
+                            label={t('phieuKiemKeFormModal.dot_kiem_ke_tong')}
+                            rules={[{ required: true, message: t('phieuKiemKeFormModal.vui_long_chon_dot') }]}
                         >
-                            <Select disabled={isView || !!selectedRecord} placeholder="Chọn đợt kiểm kê">
+                            <Select disabled={isView || !!selectedRecord} placeholder={t('phieuKiemKeFormModal.chon_dot_kiem_ke')}>
                                 {dotKiemKeKichHoat.map(opt => (
                                     <Select.Option key={opt.id} value={opt.id}>{opt.label}</Select.Option>
                                 ))}
@@ -303,17 +305,17 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
 
                         <Form.Item
                             name="idPhongBanKiemKe"
-                            label="Phòng ban kiểm kê"
+                            label={t('phieuKiemKeFormModal.phong_ban_kiem_ke')}
                         >
-                            <Select disabled placeholder="Tự động nhận diện theo tài khoản của bạn">
+                            <Select disabled placeholder={t('phieuKiemKeFormModal.tu_dong_nhan_dien')}>
                                 {phongBanList.map(pb => (
                                     <Select.Option key={pb.id} value={pb.id}>{pb.ten}</Select.Option>
                                 ))}
                             </Select>
                         </Form.Item>
 
-                        {/* <Form.Item name="idKhoKiemKe" label="Vị trí kho đối soát (Tùy chọn)">
-                            <Select disabled={isView} placeholder="Chọn vị trí kho vật lý" allowClear>
+                        {/* <Form.Item name="idKhoKiemKe" label={t('phieuKiemKeFormModal.vi_tri_kho_doi')}>
+                            <Select disabled={isView} placeholder={t('phieuKiemKeFormModal.chon_vi_tri_kho')} allowClear>
                                 {viTriList.map(vt => (
                                     <Select.Option key={vt.id} value={vt.id}>{vt.tenViTri}</Select.Option>
                                 ))}
@@ -322,11 +324,11 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                     </>
                 ) : (
                     <Tabs defaultActiveKey="1" style={{ minHeight: 400 }}>
-                        <Tabs.TabPane tab="1. Thiết bị phần cứng" key="1">
+                        <Tabs.TabPane tab={t('phieuKiemKeFormModal.1_thiet_bi_phan')} key="1">
                             <Form.List name="danhSachThietBi">
                                 {(fields) => (
                                     <>
-                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>Không có thiết bị phần cứng nào cần kiểm kê trong phòng ban này.</div>}
+                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>{t('phieuKiemKeFormModal.khong_co_thiet_bi')}</div>}
                                         {fields.map(({ key, name, ...restField }) => {
                                             const idChiTiet = form.getFieldValue(['danhSachThietBi', name, 'idChiTiet']);
                                             return (
@@ -336,10 +338,10 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'idChiTiet']}
-                                                                label="Thiết bị phần cứng đối soát"
-                                                                rules={[{ required: true, message: 'Chọn thiết bị!' }]}
+                                                                label={t('phieuKiemKeFormModal.thiet_bi_phan_cung')}
+                                                                rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_thiet_bi') }]}
                                                             >
-                                                                <Select placeholder="Chọn thiết bị..." disabled={isView}>
+                                                                <Select placeholder={t('phieuKiemKeFormModal.chon_thiet_bi')} disabled={isView}>
                                                                     {thietBiOptions.map(opt => (
                                                                         <Select.Option key={opt.id} value={opt.id}>{opt.ten}</Select.Option>
                                                                     ))}
@@ -351,22 +353,22 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'tinhTrangThucTe']}
-                                                                label="Tình trạng thực tế"
+                                                                label={t('phieuKiemKeFormModal.tinh_trang_thuc_te')}
                                                             >
-                                                                <Input placeholder="Tốt / Hỏng / Khác..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.tot_hong_khac')} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col span={6}>
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ketLuan']}
-                                                                label="Kết luận đối soát"
-                                                                rules={[{ required: true, message: 'Chọn kết luận!' }]}
+                                                                label={t('phieuKiemKeFormModal.ket_luan_doi_soat')}
+                                                                rules={[{ required: true, message: t('phieuKiemKeFormModal.chon_ket_luan') }]}
                                                             >
                                                                 <Select>
-                                                                    <Select.Option value="KHOP">Khớp khớp</Select.Option>
-                                                                    <Select.Option value="THIEU_HUT">Thiếu hụt thực tế</Select.Option>
-                                                                    <Select.Option value="SAI_VI_TRI">Sai vị trí</Select.Option>
+                                                                    <Select.Option value="KHOP">{t('phieuKiemKeFormModal.khop_khop')}</Select.Option>
+                                                                    <Select.Option value="THIEU_HUT">{t('phieuKiemKeFormModal.thieu_hut_thuc_te')}</Select.Option>
+                                                                    <Select.Option value="SAI_VI_TRI">{t('phieuKiemKeFormModal.sai_vi_tri')}</Select.Option>
                                                                 </Select>
                                                             </Form.Item>
                                                         </Col>
@@ -374,9 +376,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'idNhanVienSuDungThucTe']}
-                                                                label="Nhân viên sử dụng"
+                                                                label={t('phieuKiemKeFormModal.nhan_vien_su_dung')}
                                                             >
-                                                                <Select placeholder="Chọn nhân viên" allowClear showSearch optionFilterProp="label">
+                                                                <Select placeholder={t('phieuKiemKeFormModal.chon_nhan_vien')} allowClear showSearch optionFilterProp="label">
                                                                     {nguoiDungList.map(nd => (
                                                                         <Select.Option key={nd.id} value={nd.id} label={nd.ten}>{nd.ten}</Select.Option>
                                                                     ))}
@@ -387,9 +389,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ghiChu']}
-                                                                label="Ghi chú"
+                                                                label={t('loaiTaiSanFormModal.ghi_chu')}
                                                             >
-                                                                <Input placeholder="Nhập ghi chú thêm..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.nhap_ghi_chu_them')} />
                                                             </Form.Item>
                                                         </Col>
                                                     </Row>
@@ -401,11 +403,11 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             </Form.List>
                         </Tabs.TabPane>
 
-                        <Tabs.TabPane tab="2. Linh kiện phần cứng rời" key="2">
+                        <Tabs.TabPane tab={t('phieuKiemKeFormModal.2_linh_kien_phan')} key="2">
                             <Form.List name="danhSachLinhKien">
                                 {(fields) => (
                                     <>
-                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>Không có linh kiện nào cần kiểm kê trong phòng ban này.</div>}
+                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>{t('phieuKiemKeFormModal.khong_co_linh_kien')}</div>}
                                         {fields.map(({ key, name, ...restField }) => {
                                             const idChiTiet = form.getFieldValue(['danhSachLinhKien', name, 'idChiTiet']);
                                             return (
@@ -415,10 +417,10 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'idChiTiet']}
-                                                                label="Linh kiện đối soát"
-                                                                rules={[{ required: true, message: 'Chọn linh kiện!' }]}
+                                                                label={t('phieuKiemKeFormModal.linh_kien_doi_soat')}
+                                                                rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_linh_kien') }]}
                                                             >
-                                                                <Select placeholder="Chọn linh kiện..." disabled={isView}>
+                                                                <Select placeholder={t('phieuKiemKeFormModal.chon_linh_kien')} disabled={isView}>
                                                                     {linhKienOptions.map(opt => (
                                                                         <Select.Option key={opt.id} value={opt.id}>{opt.ten}</Select.Option>
                                                                     ))}
@@ -430,31 +432,31 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'tinhTrangThucTe']}
-                                                                label="Tình trạng thực tế"
+                                                                label={t('phieuKiemKeFormModal.tinh_trang_thuc_te')}
                                                             >
-                                                                <Input placeholder="Tốt / Hỏng / Tháo dỡ..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.tot_hong_thao_do')} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col span={6}>
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'viTriThucTe']}
-                                                                label="Vị trí thực tế lắp đặt"
+                                                                label={t('phieuKiemKeFormModal.vi_tri_thuc_te')}
                                                             >
-                                                                <Input placeholder="Ví dụ: Máy chủ PC01..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.vi_du_may_chu')} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col span={6}>
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ketLuan']}
-                                                                label="Kết luận đối soát"
-                                                                rules={[{ required: true, message: 'Chọn kết luận!' }]}
+                                                                label={t('phieuKiemKeFormModal.ket_luan_doi_soat')}
+                                                                rules={[{ required: true, message: t('phieuKiemKeFormModal.chon_ket_luan') }]}
                                                             >
                                                                 <Select>
-                                                                    <Select.Option value="KHOP">Khớp khớp</Select.Option>
-                                                                    <Select.Option value="THIEU_HUT">Thiếu hụt thực tế</Select.Option>
-                                                                    <Select.Option value="SAI_VI_TRI">Sai vị trí</Select.Option>
+                                                                    <Select.Option value="KHOP">{t('phieuKiemKeFormModal.khop_khop')}</Select.Option>
+                                                                    <Select.Option value="THIEU_HUT">{t('phieuKiemKeFormModal.thieu_hut_thuc_te')}</Select.Option>
+                                                                    <Select.Option value="SAI_VI_TRI">{t('phieuKiemKeFormModal.sai_vi_tri')}</Select.Option>
                                                                 </Select>
                                                             </Form.Item>
                                                         </Col>
@@ -462,9 +464,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ghiChu']}
-                                                                label="Ghi chú"
+                                                                label={t('loaiTaiSanFormModal.ghi_chu')}
                                                             >
-                                                                <Input placeholder="Nhập ghi chú thêm..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.nhap_ghi_chu_them')} />
                                                             </Form.Item>
                                                         </Col>
                                                     </Row>
@@ -476,11 +478,11 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             </Form.List>
                         </Tabs.TabPane>
 
-                        <Tabs.TabPane tab="3. Bản quyền phần mềm" key="3">
+                        <Tabs.TabPane tab={t('phieuKiemKeFormModal.3_ban_quyen_phan')} key="3">
                             <Form.List name="danhSachPhanMem">
                                 {(fields) => (
                                     <>
-                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>Không có bản quyền phần mềm nào cần kiểm kê trong phòng ban này.</div>}
+                                        {fields.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>{t('phieuKiemKeFormModal.khong_co_ban_quyen')}</div>}
                                         {fields.map(({ key, name, ...restField }) => {
                                             const idChiTiet = form.getFieldValue(['danhSachPhanMem', name, 'idChiTiet']);
                                             return (
@@ -490,10 +492,10 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'idChiTiet']}
-                                                                label="Bản quyền phần mềm đối soát"
-                                                                rules={[{ required: true, message: 'Chọn phần mềm!' }]}
+                                                                label={t('phieuKiemKeFormModal.ban_quyen_phan_mem')}
+                                                                rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}
                                                             >
-                                                                <Select placeholder="Chọn phần mềm..." disabled={isView}>
+                                                                <Select placeholder={t('phieuKiemKeFormModal.chon_phan_mem')} disabled={isView}>
                                                                     {phanMemOptions.map(opt => (
                                                                         <Select.Option key={opt.id} value={opt.id}>{opt.ten}</Select.Option>
                                                                     ))}
@@ -505,13 +507,13 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'trangThaiBanQuyen']}
-                                                                label="Trạng thái bản quyền thực tế"
-                                                                rules={[{ required: true, message: 'Chọn trạng thái!' }]}
+                                                                label={t('phieuKiemKeFormModal.trang_thai_ban_quyen')}
+                                                                rules={[{ required: true, message: t('phieuKiemKeFormModal.chon_trang_thai') }]}
                                                             >
                                                                 <Select>
-                                                                    <Select.Option value="ACTIVE">Hoạt động (Active)</Select.Option>
-                                                                    <Select.Option value="EXPIRED">Hết hạn (Expired)</Select.Option>
-                                                                    <Select.Option value="ILLEGAL">Không hợp lệ / Vi phạm (Illegal)</Select.Option>
+                                                                    <Select.Option value="ACTIVE">{t('phieuKiemKeFormModal.hoat_dong_active')}</Select.Option>
+                                                                    <Select.Option value="EXPIRED">{t('phieuKiemKeFormModal.het_han_expired')}</Select.Option>
+                                                                    <Select.Option value="ILLEGAL">{t('phieuKiemKeFormModal.khong_hop_le_vi')}</Select.Option>
                                                                 </Select>
                                                             </Form.Item>
                                                         </Col>
@@ -519,12 +521,12 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ketLuan']}
-                                                                label="Kết luận đối soát"
-                                                                rules={[{ required: true, message: 'Chọn kết luận!' }]}
+                                                                label={t('phieuKiemKeFormModal.ket_luan_doi_soat')}
+                                                                rules={[{ required: true, message: t('phieuKiemKeFormModal.chon_ket_luan') }]}
                                                             >
                                                                 <Select>
-                                                                    <Select.Option value="KHOP">Khớp khớp</Select.Option>
-                                                                    <Select.Option value="THIEU_HUT">Thiếu hụt / Không sử dụng</Select.Option>
+                                                                    <Select.Option value="KHOP">{t('phieuKiemKeFormModal.khop_khop')}</Select.Option>
+                                                                    <Select.Option value="THIEU_HUT">{t('phieuKiemKeFormModal.thieu_hut_khong_su')}</Select.Option>
                                                                 </Select>
                                                             </Form.Item>
                                                         </Col>
@@ -532,9 +534,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                             <Form.Item
                                                                 {...restField}
                                                                 name={[name, 'ghiChu']}
-                                                                label="Ghi chú"
+                                                                label={t('loaiTaiSanFormModal.ghi_chu')}
                                                             >
-                                                                <Input placeholder="Nhập ghi chú thêm..." />
+                                                                <Input placeholder={t('phieuKiemKeFormModal.nhap_ghi_chu_them')} />
                                                             </Form.Item>
                                                         </Col>
                                                     </Row>

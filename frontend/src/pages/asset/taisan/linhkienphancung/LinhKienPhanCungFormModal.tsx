@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Button, Row, Col, Select, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
@@ -22,6 +23,7 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<LinhKienPhanCungRequest>();
   const isView = mode === 'view';
 
@@ -38,7 +40,7 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
         if (mauRes.data) setMauPhanCungOptions(mauRes.data);
         if (nccRes.data) setNhaCungCapOptions(nccRes.data);
       } catch (e) {
-        message.error('Không thể tải danh mục cấu hình linh kiện/nhà cung cấp!');
+        message.error(t('linhKienPhanCungFormModal.khong_the_tai_danh'));
       }
     };
     if (open) {
@@ -82,8 +84,8 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết linh kiện phần cứng';
-    return selectedLinhKien ? 'Cập nhật linh kiện phần cứng' : 'Thêm mới linh kiện phần cứng';
+    if (isView) return t('linhKienPhanCungFormModal.chi_tiet_linh_kien');
+    return selectedLinhKien ? t('linhKienPhanCungFormModal.cap_nhat_linh_kien') : t('linhKienPhanCungFormModal.them_moi_linh_kien');
   };
 
   return (
@@ -114,21 +116,21 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
           <Col span={12}>
             <Form.Item
               name="idTaiSanPhanCung"
-              label="Mẫu thiết bị gốc (Mẫu linh kiện)"
-              rules={[{ required: true, message: 'Vui lòng chọn mẫu linh kiện!' }]}
+              label={t('linhKienPhanCungFormModal.mau_thiet_bi_goc')}
+              rules={[{ required: true, message: t('linhKienPhanCungFormModal.vui_long_chon_mau') }]}
             >
               <Select
                 disabled={isView}
-                placeholder="Chọn mẫu linh kiện"
+                placeholder={t('linhKienPhanCungFormModal.chon_mau_linh_kien')}
                 options={mauPhanCungOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="idNhaCungCap" label="Nhà cung cấp">
+            <Form.Item name="idNhaCungCap" label={t('donHangMuaSamPage.nha_cung_cap')}>
               <Select
                 disabled={isView}
-                placeholder="Chọn nhà cung cấp"
+                placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
                 options={nhaCungCapOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
                 allowClear
               />
@@ -140,67 +142,67 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
           <Col span={24}>
             <Form.Item
               name="soSerial"
-              label="Số Serial"
+              label={t('baoCaoPage.so_serial')}
               rules={[
-                { required: true, message: 'Vui lòng nhập số Serial!' },
-                { max: 100, message: 'Số Serial không vượt quá 100 ký tự!' }
+                { required: true, message: t('linhKienPhanCungFormModal.vui_long_nhap_so') },
+                { max: 100, message: t('linhKienPhanCungFormModal.so_serial_khong_vuot') }
               ]}
             >
-              <Input disabled={isView} placeholder="Nhập số Serial linh kiện (RAM, SSD, HDD...)" />
+              <Input disabled={isView} placeholder={t('linhKienPhanCungFormModal.nhap_so_serial_linh')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="giaMua" label="Giá mua (VND)">
+            <Form.Item name="giaMua" label={t('linhKienPhanCungFormModal.gia_mua_vnd')}>
               <InputNumber
                 disabled={isView}
                 style={{ width: '100%' }}
                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                 parser={(value) => value!.replace(/\$\s?|(,*)/g, '') as any}
-                placeholder="Nhập giá mua"
+                placeholder={t('linhKienPhanCungFormModal.nhap_gia_mua')}
               />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="thoiGianMua" label="Thời gian mua">
+            <Form.Item name="thoiGianMua" label={t('linhKienPhanCungPage.thoi_gian_mua')}>
               <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="hanBaoHanhThang" label="Hạn bảo hành (tháng)">
-              <InputNumber disabled={isView} style={{ width: '100%' }} min={0} placeholder="Hạn bảo hành" />
+            <Form.Item name="hanBaoHanhThang" label={t('linhKienPhanCungFormModal.han_bao_hanh_thang')}>
+              <InputNumber disabled={isView} style={{ width: '100%' }} min={0} placeholder={t('linhKienPhanCungFormModal.han_bao_hanh')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={isView ? 8 : 12}>
-            <Form.Item name="trangThaiKho" label="Trạng thái kho">
+            <Form.Item name="trangThaiKho" label={t('linhKienPhanCungPage.trang_thai_kho')}>
               <Select disabled={isView} options={[
-                { value: 'TON_KHO', label: 'Tồn kho (Sẵn sàng lắp)' },
-                { value: 'CAP_PHAT', label: 'Đã lắp ráp (Liên kết)' },
-                { value: 'BAO_TRI', label: 'Đang bảo trì' },
-                { value: 'THANH_LY', label: 'Đã thanh lý' },
+                { value: 'TON_KHO', label: t('linhKienPhanCungFormModal.ton_kho_san_sang') },
+                { value: 'CAP_PHAT', label: t('linhKienPhanCungFormModal.da_lap_rap_lien') },
+                { value: 'BAO_TRI', label: t('linhKienPhanCungPage.dang_bao_tri') },
+                { value: 'THANH_LY', label: t('linhKienPhanCungPage.da_thanh_ly') },
               ]} />
             </Form.Item>
           </Col>
           <Col span={isView ? 8 : 12}>
-            <Form.Item name="viTriKho" label="Vị trí kho">
-              <Input disabled={isView} placeholder="Vị trí lưu trữ lẻ" />
+            <Form.Item name="viTriKho" label={t('baoCaoPage.vi_tri_kho')}>
+              <Input disabled={isView} placeholder={t('linhKienPhanCungFormModal.vi_tri_luu_tru')} />
             </Form.Item>
           </Col>
           {isView && (
             <Col span={8}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái vận hành"
+                label={t('linhKienPhanCungPage.trang_thai_van_hanh')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Hoạt động' },
-                  { value: 'KHOA', label: 'Khóa' },
-                  { value: 'CAP_PHAT', label: 'Cấp phát' },
+                  { value: 'HOAT_DONG', label: t('userManagementPage.hoat_dong') },
+                  { value: 'KHOA', label: t('viTriManagementPage.khoa') },
+                  { value: 'CAP_PHAT', label: t('dashboardPage.cap_phat') },
                 ]} />
               </Form.Item>
             </Col>

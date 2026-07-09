@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col } from 'antd';
 import type { NhaCungCapResponse } from '../../../api-generated/models/nhaCungCapResponse';
@@ -20,6 +21,7 @@ export const NhaCungCapFormModal: React.FC<NhaCungCapFormModalProps> = ({
     onSave,
     // loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<NhaCungCapRequest>();
     const isView = mode === 'view'; // Xác định xem có phải đang ở chế độ xem chi tiết không
 
@@ -53,8 +55,8 @@ export const NhaCungCapFormModal: React.FC<NhaCungCapFormModalProps> = ({
 
     // Thay đổi Title Modal dựa trên mode
     const getTitle = () => {
-        if (isView) return 'Chi tiết thông tin Nhà cung cấp';
-        return selectedRecord ? 'Cập nhật thông tin Nhà cung cấp' : 'Thêm mới Nhà cung cấp';
+        if (isView) return t('nhaCungCapFormModal.chi_tiet_thong_tin');
+        return selectedRecord ? t('nhaCungCapFormModal.cap_nhat_thong_tin') : t('nhaCungCapFormModal.them_moi_nha_cung');
     };
 
     return (
@@ -84,57 +86,57 @@ export const NhaCungCapFormModal: React.FC<NhaCungCapFormModalProps> = ({
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item name="maNhaCungCap" label="Mã nhà cung cấp">
-                            <Input disabled placeholder="Mã hệ thống tự sinh" />
+                        <Form.Item name="maNhaCungCap" label={t('nhaCungCapFormModal.ma_nha_cung_cap')}>
+                            <Input disabled placeholder={t('nhaCungCapFormModal.ma_he_thong_tu')} />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
                             name="tenNhaCungCap"
-                            label="Tên nhà cung cấp / Đối tác"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên nhà cung cấp!' }]}
+                            label={t('nhaCungCapPage.ten_nha_cung_cap')}
+                            rules={[{ required: true, message: t('nhaCungCapFormModal.vui_long_nhap_ten') }]}
                         >
-                            <Input disabled={isView} placeholder="Ví dụ: Công ty Cổ phần Máy tính ABC" />
+                            <Input disabled={isView} placeholder={t('nhaCungCapFormModal.vi_du_cong_ty')} />
                         </Form.Item>
                     </Col>
                 </Row>
 
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item name="maSoThue" label="Mã số thuế">
-                            <Input disabled={isView} placeholder="Nhập mã số thuế doanh nghiệp" />
+                        <Form.Item name="maSoThue" label={t('donViManagementPage.ma_so_thue')}>
+                            <Input disabled={isView} placeholder={t('donViFormModal.nhap_ma_so_thue')} />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item name="nguoiLienHe" label="Người liên hệ (Đại diện)">
-                            <Input disabled={isView} placeholder="Ví dụ: Nguyễn Văn A - NVKD" />
+                        <Form.Item name="nguoiLienHe" label={t('nhaCungCapFormModal.nguoi_lien_he_dai')}>
+                            <Input disabled={isView} placeholder={t('nhaCungCapFormModal.vi_du_nguyen_van')} />
                         </Form.Item>
                     </Col>
                 </Row>
 
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item name="soDienThoai" label="Số điện thoại">
-                            <Input disabled={isView} placeholder="Ví dụ: 0987654321" />
+                        <Form.Item name="soDienThoai" label={t('appLayout.phone')}>
+                            <Input disabled={isView} placeholder={t('nhaCungCapFormModal.vi_du_0987654321')} />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
                             name="email"
-                            label="Email liên hệ"
-                            rules={[{ type: 'email', message: 'Email không đúng định dạng!' }]}
+                            label={t('nhaCungCapFormModal.email_lien_he')}
+                            rules={[{ type: 'email', message: t('dangKyPage.email_khong_dung_dinh') }]}
                         >
-                            <Input disabled={isView} placeholder="Ví dụ: contact@abc.com" />
+                            <Input disabled={isView} placeholder={t('nhaCungCapFormModal.vi_du_contactabccom')} />
                         </Form.Item>
                     </Col>
                 </Row>
 
-                <Form.Item name="diaChi" label="Địa chỉ trụ sở">
-                    <Input disabled={isView} placeholder="Nhập địa chỉ nhà cung cấp" />
+                <Form.Item name="diaChi" label={t('nhaCungCapFormModal.dia_chi_tru_so')}>
+                    <Input disabled={isView} placeholder={t('nhaCungCapFormModal.nhap_dia_chi_nha')} />
                 </Form.Item>
 
-                <Form.Item name="ghiChu" label="Ghi chú">
-                    <Input.TextArea disabled={isView} rows={3} placeholder="Ghi chú thêm về nhà cung cấp này..." />
+                <Form.Item name="ghiChu" label={t('loaiTaiSanFormModal.ghi_chu')}>
+                    <Input.TextArea disabled={isView} rows={3} placeholder={t('nhaCungCapFormModal.ghi_chu_them_ve')} />
                 </Form.Item>
             </Form>
         </Modal>

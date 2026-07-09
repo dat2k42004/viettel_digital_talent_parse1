@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -19,6 +20,7 @@ import { DanhMucThuocTinhFormModal } from './DanhMucThuocTinhFormModal';
 const { Title, Text } = Typography;
 
 export const DanhMucThuocTinhPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSach, setDanhSach] = useState<DanhMucThuocTinhResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -48,7 +50,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách thuộc tính động!');
+      message.error(e?.message || t('danhMucThuocTinhPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch(() => message.error('Không thể tải lại danh sách!'))
+      .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -84,24 +86,24 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
       if (selectedItem && selectedItem.id) {
         const res = await capNhat22(selectedItem.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật thuộc tính thành công!');
+          message.success(t('danhMucThuocTinhPage.cap_nhat_thuoc_tinh'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi23(values);
         if (res.code === 200) {
-          message.success('Thêm mới thuộc tính thành công!');
+          message.success(t('danhMucThuocTinhPage.them_moi_thuoc_tinh'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -112,13 +114,13 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai14(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} thuộc tính thành công!`);
+        message.success(t('danhMucThuocTinhPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -126,24 +128,24 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
     try {
       const res = await xoaMem23(id);
       if (res.code === 200) {
-        message.success('Xóa thuộc tính thành công!');
+        message.success(t('danhMucThuocTinhPage.xoa_thuoc_tinh_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa thuộc tính!');
+      message.error(e?.message || t('danhMucThuocTinhPage.khong_the_xoa_thuoc'));
     }
   };
 
   const renderApDungCho = (val: string) => {
     switch (val) {
       case 'PHAN_CUNG':
-        return <Tag color="blue">Thiết bị phần cứng</Tag>;
+        return <Tag color="blue">{t('phieuSuaChuaFormModal.thiet_bi_phan_cung')}</Tag>;
       case 'PHAN_MEM':
-        return <Tag color="purple">Bản quyền phần mềm</Tag>;
+        return <Tag color="purple">{t('phieuThanhLyFormModal.ban_quyen_phan_mem')}</Tag>;
       case 'LINH_KIEN':
-        return <Tag color="orange">Linh kiện phần cứng</Tag>;
+        return <Tag color="orange">{t('phieuCapPhatFormModal.linh_kien_phan_cung')}</Tag>;
       default:
         return <Tag>{val}</Tag>;
     }
@@ -152,9 +154,9 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Tạm khóa</Tag>;
+        return <Tag color="red">{t('loaiTaiSanFormModal.tam_khoa')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -162,7 +164,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã thuộc tính',
+      title: t('danhMucThuocTinhPage.ma_thuoc_tinh'),
       dataIndex: 'maThuocTinh',
       key: 'maThuocTinh',
       width: 140,
@@ -170,47 +172,47 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên thuộc tính',
+      title: t('danhMucThuocTinhPage.ten_thuoc_tinh'),
       dataIndex: 'tenThuocTinh',
       key: 'tenThuocTinh',
     },
     {
-      title: 'Kiểu dữ liệu',
+      title: t('danhMucThuocTinhPage.kieu_du_lieu'),
       dataIndex: 'kieuDuLieu',
       key: 'kieuDuLieu',
       width: 110,
       render: (val: string) => <Tag color="cyan">{val}</Tag>,
     },
     {
-      title: 'Áp dụng cho',
+      title: t('danhMucThuocTinhPage.ap_dung_cho'),
       dataIndex: 'apDungCho',
       key: 'apDungCho',
       width: 180,
       render: (val: string) => renderApDungCho(val),
     },
     {
-      title: 'Bắt buộc?',
+      title: t('danhMucThuocTinhPage.bat_buoc_1'),
       dataIndex: 'batBuocNhap',
       key: 'batBuocNhap',
       width: 110,
-      render: (val: boolean) => val ? <Tag color="red">Bắt buộc</Tag> : <Tag color="default">Tùy chọn</Tag>,
+      render: (val: boolean) => val ? <Tag color="red">{t('danhMucThuocTinhPage.bat_buoc')}</Tag> : <Tag color="default">{t('danhMucThuocTinhPage.tuy_chon')}</Tag>,
     },
     {
-      title: 'Giá trị mặc định',
+      title: t('danhMucCauHinhPage.gia_tri_mac_dinh'),
       dataIndex: 'giaTriMacDinh',
       key: 'giaTriMacDinh',
       width: 140,
       render: (val: string) => val || '-',
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 120,
       render: (_: any, record: DanhMucThuocTinhResponse) => {
@@ -218,7 +220,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.XEM_DANH_MUC_THUOC_TINH)
             ? {
               key: 'view',
-              label: 'Chi tiết',
+              label: t('linhKienPhanCungPage.chi_tiet'),
               icon: <EyeOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -230,7 +232,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_DANH_MUC_THUOC_TINH)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -242,7 +244,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_DANH_MUC_THUOC_TINH)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa thuộc tính' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('danhMucThuocTinhPage.khoa_thuoc_tinh') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -252,13 +254,13 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa danh mục thuộc tính này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('danhMucThuocTinhPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoa(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa thuộc tính</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('danhMucThuocTinhPage.xoa_thuoc_tinh')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -308,7 +310,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Input
-                placeholder="Tìm kiếm theo mã thuộc tính, tên thuộc tính..."
+                placeholder={t('danhMucThuocTinhPage.tim_kiem_theo_ma')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -316,15 +318,15 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Select
-                placeholder="Áp dụng cho phân hệ"
+                placeholder={t('danhMucThuocTinhPage.ap_dung_cho_phan')}
                 style={{ width: '100%' }}
                 value={apDungCho}
                 onChange={setApDungCho}
                 allowClear
                 options={[
-                  { value: 'PHAN_CUNG', label: 'Thiết bị Phần cứng' },
-                  { value: 'PHAN_MEM', label: 'Bản quyền Phần mềm' },
-                  { value: 'LINH_KIEN', label: 'Linh kiện Phần cứng' },
+                  { value: 'PHAN_CUNG', label: t('danhMucThuocTinhPage.thiet_bi_phan_cung') },
+                  { value: 'PHAN_MEM', label: t('danhMucThuocTinhPage.ban_quyen_phan_mem') },
+                  { value: 'LINH_KIEN', label: t('danhMucThuocTinhPage.linh_kien_phan_cung') },
                 ]}
               />
             </Col>
@@ -333,7 +335,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

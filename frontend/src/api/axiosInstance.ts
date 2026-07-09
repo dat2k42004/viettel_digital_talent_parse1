@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { authStore } from '../stores/AuthStore';
 import { message } from 'antd';
+import i18n from '../config/i18n';
 
 // Instance gốc kết nối Backend Spring Boot
 export const axiosInstance = axios.create({
@@ -11,29 +12,23 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken');
-  const tenantId = localStorage.getItem('tenantId');
-
   if (accessToken) {
-    config.headers['Authorization'] = `Bearer ${accessToken}`;
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
-
-  // Chỉ gửi X-Tenant-ID nếu người dùng thuộc một Đơn vị cụ thể
-  // Nếu là Super Admin (tenantId rỗng hoặc null/"null"), không gửi header này đi
-  if (tenantId && tenantId !== 'null' && tenantId !== 'undefined' && tenantId.trim() !== '') {
-    config.headers['X-Tenant-ID'] = tenantId;
-  }
-
+  // Gửi locale hiện tại của frontend lên backend qua header Accept-Language
+  const currentLang = localStorage.getItem('language') || 'vi';
+  config.headers = config.headers || {};
+  config.headers['Accept-Language'] = currentLang;
+  
   return config;
-}, (error) => {
-  return Promise.reject(error);
 });
 
-// Response Interceptor tự động xử lý đăng xuất khi gặp lỗi 401/403
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse) => response,
   (error) => {
-    const status = error.response?.status;
-    const requestUrl = error.config?.url || '';
+    const status = error.response ? error.response.status : null;
+    const requestUrl = error.config ? error.config.url || '' : '';
 
     // Trích xuất câu thông báo lỗi nghiệp vụ chi tiết từ backend (ApiResponse)
     if (error.response?.data && typeof error.response.data === 'object') {
@@ -46,11 +41,11 @@ axiosInstance.interceptors.response.use(
     if (status === 401) {
       if (!requestUrl.includes('/api/auth/login')) {
         authStore.dangXuat();
-        message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+        message.error(i18n.t('common.session_expired'));
         window.location.href = '/login';
       }
     } else if (status === 403) {
-      message.error('Bạn không có quyền thực hiện tác vụ này!');
+      message.error(i18n.t('common.no_permission'));
     }
 
     return Promise.reject(error);
@@ -60,5 +55,6 @@ axiosInstance.interceptors.response.use(
 // Hàm bọc (mutator) mà Orval yêu cầu — chỉ trả .data, không wrap thêm
 export const customAxiosInstance = <T>(
   config: AxiosRequestConfig,
-): Promise<T> =>
-  axiosInstance(config).then((res: AxiosResponse<T>) => res.data);
+): Promise<T> => {
+  return axiosInstance(config).then((response) => response.data);
+};

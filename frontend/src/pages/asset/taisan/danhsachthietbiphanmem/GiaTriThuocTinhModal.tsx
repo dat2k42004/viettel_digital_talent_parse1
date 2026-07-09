@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Button, Spin, message } from 'antd';
 import { layDanhSach23 } from '../../../../api-generated/endpoints/danh-muc-thuoc-tinh-controller/danh-muc-thuoc-tinh-controller';
@@ -17,6 +18,7 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
   assetId,
   assetName,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [attributes, setAttributes] = useState<DanhMucThuocTinhResponse[]>([]);
@@ -66,7 +68,7 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
         }
         form.setFieldsValue(formInitValues);
       } catch (e: any) {
-        message.error(e?.message || 'Không thể tải dữ liệu thuộc tính tài sản!');
+        message.error(e?.message || t('giaTriThuocTinhModal.khong_the_tai_du_lieu'));
       } finally {
         setLoading(false);
       }
@@ -109,13 +111,13 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
       });
 
       if (res.code === 200) {
-        message.success('Cập nhật thuộc tính thành công!');
+        message.success(t('danhMucThuocTinhPage.cap_nhat_thuoc_tinh'));
         onCancel();
       } else {
-        message.error(res.message || 'Lưu thất bại!');
+        message.error(res.message || t('cauHinhDonViPage.luu_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Lỗi khi lưu dữ liệu thuộc tính!');
+      message.error(e?.message || t('giaTriThuocTinhModal.loi_khi_luu_du'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +125,7 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
 
   return (
     <Modal
-      title={`Cấu hình thuộc tính - ${assetName}`}
+      title={t('giaTriThuocTinhModal.cau_hinh_thuoc_tinh_assetname', { assetName: assetName })}
       open={open}
       onCancel={onCancel}
       width={600}
@@ -150,10 +152,10 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
                     <Form.Item
                       label={attr.tenThuocTinh}
                       name={`attr_${attr.id}_select`}
-                      rules={[{ required: attr.batBuocNhap, message: `Vui lòng chọn ${attr.tenThuocTinh}!` }]}
+                      rules={[{ required: attr.batBuocNhap, message: t('giaTriThuocTinhModal.vui_long_chon_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh }) }]}
                     >
                       <Select
-                        placeholder={`Chọn ${attr.tenThuocTinh}`}
+                        placeholder={t('giaTriThuocTinhModal.chon_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh })}
                         allowClear
                         options={attr.luaChonGoiY
                           ?.filter(o => o.trangThai === 'HOAT_DONG')
@@ -163,9 +165,9 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
                     </Form.Item>
                     <Form.Item
                       name={`attr_${attr.id}_custom`}
-                      label={`${attr.tenThuocTinh} (Giá trị khác/tùy biến)`}
+                      label={t('giaTriThuocTinhModal.attr_tenthuoctinh_gia_tri_khac', { tenThuocTinh: attr.tenThuocTinh })}
                     >
-                      <Input placeholder="Nhập giá trị khác nếu không có trong danh sách chọn" />
+                      <Input placeholder={t('giaTriThuocTinhModal.nhap_gia_tri_khac')} />
                     </Form.Item>
                   </div>
                 );
@@ -175,9 +177,9 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
                     key={attr.id}
                     label={attr.tenThuocTinh}
                     name={`attr_${attr.id}`}
-                    rules={[{ required: attr.batBuocNhap, message: `Vui lòng nhập ${attr.tenThuocTinh}!` }]}
+                    rules={[{ required: attr.batBuocNhap, message: t('giaTriThuocTinhModal.vui_long_nhap_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh }) }]}
                   >
-                    <InputNumber style={{ width: '100%' }} placeholder={`Nhập số cho ${attr.tenThuocTinh}`} />
+                    <InputNumber style={{ width: '100%' }} placeholder={t('giaTriThuocTinhModal.nhap_so_cho_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh })} />
                   </Form.Item>
                 );
               } else {
@@ -186,9 +188,9 @@ export const GiaTriThuocTinhModal: React.FC<GiaTriThuocTinhModalProps> = ({
                     key={attr.id}
                     label={attr.tenThuocTinh}
                     name={`attr_${attr.id}`}
-                    rules={[{ required: attr.batBuocNhap, message: `Vui lòng nhập ${attr.tenThuocTinh}!` }]}
+                    rules={[{ required: attr.batBuocNhap, message: t('giaTriThuocTinhModal.vui_long_nhap_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh }) }]}
                   >
-                    <Input placeholder={`Nhập ${attr.tenThuocTinh}`} />
+                    <Input placeholder={t('giaTriThuocTinhModal.nhap_attr_tenthuoctinh', { tenThuocTinh: attr.tenThuocTinh })} />
                   </Form.Item>
                 );
               }

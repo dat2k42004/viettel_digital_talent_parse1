@@ -162,7 +162,7 @@ public class PhongBanServiceImpl implements PhongBanService {
         try {
             phongBan.setTrangThai(TrangThaiCoBanEnum.fromValue(status));
         } catch (IllegalArgumentException e) {
-            throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+            throw new NghiepVuException("exception.common.invalid_status", 400);
         }
         phongBanRepository.save(phongBan);
     }

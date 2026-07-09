@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker, Modal } from 'antd';
 import type { MenuProps } from 'antd';
@@ -24,6 +25,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const KeHoachBaoTriPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<KeHoachBaoTriDinhKyResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -62,7 +64,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                 setTotalCount(pageInfo.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách kế hoạch bảo trì!');
+            message.error(e?.message || t('keHoachBaoTriPage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -98,7 +100,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết kế hoạch');
+                message.error(t('keHoachBaoTriPage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -111,24 +113,24 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật kế hoạch thành công!');
+                    message.success(t('keHoachBaoTriPage.cap_nhat_ke_hoach'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi(values);
                 if (res.code === 200) {
-                    message.success('Tạo kế hoạch bảo trì thành công!');
+                    message.success(t('keHoachBaoTriPage.tao_ke_hoach_bao'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu kế hoạch!');
+            message.error(e?.message || t('keHoachBaoTriPage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -138,11 +140,11 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
         try {
             const res = await yeuCauPheDuyet(id);
             if (res.code === 200) {
-                message.success('Đã gửi yêu cầu phê duyệt kế hoạch!');
+                message.success(t('keHoachBaoTriPage.da_gui_yeu_cau'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi gửi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_gui_phe'));
         }
     };
 
@@ -150,11 +152,11 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
         try {
             const res = await pheDuyet(id);
             if (res.code === 200) {
-                message.success('Phê duyệt kế hoạch thành công!');
+                message.success(t('keHoachBaoTriPage.phe_duyet_ke_hoach'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_phe_duyet'));
         }
     };
 
@@ -166,7 +168,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
 
     const handleConfirmReject = async () => {
         if (!lyDoTuChoi.trim()) {
-            message.error('Vui lòng nhập lý do từ chối!');
+            message.error(t('phieuCapPhatPage.vui_long_nhap_ly_do_tu_choi'));
             return;
         }
         if (rejectId === null) return;
@@ -174,12 +176,12 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
         try {
             const res = await tuChoiPheDuyet(rejectId, { lyDoTuChoi: lyDoTuChoi.trim() });
             if (res.code === 200) {
-                message.success('Đã từ chối phê duyệt kế hoạch!');
+                message.success(t('keHoachBaoTriPage.da_tu_choi_phe'));
                 setIsRejectModalOpen(false);
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi từ chối phê duyệt');
+            message.error(e?.message || t('keHoachBaoTriPage.loi_khi_tu_choi'));
         }
     };
 
@@ -187,28 +189,28 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
         try {
             const res = await xoaMem(id);
             if (res.code === 200) {
-                message.success('Xóa kế hoạch bảo trì thành công!');
+                message.success(t('keHoachBaoTriPage.xoa_ke_hoach_bao_tri_thanh_cong'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa kế hoạch!');
+            message.error(e?.message || t('keHoachBaoTriPage.khong_the_xoa_ke'));
         }
     };
 
     const renderStatus = (status: string) => {
         switch (status) {
             case 'TAO_MOI':
-                return <Tag color="cyan">Tạo mới</Tag>;
+                return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
             case 'GUI_PHE_DUYET':
-                return <Tag color="orange">Chờ phê duyệt</Tag>;
+                return <Tag color="orange">{t('donHangMuaSamPage.cho_phe_duyet')}</Tag>;
             case 'DA_PHE_DUYET':
-                return <Tag color="blue">Đã phê duyệt</Tag>;
+                return <Tag color="blue">{t('donHangMuaSamPage.da_phe_duyet')}</Tag>;
             case 'TU_CHOI':
-                return <Tag color="red">Từ chối</Tag>;
+                return <Tag color="red">{t('keHoachBaoTriPage.tu_choi')}</Tag>;
             case 'HOAN_THANH':
-                return <Tag color="green">Đã hoàn thành</Tag>;
+                return <Tag color="green">{t('donHangMuaSamPage.da_hoan_thanh')}</Tag>;
             case 'HET_HAN':
-                return <Tag color="default">Hết hạn</Tag>;
+                return <Tag color="default">{t('keHoachBaoTriPage.het_han')}</Tag>;
             default:
                 return <Tag>{status}</Tag>;
         }
@@ -216,17 +218,17 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
 
     const formatChuKy = (chuKy: string) => {
         switch (chuKy) {
-            case 'HANG_TUAN': return 'Hàng tuần';
-            case 'HANG_THANG': return 'Hàng tháng';
-            case 'HANG_QUY': return 'Hàng quý';
-            case 'HANG_NAM': return 'Hàng năm';
+            case 'HANG_TUAN': return t('keHoachBaoTriPage.hang_tuan');
+            case 'HANG_THANG': return t('keHoachBaoTriPage.hang_thang');
+            case 'HANG_QUY': return t('keHoachBaoTriPage.hang_quy');
+            case 'HANG_NAM': return t('keHoachBaoTriPage.hang_nam');
             default: return chuKy;
         }
     };
 
     const columns = [
         {
-            title: 'Mã kế hoạch',
+            title: t('keHoachBaoTriPage.ma_ke_hoach'),
             dataIndex: 'maKeHoach',
             key: 'maKeHoach',
             width: 160,
@@ -235,53 +237,53 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Tên kế hoạch',
+            title: t('keHoachBaoTriPage.ten_ke_hoach'),
             dataIndex: 'tenKeHoach',
             key: 'tenKeHoach',
         },
         {
-            title: 'Chu kỳ',
+            title: t('keHoachBaoTriPage.chu_ky'),
             dataIndex: 'chuKyLap',
             key: 'chuKyLap',
             width: 120,
             render: (val: string) => formatChuKy(val),
         },
         {
-            title: 'Bắt đầu',
+            title: t('keHoachBaoTriPage.bat_dau'),
             dataIndex: 'thoiGianBatDauKeHoach',
             key: 'thoiGianBatDauKeHoach',
             width: 120,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Kết thúc',
+            title: t('keHoachBaoTriPage.ket_thuc'),
             dataIndex: 'thoiGianKetThucKeHoach',
             key: 'thoiGianKetThucKeHoach',
             width: 120,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Dự kiến (VNĐ)',
+            title: t('keHoachBaoTriPage.du_kien_vnd'),
             dataIndex: 'chiPhiDuKien',
             key: 'chiPhiDuKien',
             width: 130,
             render: (val: number) => val ? val.toLocaleString('vi-VN') : '0',
         },
         {
-            title: 'Người lập',
+            title: t('donHangMuaSamPage.nguoi_lap'),
             dataIndex: 'tenNguoiLap',
             key: 'tenNguoiLap',
             width: 140,
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 130,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 120,
             render: (_: any, record: KeHoachBaoTriDinhKyResponse) => {
@@ -293,7 +295,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.XEM_CHI_TIET_KHBTDK)
                         ? {
                             key: 'view',
-                            label: 'Xem chi tiết',
+                            label: t('donViManagementPage.xem_chi_tiet'),
                             icon: <EyeOutlined />,
                             onClick: () => handleOpenModal('view', record),
                         } : null,
@@ -301,7 +303,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     (isTaoMoi || isTuChoi) && authStore.kiemTraQuyen(QUYEN.CAP_NHAT_KHBTDK)
                         ? {
                             key: 'edit',
-                            label: 'Chỉnh sửa',
+                            label: t('phieuSuaChuaPage.chinh_sua'),
                             icon: <EditOutlined />,
                             onClick: () => handleOpenModal('edit', record),
                         } : null,
@@ -309,7 +311,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     (isTaoMoi || isTuChoi) && authStore.kiemTraQuyen(QUYEN.GUI_PHE_DUYET_KHBTDK)
                         ? {
                             key: 'request_approval',
-                            label: 'Gửi phê duyệt',
+                            label: t('donHangMuaSamPage.gui_phe_duyet'),
                             icon: <SendOutlined />,
                             onClick: () => handleYeuCauPheDuyet(record.id!),
                         } : null,
@@ -317,7 +319,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     isChoDuyet && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_KHBTDK)
                         ? {
                             key: 'approve',
-                            label: 'Phê duyệt',
+                            label: t('phieuSuaChuaPage.phe_duyet'),
                             icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
                             onClick: () => handlePheDuyet(record.id!),
                         } : null,
@@ -325,7 +327,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     isChoDuyet && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_KHBTDK)
                         ? {
                             key: 'reject',
-                            label: 'Từ chối duyệt',
+                            label: t('keHoachBaoTriPage.tu_choi_duyet'),
                             icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
                             onClick: () => handleRejectClick(record.id!),
                         } : null,
@@ -335,20 +337,20 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                             key: 'delete',
                             label: (
                                 <Popconfirm
-                                    title="Xác nhận xóa"
-                                    description="Xóa kế hoạch bảo trì này?"
+                                    title={t('viTriManagementPage.xac_nhan_xoa')}
+                                    description={t('keHoachBaoTriPage.xoa_ke_hoach_bao')}
                                     onConfirm={() => handleXoa(record.id!)}
-                                    okText="Xóa"
-                                    cancelText="Hủy"
+                                    okText={t('viTriManagementPage.xoa')}
+                                    cancelText={t('viTriManagementPage.huy')}
                                 >
-                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa kế hoạch</span>
+                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('keHoachBaoTriPage.xoa_ke_hoach')}</span>
                                 </Popconfirm>
                             ),
                             icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
                         } : null,
                 ].filter(Boolean) as MenuProps['items'];
 
-                if (items.length === 0) return '-';
+                if (!items || items.length === 0) return '-';
 
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
@@ -366,8 +368,8 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
             <div style={{ padding: 24, minHeight: 'calc(100vh - 112px)', borderRadius: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <div>
-                        <Title level={3} style={{ margin: 0 }}>Kế hoạch bảo trì định kỳ</Title>
-                        <Text type="secondary">Quản lý lập kế hoạch, nội dung, phạm vi tài sản áp dụng bảo dưỡng định kỳ.</Text>
+                        <Title level={3} style={{ margin: 0 }}>{t('keHoachBaoTriPage.ke_hoach_bao_tri')}</Title>
+                        <Text type="secondary">{t('keHoachBaoTriPage.quan_ly_lap_ke')}</Text>
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_KHBTDK}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -380,18 +382,18 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={8}>
                             <Select
-                                placeholder="Trạng thái kế hoạch"
+                                placeholder={t('keHoachBaoTriPage.trang_thai_ke_hoach')}
                                 style={{ width: '100%' }}
                                 value={trangThai}
                                 onChange={setTrangThai}
                                 allowClear
                                 options={[
-                                    { value: 'TAO_MOI', label: 'Tạo mới' },
-                                    { value: 'GUI_PHE_DUYET', label: 'Chờ phê duyệt' },
-                                    { value: 'DA_PHE_DUYET', label: 'Đã phê duyệt' },
-                                    { value: 'TU_CHOI', label: 'Từ chối' },
-                                    { value: 'HOAN_THANH', label: 'Đã hoàn thành' },
-                                    { value: 'HET_HAN', label: 'Hết hạn kế hoạch' },
+                                    { value: 'TAO_MOI', label: t('phieuNhapTaiSanPage.tao_moi') },
+                                    { value: 'GUI_PHE_DUYET', label: t('donHangMuaSamPage.cho_phe_duyet') },
+                                    { value: 'DA_PHE_DUYET', label: t('donHangMuaSamPage.da_phe_duyet') },
+                                    { value: 'TU_CHOI', label: t('keHoachBaoTriPage.tu_choi') },
+                                    { value: 'HOAN_THANH', label: t('donHangMuaSamPage.da_hoan_thanh') },
+                                    { value: 'HET_HAN', label: t('keHoachBaoTriPage.het_han_ke_hoach') },
                                 ]}
                             />
                         </Col>
@@ -400,13 +402,13 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                                 style={{ width: '100%' }}
                                 value={dateRange}
                                 onChange={setDateRange}
-                                placeholder={['Từ ngày lập', 'Đến ngày lập']}
+                                placeholder={[t('phieuSuaChuaPage.tu_ngay_lap'), t('phieuSuaChuaPage.den_ngay_lap')]}
                             />
                         </Col>
                         <Col xs={24} md={6}>
                             <Space>
-                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>
@@ -438,19 +440,19 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                 />
 
                 <Modal
-                    title="Từ chối phê duyệt kế hoạch"
+                    title={t('keHoachBaoTriPage.tu_choi_phe_duyet')}
                     open={isRejectModalOpen}
                     onOk={handleConfirmReject}
                     onCancel={() => setIsRejectModalOpen(false)}
-                    okText="Xác nhận từ chối"
+                    okText={t('keHoachBaoTriPage.xac_nhan_tu_choi')}
                     okButtonProps={{ danger: true }}
-                    cancelText="Hủy bỏ"
+                    cancelText={t('appLayout.cancel')}
                 >
                     <div style={{ marginTop: 16 }}>
-                        <Text strong>Lý do từ chối phê duyệt kế hoạch này:</Text>
+                        <Text strong>{t('keHoachBaoTriPage.ly_do_tu_choi')}</Text>
                         <Input.TextArea
                             rows={4}
-                            placeholder="Vui lòng nhập lý do cụ thể..."
+                            placeholder={t('keHoachBaoTriPage.vui_long_nhap_ly')}
                             value={lyDoTuChoi}
                             onChange={(e) => setLyDoTuChoi(e.target.value)}
                             style={{ marginTop: 8 }}

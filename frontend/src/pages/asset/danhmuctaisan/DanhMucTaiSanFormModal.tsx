@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select } from 'antd';
 import type { DanhMucTaiSanResponse } from '../../../api-generated/models/danhMucTaiSanResponse';
@@ -18,6 +19,7 @@ export const DanhMucTaiSanFormModal: React.FC<DanhMucTaiSanFormModalProps> = ({
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DanhMucTaiSanRequest>();
   const isView = mode === 'view';
 
@@ -50,8 +52,8 @@ export const DanhMucTaiSanFormModal: React.FC<DanhMucTaiSanFormModalProps> = ({
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết danh mục tài sản';
-    return selectedDanhMucTaiSan ? 'Cập nhật danh mục tài sản' : 'Thêm mới danh mục tài sản';
+    if (isView) return t('danhMucTaiSanFormModal.chi_tiet_danh_muc');
+    return selectedDanhMucTaiSan ? t('danhMucTaiSanFormModal.cap_nhat_danh_muc') : t('danhMucTaiSanFormModal.them_moi_danh_muc');
   };
 
   return (
@@ -82,21 +84,21 @@ export const DanhMucTaiSanFormModal: React.FC<DanhMucTaiSanFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="maDanhMuc"
-              label="Mã danh mục"
+              label={t('baoCaoPage.ma_danh_muc')}
             >
-              <Input disabled placeholder="Mã hệ thống tự động sinh" />
+              <Input disabled placeholder={t('loaiTaiSanFormModal.ma_he_thong_tu')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenDanhMuc"
-              label="Tên danh mục"
+              label={t('danhMucTaiSanPage.ten_danh_muc')}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên danh mục!' },
-                { max: 100, message: 'Tên danh mục không vượt quá 100 ký tự!' },
+                { required: true, message: t('danhMucTaiSanFormModal.vui_long_nhap_ten') },
+                { max: 100, message: t('danhMucTaiSanFormModal.ten_danh_muc_khong') },
               ]}
             >
-              <Input disabled={isView} placeholder="Nhập tên danh mục tài sản" />
+              <Input disabled={isView} placeholder={t('danhMucTaiSanFormModal.nhap_ten_danh_muc')} />
             </Form.Item>
           </Col>
         </Row>
@@ -106,19 +108,19 @@ export const DanhMucTaiSanFormModal: React.FC<DanhMucTaiSanFormModalProps> = ({
             <Col span={24}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái"
+                label={t('loaiTaiSanFormModal.trang_thai')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]} />
               </Form.Item>
             </Col>
           </Row>
         )}
 
-        <Form.Item name="moTa" label="Mô tả danh mục">
-          <Input.TextArea disabled={isView} rows={3} placeholder="Nhập mô tả chi tiết danh mục..." />
+        <Form.Item name="moTa" label={t('danhMucTaiSanFormModal.mo_ta_danh_muc')}>
+          <Input.TextArea disabled={isView} rows={3} placeholder={t('danhMucTaiSanFormModal.nhap_mo_ta_chi')} />
         </Form.Item>
       </Form>
     </Modal>

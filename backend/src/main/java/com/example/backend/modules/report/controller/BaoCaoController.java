@@ -20,7 +20,7 @@ public class BaoCaoController {
      private final BaoCaoService baoCaoService;
 
      @GetMapping("/ton-kho")
-     @PreAuthorize("hasAuthority('XEM_BAO_CAO')")
+     @PreAuthorize("hasAuthority('XEM_BAO_CAO') or hasAuthority('XEM_QUAN_TRI_TOAN_SAN')")
      public ApiResponse<PageResponse<BaoCaoTonKhoResponse>> layBaoCaoTonKho(
                @Valid BaoCaoFilterRequest request,
                @RequestParam(defaultValue = "0") int page,
@@ -29,7 +29,7 @@ public class BaoCaoController {
      }
 
      @GetMapping("/cap-phat")
-     @PreAuthorize("hasAuthority('XEM_BAO_CAO')")
+     @PreAuthorize("hasAuthority('XEM_BAO_CAO') or hasAuthority('XEM_QUAN_TRI_TOAN_SAN')")
      public ApiResponse<PageResponse<BaoCaoCapPhatResponse>> layBaoCaoCapPhat(
                @Valid BaoCaoFilterRequest request,
                @RequestParam(defaultValue = "0") int page,
@@ -38,7 +38,7 @@ public class BaoCaoController {
      }
 
      @GetMapping("/bao-tri")
-     @PreAuthorize("hasAuthority('XEM_BAO_CAO')")
+     @PreAuthorize("hasAuthority('XEM_BAO_CAO') or hasAuthority('XEM_QUAN_TRI_TOAN_SAN')")
      public ApiResponse<PageResponse<BaoCaoBaoTriResponse>> layBaoCaoBaoTri(
                @Valid BaoCaoFilterRequest request,
                @RequestParam(defaultValue = "0") int page,
@@ -55,7 +55,7 @@ public class BaoCaoController {
      }
 
      @GetMapping("/xuat-file")
-     @PreAuthorize("hasAuthority('XEM_BAO_CAO')")
+     @PreAuthorize("hasAuthority('XEM_BAO_CAO') or hasAuthority('XEM_QUAN_TRI_TOAN_SAN')")
      public ResponseEntity<byte[]> xuatFileBaoCao(
                @Valid BaoCaoFilterRequest request,
                @RequestParam String dinhDangFile) {

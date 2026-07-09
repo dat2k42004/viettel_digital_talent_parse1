@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Statistic, Typography, Tag, Empty, Spin, message } from 'antd';
 import {
@@ -19,6 +20,7 @@ import type { ThongKeTongQuanDashboardResponse } from '../../api-generated/model
 const { Title, Paragraph, Text } = Typography;
 
 export const DashboardPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(true);
   
   // State thống kê Tenant (Admin Đơn vị)
@@ -45,7 +47,7 @@ export const DashboardPage: React.FC = observer(() => {
           }
         }
       } catch (error: any) {
-        message.error(error?.message || 'Không thể tải dữ liệu thống kê tổng quan!');
+        message.error(error?.message || t('dashboardPage.khong_the_tai_du'));
       } finally {
         setLoading(false);
       }
@@ -57,7 +59,7 @@ export const DashboardPage: React.FC = observer(() => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <Spin size="large" tip="Đang tải dữ liệu tổng quan thống kê..." />
+        <Spin size="large" tip={t('dashboardPage.dang_tai_du_lieu')} />
       </div>
     );
   }
@@ -75,7 +77,7 @@ export const DashboardPage: React.FC = observer(() => {
   // --- XỬ LÝ DỮ LIỆU BIỂU ĐỒ TENANT (ADMIN ĐƠN VỊ) ---
   const pieData = thongKeDonVi?.bieuDoTyLeTrangThai
     ? Object.entries(thongKeDonVi.bieuDoTyLeTrangThai).map(([key, val]) => ({
-        name: key === 'SAN_SANG' ? 'Sẵn sàng' : key === 'DANG_CAP_PHAT' ? 'Đang cấp phát' : key === 'BAO_TRI' ? 'Bảo trì' : key === 'HONG' ? 'Hỏng' : key,
+        name: key === 'SAN_SANG' ? t('dashboardPage.san_sang') : key === 'DANG_CAP_PHAT' ? t('dashboardPage.dang_cap_phat') : key === 'BAO_TRI' ? t('dashboardPage.bao_tri') : key === 'HONG' ? t('dashboardPage.hong') : key,
         value: Number(val),
         originalKey: key
       }))
@@ -84,7 +86,7 @@ export const DashboardPage: React.FC = observer(() => {
   const barData = thongKeDonVi?.bieuDoPhanBoPhongBan
     ? Object.entries(thongKeDonVi.bieuDoPhanBoPhongBan).map(([key, val]) => ({
         name: key,
-        'Số lượng': Number(val)
+        [t('donHangMuaSamFormModal.so_luong')]: Number(val)
       }))
     : [];
 
@@ -92,16 +94,16 @@ export const DashboardPage: React.FC = observer(() => {
   const tenantBarData = thongKeToanSan?.bieuDoSoSanhTenant
     ? Object.entries(thongKeToanSan.bieuDoSoSanhTenant).map(([key, val]) => ({
         name: key,
-        'Cấp phát': Number(val)
+        [t('dashboardPage.cap_phat')]: Number(val)
       }))
     : [];
 
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0 }}>Tổng quan hệ thống ITAM</Title>
+        <Title level={2} style={{ margin: 0 }}>{t('dashboardPage.tong_quan_he_thong')}</Title>
         <Paragraph type="secondary">
-          Thống kê hiện tại cho tài khoản: <strong>{authStore.tenNguoiDung}</strong> {authStore.maDonVi ? `| Đơn vị ID: ${authStore.maDonVi}` : ''}
+          {t('dashboardPage.thong_ke_hien_tai_cho_tai_khoan')} <strong>{authStore.tenNguoiDung}</strong>{authStore.maDonVi ? ` | ${t('dashboardPage.don_vi_id', { id: authStore.maDonVi })}` : ''}
         </Paragraph>
       </div>
 
@@ -111,13 +113,13 @@ export const DashboardPage: React.FC = observer(() => {
       {authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN) && thongKeToanSan && (
         <div style={{ marginBottom: 32 }}>
           <div style={{ marginBottom: 16 }}>
-            <Tag color="purple" style={{ fontSize: 13, padding: '4px 8px' }}>Giao diện Quản trị toàn hệ thống (Super Admin)</Tag>
+            <Tag color="purple" style={{ fontSize: 13, padding: '4px 8px' }}>{t('dashboardPage.giao_dien_quan_tri')}</Tag>
           </div>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Tổng số Đơn vị (Tenant)"
+                  title={t('dashboardPage.tong_so_don_vi')}
                   value={thongKeToanSan.tongTenantDonVi || 0}
                   prefix={<BankOutlined style={{ color: '#13c2c2' }} />}
                 />
@@ -126,7 +128,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Thiết bị phần cứng"
+                  title={t('phieuSuaChuaFormModal.thiet_bi_phan_cung')}
                   value={thongKeToanSan.tongTaiSanPhanCung || 0}
                   prefix={<LaptopOutlined style={{ color: '#1890ff' }} />}
                 />
@@ -135,7 +137,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Linh kiện rời"
+                  title={t('phieuThanhLyFormModal.linh_kien_roi')}
                   value={thongKeToanSan.tongTaiSanLinhKien || 0}
                   prefix={<BuildOutlined style={{ color: '#9254de' }} />}
                 />
@@ -144,7 +146,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Bản quyền phần mềm"
+                  title={t('phieuThanhLyFormModal.ban_quyen_phan_mem')}
                   value={thongKeToanSan.tongTaiSanPhanMem || 0}
                   prefix={<SafetyCertificateOutlined style={{ color: '#fa8c16' }} />}
                 />
@@ -154,7 +156,7 @@ export const DashboardPage: React.FC = observer(() => {
 
           <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
             <Col span={24}>
-              <Card title="So sánh quy mô cấp phát tài sản giữa các đơn vị thành viên" bordered={false} style={{ borderRadius: 8 }}>
+              <Card title={t('dashboardPage.so_sanh_quy_mo')} bordered={false} style={{ borderRadius: 8 }}>
                 {tenantBarData.length > 0 ? (
                   <div style={{ width: '100%', height: 350 }}>
                     <ResponsiveContainer>
@@ -162,14 +164,14 @@ export const DashboardPage: React.FC = observer(() => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" />
                         <YAxis />
-                        <ChartTooltip formatter={(value) => `${Number(value || 0).toLocaleString('vi-VN')} thiết bị`} />
+                        <ChartTooltip formatter={(value) => t('dashboardPage.number_value_0_tolocalestring_vi', { toLocaleStringviVN: Number(value || 0).toLocaleString('vi-VN') })} />
                         <Legend />
-                        <Bar dataKey="Cấp phát" fill="#1890ff" radius={[4, 4, 0, 0]} barSize={40} />
+                        <Bar dataKey={t('dashboardPage.cap_phat')} fill="#1890ff" radius={[4, 4, 0, 0]} barSize={40} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <Empty description="Không có dữ liệu so sánh đơn vị" />
+                  <Empty description={t('dashboardPage.khong_co_du_lieu_so_sanh_don_vi')} />
                 )}
               </Card>
             </Col>
@@ -183,13 +185,13 @@ export const DashboardPage: React.FC = observer(() => {
       {authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && thongKeDonVi ? (
         <div>
           <div style={{ marginBottom: 16 }}>
-            <Tag color="blue" style={{ fontSize: 13, padding: '4px 8px' }}>Báo cáo Tổng quan đơn vị</Tag>
+            <Tag color="blue" style={{ fontSize: 13, padding: '4px 8px' }}>{t('dashboardPage.bao_cao_tong_quan')}</Tag>
           </div>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Tổng số thiết bị"
+                  title={t('dashboardPage.tong_so_thiet_bi')}
                   value={thongKeDonVi.tongSoLuongThietBi || 0}
                   prefix={<LaptopOutlined style={{ color: '#1890ff' }} />}
                 />
@@ -198,7 +200,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Yêu cầu cấp phát chờ duyệt"
+                  title={t('dashboardPage.yeu_cau_cap_phat')}
                   value={thongKeDonVi.soLuongYeuCauCapPhatChoDuyet || 0}
                   prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
                 />
@@ -207,7 +209,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Báo hỏng chờ duyệt"
+                  title={t('dashboardPage.bao_hong_cho_duyet')}
                   value={thongKeDonVi.soLuongYeuCauBaoHongChoDuyet || 0}
                   prefix={<AlertOutlined style={{ color: '#faad14' }} />}
                 />
@@ -216,7 +218,7 @@ export const DashboardPage: React.FC = observer(() => {
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
                 <Statistic
-                  title="Tổng giá trị ước tính"
+                  title={t('dashboardPage.tong_gia_tri_uoc')}
                   value={thongKeDonVi.tongGiaTriTaiSanVnd || 0}
                   formatter={(value) => `${Number(value || 0).toLocaleString('vi-VN')} VND`}
                   prefix={<DollarOutlined style={{ color: '#eb2f96' }} />}
@@ -228,7 +230,7 @@ export const DashboardPage: React.FC = observer(() => {
           <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
             {/* Biểu đồ tròn trạng thái */}
             <Col xs={24} md={10}>
-              <Card title="Tỷ lệ trạng thái tài sản" bordered={false} style={{ borderRadius: 8 }}>
+              <Card title={t('dashboardPage.ty_le_trang_thai')} bordered={false} style={{ borderRadius: 8 }}>
                 {pieData.length > 0 ? (
                   <div style={{ width: '100%', height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <ResponsiveContainer width="100%" height={240}>
@@ -246,7 +248,7 @@ export const DashboardPage: React.FC = observer(() => {
                             <Cell key={`cell-${index}`} fill={COLORS_STATUS[entry.originalKey] || THEME_COLORS[index % THEME_COLORS.length]} />
                           ))}
                         </Pie>
-                        <ChartTooltip formatter={(value) => `${value} thiết bị`} />
+                        <ChartTooltip formatter={(value) => t('dashboardPage.value_thiet_bi', { value: value })} />
                       </PieChart>
                     </ResponsiveContainer>
                     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -259,14 +261,14 @@ export const DashboardPage: React.FC = observer(() => {
                     </div>
                   </div>
                 ) : (
-                  <Empty description="Không có dữ liệu trạng thái tài sản" />
+                  <Empty description={t('dashboardPage.khong_co_du_lieu')} />
                 )}
               </Card>
             </Col>
 
             {/* Biểu đồ cột phòng ban */}
             <Col xs={24} md={14}>
-              <Card title="Phân bổ thiết bị theo phòng ban" bordered={false} style={{ borderRadius: 8 }}>
+              <Card title={t('dashboardPage.phan_bo_thiet_bi')} bordered={false} style={{ borderRadius: 8 }}>
                 {barData.length > 0 ? (
                   <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
@@ -274,13 +276,13 @@ export const DashboardPage: React.FC = observer(() => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" />
                         <YAxis />
-                        <ChartTooltip formatter={(value) => `${value} thiết bị`} />
-                        <Bar dataKey="Số lượng" fill="#1890ff" radius={[4, 4, 0, 0]} barSize={35} />
+                        <ChartTooltip formatter={(value) => t('dashboardPage.value_thiet_bi', { value: value })} />
+                        <Bar dataKey={t('donHangMuaSamFormModal.so_luong')} fill="#1890ff" radius={[4, 4, 0, 0]} barSize={35} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <Empty description="Chưa có dữ liệu cấp phát phòng ban" />
+                  <Empty description={t('dashboardPage.chua_co_du_lieu')} />
                 )}
               </Card>
             </Col>
@@ -296,8 +298,8 @@ export const DashboardPage: React.FC = observer(() => {
                   image={<PieChartOutlined style={{ fontSize: 48, color: '#bfbfbf' }} />}
                   description={
                     <div>
-                      <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>Chào mừng bạn đến với ITAM!</Text>
-                      <Text type="secondary">Tài khoản của bạn đã được xác thực thành công. Bạn không có quyền <strong>XEM_BAO_CAO</strong> để hiển thị phân bổ dữ liệu vĩ mô.</Text>
+                      <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>{t('dashboardPage.chao_mung_ban_den')}</Text>
+                      <Text type="secondary">{t('dashboardPage.tai_khoan_cua_ban')}<strong>XEM_BAO_CAO</strong>{t('dashboardPage.de_hien_thi_phan')}</Text>
                     </div>
                   }
                 />

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Space, Card, Divider, Typography } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -26,6 +27,7 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
     onSave,
     loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<KeHoachBaoTriDinhKyRequest>();
     const isView = mode === 'view';
     const [phanCungOptions, setPhanCungOptions] = useState<SelectOption[]>([]);
@@ -73,8 +75,8 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
     };
 
     const getTitle = () => {
-        if (isView) return 'Chi tiết Kế hoạch bảo trì định kỳ';
-        return selectedRecord ? 'Cập nhật Kế hoạch bảo trì định kỳ' : 'Lập Kế hoạch bảo trì định kỳ mới';
+        if (isView) return t('keHoachBaoTriFormModal.chi_tiet_ke_hoach');
+        return selectedRecord ? t('keHoachBaoTriFormModal.cap_nhat_ke_hoach') : t('keHoachBaoTriFormModal.lap_ke_hoach_bao');
     };
 
     return (
@@ -85,11 +87,11 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
             confirmLoading={loading}
             footer={
                 isView ? [
-                    <Button key="close" onClick={onCancel}>Đóng</Button>
+                    <Button key="close" onClick={onCancel}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ] : [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
-                        {selectedRecord ? 'Lưu cập nhật' : 'Tạo kế hoạch'}
+                        {selectedRecord ? t('phieuNhapTaiSanFormModal.luu_cap_nhat') : t('keHoachBaoTriFormModal.tao_ke_hoach')}
                     </Button>
                 ]
             }
@@ -97,28 +99,28 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
             style={{ top: 40 }}
         >
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-                <Divider orientation={'left' as any}>Thông tin chung kế hoạch</Divider>
+                <Divider orientation={'left' as any}>{t('keHoachBaoTriFormModal.thong_tin_chung_ke')}</Divider>
                 <Row gutter={16}>
                     <Col span={16}>
                         <Form.Item
                             name="tenKeHoach"
-                            label="Tên kế hoạch bảo trì"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên kế hoạch!' }]}
+                            label={t('keHoachBaoTriFormModal.ten_ke_hoach_bao')}
+                            rules={[{ required: true, message: t('keHoachBaoTriFormModal.vui_long_nhap_ten') }]}
                         >
-                            <Input disabled={isView} placeholder="Ví dụ: Kế hoạch bảo trì máy chủ định kỳ Quý 3" />
+                            <Input disabled={isView} placeholder={t('keHoachBaoTriFormModal.vi_du_ke_hoach')} />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
                         <Form.Item
                             name="chuKyLap"
-                            label="Chu kỳ lặp"
-                            rules={[{ required: true, message: 'Vui lòng chọn chu kỳ!' }]}
+                            label={t('keHoachBaoTriFormModal.chu_ky_lap')}
+                            rules={[{ required: true, message: t('keHoachBaoTriFormModal.vui_long_chon_chu') }]}
                         >
-                            <Select disabled={isView} placeholder="Chọn chu kỳ">
-                                <Select.Option value="HANG_TUAN">Hàng tuần</Select.Option>
-                                <Select.Option value="HANG_THANG">Hàng tháng</Select.Option>
-                                <Select.Option value="HANG_QUY">Hàng quý</Select.Option>
-                                <Select.Option value="HANG_NAM">Hàng năm</Select.Option>
+                            <Select disabled={isView} placeholder={t('keHoachBaoTriFormModal.chon_chu_ky')}>
+                                <Select.Option value="HANG_TUAN">{t('keHoachBaoTriPage.hang_tuan')}</Select.Option>
+                                <Select.Option value="HANG_THANG">{t('keHoachBaoTriPage.hang_thang')}</Select.Option>
+                                <Select.Option value="HANG_QUY">{t('keHoachBaoTriPage.hang_quy')}</Select.Option>
+                                <Select.Option value="HANG_NAM">{t('keHoachBaoTriPage.hang_nam')}</Select.Option>
                             </Select>
                         </Form.Item>
                     </Col>
@@ -128,8 +130,8 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
                     <Col span={8}>
                         <Form.Item
                             name="thoiGianBatDauKeHoach"
-                            label="Ngày bắt đầu kế hoạch"
-                            rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
+                            label={t('keHoachBaoTriFormModal.ngay_bat_dau_ke')}
+                            rules={[{ required: true, message: t('phieuSuaChuaFormModal.vui_long_chon_ngay') }]}
                         >
                             <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
                         </Form.Item>
@@ -137,14 +139,14 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
                     <Col span={8}>
                         <Form.Item
                             name="thoiGianKetThucKeHoach"
-                            label="Ngày kết thúc kế hoạch"
-                            rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
+                            label={t('keHoachBaoTriFormModal.ngay_ket_thuc_ke')}
+                            rules={[{ required: true, message: t('keHoachBaoTriFormModal.vui_long_chon_ngay') }]}
                         >
                             <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item name="chiPhiDuKien" label="Chi phí dự kiến (VNĐ)">
+                        <Form.Item name="chiPhiDuKien" label={t('keHoachBaoTriFormModal.chi_phi_du_kien')}>
                             <InputNumber disabled={isView} style={{ width: '100%' }} min={0} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                         </Form.Item>
                     </Col>
@@ -153,22 +155,22 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
                 {selectedRecord?.lyDoTuChoi && (
                     <Row gutter={16}>
                         <Col span={24}>
-                            <Form.Item label="Lý do bị từ chối">
+                            <Form.Item label={t('keHoachBaoTriFormModal.ly_do_bi_tu')}>
                                 <Input.TextArea disabled value={selectedRecord.lyDoTuChoi} autoSize={{ minRows: 2 }} style={{ color: 'red' }} />
                             </Form.Item>
                         </Col>
                     </Row>
                 )}
 
-                <Form.Item name="noiDungBaoTri" label="Nội dung bảo trì">
-                    <Input.TextArea disabled={isView} rows={3} placeholder="Nội dung chi tiết các hạng mục cần bảo trì..." />
+                <Form.Item name="noiDungBaoTri" label={t('keHoachBaoTriFormModal.noi_dung_bao_tri')}>
+                    <Input.TextArea disabled={isView} rows={3} placeholder={t('keHoachBaoTriFormModal.noi_dung_chi_tiet')} />
                 </Form.Item>
 
-                <Divider orientation={'left' as any}>Mẫu tài sản phần cứng áp dụng bảo trì</Divider>
+                <Divider orientation={'left' as any}>{t('keHoachBaoTriFormModal.mau_tai_san_phan')}</Divider>
                 <Form.List name="danhSachChiTiet" rules={[{
                     validator: async (_, names) => {
                         if (!names || names.length < 1) {
-                            return Promise.reject(new Error('Kế hoạch bảo trì phải có ít nhất một mẫu tài sản phần cứng!'));
+                            return Promise.reject(new Error(t('keHoachBaoTriFormModal.ke_hoach_bao_tri')));
                         }
                     }
                 }]}>
@@ -181,14 +183,14 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
                                             <Form.Item
                                                 {...restField}
                                                 name={[name, 'idTaiSanPhanCung']}
-                                                label="Mẫu mã phần cứng áp dụng"
-                                                rules={[{ required: true, message: 'Vui lòng chọn mẫu phần cứng!' }]}
+                                                label={t('keHoachBaoTriFormModal.mau_ma_phan_cung')}
+                                                rules={[{ required: true, message: t('keHoachBaoTriFormModal.vui_long_chon_mau') }]}
                                                 style={{ marginBottom: 0 }}
                                             >
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
-                                                    placeholder="Chọn mẫu tài sản"
+                                                    placeholder={t('keHoachBaoTriFormModal.chon_mau_tai_san')}
                                                     optionFilterProp="label"
                                                     options={phanCungOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />

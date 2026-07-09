@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Modal, Descriptions, Row, Col, Select, DatePicker, message } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
@@ -14,6 +15,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const NhatKyThaoTacPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<NhatKyThaoTacHeThongResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -58,7 +60,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                 setTotalCount(res.data.page_info?.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải nhật ký thao tác!');
+            message.error(e?.message || t('nhatKyThaoTacPage.khong_the_tai_nhat'));
         } finally {
             setLoading(false);
         }
@@ -99,13 +101,13 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
     };
 
     const getUserLabel = (id?: number) => {
-        if (!id) return 'Hệ thống';
+        if (!id) return t('danhMucCauHinhPage.he_thong');
         const user = nguoiDungOptions.find(opt => opt.id === id);
-        return user ? user.ten : `Tài khoản ID: ${id}`;
+        return user ? user.ten : t('nhatKyThaoTacPage.tai_khoan_id_id', { id: id });
     };
 
     const formatJson = (jsonStr?: string) => {
-        if (!jsonStr) return 'Không có dữ liệu';
+        if (!jsonStr) return t('nhatKyThaoTacPage.khong_co_du_lieu');
         try {
             const parsed = JSON.parse(jsonStr);
             return JSON.stringify(parsed, null, 2);
@@ -116,7 +118,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
 
     const columns = [
         {
-            title: 'Thời gian',
+            title: t('nhatKyThaoTacPage.thoi_gian'),
             dataIndex: 'thoiGianThaoTac',
             key: 'thoiGianThaoTac',
             width: 170,
@@ -125,7 +127,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm:ss') : '-',
         },
         {
-            title: 'Người thực hiện',
+            title: t('phieuNhapTaiSanPage.nguoi_thuc_hien'),
             dataIndex: 'idTaiKhoanThaoTac',
             key: 'idTaiKhoanThaoTac',
             render: (val?: number) => <Text strong>{getUserLabel(val)}</Text>,
@@ -145,13 +147,13 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
             ellipsis: true,
         },
         {
-            title: 'Thực thể tác động',
+            title: t('nhatKyThaoTacPage.thuc_the_tac_dong'),
             dataIndex: 'thucTheTacDong',
             key: 'thucTheTacDong',
             width: 180,
         },
         {
-            title: 'ID Bản ghi',
+            title: t('nhatKyThaoTacPage.id_ban_ghi'),
             dataIndex: 'idBanGhi',
             key: 'idBanGhi',
             width: 100,
@@ -159,7 +161,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
             render: (val?: number) => val || '-',
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 110,
             align: 'center' as const,
@@ -175,15 +177,15 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
         <QuyenHanGuard quyenYeuCau={QUYEN.XEM_NHAT_KY_THAO_TAC}>
             <div style={{ padding: 24 }}>
                 <div style={{ marginBottom: 24 }}>
-                    <Title level={3} style={{ margin: 0 }}>Nhật ký thao tác hệ thống</Title>
-                    <Text type="secondary">Truy vết lịch sử hoạt động, chỉnh sửa cấu hình, tác động nghiệp vụ từ người dùng và hệ thống.</Text>
+                    <Title level={3} style={{ margin: 0 }}>{t('nhatKyThaoTacPage.nhat_ky_thao_tac')}</Title>
+                    <Text type="secondary">{t('nhatKyThaoTacPage.truy_vet_lich_su')}</Text>
                 </div>
 
                 <Card style={{ marginBottom: 24 }}>
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={5}>
                             <Select
-                                placeholder="Người thực hiện"
+                                placeholder={t('phieuNhapTaiSanPage.nguoi_thuc_hien')}
                                 style={{ width: '100%' }}
                                 value={idTaiKhoanThaoTac}
                                 onChange={setIdTaiKhoanThaoTac}
@@ -201,16 +203,16 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                                 onChange={setPhuongThucApi}
                                 allowClear
                                 options={[
-                                    { value: 'POST', label: 'POST (Thêm)' },
-                                    { value: 'PUT', label: 'PUT (Sửa)' },
-                                    { value: 'DELETE', label: 'DELETE (Xóa)' },
-                                    { value: 'GET', label: 'GET (Truy xuất)' },
+                                    { value: 'POST', label: t('nhatKyThaoTacPage.post_them') },
+                                    { value: 'PUT', label: t('nhatKyThaoTacPage.put_sua') },
+                                    { value: 'DELETE', label: t('nhatKyThaoTacPage.delete_xoa') },
+                                    { value: 'GET', label: t('nhatKyThaoTacPage.get_truy_xuat') },
                                 ]}
                             />
                         </Col>
                         <Col xs={24} md={5}>
                             <Input
-                                placeholder="Thực thể tác động..."
+                                placeholder={t('nhatKyThaoTacPage.thuc_the_tac_dong_1')}
                                 value={thucTheTacDong}
                                 onChange={e => setThucTheTacDong(e.target.value)}
                                 onPressEnter={handleSearch}
@@ -223,13 +225,13 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                                 format="DD/MM/YYYY"
                                 value={dateRange}
                                 onChange={setDateRange}
-                                placeholder={['Từ ngày', 'Đến ngày']}
+                                placeholder={[t('phieuKiemKePage.tu_ngay'), t('phieuKiemKePage.den_ngay')]}
                             />
                         </Col>
                         <Col xs={24} md={4}>
                             <Space>
-                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>Tìm kiếm</Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>
@@ -252,24 +254,24 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                 </Card>
 
                 <Modal
-                    title="Chi tiết nhật ký thao tác"
+                    title={t('nhatKyThaoTacPage.chi_tiet_nhat_ky')}
                     open={isDetailOpen}
                     onCancel={() => { setIsDetailOpen(false); setSelectedLog(null); }}
                     footer={[
-                        <Button key="close" onClick={() => { setIsDetailOpen(false); setSelectedLog(null); }}>Đóng</Button>
+                        <Button key="close" onClick={() => { setIsDetailOpen(false); setSelectedLog(null); }}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                     ]}
                     width={850}
                 >
                     {selectedLog && (
                         <div style={{ marginTop: 16 }}>
                             <Descriptions bordered column={2} size="small">
-                                <Descriptions.Item label="Thời gian thực hiện" span={2}>
+                                <Descriptions.Item label={t('phieuKiemKePage.thoi_gian_thuc_hien')} span={2}>
                                     {selectedLog.thoiGianThaoTac ? dayjs(selectedLog.thoiGianThaoTac).format('DD/MM/YYYY HH:mm:ss') : '-'}
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Người thực hiện">
+                                <Descriptions.Item label={t('phieuNhapTaiSanPage.nguoi_thuc_hien')}>
                                     {getUserLabel(selectedLog.idTaiKhoanThaoTac)}
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Địa chỉ IP">
+                                <Descriptions.Item label={t('nhatKyThaoTacPage.dia_chi_ip')}>
                                     {selectedLog.diaChiIp || '-'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="HTTP Method">
@@ -278,17 +280,17 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                                 <Descriptions.Item label="Endpoint API">
                                     <Text code>{selectedLog.endpointApi}</Text>
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Thực thể tác động">
+                                <Descriptions.Item label={t('nhatKyThaoTacPage.thuc_the_tac_dong')}>
                                     {selectedLog.thucTheTacDong || '-'}
                                 </Descriptions.Item>
-                                <Descriptions.Item label="ID Bản ghi">
+                                <Descriptions.Item label={t('nhatKyThaoTacPage.id_ban_ghi')}>
                                     {selectedLog.idBanGhi || '-'}
                                 </Descriptions.Item>
                             </Descriptions>
 
                             <Row gutter={16} style={{ marginTop: 20 }}>
                                 <Col span={12}>
-                                    <div style={{ marginBottom: 8, fontWeight: 'bold' }}>Dữ liệu trước (Before):</div>
+                                    <div style={{ marginBottom: 8, fontWeight: 'bold' }}>{t('nhatKyThaoTacPage.du_lieu_truoc_before')}</div>
                                     <pre style={{
                                         // background: '#f5f5f5',
                                         padding: 12,
@@ -302,7 +304,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
                                     </pre>
                                 </Col>
                                 <Col span={12}>
-                                    <div style={{ marginBottom: 8, fontWeight: 'bold' }}>Dữ liệu sau (After):</div>
+                                    <div style={{ marginBottom: 8, fontWeight: 'bold' }}>{t('nhatKyThaoTacPage.du_lieu_sau_after')}</div>
                                     <pre style={{
                                         // background: '#f5f5f5',
                                         padding: 12,

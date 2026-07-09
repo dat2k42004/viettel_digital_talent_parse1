@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Select, Row, Col, Button } from 'antd';
 import type { NguoiDungResponse } from '../../../api-generated/models/nguoiDungResponse';
@@ -21,7 +22,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   danhSachPhongBan,
   onSave
 }) => {
-  const [form] = Form.useForm<NguoiDungRequest>();
+  const { t } = useTranslation();
+  const [form] = Form.useForm<any>();
 
   useEffect(() => {
     if (open) {
@@ -36,7 +38,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           email: selectedUser.email,
           soDienThoai: selectedUser.soDienThoai,
           idPhongBan: selectedUser.idPhongBan,
-          danhSachIdVaiTro: selectedUser.danhSachVaiTro?.map(v => v.id).filter(Boolean) || [],
+          danhSachIdVaiTro: (selectedUser.danhSachVaiTro?.map(v => v.id).filter(Boolean) || []) as number[],
         });
       } else {
         form.resetFields();
@@ -55,7 +57,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
   return (
     <Modal
-      title={selectedUser ? 'Cập nhật thông tin tài khoản' : 'Thêm mới tài khoản người dùng'}
+      title={selectedUser ? t('userFormModal.cap_nhat_thong_tin') : t('userFormModal.them_moi_tai_khoan')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -73,29 +75,29 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tenDangNhap"
-              label="Tên đăng nhập"
-              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+              label={t('donViCreateModal.ten_dang_nhap')}
+              rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ten') }]}
             >
-              <Input disabled={!!selectedUser} placeholder="Ví dụ: hung.nv" />
+              <Input disabled={!!selectedUser} placeholder={t('userFormModal.vi_du_hungnv')} />
             </Form.Item>
           </Col>
           {!selectedUser ? (
             <Col span={12}>
               <Form.Item
                 name="matKhau"
-                label="Mật khẩu khởi tạo"
-                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu khởi tạo!' }]}
+                label={t('userFormModal.mat_khau_khoi_tao')}
+                rules={[{ required: true, message: t('userFormModal.vui_long_nhap_mat') }]}
               >
-                <Input.Password placeholder="Mật khẩu khởi tạo" />
+                <Input.Password placeholder={t('userFormModal.mat_khau_khoi_tao')} />
               </Form.Item>
             </Col>
           ) : (
             <Col span={12}>
               <Form.Item
                 name="maNguoiDung"
-                label="Mã nhân viên"
+                label={t('userManagementPage.ma_nhan_vien')}
               >
-                <Input disabled placeholder="Hệ thống tự động sinh" />
+                <Input disabled placeholder={t('userFormModal.he_thong_tu_dong')} />
               </Form.Item>
             </Col>
           )}
@@ -103,22 +105,22 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="hoNguoiDung" label="Họ">
-              <Input placeholder="Ví dụ: Nguyễn" />
+            <Form.Item name="hoNguoiDung" label={t('donViFormModal.ho')}>
+              <Input placeholder={t('donViFormModal.vi_du_nguyen')} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="tenDemNguoiDung" label="Tên đệm">
-              <Input placeholder="Ví dụ: Văn" />
+            <Form.Item name="tenDemNguoiDung" label={t('donViFormModal.ten_dem')}>
+              <Input placeholder={t('donViFormModal.vi_du_van')} />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item
               name="tenNguoiDung"
-              label="Tên chính"
-              rules={[{ required: true, message: 'Vui lòng nhập tên chính!' }]}
+              label={t('userFormModal.ten_chinh')}
+              rules={[{ required: true, message: t('userFormModal.vui_long_nhap_ten') }]}
             >
-              <Input placeholder="Ví dụ: Hùng" />
+              <Input placeholder={t('userFormModal.vi_du_hung')} />
             </Form.Item>
           </Col>
         </Row>
@@ -127,29 +129,29 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="email"
-              label="Địa chỉ Email"
-              rules={[{ type: 'email', message: 'Địa chỉ email không hợp lệ!' }]}
+              label={t('appLayout.email')}
+              rules={[{ type: 'email', message: t('userFormModal.dia_chi_email_khong') }]}
             >
-              <Input placeholder="Ví dụ: hung.nv@congty.com" />
+              <Input placeholder={t('userFormModal.vi_du_hungnvcongtycom')} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="soDienThoai" label="Số điện thoại liên hệ">
-              <Input placeholder="Ví dụ: 0987654321" />
+            <Form.Item name="soDienThoai" label={t('userFormModal.so_dien_thoai_lien')}>
+              <Input placeholder={t('nhaCungCapFormModal.vi_du_0987654321')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="chucVu" label="Chức danh công việc">
-              <Input placeholder="Ví dụ: Chuyên viên Kỹ thuật" />
+            <Form.Item name="chucVu" label={t('userFormModal.chuc_danh_cong_viec')}>
+              <Input placeholder={t('userFormModal.vi_du_chuyen_vien')} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="idPhongBan" label="Phòng ban làm việc">
+            <Form.Item name="idPhongBan" label={t('userFormModal.phong_ban_lam_viec')}>
               <Select
-                placeholder="Chọn phòng ban..."
+                placeholder={t('userFormModal.chon_phong_ban')}
                 allowClear
                 showSearch
                 optionFilterProp="children"
@@ -161,12 +163,12 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
         <Form.Item
           name="danhSachIdVaiTro"
-          label="Danh sách vai trò gán cho tài khoản"
-          rules={[{ required: true, message: 'Vui lòng chọn ít nhất một vai trò!' }]}
+          label={t('userFormModal.danh_sach_vai_tro')}
+          rules={[{ required: true, message: t('userFormModal.vui_long_chon_it') }]}
         >
           <Select
             mode="multiple"
-            placeholder="Chọn vai trò..."
+            placeholder={t('userFormModal.chon_vai_tro')}
             style={{ width: '100%' }}
             options={danhSachVaiTro.map(v => ({ value: v.id, label: v.tenVaiTro }))}
           />

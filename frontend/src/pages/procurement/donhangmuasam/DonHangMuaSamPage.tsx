@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -24,6 +25,7 @@ import { DonHangMuaSamFormModal } from './DonHangMuaSamFormModal';
 const { Title, Text } = Typography;
 
 export const DonHangMuaSamPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<DonHangMuaSamResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -64,7 +66,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                 setTotalCount(res.data.page_info?.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách đơn hàng!');
+            message.error(e?.message || t('donHangMuaSamPage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -96,7 +98,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     setTotalCount(res.data.page_info?.total_elements || 0);
                 }
             })
-            .catch(() => message.error('Không thể tải lại danh sách!'))
+            .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
             .finally(() => setLoading(false));
     };
 
@@ -115,7 +117,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết đơn hàng');
+                message.error(t('donHangMuaSamPage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -128,24 +130,24 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat21(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật đơn hàng thành công!');
+                    message.success(t('donHangMuaSamPage.cap_nhat_don_hang'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi22(values);
                 if (res.code === 200) {
-                    message.success('Tạo đơn hàng mua sắm thành công!');
+                    message.success(t('donHangMuaSamPage.tao_don_hang_mua'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+            message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -155,11 +157,11 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
         try {
             const res = await yeuCauPheDuyet7(id);
             if (res.code === 200) {
-                message.success('Đã gửi yêu cầu phê duyệt đơn hàng!');
+                message.success(t('donHangMuaSamPage.da_gui_yeu_cau'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi gửi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_gui_phe'));
         }
     };
 
@@ -167,11 +169,11 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
         try {
             const res = await pheDuyet7(id);
             if (res.code === 200) {
-                message.success('Phê duyệt đơn hàng thành công!');
+                message.success(t('donHangMuaSamPage.phe_duyet_don_hang'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_phe_duyet'));
         }
     };
 
@@ -179,24 +181,24 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
         try {
             const res = await xoaMem22(id);
             if (res.code === 200) {
-                message.success('Xóa đơn hàng thành công!');
+                message.success(t('donHangMuaSamPage.xoa_don_hang_thanh'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa đơn hàng!');
+            message.error(e?.message || t('donHangMuaSamPage.khong_the_xoa_don'));
         }
     };
 
     const renderStatus = (status: string) => {
         switch (status) {
             case 'TAO_MOI':
-                return <Tag color="cyan">Tạo mới</Tag>;
+                return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
             case 'GUI_PHE_DUYET':
-                return <Tag color="orange">Chờ phê duyệt</Tag>;
+                return <Tag color="orange">{t('donHangMuaSamPage.cho_phe_duyet')}</Tag>;
             case 'DA_PHE_DUYET':
-                return <Tag color="blue">Đã phê duyệt</Tag>;
+                return <Tag color="blue">{t('donHangMuaSamPage.da_phe_duyet')}</Tag>;
             case 'HOAN_THANH':
-                return <Tag color="green">Đã hoàn thành</Tag>;
+                return <Tag color="green">{t('donHangMuaSamPage.da_hoan_thanh')}</Tag>;
             default:
                 return <Tag>{status}</Tag>;
         }
@@ -204,7 +206,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
 
     const columns = [
         {
-            title: 'Mã PO',
+            title: t('donHangMuaSamPage.ma_po'),
             dataIndex: 'maDonHang',
             key: 'maDonHang',
             width: 150,
@@ -213,39 +215,39 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Nhà cung cấp',
+            title: t('donHangMuaSamPage.nha_cung_cap'),
             dataIndex: 'tenNhaCungCap',
             key: 'tenNhaCungCap',
         },
         {
-            title: 'Ngày giao DK',
+            title: t('donHangMuaSamPage.ngay_giao_dk'),
             dataIndex: 'thoiGianGiaoDuKien',
             key: 'thoiGianGiaoDuKien',
             width: 120,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Tổng tiền (VNĐ)',
+            title: t('donHangMuaSamPage.tong_tien_vnd'),
             dataIndex: 'tongTienSauThue',
             key: 'tongTienSauThue',
             width: 150,
             render: (val: number) => val ? val.toLocaleString('vi-VN') : '0',
         },
         {
-            title: 'Người lập',
+            title: t('donHangMuaSamPage.nguoi_lap'),
             dataIndex: 'tenNguoiLap',
             key: 'tenNguoiLap',
             width: 160,
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 140,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 120,
             render: (_: any, record: DonHangMuaSamResponse) => {
@@ -256,7 +258,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.XEM_DON_HANG_MUA_SAM)
                         ? {
                             key: 'view',
-                            label: 'Xem chi tiết',
+                            label: t('donViManagementPage.xem_chi_tiet'),
                             icon: <EyeOutlined />,
                             onClick: () => handleOpenModal('view', record),
                         } : null,
@@ -264,7 +266,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     isTaoMoi && authStore.kiemTraQuyen(QUYEN.SUA_DON_HANG_MUA_SAM)
                         ? {
                             key: 'edit',
-                            label: 'Chỉnh sửa đơn',
+                            label: t('donHangMuaSamPage.chinh_sua_don'),
                             icon: <EditOutlined />,
                             onClick: () => handleOpenModal('edit', record),
                         } : null,
@@ -272,7 +274,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     isTaoMoi && authStore.kiemTraQuyen(QUYEN.YEU_CAU_PHE_DUYET_DON_HANG_MUA_SAM)
                         ? {
                             key: 'request_approval',
-                            label: 'Gửi phê duyệt',
+                            label: t('donHangMuaSamPage.gui_phe_duyet'),
                             icon: <SendOutlined />,
                             onClick: () => handleYeuCauPheDuyet(record.id!),
                         } : null,
@@ -280,7 +282,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     isChoDuyet && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_DON_HANG_MUA_SAM)
                         ? {
                             key: 'approve',
-                            label: 'Phê duyệt đơn',
+                            label: t('donHangMuaSamPage.phe_duyet_don'),
                             icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
                             onClick: () => handlePheDuyet(record.id!),
                         } : null,
@@ -290,20 +292,20 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                             key: 'delete',
                             label: (
                                 <Popconfirm
-                                    title="Xác nhận xóa"
-                                    description="Xóa đơn hàng này?"
+                                    title={t('viTriManagementPage.xac_nhan_xoa')}
+                                    description={t('donHangMuaSamPage.xoa_don_hang_nay')}
                                     onConfirm={() => handleXoa(record.id!)}
-                                    okText="Xóa"
-                                    cancelText="Hủy"
+                                    okText={t('viTriManagementPage.xoa')}
+                                    cancelText={t('viTriManagementPage.huy')}
                                 >
-                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa đơn hàng</span>
+                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('donHangMuaSamPage.xoa_don_hang')}</span>
                                 </Popconfirm>
                             ),
                             icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
                         } : null,
                 ].filter(Boolean) as MenuProps['items'];
 
-                if (items.length === 0) return '-';
+                if (!items || items.length === 0) return '-';
 
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
@@ -321,8 +323,8 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
             <div style={{ padding: 24, minHeight: 'calc(100vh - 112px)', borderRadius: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <div>
-                        <Title level={3} style={{ margin: 0 }}>Đơn hàng mua sắm (PO)</Title>
-                        <Text type="secondary">Quản lý lập kế hoạch, mua sắm vật tư, trang thiết bị và bản quyền phần mềm.</Text>
+                        <Title level={3} style={{ margin: 0 }}>{t('donHangMuaSamPage.don_hang_mua_sam')}</Title>
+                        <Text type="secondary">{t('donHangMuaSamPage.quan_ly_lap_ke')}</Text>
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_DON_HANG_MUA_SAM}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -335,7 +337,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={6}>
                             <Input
-                                placeholder="Mã đơn hàng (PO)..."
+                                placeholder={t('donHangMuaSamPage.ma_don_hang_po')}
                                 value={maDonHang}
                                 onChange={(e) => setMaDonHang(e.target.value)}
                                 prefix={<SearchOutlined />}
@@ -344,7 +346,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={6}>
                             <Select
-                                placeholder="Lọc theo nhà cung cấp"
+                                placeholder={t('donHangMuaSamPage.loc_theo_nha_cung')}
                                 style={{ width: '100%' }}
                                 value={idNhaCungCap}
                                 onChange={setIdNhaCungCap}
@@ -356,23 +358,23 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
                         </Col>
                         <Col xs={24} md={6}>
                             <Select
-                                placeholder="Trạng thái đơn hàng"
+                                placeholder={t('donHangMuaSamPage.trang_thai_don_hang')}
                                 style={{ width: '100%' }}
                                 value={trangThai}
                                 onChange={setTrangThai}
                                 allowClear
                                 options={[
-                                    { value: 'TAO_MOI', label: 'Tạo mới' },
-                                    { value: 'GUI_PHE_DUYET', label: 'Chờ phê duyệt' },
-                                    { value: 'DA_PHE_DUYET', label: 'Đã phê duyệt' },
-                                    { value: 'HOAN_THANH', label: 'Đã hoàn thành' },
+                                    { value: 'TAO_MOI', label: t('phieuNhapTaiSanPage.tao_moi') },
+                                    { value: 'GUI_PHE_DUYET', label: t('donHangMuaSamPage.cho_phe_duyet') },
+                                    { value: 'DA_PHE_DUYET', label: t('donHangMuaSamPage.da_phe_duyet') },
+                                    { value: 'HOAN_THANH', label: t('donHangMuaSamPage.da_hoan_thanh') },
                                 ]}
                             />
                         </Col>
                         <Col xs={24} md={6}>
                             <Space>
-                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>

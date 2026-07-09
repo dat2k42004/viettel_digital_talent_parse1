@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Row, Col, Typography, Button } from 'antd';
 import type { DonViResponse } from '../../../api-generated/models/donViResponse';
@@ -18,6 +19,7 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
   selectedDonVi,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DonViUpdateRequest>();
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
 
   return (
     <Modal
-      title="Cập nhật thông tin Đơn vị"
+      title={t('donViFormModal.cap_nhat_thong_tin')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -79,57 +81,57 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tenPhapLy"
-              label="Tên pháp lý Đơn vị"
-              rules={[{ required: true, message: 'Vui lòng nhập tên pháp lý!' }]}
+              label={t('donViFormModal.ten_phap_ly_don')}
+              rules={[{ required: true, message: t('dangKyDonViPage.vui_long_nhap_ten_phap_ly') }]}
             >
-              <Input placeholder="Ví dụ: Công ty Cổ phần A" />
+              <Input placeholder={t('donViFormModal.vi_du_cong_ty')} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="tenThuongMai" label="Tên thương mại / Tên viết tắt">
-              <Input placeholder="Ví dụ: Cty A" />
+            <Form.Item name="tenThuongMai" label={t('donViFormModal.ten_thuong_mai_ten')}>
+              <Input placeholder={t('donViFormModal.vi_du_cty_a')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="maSoThue" label="Mã số thuế">
-              <Input placeholder="Nhập mã số thuế doanh nghiệp" />
+            <Form.Item name="maSoThue" label={t('donViManagementPage.ma_so_thue')}>
+              <Input placeholder={t('donViFormModal.nhap_ma_so_thue')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenMienHeThong"
-              label="Tên miền hệ thống"
-              rules={[{ required: true, message: 'Vui lòng nhập tên miền!' }]}
+              label={t('donViFormModal.ten_mien_he_thong')}
+              rules={[{ required: true, message: t('dangKyPage.vui_long_nhap_ten_mien') }]}
             >
-              <Input placeholder="Ví dụ: congtya.com" />
+              <Input placeholder={t('donViFormModal.vi_du_congtyacom')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="emailChinhThuc" label="Email chính thức">
+            <Form.Item name="emailChinhThuc" label={t('donViFormModal.email_chinh_thuc')}>
               <Input type="email" placeholder="contact@congtya.com" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="soDienThoaiDiDong" label="SĐT di động">
-              <Input placeholder="Số điện thoại di động" />
+            <Form.Item name="soDienThoaiDiDong" label={t('donViManagementPage.sdt_di_dong')}>
+              <Input placeholder={t('donViFormModal.so_dien_thoai_di')} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="soDienThoaiCoDinh" label="SĐT cố định">
-              <Input placeholder="Số điện thoại cố định" />
+            <Form.Item name="soDienThoaiCoDinh" label={t('donViManagementPage.sdt_co_dinh')}>
+              <Input placeholder={t('donViFormModal.so_dien_thoai_co')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="duongDanWebsite" label="Đường dẫn Website">
+            <Form.Item name="duongDanWebsite" label={t('donViFormModal.duong_dan_website')}>
               <Input placeholder="http://congtya.com" />
             </Form.Item>
           </Col>
@@ -140,23 +142,23 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
         </Title>
         <Row gutter={16}>
           <Col span={6}>
-            <Form.Item name="hoNguoiDaiDien" label="Họ">
-              <Input placeholder="Ví dụ: Nguyễn" />
+            <Form.Item name="hoNguoiDaiDien" label={t('donViFormModal.ho')}>
+              <Input placeholder={t('donViFormModal.vi_du_nguyen')} />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="tenDemNguoiDaiDien" label="Tên đệm">
-              <Input placeholder="Ví dụ: Văn" />
+            <Form.Item name="tenDemNguoiDaiDien" label={t('donViFormModal.ten_dem')}>
+              <Input placeholder={t('donViFormModal.vi_du_van')} />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="tenNguoiDaiDien" label="Tên" rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}>
-              <Input placeholder="Ví dụ: A" />
+            <Form.Item name="tenNguoiDaiDien" label={t('donViFormModal.ten')} rules={[{ required: true, message: t('donViFormModal.vui_long_nhap_ten') }]}>
+              <Input placeholder={t('donViFormModal.vi_du_a')} />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="chucVuNguoiDaiDien" label="Chức vụ">
-              <Input placeholder="Ví dụ: Giám đốc" />
+            <Form.Item name="chucVuNguoiDaiDien" label={t('donViFormModal.chuc_vu')}>
+              <Input placeholder={t('donViFormModal.vi_du_giam_doc')} />
             </Form.Item>
           </Col>
         </Row>
@@ -166,26 +168,26 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
         </Title>
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="tinhThanhPho" label="Tỉnh / Thành phố">
-              <Input placeholder="Hà Nội" />
+            <Form.Item name="tinhThanhPho" label={t('donViFormModal.tinh_thanh_pho')}>
+              <Input placeholder={t('donViFormModal.ha_noi')} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="quanHuyen" label="Quận / Huyện">
-              <Input placeholder="Cầu Giấy" />
+            <Form.Item name="quanHuyen" label={t('donViFormModal.quan_huyen')}>
+              <Input placeholder={t('donViFormModal.cau_giay')} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="phuongXa" label="Phường / Xã">
-              <Input placeholder="Dịch Vọng" />
+            <Form.Item name="phuongXa" label={t('donViFormModal.phuong_xa')}>
+              <Input placeholder={t('donViFormModal.dich_vong')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="soNhaTenDuong" label="Số nhà, tên đường">
-              <Input placeholder="Số 1 Trần Duy Hưng" />
+            <Form.Item name="soNhaTenDuong" label={t('donViFormModal.so_nha_ten_duong')}>
+              <Input placeholder={t('donViFormModal.so_1_tran_duy')} />
             </Form.Item>
           </Col>
         </Row>

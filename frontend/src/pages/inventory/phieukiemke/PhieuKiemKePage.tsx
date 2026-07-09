@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker, Progress, Modal } from 'antd';
 import type { MenuProps } from 'antd';
@@ -28,6 +29,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const PhieuKiemKePage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<PhieuKiemKeResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -66,7 +68,7 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                 setTienDoList(filtered);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải tiến độ thực hiện!');
+            message.error(e?.message || t('phieuKiemKePage.khong_the_tai_tien'));
         } finally {
             setTienDoLoading(false);
         }
@@ -96,7 +98,7 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                 setTotalCount(pageInfo.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách phiếu kiểm kê!');
+            message.error(e?.message || t('phieuKiemKePage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -133,7 +135,7 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết phiếu kiểm kê');
+                message.error(t('phieuKiemKePage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -146,24 +148,24 @@ export const PhieuKiemKePage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật phiếu kiểm kê thành công!');
+                    message.success(t('phieuKiemKePage.cap_nhat_phieu_kiem'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi(values);
                 if (res.code === 200) {
-                    message.success('Tạo phiếu kiểm kê thành công!');
+                    message.success(t('phieuKiemKePage.tao_phieu_kiem_ke'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu phiếu kiểm kê!');
+            message.error(e?.message || t('phieuKiemKePage.co_loi_xay_ra_khi_luu_phieu_kiem_ke'));
         } finally {
             setModalLoading(false);
         }
@@ -175,14 +177,14 @@ export const PhieuKiemKePage: React.FC = observer(() => {
         try {
             const res = await thucHienKiemKe(selectedItem.id, values);
             if (res.code === 200) {
-                message.success(values.isSubmit ? 'Đã gửi báo cáo đối soát kiểm kê thành công!' : 'Đã lưu nháp tiến độ kiểm kê thành công!');
+                message.success(values.isSubmit ? t('phieuKiemKePage.da_gui_bao_cao') : t('phieuKiemKePage.da_luu_nhap_tien'));
                 setIsFormOpen(false);
                 taiDuLieu(currentPage, pageSize);
             } else {
-                message.error(res.message || 'Thực hiện kiểm kê thất bại!');
+                message.error(res.message || t('phieuKiemKePage.thuc_hien_kiem_ke'));
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi thực hiện kiểm kê!');
+            message.error(e?.message || t('phieuKiemKePage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -192,11 +194,11 @@ export const PhieuKiemKePage: React.FC = observer(() => {
         try {
             const res = await xacNhanHoanThanhPhongBan(id);
             if (res.code === 200) {
-                message.success('Đã phê duyệt nghiệm thu kết quả kiểm kê phòng ban!');
+                message.success(t('phieuKiemKePage.da_phe_duyet_nghiem'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi phê duyệt nghiệm thu');
+            message.error(e?.message || t('phieuKiemKePage.loi_khi_phe_duyet'));
         }
     };
 
@@ -204,27 +206,27 @@ export const PhieuKiemKePage: React.FC = observer(() => {
         try {
             const res = await xoaMem(id);
             if (res.code === 200) {
-                message.success('Xóa phiếu kiểm kê thành công!');
+                message.success(t('phieuKiemKePage.xoa_phieu_kiem_ke'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa phiếu kiểm kê!');
+            message.error(e?.message || t('phieuKiemKePage.khong_the_xoa_phieu'));
         }
     };
 
     const renderStatus = (status?: string) => {
         switch (status) {
-            case 'TAO_MOI': return <Tag color="cyan">Tạo mới</Tag>;
-            case 'DANG_THUC_HIEN': return <Tag color="purple">Đang thực hiện</Tag>;
-            case 'DA_GUI': return <Tag color="orange">Chờ xác nhận</Tag>;
-            case 'XAC_NHAN': return <Tag color="green">Đã nghiệm thu</Tag>;
+            case 'TAO_MOI': return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
+            case 'DANG_THUC_HIEN': return <Tag color="purple">{t('phieuSuaChuaPage.dang_thuc_hien')}</Tag>;
+            case 'DA_GUI': return <Tag color="orange">{t('phieuKiemKePage.cho_xac_nhan')}</Tag>;
+            case 'XAC_NHAN': return <Tag color="green">{t('phieuKiemKePage.da_nghiem_thu')}</Tag>;
             default: return <Tag>{status}</Tag>;
         }
     };
 
     const columns = [
         {
-            title: 'Mã phiếu',
+            title: t('phieuSuaChuaPage.ma_phieu'),
             dataIndex: 'maPhieuKiemKe',
             key: 'maPhieuKiemKe',
             width: 155,
@@ -233,50 +235,50 @@ export const PhieuKiemKePage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Mã đợt',
+            title: t('phieuKiemKePage.ma_dot'),
             dataIndex: 'maDotKiemKe',
             key: 'maDotKiemKe',
             width: 140,
         },
         {
-            title: 'Tên đợt kiểm kê',
+            title: t('phieuKiemKePage.ten_dot_kiem_ke'),
             dataIndex: 'tenDotKiemKe',
             key: 'tenDotKiemKe',
         },
         {
-            title: 'Phòng ban',
+            title: t('phieuKiemKePage.phong_ban'),
             dataIndex: 'tenPhongBan',
             key: 'tenPhongBan',
         },
         {
-            title: 'Nhân viên kiểm kê',
+            title: t('phieuKiemKePage.nhan_vien_kiem_ke'),
             dataIndex: 'tenNhanVienKiemKe',
             key: 'tenNhanVienKiemKe',
             width: 160,
         },
         {
-            title: 'Thời gian thực hiện',
+            title: t('phieuKiemKePage.thoi_gian_thuc_hien'),
             dataIndex: 'thoiGianThucHien',
             key: 'thoiGianThucHien',
             width: 160,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '-',
         },
         {
-            title: 'Thời gian tạo',
+            title: t('phieuKiemKePage.thoi_gian_tao'),
             dataIndex: 'thoiGianTao',
             key: 'thoiGianTao',
             width: 130,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 130,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'actions',
             width: 120,
             fixed: 'right' as const,
@@ -290,31 +292,31 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                 const items: MenuProps['items'] = [
                     {
                         key: 'view',
-                        label: 'Xem chi tiết',
+                        label: t('donViManagementPage.xem_chi_tiet'),
                         icon: <EyeOutlined />,
                         onClick: () => handleOpenModal('view', record),
                     },
                     canViewProgress && record.dotKiemKeId ? {
                         key: 'progress',
-                        label: 'Theo dõi tiến độ',
+                        label: t('phieuKiemKePage.theo_doi_tien_do'),
                         icon: <LineChartOutlined />,
                         onClick: () => handleOpenTienDo(record),
                     } : null,
                     canEdit ? {
                         key: 'edit',
-                        label: 'Sửa thông tin',
+                        label: t('phieuKiemKePage.sua_thong_tin'),
                         icon: <EditOutlined />,
                         onClick: () => handleOpenModal('edit', record),
                     } : null,
                     canExecute ? {
                         key: 'execute',
-                        label: 'Thực hiện đối soát',
+                        label: t('phieuKiemKePage.thuc_hien_doi_soat_1'),
                         icon: <AuditOutlined />,
                         onClick: () => handleOpenModal('execute', record),
                     } : null,
                     canVerify ? {
                         key: 'verify',
-                        label: 'Phê duyệt nghiệm thu',
+                        label: t('phieuKiemKePage.phe_duyet_nghiem_thu'),
                         icon: <CheckCircleOutlined />,
                         onClick: () => handleXacNhanHoanThanh(record.id!),
                     } : null,
@@ -325,13 +327,13 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                         key: 'delete',
                         label: (
                             <Popconfirm
-                                title="Bạn chắc chắn muốn xóa phiếu kiểm kê này?"
+                                title={t('phieuKiemKePage.ban_chac_chan_muon')}
                                 onConfirm={() => handleXoa(record.id!)}
-                                okText="Xóa"
-                                cancelText="Hủy"
+                                okText={t('viTriManagementPage.xoa')}
+                                cancelText={t('viTriManagementPage.huy')}
                                 okButtonProps={{ danger: true }}
                             >
-                                <span style={{ color: '#ff4d4f' }}>Xóa bỏ</span>
+                                <span style={{ color: '#ff4d4f' }}>{t('phieuKiemKePage.xoa_bo')}</span>
                             </Popconfirm>
                         ),
                         icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -353,8 +355,8 @@ export const PhieuKiemKePage: React.FC = observer(() => {
         <div>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <Title level={3} style={{ margin: 0 }}>Quản lý Phiếu kiểm kê phòng ban</Title>
-                    <Text type="secondary">Thực hiện đối soát, kiểm kê tài sản thực tế và theo dõi tiến độ nghiệm thu phòng ban</Text>
+                    <Title level={3} style={{ margin: 0 }}>{t('phieuKiemKePage.quan_ly_phieu_kiem')}</Title>
+                    <Text type="secondary">{t('phieuKiemKePage.thuc_hien_doi_soat')}</Text>
                 </div>
                 <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_PHIEU_KIEM_KE}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -366,25 +368,25 @@ export const PhieuKiemKePage: React.FC = observer(() => {
             <Card style={{ marginBottom: 16 }}>
                 <Row gutter={[16, 16]} align="middle">
                     <Col xs={24} sm={8} md={6}>
-                        <div style={{ fontWeight: 500, marginBottom: 4 }}>Trạng thái phiếu</div>
+                        <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('phieuKiemKePage.trang_thai_phieu')}</div>
                         <Select
-                            placeholder="Tất cả trạng thái"
+                            placeholder={t('phieuKiemKePage.tat_ca_trang_thai')}
                             style={{ width: '100%' }}
                             allowClear
                             value={trangThai}
                             onChange={setTrangThai}
                         >
-                            <Select.Option value="TAO_MOI">Tạo mới</Select.Option>
-                            <Select.Option value="DANG_THUC_HIEN">Đang thực hiện</Select.Option>
-                            <Select.Option value="DA_GUI">Chờ xác nhận</Select.Option>
-                            <Select.Option value="XAC_NHAN">Đã nghiệm thu</Select.Option>
+                            <Select.Option value="TAO_MOI">{t('phieuNhapTaiSanPage.tao_moi')}</Select.Option>
+                            <Select.Option value="DANG_THUC_HIEN">{t('phieuSuaChuaPage.dang_thuc_hien')}</Select.Option>
+                            <Select.Option value="DA_GUI">{t('phieuKiemKePage.cho_xac_nhan')}</Select.Option>
+                            <Select.Option value="XAC_NHAN">{t('phieuKiemKePage.da_nghiem_thu')}</Select.Option>
                         </Select>
                     </Col>
                     {!authStore.currentUserProfile?.idPhongBan && (
                         <Col xs={24} sm={8} md={6}>
-                            <div style={{ fontWeight: 500, marginBottom: 4 }}>Phòng ban</div>
+                            <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('phieuKiemKePage.phong_ban')}</div>
                             <Select
-                                placeholder="Tất cả phòng ban"
+                                placeholder={t('phieuKiemKePage.tat_ca_phong_ban')}
                                 style={{ width: '100%' }}
                                 allowClear
                                 value={idPhongBan}
@@ -399,12 +401,12 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                         </Col>
                     )}
                     <Col xs={24} sm={8} md={6}>
-                        <div style={{ fontWeight: 500, marginBottom: 4 }}>Thời gian thực hiện</div>
+                        <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('phieuKiemKePage.thoi_gian_thuc_hien')}</div>
                         <RangePicker
                             style={{ width: '100%' }}
                             value={dateRange}
                             onChange={setDateRange}
-                            placeholder={['Từ ngày', 'Đến ngày']}
+                            placeholder={[t('phieuKiemKePage.tu_ngay'), t('phieuKiemKePage.den_ngay')]}
                             format="DD/MM/YYYY"
                         />
                     </Col>
@@ -433,7 +435,7 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                         total: totalCount,
                         showSizeChanger: true,
                         pageSizeOptions: ['5', '10', '20', '50'],
-                        showTotal: (total) => `Tổng số ${total} bản ghi`,
+                        showTotal: (total) => t('dotKiemKePage.tong_so_total_ban_ghi', { total: total }),
                         onChange: (page, size) => {
                             setCurrentPage(page);
                             setPageSize(size);
@@ -453,11 +455,11 @@ export const PhieuKiemKePage: React.FC = observer(() => {
             />
 
             <Modal
-                title={`Theo dõi tiến độ kiểm kê phiếu: ${selectedPhieu?.maPhieuKiemKe || ''}`}
+                title={t('phieuKiemKePage.theo_doi_tien_do_kiem', { maPhieuKiemKe: selectedPhieu?.maPhieuKiemKe || '' })}
                 open={isTienDoModalOpen}
                 onCancel={() => setIsTienDoModalOpen(false)}
                 footer={[
-                    <Button key="close" onClick={() => setIsTienDoModalOpen(false)}>Đóng</Button>
+                    <Button key="close" onClick={() => setIsTienDoModalOpen(false)}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ]}
                 width={800}
             >
@@ -468,31 +470,31 @@ export const PhieuKiemKePage: React.FC = observer(() => {
                     pagination={false}
                     columns={[
                         {
-                            title: 'Phòng ban',
+                            title: t('phieuKiemKePage.phong_ban'),
                             dataIndex: 'tenPhongBan',
                             key: 'tenPhongBan',
                         },
                         {
-                            title: 'Trạng thái phiếu',
+                            title: t('phieuKiemKePage.trang_thai_phieu'),
                             dataIndex: 'trangThaiPhieu',
                             key: 'trangThaiPhieu',
                             render: (val: string) => {
                                 switch (val) {
-                                    case 'TAO_MOI': return <Tag color="cyan">Tạo mới</Tag>;
-                                    case 'DANG_THUC_HIEN': return <Tag color="purple">Đang thực hiện</Tag>;
-                                    case 'DA_GUI': return <Tag color="orange">Chờ xác nhận</Tag>;
-                                    case 'XAC_NHAN': return <Tag color="green">Đã nghiệm thu</Tag>;
-                                    default: return <Tag color="default">{val || 'Chưa lập phiếu'}</Tag>;
+                                    case 'TAO_MOI': return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
+                                    case 'DANG_THUC_HIEN': return <Tag color="purple">{t('phieuSuaChuaPage.dang_thuc_hien')}</Tag>;
+                                    case 'DA_GUI': return <Tag color="orange">{t('phieuKiemKePage.cho_xac_nhan')}</Tag>;
+                                    case 'XAC_NHAN': return <Tag color="green">{t('phieuKiemKePage.da_nghiem_thu')}</Tag>;
+                                    default: return <Tag color="default">{t('phieuKiemKePage.val_chua_lap_phieu')}</Tag>;
                                 }
                             }
                         },
                         {
-                            title: 'Đã kiểm / Tổng số tài sản',
+                            title: t('phieuKiemKePage.da_kiem_tong_so'),
                             key: 'soLuong',
                             render: (_, row) => `${row.soLuongDaKiem ?? 0} / ${row.tongSoLuongTaiSan ?? 0}`,
                         },
                         {
-                            title: 'Tiến độ',
+                            title: t('phieuKiemKePage.tien_do'),
                             key: 'progress',
                             width: 250,
                             render: (_, row) => {

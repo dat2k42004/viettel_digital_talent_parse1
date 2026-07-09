@@ -34,15 +34,19 @@ public class ViTriServiceImpl implements ViTriService {
     private final DonViRepository donViRepository;
 
     @Override
-    public PageResponse<ViTriResponse> layDanhSach(String tenViTri, String maViTri, String trangThai, String loaiViTri, int page, int size) {
-        Long idDonVi = DonViContextHolder.getTenantId();
+    public PageResponse<ViTriResponse> layDanhSach(String tenViTri, String maViTri, String trangThai, String loaiViTri, Long selectIdDonVi, int page, int size) {
+        Long currentTenantId = DonViContextHolder.getTenantId();
         boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
+        Long idDonVi = currentTenantId != null ? currentTenantId : selectIdDonVi;
 
         Specification<ViTri> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("thoiGianXoa")));
             
-            if (idDonVi == null || laSuperAdmin) {
+            if (laSuperAdmin) {
+                if (idDonVi != null) {
+                    predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+                }
                 if (trangThai != null && !trangThai.trim().isEmpty()) {
                     try {
                         predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
@@ -52,7 +56,9 @@ public class ViTriServiceImpl implements ViTriService {
                 }
             } else {
                 predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.HOAT_DONG));
-                predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+                if (idDonVi != null) {
+                    predicates.add(cb.equal(root.get("donVi").get("id"), idDonVi));
+                }
             }
 
             if (tenViTri != null && !tenViTri.trim().isEmpty()) {
@@ -167,7 +173,7 @@ public class ViTriServiceImpl implements ViTriService {
         try {
             viTri.setTrangThai(TrangThaiCoBanEnum.fromValue(status));
         } catch (IllegalArgumentException e) {
-            throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+            throw new NghiepVuException("exception.common.invalid_status", 400);
         }
         viTriRepository.save(viTri);
     }

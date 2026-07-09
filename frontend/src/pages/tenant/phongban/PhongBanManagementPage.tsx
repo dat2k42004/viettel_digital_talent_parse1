@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -13,6 +14,7 @@ import { PhongBanFormModal } from './PhongBanFormModal';
 const { Title, Text } = Typography;
 
 export const PhongBanManagementPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachPhongBan, setDanhSachPhongBan] = useState<PhongBanResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -43,7 +45,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách phòng ban!');
+      message.error(e?.message || t('phongBanManagementPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch((e) => message.error('Không thể tải lại danh sách!'))
+      .catch((e) => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -81,24 +83,24 @@ export const PhongBanManagementPage: React.FC = observer(() => {
       if (selectedPhongBan && selectedPhongBan.id) {
         const res = await capNhat6(selectedPhongBan.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật phòng ban thành công!');
+          message.success(t('phongBanManagementPage.cap_nhat_phong_ban'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi6(values);
         if (res.code === 200) {
-          message.success('Thêm mới phòng ban thành công!');
+          message.success(t('phongBanManagementPage.them_moi_phong_ban'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -109,13 +111,13 @@ export const PhongBanManagementPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai6(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} phòng ban thành công!`);
+        message.success(t('phongBanManagementPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -123,22 +125,22 @@ export const PhongBanManagementPage: React.FC = observer(() => {
     try {
       const res = await xoaMem6(id);
       if (res.code === 200) {
-        message.success('Xóa phòng ban thành công!');
+        message.success(t('phongBanManagementPage.xoa_phong_ban_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa phòng ban!');
+      message.error(e?.message || t('phongBanManagementPage.khong_the_xoa_phong'));
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Tạm khóa</Tag>;
+        return <Tag color="red">{t('loaiTaiSanFormModal.tam_khoa')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -146,7 +148,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã phòng ban',
+      title: t('phongBanFormModal.ma_phong_ban'),
       dataIndex: 'maPhongBan',
       key: 'maPhongBan',
       width: 160,
@@ -154,36 +156,36 @@ export const PhongBanManagementPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên phòng ban',
+      title: t('phongBanManagementPage.ten_phong_ban'),
       dataIndex: 'tenPhongBan',
       key: 'tenPhongBan',
     },
     {
-      title: 'Tên viết tắt',
+      title: t('phongBanManagementPage.ten_viet_tat'),
       dataIndex: 'tenVietTat',
       key: 'tenVietTat',
       width: 140,
     },
     {
-      title: 'Email nhóm',
+      title: t('phongBanManagementPage.email_nhom'),
       dataIndex: 'emailNhom',
       key: 'emailNhom',
     },
     {
-      title: 'Hotline phòng',
+      title: t('phongBanManagementPage.hotline_phong'),
       dataIndex: 'soHotlinePhong',
       key: 'soHotlinePhong',
       width: 150,
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 110,
       render: (_: any, record: PhongBanResponse) => {
@@ -191,7 +193,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_PHONG_BAN)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedPhongBan(record);
@@ -202,7 +204,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_PHONG_BAN)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa phòng ban' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('phongBanManagementPage.khoa_phong_ban') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -212,13 +214,13 @@ export const PhongBanManagementPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa phòng ban này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('phongBanManagementPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoaPhongBan(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa phòng ban</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('phongBanManagementPage.xoa_phong_ban')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -267,7 +269,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Input
-                placeholder="Tìm tên phòng ban..."
+                placeholder={t('phongBanManagementPage.tim_ten_phong_ban')}
                 value={searchTen}
                 onChange={(e) => setSearchTen(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -275,21 +277,21 @@ export const PhongBanManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={8}>
               <Input
-                placeholder="Mã phòng ban..."
+                placeholder={t('phongBanManagementPage.ma_phong_ban')}
                 value={searchMa}
                 onChange={(e) => setSearchMa(e.target.value)}
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Trạng thái"
+                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                 style={{ width: '100%' }}
                 value={searchTrangThai}
                 onChange={setSearchTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]}
               />
             </Col>
@@ -298,7 +300,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

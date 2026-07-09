@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Space, Card, Divider, Typography } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -30,6 +31,7 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
     onSave,
     loading,
 }) => {
+  const { t } = useTranslation();
     const [form] = Form.useForm<DonHangMuaSamRequest>();
     const isView = mode === 'view';
 
@@ -103,8 +105,8 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
     };
 
     const getTitle = () => {
-        if (isView) return 'Chi tiết Đơn hàng mua sắm';
-        return selectedRecord ? 'Cập nhật Đơn hàng mua sắm' : 'Lập Đơn hàng mua sắm mới';
+        if (isView) return t('donHangMuaSamFormModal.chi_tiet_don_hang');
+        return selectedRecord ? t('donHangMuaSamFormModal.cap_nhat_don_hang') : t('donHangMuaSamFormModal.lap_don_hang_mua');
     };
 
     return (
@@ -115,11 +117,11 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
             confirmLoading={loading}
             footer={
                 isView ? [
-                    <Button key="close" onClick={onCancel}>Đóng</Button>
+                    <Button key="close" onClick={onCancel}>{t('phieuNhapTaiSanFormModal.dong')}</Button>
                 ] : [
-                    <Button key="cancel" onClick={onCancel} disabled={loading}>Hủy bỏ</Button>,
+                    <Button key="cancel" onClick={onCancel} disabled={loading}>{t('appLayout.cancel')}</Button>,
                     <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
-                        {selectedRecord ? 'Lưu cập nhật' : 'Tạo đơn hàng'}
+                        {selectedRecord ? t('phieuNhapTaiSanFormModal.luu_cap_nhat') : t('donHangMuaSamFormModal.tao_don_hang')}
                     </Button>
                 ]
             }
@@ -127,24 +129,24 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
             style={{ top: 20 }}
         >
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-                <Divider orientation={"left" as any}>Thông tin chung</Divider>
+                <Divider orientation={"left" as any}>{t('donHangMuaSamFormModal.thong_tin_chung')}</Divider>
                 <Row gutter={16}>
                     {selectedRecord && (
                         <Col span={8}>
-                            <Form.Item name="maDonHang" label="Mã đơn hàng">
-                                <Input disabled placeholder="Mã tự động sinh" />
+                            <Form.Item name="maDonHang" label={t('donHangMuaSamFormModal.ma_don_hang')}>
+                                <Input disabled placeholder={t('phieuNhapTaiSanFormModal.ma_tu_dong_sinh')} />
                             </Form.Item>
                         </Col>
                     )}
                     <Col span={selectedRecord ? 16 : 24}>
                         <Form.Item
                             name="idNhaCungCap"
-                            label="Nhà cung cấp"
-                            rules={[{ required: true, message: 'Vui lòng chọn nhà cung cấp!' }]}
+                            label={t('donHangMuaSamPage.nha_cung_cap')}
+                            rules={[{ required: true, message: t('donHangMuaSamFormModal.vui_long_chon_nha') }]}
                         >
                             <Select
                                 disabled={isView}
-                                placeholder="Chọn nhà cung cấp"
+                                placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
                                 showSearch
                                 optionFilterProp="label"
                                 options={nccOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
@@ -155,12 +157,12 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
 
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item name="soHopDongDinhKem" label="Số hợp đồng đính kèm">
-                            <Input disabled={isView} placeholder="Ví dụ: HD-2026-001" />
+                        <Form.Item name="soHopDongDinhKem" label={t('donHangMuaSamFormModal.so_hop_dong_dinh')}>
+                            <Input disabled={isView} placeholder={t('donHangMuaSamFormModal.vi_du_hd2026001')} />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item name="thoiGianGiaoDuKien" label="Ngày giao hàng dự kiến">
+                        <Form.Item name="thoiGianGiaoDuKien" label={t('donHangMuaSamFormModal.ngay_giao_hang_du')}>
                             <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
                         </Form.Item>
                     </Col>
@@ -168,27 +170,27 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
 
                 <Row gutter={16}>
                     <Col span={8}>
-                        <Form.Item name="tongTienTruocThue" label="Tổng tiền trước thuế (VNĐ)" rules={[{ required: true, message: 'Nhập số tiền!' }]}>
+                        <Form.Item name="tongTienTruocThue" label={t('donHangMuaSamFormModal.tong_tien_truoc_thue')} rules={[{ required: true, message: t('donHangMuaSamFormModal.nhap_so_tien') }]}>
                             <InputNumber disabled={isView} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item name="thueVat" label="Tiền thuế VAT (VNĐ)" rules={[{ required: true, message: 'Nhập tiền thuế!' }]}>
+                        <Form.Item name="thueVat" label={t('donHangMuaSamFormModal.tien_thue_vat_vnd')} rules={[{ required: true, message: t('donHangMuaSamFormModal.nhap_tien_thue') }]}>
                             <InputNumber disabled={isView} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item name="tongTienSauThue" label="Tổng tiền sau thuế (VNĐ)" rules={[{ required: true, message: 'Nhập tổng tiền!' }]}>
+                        <Form.Item name="tongTienSauThue" label={t('donHangMuaSamFormModal.tong_tien_sau_thue')} rules={[{ required: true, message: t('donHangMuaSamFormModal.nhap_tong_tien') }]}>
                             <InputNumber disabled={isView} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                         </Form.Item>
                     </Col>
                 </Row>
 
-                <Form.Item name="ghiChu" label="Ghi chú">
-                    <Input.TextArea disabled={isView} rows={2} placeholder="Nội dung ghi chú đơn hàng..." />
+                <Form.Item name="ghiChu" label={t('loaiTaiSanFormModal.ghi_chu')}>
+                    <Input.TextArea disabled={isView} rows={2} placeholder={t('donHangMuaSamFormModal.noi_dung_ghi_chu')} />
                 </Form.Item>
 
-                <Divider orientation={"left" as any}>Chi tiết Phần cứng</Divider>
+                <Divider orientation={"left" as any}>{t('donHangMuaSamFormModal.chi_tiet_phan_cung')}</Divider>
                 <Form.List name="chiTietPhanCung">
                     {(fields, { add, remove }) => (
                         <>
@@ -196,22 +198,22 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 8 }}>
                                     <Row gutter={16} align="middle">
                                         <Col span={9}>
-                                            <Form.Item {...restField} name={[name, 'idTaiSanPhanCung']} label="Mẫu phần cứng" rules={[{ required: true, message: 'Chọn mẫu!' }]}>
+                                            <Form.Item {...restField} name={[name, 'idTaiSanPhanCung']} label={t('phieuNhapTaiSanFormModal.mau_phan_cung')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_mau') }]}>
                                                 <Select disabled={isView} showSearch optionFilterProp="label" options={phanCungOptions.map(opt => ({ value: opt.id, label: opt.ten }))} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={4}>
-                                            <Form.Item {...restField} name={[name, 'soLuongDat']} label="Số lượng" rules={[{ required: true, message: 'Nhập SL!' }]}>
+                                            <Form.Item {...restField} name={[name, 'soLuongDat']} label={t('donHangMuaSamFormModal.so_luong')} rules={[{ required: true, message: t('donHangMuaSamFormModal.nhap_sl') }]}>
                                                 <InputNumber disabled={isView} min={1} style={{ width: '100%' }} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'donGiaDat']} label="Đơn giá" rules={[{ required: true, message: 'Nhập giá!' }]}>
+                                            <Form.Item {...restField} name={[name, 'donGiaDat']} label={t('donHangMuaSamFormModal.don_gia')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.nhap_gia') }]}>
                                                 <InputNumber disabled={isView} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'ghiChu']} label="Ghi chú">
+                                            <Form.Item {...restField} name={[name, 'ghiChu']} label={t('loaiTaiSanFormModal.ghi_chu')}>
                                                 <Input disabled={isView} />
                                             </Form.Item>
                                         </Col>
@@ -234,7 +236,7 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                     )}
                 </Form.List>
 
-                <Divider orientation={"left" as any}>Chi tiết Bản quyền Phần mềm</Divider>
+                <Divider orientation={"left" as any}>{t('donHangMuaSamFormModal.chi_tiet_ban_quyen')}</Divider>
                 <Form.List name="chiTietPhanMem">
                     {(fields, { add, remove }) => (
                         <>
@@ -242,22 +244,22 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 8 }}>
                                     <Row gutter={16} align="middle">
                                         <Col span={9}>
-                                            <Form.Item {...restField} name={[name, 'idTaiSanPhanMem']} label="Mẫu phần mềm" rules={[{ required: true, message: 'Chọn phần mềm!' }]}>
+                                            <Form.Item {...restField} name={[name, 'idTaiSanPhanMem']} label={t('phieuNhapTaiSanFormModal.mau_phan_mem')} rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}>
                                                 <Select disabled={isView} showSearch optionFilterProp="label" options={phanMemOptions.map(opt => ({ value: opt.id, label: opt.ten }))} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={4}>
-                                            <Form.Item {...restField} name={[name, 'soLuongDat']} label="Số lượng" rules={[{ required: true, message: 'Nhập SL!' }]}>
+                                            <Form.Item {...restField} name={[name, 'soLuongDat']} label={t('donHangMuaSamFormModal.so_luong')} rules={[{ required: true, message: t('donHangMuaSamFormModal.nhap_sl') }]}>
                                                 <InputNumber disabled={isView} min={1} style={{ width: '100%' }} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'donGiaDat']} label="Đơn giá" rules={[{ required: true, message: 'Nhập giá!' }]}>
+                                            <Form.Item {...restField} name={[name, 'donGiaDat']} label={t('donHangMuaSamFormModal.don_gia')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.nhap_gia') }]}>
                                                 <InputNumber disabled={isView} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={5}>
-                                            <Form.Item {...restField} name={[name, 'ghiChu']} label="Ghi chú">
+                                            <Form.Item {...restField} name={[name, 'ghiChu']} label={t('loaiTaiSanFormModal.ghi_chu')}>
                                                 <Input disabled={isView} />
                                             </Form.Item>
                                         </Col>

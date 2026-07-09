@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, Switch, message, Upload, Typography } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
@@ -25,6 +26,7 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<TaiSanPhanCungRequest>();
   const isView = mode === 'view';
 
@@ -47,7 +49,7 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
         if (loaiRes.data) setLoaiOptions(loaiRes.data);
         if (dmRes.data) setDanhmucOptions(dmRes.data);
       } catch (e) {
-        message.error('Không thể tải danh sách tùy chọn cho dropdowns!');
+        message.error(t('taiSanPhanMemFormModal.khong_the_tai_danh'));
       }
     };
     if (open) {
@@ -91,8 +93,8 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết mẫu tài sản phần cứng';
-    return selectedTaiSanPhanCung ? 'Cập nhật mẫu tài sản phần cứng' : 'Thêm mới mẫu tài sản phần cứng';
+    if (isView) return t('taiSanPhanCungFormModal.chi_tiet_mau_tai');
+    return selectedTaiSanPhanCung ? t('taiSanPhanCungFormModal.cap_nhat_mau_tai') : t('taiSanPhanCungFormModal.them_moi_mau_tai');
   };
 
   return (
@@ -123,21 +125,21 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
           <Col span={12}>
             <Form.Item
               name="tenMau"
-              label="Tên mẫu thiết bị"
+              label={t('linhKienPhanCungPage.ten_mau_thiet_bi')}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên mẫu!' },
-                { max: 150, message: 'Tên mẫu không vượt quá 150 ký tự!' },
+                { required: true, message: t('taiSanPhanMemFormModal.vui_long_nhap_ten') },
+                { max: 150, message: t('taiSanPhanMemFormModal.ten_mau_khong_vuot') },
               ]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: Latitude 5520" />
+              <Input disabled={isView} placeholder={t('taiSanPhanCungFormModal.vi_du_latitude_5520')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="maMau"
-              label="Mã mẫu thiết bị"
+              label={t('taiSanPhanCungFormModal.ma_mau_thiet_bi')}
             >
-              <Input disabled placeholder="Mã hệ thống tự động sinh" />
+              <Input disabled placeholder={t('loaiTaiSanFormModal.ma_he_thong_tu')} />
             </Form.Item>
           </Col>
         </Row>
@@ -146,12 +148,12 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
           <Col span={8}>
             <Form.Item
               name="idHangSanXuat"
-              label="Hãng sản xuất"
-              rules={[{ required: true, message: 'Vui lòng chọn hãng sản xuất!' }]}
+              label={t('taiSanPhanMemPage.hang_san_xuat')}
+              rules={[{ required: true, message: t('taiSanPhanMemFormModal.vui_long_chon_hang') }]}
             >
               <Select
                 disabled={isView}
-                placeholder="Chọn hãng"
+                placeholder={t('taiSanPhanMemFormModal.chon_hang')}
                 options={hangOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
@@ -159,12 +161,12 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
           <Col span={8}>
             <Form.Item
               name="idLoaiTaiSan"
-              label="Loại tài sản"
-              rules={[{ required: true, message: 'Vui lòng chọn loại tài sản!' }]}
+              label={t('baoCaoPage.loai_tai_san')}
+              rules={[{ required: true, message: t('taiSanPhanMemFormModal.vui_long_chon_loai') }]}
             >
               <Select
                 disabled={isView}
-                placeholder="Chọn loại"
+                placeholder={t('taiSanPhanMemFormModal.chon_loai')}
                 options={loaiOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
@@ -172,12 +174,12 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
           <Col span={8}>
             <Form.Item
               name="idDanhMucTaiSan"
-              label="Danh mục tài sản"
-              rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+              label={t('taiSanPhanMemFormModal.danh_muc_tai_san')}
+              rules={[{ required: true, message: t('taiSanPhanMemFormModal.vui_long_chon_danh') }]}
             >
               <Select
                 disabled={isView}
-                placeholder="Chọn danh mục"
+                placeholder={t('taiSanPhanMemFormModal.chon_danh_muc')}
                 options={danhmucOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
@@ -186,21 +188,21 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="hinhAnh" label="Hình ảnh mẫu">
+            <Form.Item name="hinhAnh" label={t('taiSanPhanMemFormModal.hinh_anh_mau')}>
               {isView ? (
                 form.getFieldValue('hinhAnh') ? (
                   <div style={{ marginTop: 8 }}>
-                    <img src={form.getFieldValue('hinhAnh')} alt="Mẫu phần cứng" style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, objectFit: 'contain' }} />
+                    <img src={form.getFieldValue('hinhAnh')} alt={t('phieuNhapTaiSanFormModal.mau_phan_cung')} style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, objectFit: 'contain' }} />
                   </div>
                 ) : (
-                  <span>Không có hình ảnh</span>
+                  <span>{t('taiSanPhanMemFormModal.khong_co_hinh_anh')}</span>
                 )
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <Input
                     value={imageUrl}
                     disabled
-                    placeholder="URL hình ảnh sẽ tự động điền khi upload thành công"
+                    placeholder={t('taiSanPhanMemFormModal.url_hinh_anh_se')}
                   />
                   {authStore.kiemTraQuyen(QUYEN.TAI_LEN_FILE) ? (
                     <Upload
@@ -220,12 +222,12 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
                             const uploadedUrl = res.data.data[0];
                             form.setFieldValue('hinhAnh', uploadedUrl);
                             setImageUrl(uploadedUrl);
-                            message.success('Tải ảnh lên thành công!');
+                            message.success(t('taiSanPhanMemFormModal.tai_anh_len_thanh'));
                           } else {
-                            message.error('Tải ảnh thất bại!');
+                            message.error(t('taiSanPhanMemFormModal.tai_anh_that_bai'));
                           }
                         } catch (err: any) {
-                          message.error(err?.message || 'Lỗi khi tải ảnh lên!');
+                          message.error(err?.message || t('taiSanPhanMemFormModal.loi_khi_tai_anh'));
                         } finally {
                           setUploading(false);
                         }
@@ -237,7 +239,7 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
                       </Button>
                     </Upload>
                   ) : (
-                    <Typography.Text type="secondary">Bạn không có quyền upload ảnh (yêu cầu quyền TAI_LEN_FILE).</Typography.Text>
+                    <Typography.Text type="secondary">{t('taiSanPhanMemFormModal.ban_khong_co_quyen')}</Typography.Text>
                   )}
                   {imageUrl && (
                     <div style={{ marginTop: 4 }}>
@@ -249,7 +251,7 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item name="coTheThaoLap" label="Có thể tháo lắp?" valuePropName="checked">
+            <Form.Item name="coTheThaoLap" label={t('taiSanPhanCungFormModal.co_the_thao_lap')} valuePropName="checked">
               <Switch disabled={isView} />
             </Form.Item>
           </Col>
@@ -257,19 +259,19 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
             <Col span={6}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái"
+                label={t('loaiTaiSanFormModal.trang_thai')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]} />
               </Form.Item>
             </Col>
           )}
         </Row>
 
-        <Form.Item name="moTa" label="Mô tả mẫu tài sản">
-          <Input.TextArea disabled={isView} rows={3} placeholder="Mô tả thông số chi tiết của mẫu..." />
+        <Form.Item name="moTa" label={t('taiSanPhanMemFormModal.mo_ta_mau_tai')}>
+          <Input.TextArea disabled={isView} rows={3} placeholder={t('taiSanPhanMemFormModal.mo_ta_thong_so')} />
         </Form.Item>
       </Form>
     </Modal>

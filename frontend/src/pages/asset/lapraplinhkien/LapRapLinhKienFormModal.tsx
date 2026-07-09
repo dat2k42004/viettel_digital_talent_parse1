@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, message } from 'antd';
 import type { LapRapLinhKienRequest } from '../../../api-generated/models/lapRapLinhKienRequest';
@@ -16,6 +17,7 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
   onCancel,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<LapRapLinhKienRequest>();
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +35,7 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
         if (tbRes.data) setThietBiOptions(tbRes.data);
         if (lkRes.data) setLinhKienOptions(lkRes.data);
       } catch (e) {
-        message.error('Không thể tải danh sách thiết bị/linh kiện cho lắp ráp!');
+        message.error(t('lapRapLinhKienFormModal.khong_the_tai_danh'));
       } finally {
         setLoading(false);
       }
@@ -55,7 +57,7 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
 
   return (
     <Modal
-      title="Thực hiện lắp ráp linh kiện"
+      title={t('lapRapLinhKienFormModal.thuc_hien_lap_rap')}
       open={open}
       onCancel={onCancel}
       confirmLoading={loading}
@@ -74,11 +76,11 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
           <Col span={24}>
             <Form.Item
               name="thietBiPhanCungId"
-              label="Chọn Thiết bị phần cứng nhận linh kiện (Mẹ)"
-              rules={[{ required: true, message: 'Vui lòng chọn thiết bị nhận!' }]}
+              label={t('lapRapLinhKienFormModal.chon_thiet_bi_phan_cung')}
+              rules={[{ required: true, message: t('lapRapLinhKienFormModal.vui_long_chon_thiet') }]}
             >
               <Select
-                placeholder="Chọn thiết bị phần cứng (Ví dụ: Laptop Dell Latitude)"
+                placeholder={t('lapRapLinhKienFormModal.chon_thiet_bi_phan')}
                 showSearch
                 filterOption={(input, option) =>
                   (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
@@ -93,11 +95,11 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
           <Col span={24}>
             <Form.Item
               name="linhKienPhanCungId"
-              label="Chọn Linh kiện phần cứng cần lắp (Con)"
-              rules={[{ required: true, message: 'Vui lòng chọn linh kiện lắp ráp!' }]}
+              label={t('lapRapLinhKienFormModal.chon_linh_kien_phan')}
+              rules={[{ required: true, message: t('lapRapLinhKienFormModal.vui_long_chon_linh') }]}
             >
               <Select
-                placeholder="Chọn linh kiện có sẵn trong kho (RAM, SSD...)"
+                placeholder={t('lapRapLinhKienFormModal.chon_linh_kien_co')}
                 showSearch
                 filterOption={(input, option) =>
                   (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
@@ -108,8 +110,8 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
           </Col>
         </Row>
 
-        <Form.Item name="ghiChu" label="Ghi chú lắp ráp">
-          <Input.TextArea rows={3} placeholder="Nhập lý do, ghi chú chi tiết lắp ráp..." />
+        <Form.Item name="ghiChu" label={t('lapRapLinhKienFormModal.ghi_chu_lap_rap')}>
+          <Input.TextArea rows={3} placeholder={t('lapRapLinhKienFormModal.nhap_ly_do_ghi')} />
         </Form.Item>
       </Form>
     </Modal>

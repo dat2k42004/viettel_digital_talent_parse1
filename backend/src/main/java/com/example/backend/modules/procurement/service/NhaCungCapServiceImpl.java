@@ -36,7 +36,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                if (com.example.backend.shared.utils.SecurityUtils.laSuperAdmin()) {
                     return null;
                }
-               throw new NghiepVuException("Không tìm thấy thông tin đơn vị từ phiên làm việc", 403);
+               throw new NghiepVuException("exception.common.no_tenant_info", 403);
           }
           return tenantId;
      }
@@ -65,7 +65,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
                     try {
                          predicates.add(cb.equal(root.get("trangThai"), TrangThaiCoBanEnum.fromValue(trangThai.trim())));
                     } catch (IllegalArgumentException e) {
-                         throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+                         throw new NghiepVuException("exception.common.invalid_status", 400);
                     }
                }
 
@@ -171,7 +171,7 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
           try {
                ncc.setTrangThai(TrangThaiCoBanEnum.fromValue(request.getTrangThai()));
           } catch (IllegalArgumentException e) {
-               throw new NghiepVuException("Trạng thái không hợp lệ", 400);
+               throw new NghiepVuException("exception.common.invalid_status", 400);
           }
           nhaCungCapRepository.save(ncc);
      }

@@ -14,22 +14,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoaiTaiSanRequest {
 
-    @Size(max = 50, message = "Mã loại không vượt quá 50 ký tự")
+    @Size(max = 50, message = "{validation.asset_category.maLoai.max}")
     private String maLoai;
 
-    @NotBlank(message = "Tên loại không được để trống")
-    @Size(max = 100, message = "Tên loại không vượt quá 100 ký tự")
+    @NotBlank(message = "{validation.asset_category.tenLoai.notblank}")
+    @Size(max = 100, message = "{validation.asset_category.tenLoai.max}")
     private String tenLoai;
 
-    @Size(max = 10, message = "Tiền tố mã thẻ không vượt quá 10 ký tự")
+    @Size(max = 10, message = "{validation.asset_category.tienToMaThe.max}")
     private String tienToMaThe;
 
-    @Min(value = 0, message = "Thời gian khấu hao phải lớn hơn hoặc bằng 0")
+    @Min(value = 0, message = "{validation.asset_category.thoiGianKhauHao.min}")
     private Integer thoiGianKhauHao;
 
     private String ghiChu;
 
-    @NotBlank(message = "Trạng thái không được để trống")
-    @Size(max = 30, message = "Trạng thái không vượt quá 30 ký tự")
+    @NotBlank(message = "{validation.asset_category.trangThai.notblank}")
+    @Size(max = 30, message = "{validation.asset_category.trangThai.max}")
     private String trangThai;
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -19,6 +20,7 @@ import { TaiSanPhanMemFormModal } from './TaiSanPhanMemFormModal';
 const { Title, Text } = Typography;
 
 export const TaiSanPhanMemPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSach, setDanhSach] = useState<TaiSanPhanMemResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -48,7 +50,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách mẫu phần mềm!');
+      message.error(e?.message || t('taiSanPhanMemPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch(() => message.error('Không thể tải lại danh sách!'))
+      .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -84,24 +86,24 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
       if (selectedItem && selectedItem.id) {
         const res = await capNhat4(selectedItem.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật mẫu phần mềm thành công!');
+          message.success(t('taiSanPhanMemPage.cap_nhat_mau_phan'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi4(values);
         if (res.code === 200) {
-          message.success('Thêm mới mẫu phần mềm thành công!');
+          message.success(t('taiSanPhanMemPage.them_moi_mau_phan'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -112,13 +114,13 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai4(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} mẫu phần mềm thành công!`);
+        message.success(t('taiSanPhanMemPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -126,22 +128,22 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
     try {
       const res = await xoaMem4(id);
       if (res.code === 200) {
-        message.success('Xóa mẫu phần mềm thành công!');
+        message.success(t('taiSanPhanMemPage.xoa_mau_phan_mem'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa mẫu phần mềm!');
+      message.error(e?.message || t('taiSanPhanMemPage.khong_the_xoa_mau'));
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Tạm khóa</Tag>;
+        return <Tag color="red">{t('loaiTaiSanFormModal.tam_khoa')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -149,7 +151,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã mẫu',
+      title: t('taiSanPhanMemPage.ma_mau'),
       dataIndex: 'maMau',
       key: 'maMau',
       width: 120,
@@ -157,44 +159,44 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên mẫu',
+      title: t('danhSachThietBiPhanCungPage.ten_mau'),
       dataIndex: 'tenMau',
       key: 'tenMau',
     },
     {
-      title: 'Hãng sản xuất',
+      title: t('taiSanPhanMemPage.hang_san_xuat'),
       dataIndex: 'tenHangSanXuat',
       key: 'tenHangSanXuat',
     },
     {
-      title: 'Loại tài sản',
+      title: t('baoCaoPage.loai_tai_san'),
       dataIndex: 'tenLoaiTaiSan',
       key: 'tenLoaiTaiSan',
     },
     {
-      title: 'Hình thức triển khai',
+      title: t('taiSanPhanMemPage.hinh_thuc_trien_khai'),
       dataIndex: 'hinhThucTrienKhai',
       key: 'hinhThucTrienKhai',
     },
     {
-      title: 'Hình thức cấp phép',
+      title: t('taiSanPhanMemPage.hinh_thuc_cap_phep'),
       dataIndex: 'hinhThucCapPhep',
       key: 'hinhThucCapPhep',
     },
     {
-      title: 'Nền tảng hỗ trợ',
+      title: t('taiSanPhanMemPage.nen_tang_ho_tro'),
       dataIndex: 'nenTangHoTro',
       key: 'nenTangHoTro',
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 120,
       render: (_: any, record: TaiSanPhanMemResponse) => {
@@ -202,7 +204,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.XEM_TAI_SAN_PHAN_MEM)
             ? {
               key: 'view',
-              label: 'Chi tiết',
+              label: t('linhKienPhanCungPage.chi_tiet'),
               icon: <EyeOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -214,7 +216,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_TAI_SAN_PHAN_MEM)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -226,7 +228,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_TAI_SAN_PHAN_MEM)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa mẫu' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('taiSanPhanMemPage.khoa_mau') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -236,13 +238,13 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa mẫu phần mềm này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('taiSanPhanMemPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoa(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa mẫu</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('taiSanPhanMemPage.xoa_mau')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -292,7 +294,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Input
-                placeholder="Tìm kiếm theo mã mẫu, tên mẫu..."
+                placeholder={t('taiSanPhanMemPage.tim_kiem_theo_ma')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -300,14 +302,14 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Select
-                placeholder="Trạng thái"
+                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                 style={{ width: '100%' }}
                 value={trangThai}
                 onChange={setTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]}
               />
             </Col>
@@ -316,7 +318,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

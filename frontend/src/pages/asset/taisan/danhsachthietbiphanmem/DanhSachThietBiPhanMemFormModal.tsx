@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Button, Row, Col, Select, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
@@ -22,6 +23,7 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DanhSachThietBiPhanMemRequest>();
   const isView = mode === 'view';
 
@@ -38,7 +40,7 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
         if (mauRes.data) setMauPhanMemOptions(mauRes.data);
         if (nccRes.data) setNhaCungCapOptions(nccRes.data);
       } catch (e) {
-        message.error('Không thể tải danh mục cấu hình phần mềm/nhà cung cấp!');
+        message.error(t('danhSachThietBiPhanMemFormModal.khong_the_tai_danh'));
       }
     };
     if (open) {
@@ -84,8 +86,8 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết bản quyền phần mềm';
-    return selectedThietBi ? 'Cập nhật bản quyền phần mềm' : 'Thêm mới bản quyền phần mềm';
+    if (isView) return t('danhSachThietBiPhanMemFormModal.chi_tiet_ban_quyen');
+    return selectedThietBi ? t('danhSachThietBiPhanMemFormModal.cap_nhat_ban_quyen') : t('danhSachThietBiPhanMemFormModal.them_moi_ban_quyen');
   };
 
   return (
@@ -116,21 +118,21 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
           <Col span={12}>
             <Form.Item
               name="idTaiSanPhanMem"
-              label="Mẫu tài sản phần mềm"
-              rules={[{ required: true, message: 'Vui lòng chọn mẫu phần mềm!' }]}
+              label={t('danhSachThietBiPhanMemFormModal.mau_tai_san_phan')}
+              rules={[{ required: true, message: t('danhSachThietBiPhanMemFormModal.vui_long_chon_mau') }]}
             >
               <Select
                 disabled={isView}
-                placeholder="Chọn mẫu phần mềm"
+                placeholder={t('danhSachThietBiPhanMemFormModal.chon_mau_phan_mem')}
                 options={mauPhanMemOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="idNhaCungCap" label="Nhà cung cấp">
+            <Form.Item name="idNhaCungCap" label={t('donHangMuaSamPage.nha_cung_cap')}>
               <Select
                 disabled={isView}
-                placeholder="Chọn nhà cung cấp"
+                placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
                 options={nhaCungCapOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
                 allowClear
               />
@@ -142,13 +144,13 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
           <Col span={24}>
             <Form.Item
               name="keyBanQuyen"
-              label="Key bản quyền / License key"
+              label={t('danhSachThietBiPhanMemFormModal.key_ban_quyen_license')}
               rules={[
-                { required: true, message: 'Vui lòng nhập Key bản quyền!' },
-                { max: 255, message: 'Key bản quyền không vượt quá 255 ký tự!' },
+                { required: true, message: t('danhSachThietBiPhanMemFormModal.vui_long_nhap_key') },
+                { max: 255, message: t('danhSachThietBiPhanMemFormModal.key_ban_quyen_khong') },
               ]}
             >
-              <Input disabled={isView} placeholder="Nhập mã key bản quyền phần mềm" />
+              <Input disabled={isView} placeholder={t('danhSachThietBiPhanMemFormModal.nhap_ma_key_ban')} />
             </Form.Item>
           </Col>
         </Row>
@@ -157,45 +159,45 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
           <Col span={12}>
             <Form.Item
               name="maChungTuMua"
-              label="Mã chứng từ mua"
-              rules={[{ max: 100, message: 'Mã chứng từ không vượt quá 100 ký tự!' }]}
+              label={t('danhSachThietBiPhanMemFormModal.ma_chung_tu_mua')}
+              rules={[{ max: 100, message: t('danhSachThietBiPhanMemFormModal.ma_chung_tu_khong') }]}
             >
-              <Input disabled={isView} placeholder="Nhập mã hóa đơn/chứng từ mua" />
+              <Input disabled={isView} placeholder={t('danhSachThietBiPhanMemFormModal.nhap_ma_hoa_donchung')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tongSoGhe"
-              label="Tổng số ghế (License seats)"
+              label={t('danhSachThietBiPhanMemFormModal.tong_so_ghe_license')}
               rules={[
-                { required: true, message: 'Vui lòng nhập số ghế sử dụng!' },
-                { type: 'number', min: 1, message: 'Tổng số ghế phải lớn hơn hoặc bằng 1!' }
+                { required: true, message: t('danhSachThietBiPhanMemFormModal.vui_long_nhap_so') },
+                { type: 'number', min: 1, message: t('danhSachThietBiPhanMemFormModal.tong_so_ghe_phai') }
               ]}
             >
-              <InputNumber disabled={isView} style={{ width: '100%' }} placeholder="Số lượng máy được phép cài đặt" />
+              <InputNumber disabled={isView} style={{ width: '100%' }} placeholder={t('danhSachThietBiPhanMemFormModal.so_luong_may_duoc')} />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="giaMua" label="Giá mua (VND)">
+            <Form.Item name="giaMua" label={t('linhKienPhanCungFormModal.gia_mua_vnd')}>
               <InputNumber
                 disabled={isView}
                 style={{ width: '100%' }}
                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                 parser={(value) => value!.replace(/\$\s?|(,*)/g, '') as any}
-                placeholder="Nhập giá mua"
+                placeholder={t('linhKienPhanCungFormModal.nhap_gia_mua')}
               />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="thoiGianMua" label="Thời gian mua">
+            <Form.Item name="thoiGianMua" label={t('linhKienPhanCungPage.thoi_gian_mua')}>
               <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="thoiGianHetHan" label="Thời gian hết hạn">
+            <Form.Item name="thoiGianHetHan" label={t('danhSachThietBiPhanMemFormModal.thoi_gian_het_han')}>
               <DatePicker disabled={isView} style={{ width: '100%' }} format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
@@ -203,11 +205,11 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
 
         <Row gutter={16}>
           <Col span={isView ? 12 : 24}>
-            <Form.Item name="trangThaiKho" label="Trạng thái kho">
+            <Form.Item name="trangThaiKho" label={t('linhKienPhanCungPage.trang_thai_kho')}>
               <Select disabled={isView} options={[
-                { value: 'TON_KHO', label: 'Chưa kích hoạt (Trong kho)' },
-                { value: 'CAP_PHAT', label: 'Đang hoạt động (Đã cấp)' },
-                { value: 'THANH_LY', label: 'Đã hủy/Hết hạn' },
+                { value: 'TON_KHO', label: t('danhSachThietBiPhanMemFormModal.chua_kich_hoat_trong') },
+                { value: 'CAP_PHAT', label: t('danhSachThietBiPhanMemFormModal.dang_hoat_dong_da') },
+                { value: 'THANH_LY', label: t('danhSachThietBiPhanMemPage.da_huyhet_han') },
               ]} />
             </Form.Item>
           </Col>
@@ -215,12 +217,12 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
             <Col span={12}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái vận hành"
+                label={t('linhKienPhanCungPage.trang_thai_van_hanh')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Hoạt động' },
-                  { value: 'KHOA', label: 'Khóa' },
-                  { value: 'CAP_PHAT', label: 'Cấp phát' },
+                  { value: 'HOAT_DONG', label: t('userManagementPage.hoat_dong') },
+                  { value: 'KHOA', label: t('viTriManagementPage.khoa') },
+                  { value: 'CAP_PHAT', label: t('dashboardPage.cap_phat') },
                 ]} />
               </Form.Item>
             </Col>

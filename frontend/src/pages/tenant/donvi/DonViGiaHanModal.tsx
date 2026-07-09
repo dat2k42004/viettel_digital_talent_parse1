@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Modal, Form, DatePicker, Input, Button } from 'antd';
 import dayjs from 'dayjs';
@@ -14,13 +15,14 @@ export const DonViGiaHanModal: React.FC<DonViGiaHanModalProps> = ({
   onCancel,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<GiaHanHopDongRequest>();
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       const payload: GiaHanHopDongRequest = {
-        ngayHetHanMoi: values.ngayHetHanMoi ? values.ngayHetHanMoi.format('YYYY-MM-DD') : '',
+        ngayHetHanMoi: values.ngayHetHanMoi ? (values.ngayHetHanMoi as any).format('YYYY-MM-DD') : '',
         ghiChuGiaHan: values.ghiChuGiaHan,
       };
       await onSave(payload);
@@ -32,7 +34,7 @@ export const DonViGiaHanModal: React.FC<DonViGiaHanModalProps> = ({
 
   return (
     <Modal
-      title="Gia hạn hợp đồng Đơn vị"
+      title={t('donViGiaHanModal.gia_han_hop_dong')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -47,14 +49,14 @@ export const DonViGiaHanModal: React.FC<DonViGiaHanModalProps> = ({
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Form.Item
           name="ngayHetHanMoi"
-          label="Ngày hết hạn mới"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày hết hạn!' }]}
+          label={t('donViGiaHanModal.ngay_het_han_moi')}
+          rules={[{ required: true, message: t('donViGiaHanModal.vui_long_chon_ngay') }]}
         >
           <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" minDate={dayjs()} />
         </Form.Item>
 
-        <Form.Item name="ghiChuGiaHan" label="Ghi chú gia hạn">
-          <Input.TextArea rows={4} placeholder="Nhập lý do hoặc nội dung ghi chú gia hạn hợp đồng..." />
+        <Form.Item name="ghiChuGiaHan" label={t('donViGiaHanModal.ghi_chu_gia_han')}>
+          <Input.TextArea rows={4} placeholder={t('donViGiaHanModal.nhap_ly_do_hoac')} />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Checkbox, Row, Col, Typography, message, Select } from 'antd';
 import type { VaiTroResponse } from '../../../api-generated/models/vaiTroResponse';
@@ -24,6 +25,7 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
   danhSachDonVi,
   onSave
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<any>();
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
 
@@ -52,7 +54,7 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
     try {
       const values = await form.validateFields();
       if (selectedPermissionIds.length === 0) {
-        message.error('Vui lòng chọn ít nhất một quyền hạn!');
+        message.error(t('roleFormModal.vui_long_chon_it'));
         return;
       }
       await onSave({
@@ -70,7 +72,7 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
     if (!maQuyen) return 'KHÁC';
     if (maQuyen.includes('NGUOI_DUNG')) return 'NGƯỜI DÙNG';
     if (maQuyen.includes('VAI_TRO')) return 'VAI TRÒ';
-    if (maQuyen.includes('DON_VI')) return 'ĐƠN VỊ';
+    if (maQuyen.includes('DON_VI')) return t('userQuyenModal.don_vi');
     if (maQuyen.includes('PHONG_BAN')) return 'PHÒNG BAN';
     if (maQuyen.includes('VI_TRI')) return 'VỊ TRÍ';
     if (maQuyen.includes('CAU_HINH')) return 'CẤU HÌNH';
@@ -91,7 +93,7 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
 
   return (
     <Modal
-      title={selectedRole ? 'Cập nhật thông tin vai trò' : 'Tạo mới vai trò chức năng'}
+      title={selectedRole ? t('roleFormModal.cap_nhat_thong_tin') : t('roleFormModal.tao_moi_vai_tro')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -108,11 +110,11 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
         {authStore.laSuperAdmin && (
           <Form.Item
             name="idDonVi"
-            label="Đơn vị áp dụng"
-            rules={[{ required: true, message: 'Vui lòng chọn đơn vị áp dụng!' }]}
+            label={t('roleManagementPage.don_vi_ap_dung')}
+            rules={[{ required: true, message: t('roleFormModal.vui_long_chon_don') }]}
           >
-            <Select placeholder="Chọn đơn vị áp dụng..." showSearch optionFilterProp="children">
-              <Select.Option value="he_thong">Hệ thống (Toàn sàn)</Select.Option>
+            <Select placeholder={t('roleFormModal.chon_don_vi_ap')} showSearch optionFilterProp="children">
+              <Select.Option value="he_thong">{t('roleManagementPage.he_thong_toan_san')}</Select.Option>
               {danhSachDonVi.map(d => (
                 <Select.Option key={d.id} value={d.id}>{d.tenPhapLy}</Select.Option>
               ))}
@@ -123,25 +125,25 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
         {selectedRole && (
           <Form.Item
             name="maVaiTro"
-            label="Mã vai trò"
+            label={t('roleFormModal.ma_vai_tro')}
           >
-            <Input disabled placeholder="Mã vai trò" />
+            <Input disabled placeholder={t('roleFormModal.ma_vai_tro')} />
           </Form.Item>
         )}
 
         <Form.Item
           name="tenVaiTro"
-          label="Tên vai trò hiển thị"
-          rules={[{ required: true, message: 'Vui lòng nhập tên vai trò hiển thị!' }]}
+          label={t('roleManagementPage.ten_vai_tro_hien')}
+          rules={[{ required: true, message: t('roleFormModal.vui_long_nhap_ten') }]}
         >
-          <Input placeholder="Ví dụ: Thủ kho tổng" />
+          <Input placeholder={t('roleFormModal.vi_du_thu_kho')} />
         </Form.Item>
 
-        <Form.Item name="moTa" label="Mô tả tóm tắt chức năng">
-          <Input.TextArea rows={3} placeholder="Mô tả tóm tắt các quyền năng hoặc vị trí của vai trò này..." />
+        <Form.Item name="moTa" label={t('roleFormModal.mo_ta_tom_tat_chuc_nang')}>
+          <Input.TextArea rows={3} placeholder={t('roleFormModal.mo_ta_tom_tat')} />
         </Form.Item>
 
-        <Form.Item label={<Text strong>Ma trận quyền hạn phân bổ</Text>} required>
+        <Form.Item label={<Text strong>{t('roleFormModal.ma_tran_quyen_han')}</Text>} required>
           <div style={{ maxHeight: 350, overflowY: 'auto', border: '1px solid #d9d9d9', borderRadius: 8, padding: '16px 16px 0 16px' }}>
             {Object.entries(groupedPermissions).map(([groupName, permissions]) => {
               const checkedChildren = permissions.filter(p => selectedPermissionIds.includes(p.id!));

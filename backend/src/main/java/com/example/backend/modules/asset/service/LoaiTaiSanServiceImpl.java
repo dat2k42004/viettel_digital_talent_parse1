@@ -77,9 +77,9 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     @Cacheable(value = "loai_tai_san_cache", key = "#id")
     public LoaiTaiSanResponse layTheoId(Long id) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản với ID: " + id, 404));
+                .orElseThrow(() -> new NghiepVuException("exception.asset_category.not_found_id", 404, id));
         if (loaiTaiSan.getTrangThai() != com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG) {
-            throw new NghiepVuException("Loại tài sản hiện đang bị khóa hoặc ngừng hoạt động", 400);
+            throw new NghiepVuException("exception.asset_category.locked", 400);
         }
         return mapToResponse(loaiTaiSan);
     }
@@ -101,7 +101,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     @CacheEvict(value = {"loai_tai_san_cache", "loai_tai_san_list_cache"}, allEntries = true)
     public LoaiTaiSanResponse capNhat(Long id, LoaiTaiSanRequest request) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản để cập nhật", 404));
+                .orElseThrow(() -> new NghiepVuException("exception.asset_category.not_found_update", 404));
 
         capNhatThongTin(loaiTaiSan, request);
         loaiTaiSan = loaiTaiSanRepository.save(loaiTaiSan);
@@ -114,7 +114,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     @CacheEvict(value = {"loai_tai_san_cache", "loai_tai_san_list_cache"}, allEntries = true)
     public void xoaMem(Long id) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản để xóa", 404));
+                .orElseThrow(() -> new NghiepVuException("exception.asset_category.not_found_delete", 404));
 
         loaiTaiSan.setThoiGianXoa(LocalDateTime.now());
         loaiTaiSan.setLyDoXoa("Người dùng xóa");
@@ -126,7 +126,7 @@ public class LoaiTaiSanServiceImpl implements LoaiTaiSanService {
     @CacheEvict(value = {"loai_tai_san_cache", "loai_tai_san_list_cache"}, allEntries = true)
     public void capNhatTrangThai(Long id, TrangThaiRequest request) {
         LoaiTaiSan loaiTaiSan = loaiTaiSanRepository.findByIdAndThoiGianXoaIsNull(id)
-                .orElseThrow(() -> new NghiepVuException("Không tìm thấy loại tài sản", 404));
+                .orElseThrow(() -> new NghiepVuException("exception.asset_category.not_found", 404));
 
         String status = request.getTrangThai();
         com.example.backend.shared.model.TrangThaiCoBanEnum trangThaiEnum;

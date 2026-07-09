@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Modal, Descriptions, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -19,6 +20,7 @@ import { authStore } from '../../../stores/AuthStore';
 const { Title, Text } = Typography;
 
 export const RoleManagementPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachVaiTro, setDanhSachVaiTro] = useState<VaiTroResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -48,17 +50,17 @@ export const RoleManagementPage: React.FC = observer(() => {
         setIsDetailModalOpen(true);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải thông tin chi tiết vai trò!');
+      message.error(e?.message || t('roleManagementPage.khong_the_tai_thong'));
     }
   };
 
   const handleXoaVaiTro = async (id: number) => {
     try {
       await xoaMem1(id);
-      message.success('Xóa vai trò thành công!');
+      message.success(t('roleManagementPage.xoa_vai_tro_thanh'));
       taiDuLieu(currentPage, pageSize, searchText, filterMaVaiTro, filterTrangThai);
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa vai trò!');
+      message.error(e?.message || t('roleManagementPage.khong_the_xoa_vai'));
     }
   };
 
@@ -84,7 +86,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         setDanhSachDonVi(res.data.content);
       }
     } catch (e) {
-      console.error('Không thể tải danh sách đơn vị', e);
+      console.error(t('roleManagementPage.khong_the_tai_danh_sach_don_vi'), e);
     }
   };
 
@@ -95,7 +97,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         setDanhSachQuyen(res.data);
       }
     } catch (e) {
-      console.error('Không thể tải danh sách quyền', e);
+      console.error(t('roleManagementPage.khong_the_tai_danh_sach_quyen'), e);
     }
   };
 
@@ -114,7 +116,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách vai trò từ máy chủ!');
+      message.error(e?.message || t('roleManagementPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -127,7 +129,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         setMaTranQuyen(res.data);
       }
     } catch (e) {
-      console.error('Không thể tải ma trận phân nhóm quyền', e);
+      console.error(t('roleManagementPage.khong_the_tai_ma'), e);
     }
   };
 
@@ -155,15 +157,15 @@ export const RoleManagementPage: React.FC = observer(() => {
     try {
       if (selectedRole?.id) {
         await capNhat1(selectedRole.id, values);
-        message.success('Cập nhật thông tin vai trò thành công!');
+        message.success(t('roleManagementPage.cap_nhat_thong_tin'));
       } else {
         await themMoi1(values);
-        message.success('Thêm mới vai trò chức năng thành công!');
+        message.success(t('roleManagementPage.them_moi_vai_tro'));
       }
       setIsEditModalOpen(false);
       taiDuLieu(currentPage, pageSize, searchText, filterMaVaiTro, filterTrangThai);
     } catch (e: any) {
-      message.error(e?.message || 'Lưu thông tin vai trò thất bại!');
+      message.error(e?.message || t('roleManagementPage.luu_thong_tin_vai'));
     }
   };
 
@@ -178,11 +180,11 @@ export const RoleManagementPage: React.FC = observer(() => {
     if (!selectedRole?.id) return;
     try {
       await capNhatQuyen(selectedRole.id, values);
-      message.success('Cập nhật ma trận phân quyền cho vai trò thành công!');
+      message.success(t('roleManagementPage.cap_nhat_ma_tran'));
       setIsMatrixModalOpen(false);
       taiDuLieu(currentPage, pageSize, searchText, filterMaVaiTro, filterTrangThai);
     } catch (e: any) {
-      message.error(e?.message || 'Lưu ma trận phân quyền thất bại!');
+      message.error(e?.message || t('roleManagementPage.luu_ma_tran_phan'));
     }
   };
 
@@ -190,15 +192,15 @@ export const RoleManagementPage: React.FC = observer(() => {
     ...(authStore.laSuperAdmin
       ? [
         {
-          title: 'Đơn vị (SaaS)',
+          title: t('userManagementPage.don_vi_saas'),
           dataIndex: 'idDonVi',
           key: 'idDonVi',
-          render: (val: any) => <Tag color="orange">Đơn vị {val}</Tag>,
+          render: (val: any) => <Tag color="orange">{t('userManagementPage.don_vi_val')}</Tag>,
         },
       ]
       : []),
     {
-      title: 'Mã định danh vai trò',
+      title: t('roleManagementPage.ma_dinh_danh_vai'),
       dataIndex: 'maVaiTro',
       key: 'maVaiTro',
       sorter: (a: any, b: any) => (a.maVaiTro || '').localeCompare(b.maVaiTro || ''),
@@ -206,85 +208,85 @@ export const RoleManagementPage: React.FC = observer(() => {
       render: (val: string) => <Tag color="purple">{val}</Tag>
     },
     {
-      title: 'Tên vai trò hiển thị',
+      title: t('roleManagementPage.ten_vai_tro_hien'),
       dataIndex: 'tenVaiTro',
       key: 'tenVaiTro',
       render: (val: string) => <strong>{val}</strong>
     },
     {
-      title: 'Phân loại',
+      title: t('roleManagementPage.phan_loai'),
       dataIndex: 'laHeThong',
       key: 'laHeThong',
       render: (val: boolean) => (
-        <Tag color={val ? 'blue' : 'default'}>{val ? 'Hệ thống' : 'Tùy biến'}</Tag>
+        <Tag color={val ? 'blue' : 'default'}>{t('roleManagementPage.val_he_thong_tuy')}</Tag>
       ),
     },
     ...(authStore.laSuperAdmin ? [{
-      title: 'Đơn vị áp dụng',
+      title: t('roleManagementPage.don_vi_ap_dung'),
       dataIndex: 'idDonVi',
       key: 'idDonVi',
       render: (val?: number) => {
-        if (!val) return <Tag color="blue">Hệ thống</Tag>;
+        if (!val) return <Tag color="blue">{t('danhMucCauHinhPage.he_thong')}</Tag>;
         const dv = danhSachDonVi.find(d => d.id === val);
-        return <span>{dv?.tenPhapLy || `Đơn vị (ID: ${val})`}</span>;
+        return <span>{t('roleManagementPage.dvtenphaply_don_vi_id')}</span>;
       }
     }] : []),
     {
-      title: 'Mức ưu tiên',
+      title: t('roleManagementPage.muc_uu_tien'),
       dataIndex: 'capDoUuTien',
       key: 'capDoUuTien',
       sorter: (a: VaiTroResponse, b: VaiTroResponse) => (a.capDoUuTien || 0) - (b.capDoUuTien || 0),
-      render: (val: number) => <Tag color="cyan">Cấp {val || 0}</Tag>
+      render: (val: number) => <Tag color="cyan">{t('roleManagementPage.cap_val_0')}</Tag>
     },
-    { title: 'Mô tả chi tiết', dataIndex: 'moTa', key: 'moTa', render: (val: string) => val || 'Chưa thiết lập mô tả' },
+    { title: t('viTriFormModal.mo_ta_chi_tiet'), dataIndex: 'moTa', key: 'moTa', render: (val: string) => val || t('roleManagementPage.chua_thiet_lap_mo') },
     {
-      title: 'Tổng số quyền gán',
+      title: t('roleManagementPage.tong_so_quyen_gan'),
       dataIndex: 'danhSachQuyen',
       key: 'danhSachQuyen',
-      render: (list?: any[]) => <Tag color="cyan">{list?.length || 0} Quyền hạn</Tag>,
+      render: (list?: any[]) => <Tag color="cyan">{t('roleManagementPage.listlength_0_quyen_han')}</Tag>,
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       render: (val: string) => (
         <Tag color={val === 'HOAT_DONG' ? 'green' : 'red'}>
-          {val === 'HOAT_DONG' ? 'Hoạt động' : 'Bị khóa'}
+          {val === 'HOAT_DONG' ? t('userManagementPage.hoat_dong') : t('userManagementPage.bi_khoa')}
         </Tag>
       ),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       render: (_: any, record: VaiTroResponse) => {
         const actItems: MenuProps['items'] = [
           {
             key: 'detail',
             icon: <EyeOutlined />,
-            label: 'Xem chi tiết',
+            label: t('donViManagementPage.xem_chi_tiet'),
             onClick: () => record.id && handleOpenDetail(record.id),
           },
           authStore.kiemTraQuyen('SUA_VAI_TRO') && {
             key: 'edit',
             icon: <EditOutlined />,
-            label: 'Chỉnh sửa vai trò',
+            label: t('roleManagementPage.chinh_sua_vai_tro'),
             onClick: () => handleOpenEdit(record),
           },
           authStore.kiemTraQuyen('CAP_NHAT_QUYEN_VAI_TRO') && {
             key: 'matrix',
             icon: <SafetyOutlined />,
-            label: 'Thiết lập ma trận quyền',
+            label: t('roleManagementPage.thiet_lap_ma_tran'),
             onClick: () => handleOpenMatrix(record),
           },
           authStore.kiemTraQuyen('XOA_VAI_TRO') && {
             key: 'delete',
             label: (
               <Popconfirm
-                title="Xác nhận xóa vai trò?"
-                description="Bạn có chắc chắn muốn xóa vai trò này không?"
+                title={t('roleManagementPage.xac_nhan_xoa_vai')}
+                description={t('roleManagementPage.ban_co_chac_chan')}
                 onConfirm={() => record.id && handleXoaVaiTro(record.id)}
-                okText="Xác nhận"
-                cancelText="Hủy"
+                okText={t('userManagementPage.xac_nhan')}
+                cancelText={t('viTriManagementPage.huy')}
                 okButtonProps={{ danger: true }}
               >
                 <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>
@@ -295,8 +297,8 @@ export const RoleManagementPage: React.FC = observer(() => {
           },
         ].filter(Boolean) as MenuProps['items'];
 
-        if (actItems.length === 0) {
-          return <Text type="secondary" style={{ fontSize: 12 }}>Không có quyền</Text>;
+        if (!actItems || actItems.length === 0) {
+          return <Text type="secondary" style={{ fontSize: 12 }}>{t('userManagementPage.khong_co_quyen')}</Text>;
         }
 
         return (
@@ -314,8 +316,8 @@ export const RoleManagementPage: React.FC = observer(() => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontSize: 24 }}>Quản lý vai trò & phân quyền (IAM Matrix)</Title>
-          <Text type="secondary">Cấu hình nhóm vai trò hệ thống, gán ma trận quyền hạn cho từng nhóm chức vụ bảo mật.</Text>
+          <Title level={2} style={{ margin: 0, fontSize: 24 }}>{t('roleManagementPage.quan_ly_vai_tro')}</Title>
+          <Text type="secondary">{t('roleManagementPage.cau_hinh_nhom_vai')}</Text>
         </div>
         <QuyenHanGuard quyenYeuCau="THEM_VAI_TRO">
           <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenEdit(null)}>
@@ -328,7 +330,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         <Row gutter={[12, 12]} align="middle">
           <Col xs={24} sm={8} md={8}>
             <Input
-              placeholder="Tìm kiếm tên vai trò..."
+              placeholder={t('roleManagementPage.tim_kiem_ten_vai')}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -338,7 +340,7 @@ export const RoleManagementPage: React.FC = observer(() => {
           </Col>
           <Col xs={24} sm={8} md={6}>
             <Input
-              placeholder="Mã vai trò..."
+              placeholder={t('roleManagementPage.ma_vai_tro')}
               value={filterMaVaiTro}
               onChange={(e) => setFilterMaVaiTro(e.target.value)}
               onPressEnter={handleSearch}
@@ -347,20 +349,20 @@ export const RoleManagementPage: React.FC = observer(() => {
           </Col>
           <Col xs={24} sm={8} md={5}>
             <Select
-              placeholder="Trạng thái"
+              placeholder={t('loaiTaiSanFormModal.trang_thai')}
               style={{ width: '100%' }}
               value={filterTrangThai}
               onChange={setFilterTrangThai}
               allowClear
             >
-              <Select.Option value="HOAT_DONG">Hoạt động</Select.Option>
-              <Select.Option value="BI_KHOA">Bị khóa</Select.Option>
+              <Select.Option value="HOAT_DONG">{t('userManagementPage.hoat_dong')}</Select.Option>
+              <Select.Option value="BI_KHOA">{t('userManagementPage.bi_khoa')}</Select.Option>
             </Select>
           </Col>
           <Col xs={24} sm={24} md={5}>
             <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
-              <Button onClick={handleResetFilters}>Làm mới</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+              <Button onClick={handleResetFilters}>{t('viTriManagementPage.lam_moi')}</Button>
             </Space>
           </Col>
         </Row>
@@ -402,7 +404,7 @@ export const RoleManagementPage: React.FC = observer(() => {
       />
 
       <Modal
-        title="Chi tiết vai trò chức năng"
+        title={t('roleManagementPage.chi_tiet_vai_tro')}
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={[
@@ -414,34 +416,34 @@ export const RoleManagementPage: React.FC = observer(() => {
       >
         {detailRole && (
           <Descriptions bordered column={1} size="small" style={{ marginTop: 16 }}>
-            <Descriptions.Item label="Mã định danh vai trò">
+            <Descriptions.Item label={t('roleManagementPage.ma_dinh_danh_vai')}>
               <Tag color="purple">{detailRole.maVaiTro}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Tên vai trò hiển thị">
+            <Descriptions.Item label={t('roleManagementPage.ten_vai_tro_hien')}>
               <strong>{detailRole.tenVaiTro}</strong>
             </Descriptions.Item>
-            <Descriptions.Item label="Mô tả">
-              {detailRole.moTa || 'Không có mô tả'}
+            <Descriptions.Item label={t('roleManagementPage.mo_ta')}>
+              {detailRole.moTa || t('roleManagementPage.khong_co_mo_ta')}
             </Descriptions.Item>
-            <Descriptions.Item label="Phân loại">
-              <Tag color={detailRole.laHeThong ? 'blue' : 'default'}>{detailRole.laHeThong ? 'Vai trò hệ thống' : 'Vai trò tùy biến'}</Tag>
+            <Descriptions.Item label={t('roleManagementPage.phan_loai')}>
+              <Tag color={detailRole.laHeThong ? 'blue' : 'default'}>{t('roleManagementPage.detailrolelahethong_vai_tro_he')}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Độ ưu tiên">
+            <Descriptions.Item label={t('roleManagementPage.do_uu_tien')}>
               Cấp {detailRole.capDoUuTien || 0}
             </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              <Tag color={detailRole.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>{detailRole.trangThai === 'HOAT_DONG' ? 'Hoạt động' : 'Bị khóa'}</Tag>
+            <Descriptions.Item label={t('loaiTaiSanFormModal.trang_thai')}>
+              <Tag color={detailRole.trangThai === 'HOAT_DONG' ? 'green' : 'red'}>{t('roleManagementPage.detailroletrangthai_hoat_dong_hoat_dong')}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Đơn vị gán">
+            <Descriptions.Item label={t('roleManagementPage.don_vi_gan')}>
               <Tag color="orange">
-                {!detailRole.idDonVi ? 'Hệ thống (Toàn sàn)' : (danhSachDonVi.find(d => d.id === detailRole.idDonVi)?.tenPhapLy || `Đơn vị (ID: ${detailRole.idDonVi})`)}
+                {!detailRole.idDonVi ? t('roleManagementPage.he_thong_toan_san') : (danhSachDonVi.find(d => d.id === detailRole.idDonVi)?.tenPhapLy || t('roleManagementPage.don_vi_id_detailrole_iddonvi', { idDonVi: detailRole.idDonVi }))}
               </Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Quyền hạn của vai trò">
+            <Descriptions.Item label={t('roleManagementPage.quyen_han_cua_vai')}>
               <Space wrap>
                 {detailRole.danhSachQuyen?.map(q => (
                   <Tag color="cyan" key={q.id}>{q.tenQuyen} ({q.maQuyen})</Tag>
-                )) || <Text type="secondary">Chưa cấu hình quyền</Text>}
+                )) || <Text type="secondary">{t('roleManagementPage.chua_cau_hinh_quyen')}</Text>}
               </Space>
             </Descriptions.Item>
           </Descriptions>

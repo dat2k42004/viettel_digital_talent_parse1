@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { Result, Button, Spin } from 'antd';
@@ -42,20 +43,24 @@ import PhieuThuHoiPage from './pages/lifecycle/thuhoi/PhieuThuHoiPage';
 import PhieuDieuChuyenPage from './pages/lifecycle/dieuchuyen/PhieuDieuChuyenPage';
 import PhieuThanhLyPage from './pages/lifecycle/thanhly/PhieuThanhLyPage';
 
-const AccessDenied = () => (
-  <Result
-    status="403"
-    title="403"
-    subTitle="Bạn không có quyền truy cập trang này. Vui lòng liên hệ quản trị viên hoặc quay lại trang chủ."
-    extra={
-      <Button type="primary" onClick={() => window.location.href = '/'}>
-        Quay lại trang chủ
-      </Button>
-    }
-  />
-);
+const AccessDenied = () => {
+  const { t } = useTranslation();
+  return (
+    <Result
+      status="403"
+      title="403"
+      subTitle={t('app.ban_khong_co_quyen_truy')}
+      extra={
+        <Button type="primary" onClick={() => window.location.href = '/'}>
+          {t('app.quay_lai_trang_chu')}
+        </Button>
+      }
+    />
+  );
+};
 
 const PermittedRoute = observer(({ element, quyen }: { element: React.ReactNode; quyen: string | string[] }) => {
+  const { t } = useTranslation();
   if (!authStore.kiemTraQuyen(quyen)) {
     return <AccessDenied />;
   }
@@ -250,6 +255,7 @@ const router = createBrowserRouter([
 ]);
 
 export const App = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -268,7 +274,7 @@ export const App = observer(() => {
         }
       })
       .catch((err) => {
-        console.error('Không thể cập nhật hồ sơ cá nhân khi F5:', err);
+        console.error(t('app.khong_the_cap_nhat_ho'), err);
       })
       .finally(() => {
         setLoading(false);
@@ -286,7 +292,7 @@ export const App = observer(() => {
           background: '#f3f4f6',
         }}
       >
-        <Spin size="large" tip="Đang đồng bộ cấu hình phân quyền hệ thống..." />
+        <Spin size="large" tip={t('app.dang_dong_bo_cau_hinh')} />
       </div>
     );
   }

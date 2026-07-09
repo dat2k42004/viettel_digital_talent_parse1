@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Button, Row, Col, Select } from 'antd';
 import type { LoaiTaiSanResponse } from '../../../api-generated/models/loaiTaiSanResponse';
@@ -18,6 +19,7 @@ export const LoaiTaiSanFormModal: React.FC<LoaiTaiSanFormModalProps> = ({
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<LoaiTaiSanRequest>();
   const isView = mode === 'view';
 
@@ -55,8 +57,8 @@ export const LoaiTaiSanFormModal: React.FC<LoaiTaiSanFormModalProps> = ({
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết loại tài sản';
-    return selectedLoaiTaiSan ? 'Cập nhật loại tài sản' : 'Thêm mới loại tài sản';
+    if (isView) return t('loaiTaiSanFormModal.chi_tiet_loai_tai');
+    return selectedLoaiTaiSan ? t('loaiTaiSanFormModal.cap_nhat_loai_tai') : t('loaiTaiSanFormModal.them_moi_loai_tai');
   };
 
   return (
@@ -87,21 +89,21 @@ export const LoaiTaiSanFormModal: React.FC<LoaiTaiSanFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="maLoai"
-              label="Mã loại tài sản"
+              label={t('loaiTaiSanFormModal.ma_loai_tai_san')}
             >
-              <Input disabled placeholder="Mã hệ thống tự động sinh" />
+              <Input disabled placeholder={t('loaiTaiSanFormModal.ma_he_thong_tu')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenLoai"
-              label="Tên loại tài sản"
+              label={t('loaiTaiSanFormModal.ten_loai_tai_san')}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên loại!' },
-                { max: 100, message: 'Tên loại không vượt quá 100 ký tự!' },
+                { required: true, message: t('loaiTaiSanFormModal.vui_long_nhap_ten') },
+                { max: 100, message: t('loaiTaiSanFormModal.ten_loai_khong_vuot') },
               ]}
             >
-              <Input disabled={isView} placeholder="Nhập tên loại tài sản" />
+              <Input disabled={isView} placeholder={t('loaiTaiSanFormModal.nhap_ten_loai_tai')} />
             </Form.Item>
           </Col>
         </Row>
@@ -110,21 +112,21 @@ export const LoaiTaiSanFormModal: React.FC<LoaiTaiSanFormModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tienToMaThe"
-              label="Tiền tố mã thẻ"
-              rules={[{ max: 10, message: 'Tiền tố không vượt quá 10 ký tự!' }]}
+              label={t('loaiTaiSanFormModal.tien_to_ma_the')}
+              rules={[{ max: 10, message: t('loaiTaiSanFormModal.tien_to_khong_vuot') }]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: TS-PC, TS-PM" />
+              <Input disabled={isView} placeholder={t('loaiTaiSanFormModal.vi_du_tspc_tspm')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="thoiGianKhauHao"
-              label="Thời gian khấu hao (tháng)"
+              label={t('loaiTaiSanFormModal.thoi_gian_khau_hao')}
               rules={[
-                { type: 'number', min: 0, message: 'Khấu hao phải lớn hơn hoặc bằng 0!' }
+                { type: 'number', min: 0, message: t('loaiTaiSanFormModal.khau_hao_phai_lon') }
               ]}
             >
-              <InputNumber disabled={isView} style={{ width: '100%' }} placeholder="Nhập số tháng khấu hao" />
+              <InputNumber disabled={isView} style={{ width: '100%' }} placeholder={t('loaiTaiSanFormModal.nhap_so_thang_khau')} />
             </Form.Item>
           </Col>
         </Row>
@@ -134,19 +136,19 @@ export const LoaiTaiSanFormModal: React.FC<LoaiTaiSanFormModalProps> = ({
             <Col span={24}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái"
+                label={t('loaiTaiSanFormModal.trang_thai')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]} />
               </Form.Item>
             </Col>
           </Row>
         )}
 
-        <Form.Item name="ghiChu" label="Ghi chú">
-          <Input.TextArea disabled={isView} rows={3} placeholder="Nhập ghi chú (nếu có)..." />
+        <Form.Item name="ghiChu" label={t('loaiTaiSanFormModal.ghi_chu')}>
+          <Input.TextArea disabled={isView} rows={3} placeholder={t('loaiTaiSanFormModal.nhap_ghi_chu_neu')} />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Typography } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, BankOutlined } from '@ant-design/icons';
@@ -18,6 +19,7 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
   onSave,
   loading,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DangKyDonViRequest>();
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
 
   return (
     <Modal
-      title="Thêm mới Đơn vị (SaaS Tenant)"
+      title={t('donViCreateModal.them_moi_don_vi')}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -59,19 +61,19 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tenPhapLy"
-              label="Tên pháp lý Đơn vị"
-              rules={[{ required: true, message: 'Vui lòng nhập tên pháp lý!' }]}
+              label={t('donViFormModal.ten_phap_ly_don')}
+              rules={[{ required: true, message: t('dangKyDonViPage.vui_long_nhap_ten_phap_ly') }]}
             >
-              <Input prefix={<BankOutlined />} placeholder="Ví dụ: Công ty Cổ phần A" />
+              <Input prefix={<BankOutlined />} placeholder={t('donViFormModal.vi_du_cong_ty')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenMienHeThong"
-              label="Tên miền hệ thống (Domain)"
-              rules={[{ required: true, message: 'Vui lòng nhập tên miền!' }]}
+              label={t('donViCreateModal.ten_mien_he_thong')}
+              rules={[{ required: true, message: t('dangKyPage.vui_long_nhap_ten_mien') }]}
             >
-              <Input placeholder="Ví dụ: congtya.com" />
+              <Input placeholder={t('donViFormModal.vi_du_congtyacom')} />
             </Form.Item>
           </Col>
         </Row>
@@ -80,18 +82,18 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="maSoThue"
-              label="Mã số thuế"
+              label={t('donViManagementPage.ma_so_thue')}
             >
-              <Input placeholder="Nhập mã số thuế" />
+              <Input placeholder={t('donViCreateModal.nhap_ma_so_thue')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="tenNguoiDaiDien"
-              label="Họ tên người đại diện pháp luật"
-              rules={[{ required: true, message: 'Vui lòng nhập họ tên người đại diện!' }]}
+              label={t('donViCreateModal.ho_ten_nguoi_dai')}
+              rules={[{ required: true, message: t('dangKyDonViPage.vui_long_nhap_ho_ten_nguoi_dai_dien') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Ví dụ: Nguyễn Văn A" />
+              <Input prefix={<UserOutlined />} placeholder={t('dangKyDonViPage.vi_du_nguyen_van_a')} />
             </Form.Item>
           </Col>
         </Row>
@@ -104,19 +106,19 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tenAdmin"
-              label="Họ tên Admin"
-              rules={[{ required: true, message: 'Vui lòng nhập họ tên Admin!' }]}
+              label={t('donViCreateModal.ho_ten_admin')}
+              rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ho') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Ví dụ: Nguyễn Văn Quản Trị" />
+              <Input prefix={<UserOutlined />} placeholder={t('donViCreateModal.vi_du_nguyen_van')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="emailAdmin"
-              label="Email nhận mã OTP kích hoạt"
+              label={t('donViCreateModal.email_nhan_ma_otp')}
               rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' }
+                { required: true, message: t('xacThucOtpPage.vui_long_nhap_email') },
+                { type: 'email', message: t('xacThucOtpPage.email_khong_hop_le') }
               ]}
             >
               <Input prefix={<MailOutlined />} placeholder="admin@congtya.com" />
@@ -128,22 +130,22 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
           <Col span={12}>
             <Form.Item
               name="tenDangNhapAdmin"
-              label="Tên đăng nhập Admin"
-              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+              label={t('donViCreateModal.ten_dang_nhap_admin')}
+              rules={[{ required: true, message: t('donViCreateModal.vui_long_nhap_ten') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Tên đăng nhập" />
+              <Input prefix={<UserOutlined />} placeholder={t('donViCreateModal.ten_dang_nhap')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="matKhauAdmin"
-              label="Mật khẩu tài khoản Admin"
+              label={t('donViCreateModal.mat_khau_tai_khoan')}
               rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                { min: 6, message: 'Mật khẩu phải chứa ít nhất 6 ký tự!' }
+                { required: true, message: t('donViCreateModal.vui_long_nhap_mat') },
+                { min: 6, message: t('donViCreateModal.mat_khau_phai_chua') }
               ]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
+              <Input.Password prefix={<LockOutlined />} placeholder={t('donViCreateModal.mat_khau')} />
             </Form.Item>
           </Col>
         </Row>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker, Modal, Form, InputNumber } from 'antd';
 import type { MenuProps } from 'antd';
@@ -25,6 +26,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const PhieuSuaChuaPage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<PhieuSuaChuaBaoTriResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -67,7 +69,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                 setTotalCount(pageInfo.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách phiếu sửa chữa!');
+            message.error(e?.message || t('phieuSuaChuaPage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -103,7 +105,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết phiếu');
+                message.error(t('phieuSuaChuaPage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -116,24 +118,24 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật phiếu thành công!');
+                    message.success(t('phieuSuaChuaPage.cap_nhat_phieu_thanh'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi(values);
                 if (res.code === 200) {
-                    message.success('Tạo phiếu sửa chữa bảo trì thành công!');
+                    message.success(t('phieuSuaChuaPage.tao_phieu_sua_chua'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+            message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -143,11 +145,11 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
         try {
             const res = await yeuCauPheDuyet(id);
             if (res.code === 200) {
-                message.success('Đã gửi yêu cầu phê duyệt phiếu!');
+                message.success(t('phieuSuaChuaPage.da_gui_yeu_cau'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi gửi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_gui_phe'));
         }
     };
 
@@ -155,11 +157,11 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
         try {
             const res = await pheDuyet(id);
             if (res.code === 200) {
-                message.success('Phê duyệt phiếu sửa chữa thành công!');
+                message.success(t('phieuSuaChuaPage.phe_duyet_phieu_sua'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_phe_duyet'));
         }
     };
 
@@ -185,7 +187,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                 setIsProgressModalOpen(true);
             }
         } catch (error) {
-            message.error('Lỗi khi tải chi tiết tiến độ thực hiện');
+            message.error(t('phieuSuaChuaPage.loi_khi_tai_chi'));
         } finally {
             setLoading(false);
         }
@@ -218,14 +220,14 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
 
             const res = await capNhatTienDoThucHien(selectedItem.id, payload as any);
             if (res.code === 200) {
-                message.success('Cập nhật tiến độ thực hiện sửa chữa thành công!');
+                message.success(t('phieuSuaChuaPage.cap_nhat_tien_do_thuc'));
                 setIsProgressModalOpen(false);
                 taiDuLieu(currentPage, pageSize);
             } else {
-                message.error(res.message || 'Cập nhật tiến độ thất bại!');
+                message.error(res.message || t('phieuSuaChuaPage.cap_nhat_tien_do_that_bai'));
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi cập nhật tiến độ');
+            message.error(e?.message || t('phieuSuaChuaPage.loi_khi_cap_nhat'));
         } finally {
             setModalLoading(false);
         }
@@ -235,26 +237,26 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
         try {
             const res = await xoaMem(id);
             if (res.code === 200) {
-                message.success('Xóa phiếu sửa chữa thành công!');
+                message.success(t('phieuSuaChuaPage.xoa_phieu_sua_chua_thanh_cong'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa phiếu!');
+            message.error(e?.message || t('phieuSuaChuaPage.khong_the_xoa_phieu'));
         }
     };
 
     const renderStatus = (status: string) => {
         switch (status) {
             case 'TAO_MOI':
-                return <Tag color="cyan">Tạo mới</Tag>;
+                return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
             case 'GUI_PHE_DUYET':
-                return <Tag color="orange">Chờ phê duyệt</Tag>;
+                return <Tag color="orange">{t('donHangMuaSamPage.cho_phe_duyet')}</Tag>;
             case 'DA_PHE_DUYET':
-                return <Tag color="blue">Đã phê duyệt</Tag>;
+                return <Tag color="blue">{t('donHangMuaSamPage.da_phe_duyet')}</Tag>;
             case 'DANG_THUC_HIEN':
-                return <Tag color="purple">Đang thực hiện</Tag>;
+                return <Tag color="purple">{t('phieuSuaChuaPage.dang_thuc_hien')}</Tag>;
             case 'HOAN_THANH':
-                return <Tag color="green">Hoàn thành</Tag>;
+                return <Tag color="green">{t('phieuSuaChuaPage.hoan_thanh')}</Tag>;
             default:
                 return <Tag>{status}</Tag>;
         }
@@ -262,16 +264,16 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
 
     const renderItemStatus = (status: string) => {
         switch (status) {
-            case 'CHUA_GUI_DI': return <Tag color="default">Chưa gửi đi</Tag>;
-            case 'DA_GUI_DI': return <Tag color="warning">Đã gửi đi sửa</Tag>;
-            case 'DA_THU_LAI': return <Tag color="success">Đã thu hồi / Xử lý xong</Tag>;
+            case 'CHUA_GUI_DI': return <Tag color="default">{t('phieuSuaChuaPage.chua_gui_di')}</Tag>;
+            case 'DA_GUI_DI': return <Tag color="warning">{t('phieuSuaChuaPage.da_gui_di_sua')}</Tag>;
+            case 'DA_THU_LAI': return <Tag color="success">{t('phieuSuaChuaPage.da_thu_hoi_xu')}</Tag>;
             default: return <Tag>{status}</Tag>;
         }
     };
 
     const columns = [
         {
-            title: 'Mã phiếu',
+            title: t('phieuSuaChuaPage.ma_phieu'),
             dataIndex: 'maPhieuSuaChua',
             key: 'maPhieuSuaChua',
             width: 160,
@@ -280,55 +282,55 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Mã kế hoạch liên kết',
+            title: t('phieuSuaChuaPage.ma_ke_hoach_lien'),
             dataIndex: 'maKeHoachBaoTri',
             key: 'maKeHoachBaoTri',
             width: 160,
             render: (val: string) => val,
         },
         {
-            title: 'Ngày bắt đầu',
+            title: t('phieuSuaChuaPage.ngay_bat_dau'),
             dataIndex: 'thoiGianBatDau',
             key: 'thoiGianBatDau',
             width: 120,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Hoàn thành DK',
+            title: t('phieuSuaChuaPage.hoan_thanh_dk'),
             dataIndex: 'thoiGianHoanThanhDuKien',
             key: 'thoiGianHoanThanhDuKien',
             width: 130,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Hoàn thành TT',
+            title: t('phieuSuaChuaPage.hoan_thanh_tt'),
             dataIndex: 'thoiGianHoanThanhThucTe',
             key: 'thoiGianHoanThanhThucTe',
             width: 130,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Tổng chi phí (VNĐ)',
+            title: t('phieuSuaChuaPage.tong_chi_phi_vnd'),
             dataIndex: 'tongChiPhiThucHien',
             key: 'tongChiPhiThucHien',
             width: 150,
             render: (val: number) => val ? val.toLocaleString('vi-VN') : '0',
         },
         {
-            title: 'Người lập',
+            title: t('donHangMuaSamPage.nguoi_lap'),
             dataIndex: 'tenNguoiLap',
             key: 'tenNguoiLap',
             width: 140,
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 130,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'hanhDong',
             width: 120,
             render: (_: any, record: PhieuSuaChuaBaoTriResponse) => {
@@ -340,7 +342,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     authStore.kiemTraQuyen(QUYEN.XEM_CHI_TIET_PHIEU_SUA_CHUA_BAO_TRI)
                         ? {
                             key: 'view',
-                            label: 'Xem chi tiết',
+                            label: t('donViManagementPage.xem_chi_tiet'),
                             icon: <EyeOutlined />,
                             onClick: () => handleOpenModal('view', record),
                         } : null,
@@ -348,7 +350,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     isTaoMoi && authStore.kiemTraQuyen(QUYEN.CAP_NHAT_PHIEU_SUA_CHUA_BAO_TRI)
                         ? {
                             key: 'edit',
-                            label: 'Chỉnh sửa',
+                            label: t('phieuSuaChuaPage.chinh_sua'),
                             icon: <EditOutlined />,
                             onClick: () => handleOpenModal('edit', record),
                         } : null,
@@ -356,7 +358,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     isTaoMoi && authStore.kiemTraQuyen(QUYEN.GUI_PHE_DUYET_PHIEU_SUA_CHUA_BAO_TRI)
                         ? {
                             key: 'request_approval',
-                            label: 'Gửi phê duyệt',
+                            label: t('donHangMuaSamPage.gui_phe_duyet'),
                             icon: <SendOutlined />,
                             onClick: () => handleYeuCauPheDuyet(record.id!),
                         } : null,
@@ -364,7 +366,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     isChoDuyet && authStore.kiemTraQuyen(QUYEN.PHE_DUYET_PHIEU_SUA_CHUA_BAO_TRI)
                         ? {
                             key: 'approve',
-                            label: 'Phê duyệt',
+                            label: t('phieuSuaChuaPage.phe_duyet'),
                             icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
                             onClick: () => handlePheDuyet(record.id!),
                         } : null,
@@ -372,7 +374,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     isDuyetOrThucHien && authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TIEN_DO_PSCBT)
                         ? {
                             key: 'progress',
-                            label: 'Cập nhật tiến độ',
+                            label: t('phieuSuaChuaPage.cap_nhat_tien_do'),
                             icon: <InfoCircleOutlined style={{ color: '#722ed1' }} />,
                             onClick: () => handleOpenProgressModal(record),
                         } : null,
@@ -382,20 +384,20 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                             key: 'delete',
                             label: (
                                 <Popconfirm
-                                    title="Xác nhận xóa"
-                                    description="Xóa phiếu sửa chữa này?"
+                                    title={t('viTriManagementPage.xac_nhan_xoa')}
+                                    description={t('phieuSuaChuaPage.xoa_phieu_sua_chua')}
                                     onConfirm={() => handleXoa(record.id!)}
-                                    okText="Xóa"
-                                    cancelText="Hủy"
+                                    okText={t('viTriManagementPage.xoa')}
+                                    cancelText={t('viTriManagementPage.huy')}
                                 >
-                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa phiếu</span>
+                                    <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('phieuSuaChuaPage.xoa_phieu')}</span>
                                 </Popconfirm>
                             ),
                             icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
                         } : null,
                 ].filter(Boolean) as MenuProps['items'];
 
-                if (items.length === 0) return '-';
+                if (!items || items.length === 0) return '-';
 
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
@@ -413,8 +415,8 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
             <div style={{ padding: 24, minHeight: 'calc(100vh - 112px)', borderRadius: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <div>
-                        <Title level={3} style={{ margin: 0 }}>Chứng từ phiếu sửa chữa bảo trì</Title>
-                        <Text type="secondary">Quản lý lập phiếu theo dõi gửi sửa chữa, bảo hành thiết bị thực tế.</Text>
+                        <Title level={3} style={{ margin: 0 }}>{t('phieuSuaChuaPage.chung_tu_phieu_sua')}</Title>
+                        <Text type="secondary">{t('phieuSuaChuaPage.quan_ly_lap_phieu')}</Text>
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_PHIEU_SUA_CHUA_BAO_TRI}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -427,17 +429,17 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                     <Row gutter={[16, 16]}>
                         <Col xs={24} md={8}>
                             <Select
-                                placeholder="Trạng thái chứng từ"
+                                placeholder={t('phieuSuaChuaPage.trang_thai_chung_tu')}
                                 style={{ width: '100%' }}
                                 value={trangThai}
                                 onChange={setTrangThai}
                                 allowClear
                                 options={[
-                                    { value: 'TAO_MOI', label: 'Tạo mới' },
-                                    { value: 'GUI_PHE_DUYET', label: 'Chờ phê duyệt' },
-                                    { value: 'DA_PHE_DUYET', label: 'Đã phê duyệt' },
-                                    { value: 'DANG_THUC_HIEN', label: 'Đang thực hiện' },
-                                    { value: 'HOAN_THANH', label: 'Đã hoàn thành' },
+                                    { value: 'TAO_MOI', label: t('phieuNhapTaiSanPage.tao_moi') },
+                                    { value: 'GUI_PHE_DUYET', label: t('donHangMuaSamPage.cho_phe_duyet') },
+                                    { value: 'DA_PHE_DUYET', label: t('donHangMuaSamPage.da_phe_duyet') },
+                                    { value: 'DANG_THUC_HIEN', label: t('phieuSuaChuaPage.dang_thuc_hien') },
+                                    { value: 'HOAN_THANH', label: t('donHangMuaSamPage.da_hoan_thanh') },
                                 ]}
                             />
                         </Col>
@@ -446,13 +448,13 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                                 style={{ width: '100%' }}
                                 value={dateRange}
                                 onChange={setDateRange}
-                                placeholder={['Từ ngày lập', 'Đến ngày lập']}
+                                placeholder={[t('phieuSuaChuaPage.tu_ngay_lap'), t('phieuSuaChuaPage.den_ngay_lap')]}
                             />
                         </Col>
                         <Col xs={24} md={6}>
                             <Space>
-                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>Tìm kiếm</Button>
-                                <Button onClick={handleReset}>Làm mới</Button>
+                                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('phieuNhapTaiSanPage.tim_kiem')}</Button>
+                                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>
                         </Col>
                     </Row>
@@ -484,7 +486,7 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                 />
 
                 <Modal
-                    title={`Cập nhật tiến độ thực hiện: ${selectedItem?.maPhieuSuaChua || ''}`}
+                    title={t('phieuSuaChuaPage.cap_nhat_tien_do_thuc_1', { maPhieuSuaChua: selectedItem?.maPhieuSuaChua || '' })}
                     open={isProgressModalOpen}
                     onOk={handleSaveProgress}
                     onCancel={() => setIsProgressModalOpen(false)}
@@ -499,37 +501,37 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                             size="small"
                             columns={[
                                 {
-                                    title: 'Tên mẫu tài sản',
+                                    title: t('phieuSuaChuaPage.ten_mau_tai_san'),
                                     dataIndex: 'tenMauTaiSan',
                                     key: 'tenMauTaiSan',
                                 },
                                 {
-                                    title: 'Loại',
+                                    title: t('phieuSuaChuaPage.loai'),
                                     dataIndex: 'loai',
                                     key: 'loaiTaiSan',
                                     width: 100,
-                                    render: (val) => val === 'THIET_BI' ? 'Thiết bị' : 'Linh kiện',
+                                    render: (val) => val === 'THIET_BI' ? t('phieuSuaChuaPage.thiet_bi') : t('phieuSuaChuaPage.linh_kien'),
                                 },
                                 {
-                                    title: 'Hình thức',
+                                    title: t('phieuSuaChuaPage.hinh_thuc'),
                                     dataIndex: 'loaiHinhXuLy',
                                     key: 'loaiHinhXuLy',
                                     width: 150,
                                     render: (val) => {
-                                        if (val === 'GUI_BAO_HANH') return 'Bảo hành';
-                                        if (val === 'SUA_CHUA_DICH_VU') return 'Sửa dịch vụ';
-                                        return 'Thay thế';
+                                        if (val === 'GUI_BAO_HANH') return t('phieuSuaChuaPage.bao_hanh');
+                                        if (val === 'SUA_CHUA_DICH_VU') return t('phieuSuaChuaPage.sua_dich_vu');
+                                        return t('phieuSuaChuaPage.thay_the');
                                     }
                                 },
                                 {
-                                    title: 'Trạng thái cũ',
+                                    title: t('phieuSuaChuaPage.trang_thai_cu'),
                                     dataIndex: 'trangThaiThucHien',
                                     key: 'trangThaiThucHien',
                                     width: 120,
                                     render: (val) => renderItemStatus(val),
                                 },
                                 {
-                                    title: 'Trạng thái mới',
+                                    title: t('phieuSuaChuaPage.trang_thai_moi'),
                                     key: 'trangThaiMoi',
                                     width: 150,
                                     render: (_, record) => (
@@ -538,26 +540,26 @@ export const PhieuSuaChuaPage: React.FC = observer(() => {
                                             onChange={(val) => handleProgressValueChange(record.id!, 'trangThaiThucHienMoi', val)}
                                             style={{ width: '100%' }}
                                         >
-                                            <Select.Option value="CHUA_GUI_DI">Chưa gửi đi</Select.Option>
-                                            <Select.Option value="DA_GUI_DI">Đã gửi đi</Select.Option>
-                                            <Select.Option value="DA_THU_LAI">Đã thu lại (Xong)</Select.Option>
+                                            <Select.Option value="CHUA_GUI_DI">{t('phieuSuaChuaPage.chua_gui_di')}</Select.Option>
+                                            <Select.Option value="DA_GUI_DI">{t('phieuSuaChuaPage.da_gui_di')}</Select.Option>
+                                            <Select.Option value="DA_THU_LAI">{t('phieuSuaChuaPage.da_thu_lai_xong')}</Select.Option>
                                         </Select>
                                     )
                                 },
                                 {
-                                    title: 'Phương án xử lý',
+                                    title: t('phieuSuaChuaPage.phuong_an_xu_ly'),
                                     key: 'phuongAn',
                                     width: 180,
                                     render: (_, record) => (
                                         <Input
                                             value={progressFormValues[record.id!]?.phuongAnXuLy}
                                             onChange={(e) => handleProgressValueChange(record.id!, 'phuongAnXuLy', e.target.value)}
-                                            placeholder="Ghi nhận xử lý..."
+                                            placeholder={t('phieuSuaChuaPage.ghi_nhan_xu_ly')}
                                         />
                                     )
                                 },
                                 {
-                                    title: 'Chi phí thực (VNĐ)',
+                                    title: t('phieuSuaChuaPage.chi_phi_thuc_vnd'),
                                     key: 'chiPhi',
                                     width: 130,
                                     render: (_, record) => (

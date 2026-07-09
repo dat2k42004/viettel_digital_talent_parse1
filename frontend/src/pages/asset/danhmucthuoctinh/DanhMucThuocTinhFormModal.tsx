@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, Switch, Card, InputNumber } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -19,6 +20,7 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
   mode,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<DanhMucThuocTinhRequest>();
   const isView = mode === 'view';
 
@@ -73,8 +75,8 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
   };
 
   const getTitle = () => {
-    if (isView) return 'Chi tiết danh mục thuộc tính động';
-    return selectedThuocTinh ? 'Cập nhật thuộc tính động' : 'Thêm mới thuộc tính động';
+    if (isView) return t('danhMucThuocTinhFormModal.chi_tiet_danh_muc');
+    return selectedThuocTinh ? t('danhMucThuocTinhFormModal.cap_nhat_thuoc_tinh') : t('danhMucThuocTinhFormModal.them_moi_thuoc_tinh');
   };
 
   return (
@@ -105,21 +107,21 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
           <Col span={12}>
             <Form.Item
               name="tenThuocTinh"
-              label="Tên thuộc tính hiển thị"
+              label={t('danhMucThuocTinhFormModal.ten_thuoc_tinh_hien')}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên thuộc tính!' },
-                { max: 100, message: 'Tên thuộc tính không vượt quá 100 ký tự!' }
+                { required: true, message: t('danhMucThuocTinhFormModal.vui_long_nhap_ten') },
+                { max: 100, message: t('danhMucThuocTinhFormModal.ten_thuoc_tinh_khong') }
               ]}
             >
-              <Input disabled={isView} placeholder="Ví dụ: Dung lượng RAM, Hệ điều hành" />
+              <Input disabled={isView} placeholder={t('danhMucThuocTinhFormModal.vi_du_dung_luong')} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="maThuocTinh"
-              label="Mã thuộc tính duy nhất"
+              label={t('danhMucThuocTinhFormModal.ma_thuoc_tinh_duy')}
             >
-              <Input disabled placeholder="Mã hệ thống tự động sinh" />
+              <Input disabled placeholder={t('loaiTaiSanFormModal.ma_he_thong_tu')} />
             </Form.Item>
           </Col>
         </Row>
@@ -128,26 +130,26 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
           <Col span={isView ? 8 : 12}>
             <Form.Item
               name="kieuDuLieu"
-              label="Kiêu dữ liệu"
-              rules={[{ required: true, message: 'Vui lòng chọn kiểu dữ liệu!' }]}
+              label={t('danhMucThuocTinhFormModal.kieu_du_lieu')}
+              rules={[{ required: true, message: t('danhMucThuocTinhFormModal.vui_long_chon_kieu') }]}
             >
               <Select disabled={isView} options={[
-                { value: 'TEXT', label: 'Văn bản (TEXT)' },
-                { value: 'NUMBER', label: 'Số (NUMBER)' },
-                { value: 'SELECT', label: 'Lựa chọn (SELECT)' },
+                { value: 'TEXT', label: t('danhMucThuocTinhFormModal.van_ban_text') },
+                { value: 'NUMBER', label: t('danhMucThuocTinhFormModal.so_number') },
+                { value: 'SELECT', label: t('danhMucThuocTinhFormModal.lua_chon_select') },
               ]} />
             </Form.Item>
           </Col>
           <Col span={isView ? 8 : 12}>
             <Form.Item
               name="apDungCho"
-              label="Áp dụng cho phân hệ"
-              rules={[{ required: true, message: 'Vui lòng chọn phân hệ áp dụng!' }]}
+              label={t('danhMucThuocTinhPage.ap_dung_cho_phan')}
+              rules={[{ required: true, message: t('danhMucThuocTinhFormModal.vui_long_chon_phan') }]}
             >
               <Select disabled={isView} options={[
-                { value: 'PHAN_CUNG', label: 'Thiết bị Phần cứng' },
-                { value: 'PHAN_MEM', label: 'Key Bản quyền Phần mềm' },
-                { value: 'LINH_KIEN', label: 'Linh kiện Phần cứng' },
+                { value: 'PHAN_CUNG', label: t('danhMucThuocTinhPage.thiet_bi_phan_cung') },
+                { value: 'PHAN_MEM', label: t('danhMucThuocTinhFormModal.key_ban_quyen_phan') },
+                { value: 'LINH_KIEN', label: t('danhMucThuocTinhPage.linh_kien_phan_cung') },
               ]} />
             </Form.Item>
           </Col>
@@ -155,11 +157,11 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
             <Col span={8}>
               <Form.Item
                 name="trangThai"
-                label="Trạng thái"
+                label={t('loaiTaiSanFormModal.trang_thai')}
               >
                 <Select disabled options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]} />
               </Form.Item>
             </Col>
@@ -170,21 +172,21 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
           <Col span={12}>
             <Form.Item
               name="giaTriMacDinh"
-              label="Giá trị mặc định"
-              rules={[{ max: 255, message: 'Giá trị không vượt quá 255 ký tự!' }]}
+              label={t('danhMucCauHinhPage.gia_tri_mac_dinh')}
+              rules={[{ max: 255, message: t('danhMucThuocTinhFormModal.gia_tri_khong_vuot') }]}
             >
-              <Input disabled={isView} placeholder="Nhập giá trị mặc định của thuộc tính" />
+              <Input disabled={isView} placeholder={t('danhMucThuocTinhFormModal.nhap_gia_tri_mac')} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="batBuocNhap" label="Bắt buộc nhập dữ liệu?" valuePropName="checked">
+            <Form.Item name="batBuocNhap" label={t('danhMucThuocTinhFormModal.bat_buoc_nhap_du')} valuePropName="checked">
               <Switch disabled={isView} />
             </Form.Item>
           </Col>
         </Row>
 
         {kieuDuLieu === 'SELECT' && (
-          <Card title="Danh sách các tùy chọn gợi ý (Options)" size="small" style={{ marginTop: 16 }}>
+          <Card title={t('danhMucThuocTinhFormModal.danh_sach_cac_tuy')} size="small" style={{ marginTop: 16 }}>
             <Form.List name="luaChonGoiY">
               {(fields, { add, remove }) => (
                 <>
@@ -202,22 +204,22 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
                           {...field}
                           name={[field.name, 'giaTri']}
                           rules={[
-                            { required: true, message: 'Vui lòng nhập giá trị gợi ý!' },
-                            { max: 150, message: 'Không quá 150 ký tự!' }
+                            { required: true, message: t('danhMucThuocTinhFormModal.vui_long_nhap_gia') },
+                            { max: 150, message: t('danhMucThuocTinhFormModal.khong_qua_150_ky') }
                           ]}
                           noStyle
                         >
-                          <Input disabled={isView} placeholder="Giá trị hiển thị (Ví dụ: 8GB, Windows 11)" />
+                          <Input disabled={isView} placeholder={t('danhMucThuocTinhFormModal.gia_tri_hien_thi')} />
                         </Form.Item>
                       </Col>
                       <Col span={6}>
                         <Form.Item
                           {...field}
                           name={[field.name, 'thuTuHienThi']}
-                          rules={[{ required: true, message: 'Vui lòng nhập thứ tự!' }]}
+                          rules={[{ required: true, message: t('danhMucThuocTinhFormModal.vui_long_nhap_thu') }]}
                           noStyle
                         >
-                          <InputNumber disabled={isView} style={{ width: '100%' }} placeholder="Thứ tự hiển thị" min={0} />
+                          <InputNumber disabled={isView} style={{ width: '100%' }} placeholder={t('danhMucThuocTinhFormModal.thu_tu_hien_thi')} min={0} />
                         </Form.Item>
                       </Col>
                       <Col span={6}>
@@ -228,8 +230,8 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
                           noStyle
                         >
                           <Select disabled={isView} options={[
-                            { value: 'HOAT_DONG', label: 'Hoạt động' },
-                            { value: 'KHOA', label: 'Khóa' },
+                            { value: 'HOAT_DONG', label: t('userManagementPage.hoat_dong') },
+                            { value: 'KHOA', label: t('viTriManagementPage.khoa') },
                           ]} />
                         </Form.Item>
                       </Col>

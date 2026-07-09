@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Button, Checkbox, Row, Col, Typography } from 'antd';
 import type { NguoiDungResponse } from '../../../api-generated/models/nguoiDungResponse';
@@ -21,6 +22,7 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
   danhSachQuyen,
   onSave
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<NguoiDungQuyenUpdateRequest>();
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,7 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
     if (!maQuyen) return 'KHÁC';
     if (maQuyen.includes('NGUOI_DUNG')) return 'NGƯỜI DÙNG';
     if (maQuyen.includes('VAI_TRO')) return 'VAI TRÒ';
-    if (maQuyen.includes('DON_VI')) return 'ĐƠN VỊ';
+    if (maQuyen.includes('DON_VI')) return t('userQuyenModal.don_vi');
     if (maQuyen.includes('PHONG_BAN')) return 'PHÒNG BAN';
     if (maQuyen.includes('VI_TRI')) return 'VỊ TRÍ';
     if (maQuyen.includes('CAU_HINH')) return 'CẤU HÌNH';
@@ -67,7 +69,7 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
 
   return (
     <Modal
-      title={`Cấp quyền trực tiếp cho tài khoản: ${selectedUser?.tenDangNhap}`}
+      title={t('userQuyenModal.cap_quyen_truc_tiep_cho', { tenDangNhap: selectedUser?.tenDangNhap })}
       open={open}
       onCancel={onCancel}
       footer={[
@@ -81,7 +83,7 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
       width={700}
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-        <Form.Item label={<Text strong>Ma trận quyền hạn trực tiếp (Override Role Permissions)</Text>}>
+        <Form.Item label={<Text strong>{t('userQuyenModal.ma_tran_quyen_han')}</Text>}>
           <div style={{ maxHeight: 400, overflowY: 'auto', border: '1px solid #d9d9d9', borderRadius: 8, padding: '16px 16px 0 16px' }}>
             {Object.entries(groupedPermissions).map(([groupName, permissions]) => {
               const checkedChildren = permissions.filter(p => selectedPermissionIds.includes(p.id!));

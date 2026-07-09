@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -19,9 +20,9 @@ public class DashboardController {
      private final DashboardService dashboardService;
 
      @GetMapping("/don-vi")
-     @PreAuthorize("hasAuthority('XEM_BAO_CAO')")
-     public ApiResponse<ThongKeTongQuanDashboardResponse> layThongKeDonViAdmin() {
-          return ApiResponse.success(dashboardService.layThongKeDonViAdmin());
+     @PreAuthorize("hasAuthority('XEM_BAO_CAO') or hasAuthority('XEM_QUAN_TRI_TOAN_SAN')")
+     public ApiResponse<ThongKeTongQuanDashboardResponse> layThongKeDonViAdmin(@RequestParam(required = false) Long idDonVi) {
+          return ApiResponse.success(dashboardService.layThongKeDonViAdmin(idDonVi));
      }
 
      @GetMapping("/toan-san")

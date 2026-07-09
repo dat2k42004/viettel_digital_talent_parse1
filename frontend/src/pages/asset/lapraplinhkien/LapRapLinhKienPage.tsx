@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, Space } from 'antd';
 import type { MenuProps } from 'antd';
@@ -21,6 +22,7 @@ import { LapRapFormModal } from './LapRapLinhKienFormModal';
 const { Title, Text } = Typography;
 
 export const LapRapLinhKienPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSach, setDanhSach] = useState<LapRapLinhKienResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -58,7 +60,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
         setTotalCount(pageInfo.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải lịch sử lắp ráp linh kiện!');
+      message.error(e?.message || t('lapRapLinhKienPage.khong_the_tai_lich'));
     } finally {
       setLoading(false);
     }
@@ -110,17 +112,17 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
       const res = await themMoi18(values);
       const code = (res as any).code;
       if (code === 200 || (res && !code)) {
-        message.success('Thực hiện lắp ráp thành công!');
+        message.success(t('lapRapLinhKienPage.thuc_hien_lap_rap'));
         setIsFormOpen(false);
         taiDuLieu(1, pageSize);
         // Refresh options since linkien might be linked now
         const lkRes = await laySelectOptions8();
         if (lkRes.data) setLinhKienOptions(lkRes.data);
       } else {
-        message.error((res as any).message || 'Lắp ráp thất bại!');
+        message.error((res as any).message || t('lapRapLinhKienPage.lap_rap_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Lỗi khi kết nối tới máy chủ!');
+      message.error(e?.message || t('lapRapLinhKienPage.loi_khi_ket_noi'));
     }
   };
 
@@ -129,25 +131,25 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
       const res = await capNhatThaoDo(id);
       const code = (res as any).code;
       if (code === 200 || res) {
-        message.success('Tháo dỡ linh kiện thành công!');
+        message.success(t('lapRapLinhKienPage.thao_do_linh_kien'));
         taiDuLieu(currentPage, pageSize);
         // Refresh options
         const lkRes = await laySelectOptions8();
         if (lkRes.data) setLinhKienOptions(lkRes.data);
       } else {
-        message.error((res as any).message || 'Tháo dỡ thất bại!');
+        message.error((res as any).message || t('lapRapLinhKienPage.thao_do_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tháo dỡ linh kiện!');
+      message.error(e?.message || t('lapRapLinhKienPage.khong_the_thao_do'));
     }
   };
 
   const renderLienKetStatus = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return <Tag color="green">Đang liên kết (Active)</Tag>;
+        return <Tag color="green">{t('lapRapLinhKienPage.dang_lien_ket_active')}</Tag>;
       case 'INACTIVE':
-        return <Tag color="red">Đã tháo dỡ (Inactive)</Tag>;
+        return <Tag color="red">{t('lapRapLinhKienPage.da_thao_do_inactive')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -155,20 +157,20 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Thiết bị mẹ (Serial / Thẻ tài sản)',
+      title: t('lapRapLinhKienPage.thiet_bi_me_serial'),
       key: 'thietBiMe',
       sorter: (a: any, b: any) => (a.soSerialThietBi || '').localeCompare(b.soSerialThietBi || ''),
       render: (_: any, record: LapRapLienKetThaoDoResponse) => {
         return (
           <div>
             <div><Text strong>{record.soSerialThietBi || 'N/A'}</Text></div>
-            <div><Text type="secondary">{record.maTheTaiSanThietBi || 'Không có thẻ'}</Text></div>
+            <div><Text type="secondary">{t('lapRapLinhKienPage.recordmathetaisanthietbi_khong_co_the')}</Text></div>
           </div>
         );
       },
     },
     {
-      title: 'Linh kiện con (Serial)',
+      title: t('lapRapLinhKienPage.linh_kien_con_serial'),
       dataIndex: 'soSerialLinhKien',
       key: 'soSerialLinhKien',
       sorter: (a: any, b: any) => (a.soSerialLinhKien || '').localeCompare(b.soSerialLinhKien || ''),
@@ -176,33 +178,33 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
       render: (val: string) => <Text strong>{val}</Text>,
     },
     {
-      title: 'Thời gian lắp ráp',
+      title: t('lapRapLinhKienPage.thoi_gian_lap_rap'),
       dataIndex: 'thoiGianLap',
       key: 'thoiGianLap',
       width: 150,
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '-',
     },
     {
-      title: 'Thời gian tháo dỡ',
+      title: t('lapRapLinhKienPage.thoi_gian_thao_do'),
       dataIndex: 'thoiGianThao',
       key: 'thoiGianThao',
       width: 150,
       render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY HH:mm') : '-',
     },
     {
-      title: 'Trạng thái liên kết',
+      title: t('lapRapLinhKienPage.trang_thai_lien_ket'),
       dataIndex: 'trangThaiLienKet',
       key: 'trangThaiLienKet',
       width: 180,
       render: (val: string) => renderLienKetStatus(val),
     },
     {
-      title: 'Ghi chú',
+      title: t('loaiTaiSanFormModal.ghi_chu'),
       dataIndex: 'ghiChu',
       key: 'ghiChu',
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 120,
       render: (_: any, record: LapRapLienKetThaoDoResponse) => {
@@ -214,13 +216,13 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
               key: 'disassemble',
               label: (
                 <Popconfirm
-                  title="Xác nhận tháo dỡ"
-                  description="Bạn có chắc chắn muốn tháo dỡ linh kiện này khỏi thiết bị mẹ?"
-                  okText="Xác nhận tháo"
-                  cancelText="Hủy"
+                  title={t('lapRapLinhKienPage.xac_nhan_thao_do')}
+                  description={t('lapRapLinhKienPage.ban_co_chac_chan')}
+                  okText={t('lapRapLinhKienPage.xac_nhan_thao')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleThaoDo(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Tháo dỡ</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('lapRapLinhKienPage.thao_do')}</span>
                 </Popconfirm>
               ),
               icon: <SafetyOutlined style={{ color: '#ff4d4f' }} />,
@@ -228,7 +230,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
             : null,
         ].filter(Boolean) as MenuProps['items'];
 
-        if (items.length === 0) return '-';
+        if (!items || items.length === 0) return '-';
 
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
@@ -270,7 +272,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={7}>
               <Select
-                placeholder="Chọn thiết bị phần cứng (Mẹ)"
+                placeholder={t('lapRapLinhKienPage.chon_thiet_bi_phan')}
                 style={{ width: '100%' }}
                 value={thietBiId}
                 onChange={setThietBiId}
@@ -284,7 +286,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={7}>
               <Select
-                placeholder="Chọn linh kiện lắp đặt (Con)"
+                placeholder={t('lapRapLinhKienPage.chon_linh_kien_lap')}
                 style={{ width: '100%' }}
                 value={linhKienId}
                 onChange={setLinhKienId}
@@ -298,14 +300,14 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={5}>
               <Select
-                placeholder="Trạng thái liên kết"
+                placeholder={t('lapRapLinhKienPage.trang_thai_lien_ket')}
                 style={{ width: '100%' }}
                 value={trangThaiLienKet}
                 onChange={setTrangThaiLienKet}
                 allowClear
                 options={[
-                  { value: 'ACTIVE', label: 'Đang liên kết' },
-                  { value: 'INACTIVE', label: 'Đã tháo dỡ' },
+                  { value: 'ACTIVE', label: t('lapRapLinhKienPage.dang_lien_ket') },
+                  { value: 'INACTIVE', label: t('lapRapLinhKienPage.da_thao_do') },
                 ]}
               />
             </Col>

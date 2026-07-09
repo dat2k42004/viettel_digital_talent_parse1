@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select, DatePicker } from 'antd';
 import type { MenuProps } from 'antd';
@@ -23,6 +24,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export const DotKiemKePage: React.FC = observer(() => {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [danhSach, setDanhSach] = useState<DotKiemKeResponse[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -56,7 +58,7 @@ export const DotKiemKePage: React.FC = observer(() => {
                 setTotalCount(pageInfo.total_elements || 0);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể tải danh sách đợt kiểm kê!');
+            message.error(e?.message || t('dotKiemKePage.khong_the_tai_danh'));
         } finally {
             setLoading(false);
         }
@@ -92,7 +94,7 @@ export const DotKiemKePage: React.FC = observer(() => {
                     setIsFormOpen(true);
                 }
             } catch (error) {
-                message.error('Lỗi khi lấy chi tiết đợt kiểm kê');
+                message.error(t('dotKiemKePage.loi_khi_lay_chi'));
             } finally {
                 setLoading(false);
             }
@@ -105,24 +107,24 @@ export const DotKiemKePage: React.FC = observer(() => {
             if (selectedItem && selectedItem.id) {
                 const res = await capNhat(selectedItem.id, values);
                 if (res.code === 200) {
-                    message.success('Cập nhật đợt kiểm kê thành công!');
+                    message.success(t('dotKiemKePage.cap_nhat_dot_kiem'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Cập nhật thất bại!');
+                    message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
                 }
             } else {
                 const res = await themMoi(values);
                 if (res.code === 200) {
-                    message.success('Tạo đợt kiểm kê thành công!');
+                    message.success(t('dotKiemKePage.tao_dot_kiem_ke'));
                     setIsFormOpen(false);
                     taiDuLieu(currentPage, pageSize);
                 } else {
-                    message.error(res.message || 'Thêm mới thất bại!');
+                    message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
                 }
             }
         } catch (e: any) {
-            message.error(e?.message || 'Có lỗi xảy ra khi lưu đợt kiểm kê!');
+            message.error(e?.message || t('dotKiemKePage.co_loi_xay_ra'));
         } finally {
             setModalLoading(false);
         }
@@ -132,11 +134,11 @@ export const DotKiemKePage: React.FC = observer(() => {
         try {
             const res = await yeuCauPheDuyet(id);
             if (res.code === 200) {
-                message.success('Đã gửi yêu cầu phê duyệt đợt kiểm kê!');
+                message.success(t('dotKiemKePage.da_gui_yeu_cau'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi gửi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_gui_phe'));
         }
     };
 
@@ -144,11 +146,11 @@ export const DotKiemKePage: React.FC = observer(() => {
         try {
             const res = await pheDuyet(id);
             if (res.code === 200) {
-                message.success('Phê duyệt đợt kiểm kê thành công!');
+                message.success(t('dotKiemKePage.phe_duyet_dot_kiem'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Lỗi khi phê duyệt');
+            message.error(e?.message || t('donHangMuaSamPage.loi_khi_phe_duyet'));
         }
     };
 
@@ -156,28 +158,28 @@ export const DotKiemKePage: React.FC = observer(() => {
         try {
             const res = await xoaMem(id);
             if (res.code === 200) {
-                message.success('Xóa đợt kiểm kê thành công!');
+                message.success(t('dotKiemKePage.xoa_dot_kiem_ke'));
                 taiDuLieu(currentPage, pageSize);
             }
         } catch (e: any) {
-            message.error(e?.message || 'Không thể xóa đợt kiểm kê!');
+            message.error(e?.message || t('dotKiemKePage.khong_the_xoa_dot'));
         }
     };
 
     const renderStatus = (status?: string) => {
         switch (status) {
-            case 'TAO_MOI': return <Tag color="cyan">Tạo mới</Tag>;
-            case 'GUI_PHE_DUYET': return <Tag color="orange">Chờ phê duyệt</Tag>;
-            case 'DA_PHE_DUYET': return <Tag color="blue">Đã phê duyệt</Tag>;
-            case 'DANG_THUC_HIEN': return <Tag color="purple">Đang thực hiện</Tag>;
-            case 'HOAN_THANH': return <Tag color="green">Hoàn thành</Tag>;
+            case 'TAO_MOI': return <Tag color="cyan">{t('phieuNhapTaiSanPage.tao_moi')}</Tag>;
+            case 'GUI_PHE_DUYET': return <Tag color="orange">{t('donHangMuaSamPage.cho_phe_duyet')}</Tag>;
+            case 'DA_PHE_DUYET': return <Tag color="blue">{t('donHangMuaSamPage.da_phe_duyet')}</Tag>;
+            case 'DANG_THUC_HIEN': return <Tag color="purple">{t('phieuSuaChuaPage.dang_thuc_hien')}</Tag>;
+            case 'HOAN_THANH': return <Tag color="green">{t('phieuSuaChuaPage.hoan_thanh')}</Tag>;
             default: return <Tag>{status}</Tag>;
         }
     };
 
     const columns = [
         {
-            title: 'Mã đợt',
+            title: t('phieuKiemKePage.ma_dot'),
             dataIndex: 'maDotKiemKe',
             key: 'maDotKiemKe',
             width: 140,
@@ -186,60 +188,60 @@ export const DotKiemKePage: React.FC = observer(() => {
             render: (val: string) => <Text strong>{val}</Text>,
         },
         {
-            title: 'Tên đợt kiểm kê',
+            title: t('phieuKiemKePage.ten_dot_kiem_ke'),
             dataIndex: 'tenDotKiemKe',
             key: 'tenDotKiemKe',
         },
         {
-            title: 'Người lập',
+            title: t('donHangMuaSamPage.nguoi_lap'),
             dataIndex: 'tenNguoiLap',
             key: 'tenNguoiLap',
             width: 150,
         },
         {
-            title: 'Người phê duyệt',
+            title: t('dotKiemKePage.nguoi_phe_duyet'),
             dataIndex: 'tenNguoiPheDuyet',
             key: 'tenNguoiPheDuyet',
             width: 150,
             render: (val: string) => val || '-',
         },
         {
-            title: 'Bắt đầu dự kiến',
+            title: t('dotKiemKePage.bat_dau_du_kien'),
             dataIndex: 'thoiGianBatDauDuKien',
             key: 'thoiGianBatDauDuKien',
             width: 140,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'Kết thúc dự kiến',
+            title: t('dotKiemKePage.ket_thuc_du_kien'),
             dataIndex: 'thoiGianKetThucDuKien',
             key: 'thoiGianKetThucDuKien',
             width: 140,
             render: (val: string) => val ? dayjs(val).format('DD/MM/YYYY') : '-',
         },
         {
-            title: 'TS Hệ thống',
+            title: t('dotKiemKePage.ts_he_thong'),
             dataIndex: 'tongTaiSanHeThong',
             key: 'tongTaiSanHeThong',
             width: 110,
             render: (val: number) => val ?? 0,
         },
         {
-            title: 'TS Thực tế',
+            title: t('dotKiemKePage.ts_thuc_te'),
             dataIndex: 'tongTaiSanThucTe',
             key: 'tongTaiSanThucTe',
             width: 110,
             render: (val: number) => val ?? 0,
         },
         {
-            title: 'Trạng thái',
+            title: t('loaiTaiSanFormModal.trang_thai'),
             dataIndex: 'trangThai',
             key: 'trangThai',
             width: 135,
             render: (val: string) => renderStatus(val),
         },
         {
-            title: 'Hành động',
+            title: t('viTriManagementPage.hanh_dong'),
             key: 'actions',
             width: 120,
             fixed: 'right' as const,
@@ -252,25 +254,25 @@ export const DotKiemKePage: React.FC = observer(() => {
                 const items: MenuProps['items'] = [
                     {
                         key: 'view',
-                        label: 'Xem chi tiết',
+                        label: t('donViManagementPage.xem_chi_tiet'),
                         icon: <EyeOutlined />,
                         onClick: () => handleOpenModal('view', record),
                     },
                     canEdit ? {
                         key: 'edit',
-                        label: 'Sửa thông tin',
+                        label: t('phieuKiemKePage.sua_thong_tin'),
                         icon: <EditOutlined />,
                         onClick: () => handleOpenModal('edit', record),
                     } : null,
                     canRequestApprove ? {
                         key: 'send',
-                        label: 'Gửi phê duyệt',
+                        label: t('donHangMuaSamPage.gui_phe_duyet'),
                         icon: <SendOutlined />,
                         onClick: () => handleYeuCauPheDuyet(record.id!),
                     } : null,
                     canApprove ? {
                         key: 'approve',
-                        label: 'Phê duyệt',
+                        label: t('phieuSuaChuaPage.phe_duyet'),
                         icon: <CheckCircleOutlined />,
                         onClick: () => handlePheDuyet(record.id!),
                     } : null,
@@ -281,13 +283,13 @@ export const DotKiemKePage: React.FC = observer(() => {
                         key: 'delete',
                         label: (
                             <Popconfirm
-                                title="Bạn chắc chắn muốn xóa đợt kiểm kê này?"
+                                title={t('dotKiemKePage.ban_chac_chan_muon')}
                                 onConfirm={() => handleXoa(record.id!)}
-                                okText="Xóa"
-                                cancelText="Hủy"
+                                okText={t('viTriManagementPage.xoa')}
+                                cancelText={t('viTriManagementPage.huy')}
                                 okButtonProps={{ danger: true }}
                             >
-                                <span style={{ color: '#ff4d4f' }}>Xóa bỏ</span>
+                                <span style={{ color: '#ff4d4f' }}>{t('phieuKiemKePage.xoa_bo')}</span>
                             </Popconfirm>
                         ),
                         icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -309,8 +311,8 @@ export const DotKiemKePage: React.FC = observer(() => {
         <div>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <Title level={3} style={{ margin: 0 }}>Quản lý Đợt kiểm kê tài sản</Title>
-                    <Text type="secondary">Quản lý và lập kế hoạch các chiến dịch kiểm kê tài sản công nghệ thông tin định kỳ</Text>
+                    <Title level={3} style={{ margin: 0 }}>{t('dotKiemKePage.quan_ly_dot_kiem')}</Title>
+                    <Text type="secondary">{t('dotKiemKePage.quan_ly_va_lap')}</Text>
                 </div>
                 <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_DKK}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
@@ -322,28 +324,28 @@ export const DotKiemKePage: React.FC = observer(() => {
             <Card style={{ marginBottom: 16 }}>
                 <Row gutter={[16, 16]} align="middle">
                     <Col xs={24} sm={8} md={6}>
-                        <div style={{ fontWeight: 500, marginBottom: 4 }}>Trạng thái</div>
+                        <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('loaiTaiSanFormModal.trang_thai')}</div>
                         <Select
-                            placeholder="Tất cả trạng thái"
+                            placeholder={t('phieuKiemKePage.tat_ca_trang_thai')}
                             style={{ width: '100%' }}
                             allowClear
                             value={trangThai}
                             onChange={setTrangThai}
                         >
-                            <Select.Option value="TAO_MOI">Tạo mới</Select.Option>
-                            <Select.Option value="GUI_PHE_DUYET">Chờ phê duyệt</Select.Option>
-                            <Select.Option value="DA_PHE_DUYET">Đã phê duyệt</Select.Option>
-                            <Select.Option value="DANG_THUC_HIEN">Đang thực hiện</Select.Option>
-                            <Select.Option value="HOAN_THANH">Hoàn thành</Select.Option>
+                            <Select.Option value="TAO_MOI">{t('phieuNhapTaiSanPage.tao_moi')}</Select.Option>
+                            <Select.Option value="GUI_PHE_DUYET">{t('donHangMuaSamPage.cho_phe_duyet')}</Select.Option>
+                            <Select.Option value="DA_PHE_DUYET">{t('donHangMuaSamPage.da_phe_duyet')}</Select.Option>
+                            <Select.Option value="DANG_THUC_HIEN">{t('phieuSuaChuaPage.dang_thuc_hien')}</Select.Option>
+                            <Select.Option value="HOAN_THANH">{t('phieuSuaChuaPage.hoan_thanh')}</Select.Option>
                         </Select>
                     </Col>
                     <Col xs={24} sm={10} md={8}>
-                        <div style={{ fontWeight: 500, marginBottom: 4 }}>Thời gian bắt đầu/kết thúc</div>
+                        <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('dotKiemKePage.thoi_gian_bat_dauket')}</div>
                         <RangePicker
                             style={{ width: '100%' }}
                             value={dateRange}
                             onChange={setDateRange}
-                            placeholder={['Từ ngày', 'Đến ngày']}
+                            placeholder={[t('phieuKiemKePage.tu_ngay'), t('phieuKiemKePage.den_ngay')]}
                             format="DD/MM/YYYY"
                         />
                     </Col>
@@ -372,7 +374,7 @@ export const DotKiemKePage: React.FC = observer(() => {
                         total: totalCount,
                         showSizeChanger: true,
                         pageSizeOptions: ['5', '10', '20', '50'],
-                        showTotal: (total) => `Tổng số ${total} bản ghi`,
+                        showTotal: (total) => t('dotKiemKePage.tong_so_total_ban_ghi', { total: total }),
                         onChange: (page, size) => {
                             setCurrentPage(page);
                             setPageSize(size);

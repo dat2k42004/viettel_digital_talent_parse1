@@ -42,11 +42,25 @@ public class DashboardServiceImpl implements DashboardService {
 
      @Override
      @Transactional(readOnly = true)
-     public ThongKeTongQuanDashboardResponse layThongKeDonViAdmin() {
-          Long idDonVi = DonViContextHolder.getTenantId();
+     public ThongKeTongQuanDashboardResponse layThongKeDonViAdmin(Long selectIdDonVi) {
+          Long idDonVi = selectIdDonVi;
+          if (idDonVi == null) {
+               idDonVi = DonViContextHolder.getTenantId();
+          }
           boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
           if (idDonVi == null && !laSuperAdmin) {
-               throw new NghiepVuException("Quyền truy cập bị từ chối. Không xác định được đơn vị quản lý", 403);
+               throw new NghiepVuException("exception.common.no_tenant_context", 403);
+          }
+
+          if (idDonVi == null) {
+               return ThongKeTongQuanDashboardResponse.builder()
+                         .tongSoLuongThietBi(0L)
+                         .tongGiaTriTaiSanVnd(BigDecimal.ZERO)
+                         .soLuongYeuCauCapPhatChoDuyet(0L)
+                         .soLuongYeuCauBaoHongChoDuyet(0L)
+                         .bieuDoTyLeTrangThai(new HashMap<>())
+                         .bieuDoPhanBoPhongBan(new HashMap<>())
+                         .build();
           }
 
           // Thu thập số liệu tĩnh từ các Read Model Summary để render siêu tốc

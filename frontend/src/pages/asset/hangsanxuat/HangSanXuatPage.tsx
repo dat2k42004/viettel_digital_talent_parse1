@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -19,6 +20,7 @@ import { HangSanXuatFormModal } from './HangSanXuatFormModal';
 const { Title, Text } = Typography;
 
 export const HangSanXuatPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSach, setDanhSach] = useState<HangSanXuatResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -48,7 +50,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách hãng sản xuất!');
+      message.error(e?.message || t('hangSanXuatPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch(() => message.error('Không thể tải lại danh sách!'))
+      .catch(() => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -84,24 +86,24 @@ export const HangSanXuatPage: React.FC = observer(() => {
       if (selectedItem && selectedItem.id) {
         const res = await capNhat19(selectedItem.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật hãng sản xuất thành công!');
+          message.success(t('hangSanXuatPage.cap_nhat_hang_san'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi20(values);
         if (res.code === 200) {
-          message.success('Thêm mới hãng sản xuất thành công!');
+          message.success(t('hangSanXuatPage.them_moi_hang_san'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -112,13 +114,13 @@ export const HangSanXuatPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai12(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Kích hoạt' : 'Khóa'} hãng sản xuất thành công!`);
+        message.success(t('hangSanXuatPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.kich_hoat') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -126,22 +128,22 @@ export const HangSanXuatPage: React.FC = observer(() => {
     try {
       const res = await xoaMem19(id);
       if (res.code === 200) {
-        message.success('Xóa hãng sản xuất thành công!');
+        message.success(t('hangSanXuatPage.xoa_hang_san_xuat'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa hãng sản xuất!');
+      message.error(e?.message || t('hangSanXuatPage.khong_the_xoa_hang'));
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Tạm khóa</Tag>;
+        return <Tag color="red">{t('loaiTaiSanFormModal.tam_khoa')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -149,7 +151,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã hãng',
+      title: t('hangSanXuatPage.ma_hang'),
       dataIndex: 'maHang',
       key: 'maHang',
       width: 120,
@@ -157,12 +159,12 @@ export const HangSanXuatPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên hãng sản xuất',
+      title: t('hangSanXuatPage.ten_hang_san_xuat'),
       dataIndex: 'tenHang',
       key: 'tenHang',
     },
     {
-      title: 'Website hỗ trợ',
+      title: t('hangSanXuatPage.website_ho_tro'),
       dataIndex: 'websiteHoTro',
       key: 'websiteHoTro',
       render: (val: string) => val ? <a href={val} target="_blank" rel="noreferrer">{val}</a> : '-',
@@ -174,19 +176,19 @@ export const HangSanXuatPage: React.FC = observer(() => {
       width: 130,
     },
     {
-      title: 'Email hỗ trợ',
+      title: t('hangSanXuatPage.email_ho_tro'),
       dataIndex: 'emailHoTro',
       key: 'emailHoTro',
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 120,
       render: (_: any, record: HangSanXuatResponse) => {
@@ -194,7 +196,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.XEM_HANG_SAN_XUAT)
             ? {
               key: 'view',
-              label: 'Chi tiết',
+              label: t('linhKienPhanCungPage.chi_tiet'),
               icon: <EyeOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -206,7 +208,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_HANG_SAN_XUAT)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedItem(record);
@@ -218,7 +220,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_HANG_SAN_XUAT)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa hãng' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('hangSanXuatPage.khoa_hang') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -228,13 +230,13 @@ export const HangSanXuatPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa hãng sản xuất này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('hangSanXuatPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoa(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa hãng</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('hangSanXuatPage.xoa_hang')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -284,7 +286,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Input
-                placeholder="Tìm kiếm theo mã hãng, tên hãng..."
+                placeholder={t('hangSanXuatPage.tim_kiem_theo_ma')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -292,14 +294,14 @@ export const HangSanXuatPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Select
-                placeholder="Trạng thái"
+                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                 style={{ width: '100%' }}
                 value={trangThai}
                 onChange={setTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]}
               />
             </Col>
@@ -308,7 +310,7 @@ export const HangSanXuatPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

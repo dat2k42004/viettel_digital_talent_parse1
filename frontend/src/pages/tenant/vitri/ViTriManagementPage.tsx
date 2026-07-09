@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Space, Input, Tag, Typography, Tooltip, message, Popconfirm, Dropdown, Row, Col, Select } from 'antd';
 import type { MenuProps } from 'antd';
@@ -13,6 +14,7 @@ import { ViTriFormModal } from './ViTriFormModal';
 const { Title, Text } = Typography;
 
 export const ViTriManagementPage: React.FC = observer(() => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [danhSachViTri, setDanhSachViTri] = useState<ViTriResponse[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -45,7 +47,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
         setTotalCount(res.data.page_info?.total_elements || 0);
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể tải danh sách vị trí!');
+      message.error(e?.message || t('viTriManagementPage.khong_the_tai_danh'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
           setTotalCount(res.data.page_info?.total_elements || 0);
         }
       })
-      .catch((e) => message.error('Không thể tải lại danh sách!'))
+      .catch((e) => message.error(t('viTriManagementPage.khong_the_tai_lai')))
       .finally(() => setLoading(false));
   };
 
@@ -84,24 +86,24 @@ export const ViTriManagementPage: React.FC = observer(() => {
       if (selectedViTri && selectedViTri.id) {
         const res = await capNhat(selectedViTri.id, values);
         if (res.code === 200) {
-          message.success('Cập nhật vị trí thành công!');
+          message.success(t('viTriManagementPage.cap_nhat_vi_tri'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Cập nhật thất bại!');
+          message.error(res.message || t('viTriManagementPage.cap_nhat_that_bai'));
         }
       } else {
         const res = await themMoi(values);
         if (res.code === 200) {
-          message.success('Thêm mới vị trí thành công!');
+          message.success(t('viTriManagementPage.them_moi_vi_tri'));
           setIsFormOpen(false);
           taiDuLieu(currentPage, pageSize);
         } else {
-          message.error(res.message || 'Thêm mới thất bại!');
+          message.error(res.message || t('viTriManagementPage.them_moi_that_bai'));
         }
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra khi lưu thông tin!');
+      message.error(e?.message || t('danhMucCauHinhPage.co_loi_xay_ra'));
     }
   };
 
@@ -112,13 +114,13 @@ export const ViTriManagementPage: React.FC = observer(() => {
     try {
       const res = await capNhatTrangThai(record.id, { trangThai: nextStatus });
       if (res.code === 200) {
-        message.success(`${nextStatus === 'HOAT_DONG' ? 'Mở khóa' : 'Khóa'} vị trí thành công!`);
+        message.success(t('viTriManagementPage.nextstatus_hoat_dong_t_vitrimanagementpage', { khoa: nextStatus === 'HOAT_DONG' ? t('viTriManagementPage.mo_khoa') : t('viTriManagementPage.khoa') }));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Cập nhật trạng thái thất bại!');
+        message.error(res.message || t('viTriManagementPage.cap_nhat_trang_thai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Có lỗi xảy ra!');
+      message.error(e?.message || t('viTriManagementPage.co_loi_xay_ra'));
     }
   };
 
@@ -126,37 +128,37 @@ export const ViTriManagementPage: React.FC = observer(() => {
     try {
       const res = await xoaMem(id);
       if (res.code === 200) {
-        message.success('Xóa vị trí thành công!');
+        message.success(t('viTriManagementPage.xoa_vi_tri_thanh'));
         taiDuLieu(currentPage, pageSize);
       } else {
-        message.error(res.message || 'Xóa thất bại!');
+        message.error(res.message || t('viTriManagementPage.xoa_that_bai'));
       }
     } catch (e: any) {
-      message.error(e?.message || 'Không thể xóa vị trí!');
+      message.error(e?.message || t('viTriManagementPage.khong_the_xoa_vi'));
     }
   };
 
   const renderLoaiViTri = (loai: string) => {
     switch (loai) {
       case 'KHO':
-        return 'Kho bãi';
+        return t('viTriManagementPage.kho_bai');
       case 'PHONG_MAY':
-        return 'Phòng máy / Server';
+        return t('viTriManagementPage.phong_may_server');
       case 'KE_TU':
-        return 'Kệ tủ / Rack';
+        return t('viTriManagementPage.ke_tu_rack');
       case 'VAN_PHONG':
-        return 'Văn phòng';
+        return t('viTriManagementPage.van_phong');
       default:
-        return loai || 'Chưa phân loại';
+        return loai || t('viTriManagementPage.chua_phan_loai');
     }
   };
 
   const renderStatus = (status: string) => {
     switch (status) {
       case 'HOAT_DONG':
-        return <Tag color="green">Đang hoạt động</Tag>;
+        return <Tag color="green">{t('loaiTaiSanFormModal.dang_hoat_dong')}</Tag>;
       case 'KHOA':
-        return <Tag color="red">Tạm khóa</Tag>;
+        return <Tag color="red">{t('loaiTaiSanFormModal.tam_khoa')}</Tag>;
       default:
         return <Tag>{status}</Tag>;
     }
@@ -164,7 +166,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
 
   const columns = [
     {
-      title: 'Mã vị trí',
+      title: t('viTriFormModal.ma_vi_tri'),
       dataIndex: 'maViTri',
       key: 'maViTri',
       width: 160,
@@ -172,40 +174,40 @@ export const ViTriManagementPage: React.FC = observer(() => {
       defaultSortOrder: 'ascend' as const,
     },
     {
-      title: 'Tên vị trí',
+      title: t('viTriManagementPage.ten_vi_tri'),
       dataIndex: 'tenViTri',
       key: 'tenViTri',
     },
     {
-      title: 'Loại vị trí',
+      title: t('viTriManagementPage.loai_vi_tri'),
       dataIndex: 'loaiViTri',
       key: 'loaiViTri',
       width: 180,
       render: (val: string) => renderLoaiViTri(val),
     },
     {
-      title: 'Sức chứa tối đa',
+      title: t('viTriManagementPage.suc_chua_toi_da'),
       dataIndex: 'sucChuaToiDa',
       key: 'sucChuaToiDa',
       width: 140,
-      render: (val: number) => val || 'Không giới hạn',
+      render: (val: number) => val || t('viTriManagementPage.khong_gioi_han'),
     },
     {
-      title: 'Diện tích (m²)',
+      title: t('viTriManagementPage.dien_tich_m'),
       dataIndex: 'dienTichM2',
       key: 'dienTichM2',
       width: 130,
       render: (val: number) => val ? `${val} m²` : 'N/A',
     },
     {
-      title: 'Trạng thái',
+      title: t('loaiTaiSanFormModal.trang_thai'),
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 140,
       render: (val: string) => renderStatus(val),
     },
     {
-      title: 'Hành động',
+      title: t('viTriManagementPage.hanh_dong'),
       key: 'hanhDong',
       width: 110,
       render: (_: any, record: ViTriResponse) => {
@@ -213,7 +215,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.SUA_VI_TRI)
             ? {
               key: 'edit',
-              label: 'Cập nhật',
+              label: t('viTriManagementPage.cap_nhat'),
               icon: <EditOutlined />,
               onClick: () => {
                 setSelectedViTri(record);
@@ -224,7 +226,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
           authStore.kiemTraQuyen(QUYEN.CAP_NHAT_TRANG_THAI_VI_TRI)
             ? {
               key: 'toggle_status',
-              label: record.trangThai === 'HOAT_DONG' ? 'Khóa vị trí' : 'Kích hoạt',
+              label: record.trangThai === 'HOAT_DONG' ? t('viTriManagementPage.khoa_vi_tri') : t('viTriManagementPage.kich_hoat'),
               icon: <SafetyOutlined />,
               onClick: () => handleToggleStatus(record),
             }
@@ -234,13 +236,13 @@ export const ViTriManagementPage: React.FC = observer(() => {
               key: 'delete',
               label: (
                 <Popconfirm
-                  title="Xác nhận xóa"
-                  description="Bạn có chắc chắn muốn xóa vị trí này?"
-                  okText="Xóa"
-                  cancelText="Hủy"
+                  title={t('viTriManagementPage.xac_nhan_xoa')}
+                  description={t('viTriManagementPage.ban_co_chac_chan')}
+                  okText={t('viTriManagementPage.xoa')}
+                  cancelText={t('viTriManagementPage.huy')}
                   onConfirm={() => handleXoaViTri(record.id!)}
                 >
-                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>Xóa vị trí</span>
+                  <span style={{ color: '#ff4d4f', display: 'block', width: '100%' }}>{t('viTriManagementPage.xoa_vi_tri')}</span>
                 </Popconfirm>
               ),
               icon: <DeleteOutlined style={{ color: '#ff4d4f' }} />,
@@ -289,7 +291,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={6}>
               <Input
-                placeholder="Tìm tên vị trí..."
+                placeholder={t('viTriManagementPage.tim_ten_vi_tri')}
                 value={searchTen}
                 onChange={(e) => setSearchTen(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -297,36 +299,36 @@ export const ViTriManagementPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Input
-                placeholder="Mã vị trí..."
+                placeholder={t('viTriManagementPage.ma_vi_tri')}
                 value={searchMa}
                 onChange={(e) => setSearchMa(e.target.value)}
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Loại vị trí"
+                placeholder={t('viTriManagementPage.loai_vi_tri')}
                 style={{ width: '100%' }}
                 value={searchLoai}
                 onChange={setSearchLoai}
                 allowClear
                 options={[
-                  { value: 'KHO', label: 'Kho bãi' },
-                  { value: 'PHONG_MAY', label: 'Phòng máy' },
-                  { value: 'KE_TU', label: 'Kệ tủ' },
-                  { value: 'VAN_PHONG', label: 'Văn phòng' },
+                  { value: 'KHO', label: t('viTriManagementPage.kho_bai') },
+                  { value: 'PHONG_MAY', label: t('viTriManagementPage.phong_may') },
+                  { value: 'KE_TU', label: t('viTriManagementPage.ke_tu') },
+                  { value: 'VAN_PHONG', label: t('viTriManagementPage.van_phong') },
                 ]}
               />
             </Col>
             <Col xs={24} md={4}>
               <Select
-                placeholder="Trạng thái"
+                placeholder={t('loaiTaiSanFormModal.trang_thai')}
                 style={{ width: '100%' }}
                 value={searchTrangThai}
                 onChange={setSearchTrangThai}
                 allowClear
                 options={[
-                  { value: 'HOAT_DONG', label: 'Đang hoạt động' },
-                  { value: 'KHOA', label: 'Tạm khóa' },
+                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
+                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
                 ]}
               />
             </Col>
@@ -335,7 +337,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   Tìm kiếm
                 </Button>
-                <Button onClick={handleReset}>Làm mới</Button>
+                <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>
           </Row>

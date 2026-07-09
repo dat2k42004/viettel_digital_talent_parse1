@@ -26,10 +26,11 @@ public class ViTriController {
             @RequestParam(required = false) String maViTri,
             @RequestParam(required = false) String trangThai,
             @RequestParam(required = false) String loaiViTri,
+            @RequestParam(required = false) Long idDonVi,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ApiResponse.success(viTriService.layDanhSach(tenViTri, maViTri, trangThai, loaiViTri, page, size));
+        return ApiResponse.success(viTriService.layDanhSach(tenViTri, maViTri, trangThai, loaiViTri, idDonVi, page, size));
     }
 
     @GetMapping("/{id}")

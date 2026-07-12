@@ -264,7 +264,7 @@ export const PhieuCapPhatFormModal: React.FC<PhieuCapPhatFormModalProps> = ({
                                 <Card size="small" key={key} style={{ marginBottom: 12 }}>
                                     <Row gutter={12} align="middle">
                                         <Col span={10}>
-                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanMemId']} label={t('phieuSuaChuaFormModal.thiet_bi_phan_mem')} rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}>
+                                            <Form.Item {...restField} name={[name, 'danhSachThietBiPhanMemId']} label={t('phieuCapPhatFormModal.ban_quyen_phan_mem')} rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}>
                                                 <Select
                                                     disabled={isView}
                                                     showSearch

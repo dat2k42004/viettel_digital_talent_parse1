@@ -609,10 +609,18 @@ export const AppLayout: React.FC = observer(() => {
           {authStore.currentUserProfile ? (
             <Descriptions bordered column={1} size="small" style={{ marginTop: 16 }}>
               <Descriptions.Item label={t('appLayout.fullName')}>{authStore.tenNguoiDung}</Descriptions.Item>
-              <Descriptions.Item label={t('appLayout.email')}>{t('appLayout.authstore_currentuserprofile_email_chua_thiet')}</Descriptions.Item>
-              <Descriptions.Item label={t('appLayout.phone')}>{t('appLayout.authstore_currentuserprofile_sodienthoai_chua_thiet')}</Descriptions.Item>
-              <Descriptions.Item label={t('appLayout.title')}>{t('appLayout.authstore_currentuserprofile_chucvu_chuyen_vien')}</Descriptions.Item>
-              <Descriptions.Item label={t('appLayout.department')}>{t('appLayout.authstore_currentuserprofile_tenphongban_phong_ban')}</Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.email')}>
+                {authStore.currentUserProfile.email || t('appLayout.noInfo')}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.phone')}>
+                {authStore.currentUserProfile.soDienThoai || t('appLayout.noInfo')}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.title')}>
+                {authStore.currentUserProfile.chucVu || t('appLayout.defaultTitle')}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('appLayout.department')}>
+                {authStore.currentUserProfile.tenPhongBan || t('appLayout.defaultDept')}
+              </Descriptions.Item>
               <Descriptions.Item label={t('appLayout.roles')}>
                 {authStore.danhSachQuyenHan.map((role) => (
                   <Tag color="purple" key={role} style={{ marginBottom: 4 }}>{role}</Tag>

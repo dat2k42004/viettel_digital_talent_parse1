@@ -485,7 +485,8 @@
     "trang_thai": "Trạng thái",
     "dang_hoat_dong": "Đang hoạt động",
     "tam_khoa": "Tạm khóa",
-    "tai_anh_len_upload": "Tải ảnh lên (Upload)"
+    "tai_anh_len_upload": "Tải ảnh lên (Upload)",
+    "co_the_thao_lap_linh": "Có thể tháo lắp"
   },
   "taiSanPhanCungPage": {
     "cotag_tag_color": ">Có</Tag> : <Tag color=",
@@ -569,7 +570,10 @@
     "ban_khong_co_quyen": "Bạn không có quyền upload ảnh (yêu cầu quyền TAI_LEN_FILE).",
     "trang_thai": "Trạng thái",
     "dang_hoat_dong": "Đang hoạt động",
-    "tam_khoa": "Tạm khóa"
+    "tam_khoa": "Tạm khóa",
+    "nhap_mo_ta_chi_tiet": "Nhập mô tả chi tiết",
+    "vi_du_vinh_vien_theo": "Ví dụ",
+    "vi_du_windows_linux_macos": "Windows"
   },
   "taiSanPhanMemPage": {
     "tim_kiem_theo_ma": "Tìm kiếm theo mã mẫu, tên mẫu...",
@@ -1536,7 +1540,17 @@
     "vi_du_moi_100_xuoc_nhe": "Ví dụ: Mới 100%, Xước nhẹ...",
     "danh_sach_cap_phat_thiet": "Danh sách Cấp phát - Thiết bị phần cứng",
     "danh_sach_cap_phat_ban": "Danh sách Cấp phát - Bản quyền phần mềm",
-    "vui_long_chon_phong_ban": "Vui lòng chọn phòng ban!"
+    "vui_long_chon_phong_ban": "Vui lòng chọn phòng ban!",
+    "tinh_trang_luc_ban": "Tình trạng lúc bàn giao",
+    "vi_du_may_moi_nguyen": "Ví dụ: máy mới nguyên, hoạt động tốt...",
+    "vi_du_sac_chuot_tui": "Ví dụ: sạc, chuột, túi đựng...",
+    "danh_sach_cap_phat_phan": "Danh sách Cấp phát - Bản quyền phần mềm",
+    "tim_theo_ten_phan": "Tìm theo tên phần mềm...",
+    "he_thong_tu_dong": "Hệ thống tự động sinh...",
+    "danh_sach_cap_phat_linh": "Danh sách Cấp phát - Linh kiện",
+    "linh_kien_kem_theo": "Linh kiện kèm theo",
+    "nhap_tinh_trang_luc": "Vui lòng nhập tình trạng lúc bàn giao!",
+    "key_kich_hoat_he": "Key kích hoạt"
   },
   "phieuCapPhatPage": {
     "xac_nhan_tu_choi": "Xác nhận từ chối",
@@ -1659,7 +1673,12 @@
     "nhap_ly_do_dieu_chuyen": "Nhập lý do điều chuyển!",
     "item_mathetaisan_item_soserial_item": "{{soSerial}} - {{tenTaiSan}} (Đã chọn)",
     "id_lich_su_cap_opt_keyidfield": "ID Lịch sử cấp: {{optkeyIdField}}",
-    "id_lich_su_cap_item": "ID Lịch sử cấp: {{chiTietCapPhatId}}"
+    "id_lich_su_cap_item": "ID Lịch sử cấp: {{chiTietCapPhatId}}",
+    "tinh_trang_sau_ban": "Tình trạng sau bàn giao",
+    "vi_du_binh_thuong_tray": "Ví dụ: Bình thường, trầy xước...",
+    "danh_sach_ban_quyen": "Danh sách Điều chuyển - Bản quyền phần mềm",
+    "chu_thich_dieu_chuyen": "Nhập chú thích điều chuyển...",
+    "danh_sach_dieu_chuyen_linh": "Danh sách Điều chuyển - Linh kiện"
   },
   "phieuDieuChuyenPage": {
     "ban_co_chac_chan": "Bạn có chắc chắn muốn xóa phiếu điều chuyển này?",
@@ -2347,7 +2366,11 @@
     "thiet_bi_matcheditem_tentaisan": "Thiết bị: {{tenTaiSan}}",
     "phan_mem_matcheditem_tentaisan": "Phần mềm: {{tenTaiSan}}",
     "linh_kien_matcheditem_tentaisan": "Linh kiện: {{tenTaiSan}}",
-    "dong_id_currentvalid": "Dòng ID: {{currentValId}}"
+    "dong_id_currentvalid": "Dòng ID: {{currentValId}}",
+    "danh_sach_thuc_nhan_phan": "Danh sách thực nhận - Thiết bị phần mềm",
+    "danh_sach_thuc_nhan_linh": "Danh sách thực nhận - Linh kiện phần cưng",
+    "license_key_thuc_te": "License Key thực tế",
+    "so_ghe_nhap_ghe": "Số ghê nhập"
   },
   "phieuNhapTaiSanPage": {
     "so_hoa_don_vat": "Số hóa đơn VAT...",
@@ -2636,7 +2659,8 @@
     "vui_long_nhap_ten": "Vui lòng nhập tên!",
     "thong_tin_co_ban": "Thông tin cơ bản",
     "nguoi_dai_dien_phap_luat": "Người đại diện pháp luật",
-    "dia_chi_tru_so_chinh": "Địa chỉ trụ sở chính"
+    "dia_chi_tru_so_chinh": "Địa chỉ trụ sở chính",
+    "mo_ta": "Mô tả"
   },
   "donViGiaHanModal": {
     "gia_han_hop_dong": "Gia hạn hợp đồng Đơn vị",

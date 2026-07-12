@@ -16,11 +16,39 @@ axiosInstance.interceptors.request.use((config) => {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
-  // Gửi locale hiện tại của frontend lên backend qua header Accept-Language
+  // Lấy tenantId từ localStorage
+  const tenantId = localStorage.getItem('tenantId');
+  if (tenantId) {
+    config.headers['X-Tenant-ID'] = tenantId;
+  }
+
+  // Kiểm tra nếu là Super Admin thì gửi X-Is-Global
+  const savedProfile = localStorage.getItem('userProfile');
+  if (savedProfile) {
+    try {
+      const profile = JSON.parse(savedProfile);
+      const isSuperAdmin = profile.danhSachQuyenPhanGiai?.includes('XEM_QUAN_TRI_TOAN_SAN');
+      if (isSuperAdmin) {
+        config.headers['X-Is-Global'] = 'true';
+      }
+    } catch (e) {
+      console.error('Failed to parse userProfile in axios interceptor', e);
+    }
+  }
+
+  // Tự động làm phẳng tham số 'request' lồng nhau cho Spring Boot binding
+  if (config.params && typeof config.params === 'object') {
+    if (config.params.request && typeof config.params.request === 'object') {
+      const requestParams = config.params.request;
+      delete config.params.request;
+      config.params = { ...config.params, ...requestParams };
+    }
+  }
+  // Gửi locale hiện tại lên backend qua header Accept-Language
   const currentLang = localStorage.getItem('language') || 'vi';
   config.headers = config.headers || {};
   config.headers['Accept-Language'] = currentLang;
-  
+
   return config;
 });
 

@@ -42,7 +42,7 @@ public class BaoMatConfig {
         // Cẩu hình danh sch cc domain frontend ức php gọi API (C thể Đi "*" thnh "http://localhost:3000")
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Tenant-ID"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Tenant-ID", "X-Is-Global"));
         configuration.setExposedHeaders(List.of("X-Total-Count"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

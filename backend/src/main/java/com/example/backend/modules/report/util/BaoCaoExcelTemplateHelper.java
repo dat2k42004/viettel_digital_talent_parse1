@@ -4,6 +4,7 @@ import com.example.backend.modules.report.model.BaoCaoBaoTri;
 import com.example.backend.modules.report.model.BaoCaoCapPhat;
 import com.example.backend.modules.report.model.BaoCaoTonKho;
 import com.example.backend.modules.tenant.model.DonVi;
+import com.example.backend.modules.report.dto.BaoCaoToanSanSuperAdminResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -157,6 +158,50 @@ public class BaoCaoExcelTemplateHelper {
                     for (int i = 0; i < headers.length; i++) {
                          if (i != 5)
                               row.getCell(i).setCellStyle(dataStyle);
+                    }
+               }
+
+               autoSizeColumns(sheet, headers.length);
+               workbook.write(out);
+               return out.toByteArray();
+          }
+     }
+
+     // =========================================================================
+     // TEMPLATE 4: KẾT XUẤT FILE FILE EXCEL TỔNG HỢP TOÀN SẢN (SUPER ADMIN)
+     // =========================================================================
+     public static byte[] taoTemplateToanSan(List<BaoCaoToanSanSuperAdminResponse> listData) throws IOException {
+          try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+               Sheet sheet = workbook.createSheet("Tổng hợp Toàn Sàn");
+
+               CellStyle headerStyle = taoCellStyleHeader(workbook);
+               CellStyle dataStyle = taoCellStyleData(workbook);
+               CellStyle moneyStyle = taoCellStyleMoney(workbook);
+
+               String[] headers = { "Mã Đơn Vị", "Tên Đơn Vị", "Tổng Số Lượng Phần Cứng", "Tổng Số Lượng Phần Mềm", "Tổng Giá Trị Ước Tính (VND)" };
+               Row headerRow = sheet.createRow(0);
+               for (int i = 0; i < headers.length; i++) {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(headers[i]);
+                    cell.setCellStyle(headerStyle);
+               }
+
+               int rowIndex = 1;
+               for (BaoCaoToanSanSuperAdminResponse item : listData) {
+                    Row row = sheet.createRow(rowIndex++);
+                    row.createCell(0).setCellValue(item.getIdDonVi());
+                    row.createCell(1).setCellValue(item.getTenDonVi() != null ? item.getTenDonVi() : "");
+                    row.createCell(2).setCellValue(item.getTongSoLuongPhanCung());
+                    row.createCell(3).setCellValue(item.getTongSoLuongPhanMem());
+
+                    Cell cellTien = row.createCell(4);
+                    cellTien.setCellValue(item.getTongGiaTriUocTinhVnd() != null ? item.getTongGiaTriUocTinhVnd().doubleValue() : 0.0);
+                    cellTien.setCellStyle(moneyStyle);
+
+                    for (int i = 0; i < headers.length; i++) {
+                         if (i != 4) {
+                              row.getCell(i).setCellStyle(dataStyle);
+                         }
                     }
                }
 

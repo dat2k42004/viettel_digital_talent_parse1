@@ -14,6 +14,7 @@ import {
 } from '../../api-generated/endpoints/bao-cao-controller/bao-cao-controller';
 import { laySelectOptions4 as layPhongBanOptions } from '../../api-generated/endpoints/phong-ban-controller/phong-ban-controller';
 import { layDanhSach as layViTriDanhSach } from '../../api-generated/endpoints/vi-tri-controller/vi-tri-controller';
+import { layDanhSach29 as layDanhSachDonVi } from '../../api-generated/endpoints/don-vi-controller/don-vi-controller';
 
 import type { BaoCaoTonKhoResponse } from '../../api-generated/models/baoCaoTonKhoResponse';
 import type { BaoCaoCapPhatResponse } from '../../api-generated/models/baoCaoCapPhatResponse';
@@ -46,24 +47,53 @@ export const BaoCaoPage: React.FC = observer(() => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalElements, setTotalElements] = useState<number>(0);
 
-  // Load dropdown options
-  useEffect(() => {
-    if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {
-      layPhongBanOptions()
-        .then((res) => {
-          if (res.data) setPhongBanList(res.data);
-        })
-        .catch(() => {});
+  // State danh sách đơn vị của Super Admin
+  const [donViList, setDonViList] = useState<any[]>([]);
+  const selectedDonViId = Form.useWatch('idDonVi', form);
 
-      layViTriDanhSach({ page: 0, size: 1000 })
+  // Load danh sách đơn vị nếu là Super Admin
+  useEffect(() => {
+    if (authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
+      layDanhSachDonVi({ page: 0, size: 1000 })
         .then((res) => {
-          if (res.data && res.data.content) {
-            setViTriList(res.data.content);
+          if (res && res.data && res.data.content) {
+            setDonViList(res.data.content);
           }
         })
         .catch(() => {});
     }
   }, []);
+
+  // Load dropdown options
+  useEffect(() => {
+    const laSuperAdmin = authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN);
+    const coTheTaiOptions = authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) || (laSuperAdmin && selectedDonViId);
+
+    if (coTheTaiOptions) {
+      const optionParams = laSuperAdmin ? { idDonVi: selectedDonViId } : {};
+
+      layPhongBanOptions(optionParams)
+        .then((res) => {
+          if (res.data) setPhongBanList(res.data);
+        })
+        .catch(() => {
+          setPhongBanList([]);
+        });
+
+      layViTriDanhSach({ page: 0, size: 1000, ...optionParams })
+        .then((res) => {
+          if (res.data && res.data.content) {
+            setViTriList(res.data.content);
+          }
+        })
+        .catch(() => {
+          setViTriList([]);
+        });
+    } else {
+      setPhongBanList([]);
+      setViTriList([]);
+    }
+  }, [selectedDonViId]);
 
   // Xác định tab active mặc định khi vào trang dựa trên quyền hạn
   useEffect(() => {
@@ -81,6 +111,7 @@ export const BaoCaoPage: React.FC = observer(() => {
     const [tuNgay, denNgay] = filterValues.rangePicker || [];
 
     const requestParams: any = {
+      idDonVi: filterValues.idDonVi || undefined,
       idPhongBan: filterValues.idPhongBan || undefined,
       idViTri: filterValues.idViTri || undefined,
       tuNgay: tuNgay ? dayjs(tuNgay).format('YYYY-MM-DD') : undefined,
@@ -159,6 +190,7 @@ export const BaoCaoPage: React.FC = observer(() => {
 
     const params = {
       loaiBaoCao: activeTab,
+      idDonVi: filterValues.idDonVi || undefined,
       idPhongBan: filterValues.idPhongBan || undefined,
       idViTri: filterValues.idViTri || undefined,
       tuNgay: tuNgay ? dayjs(tuNgay).format('YYYY-MM-DD') : undefined,
@@ -512,7 +544,7 @@ export const BaoCaoPage: React.FC = observer(() => {
 
   // Các tabs được phân quyền hiển thị
   const items = [];
-  if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {
+  if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) || authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
     items.push(
       { key: 'TON_KHO', label: t('baoCaoPage.bao_cao_ton_kho') },
       { key: 'CAP_PHAT', label: t('baoCaoPage.bao_cao_cap_phat') },
@@ -573,10 +605,27 @@ export const BaoCaoPage: React.FC = observer(() => {
       </div>
 
       {/* FILTER PANEL */}
-      {activeTab !== 'TOAN_SAN' && authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && (
+      {activeTab !== 'TOAN_SAN' && (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) || authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) && (
         <Card style={{ marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
           <Form form={form} layout="vertical" onFinish={handleTimKiem}>
             <Row gutter={[16, 16]}>
+              {authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN) && (
+                <Col xs={24} sm={12} md={6}>
+                  <Form.Item name="idDonVi" label="Chọn đơn vị thành viên" rules={[{ required: true, message: 'Vui lòng chọn đơn vị' }]}>
+                    <Select
+                      placeholder="Chọn đơn vị"
+                      allowClear
+                      onChange={() => {
+                        form.setFieldsValue({ idPhongBan: undefined, idViTri: undefined });
+                      }}
+                      options={donViList.map((x) => ({
+                        value: x.id,
+                        label: x.tenThuongMai || x.tenDangKy || `Đơn vị #${x.id}`
+                      }))}
+                    />
+                  </Form.Item>
+                </Col>
+              )}
               <Col xs={24} sm={12} md={6}>
                 <Form.Item name="idPhongBan" label={t('baoCaoPage.loc_theo_phong_ban')}>
                   <Select

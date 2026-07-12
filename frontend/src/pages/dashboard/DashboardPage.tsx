@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Typography, Tag, Empty, Spin, message } from 'antd';
+import { Card, Row, Col, Statistic, Typography, Tag, Empty, Spin, message, Select } from 'antd';
 import {
   LaptopOutlined,
   CheckCircleOutlined,
@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite';
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend } from 'recharts';
 import { authStore, QUYEN } from '../../stores/AuthStore';
 import { layThongKeDonViAdmin, layThongKeToanSanSuperAdmin } from '../../api-generated/endpoints/dashboard-controller/dashboard-controller';
+import { layDanhSach29 as layDanhSachDonVi } from '../../api-generated/endpoints/don-vi-controller/don-vi-controller';
 import type { ThongKeTongQuanDashboardResponse } from '../../api-generated/models/thongKeTongQuanDashboardResponse';
 
 const { Title, Paragraph, Text } = Typography;
@@ -29,6 +30,62 @@ export const DashboardPage: React.FC = observer(() => {
   // State thống kê Toàn sản (SuperAdmin)
   const [thongKeToanSan, setThongKeToanSan] = useState<any>(null);
 
+  // Thêm state cho việc chọn đơn vị của Super Admin
+  const [donViList, setDonViList] = useState<any[]>([]);
+  const [selectedDonViId, setSelectedDonViId] = useState<number | undefined>(undefined);
+
+  // Tải danh sách đơn vị nếu là Super Admin
+  useEffect(() => {
+    if (authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
+      layDanhSachDonVi({ page: 0, size: 1000 })
+        .then((res) => {
+          if (res && res.data && res.data.content) {
+            setDonViList(res.data.content);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  // Tải thống kê cho đơn vị cụ thể khi Super Admin chọn đơn vị
+  useEffect(() => {
+    const taiThongKeDonVi = async () => {
+      if (selectedDonViId) {
+        setLoading(true);
+        try {
+          const res = await layThongKeDonViAdmin({ idDonVi: selectedDonViId });
+          if (res && res.data) {
+            setThongKeDonVi(res.data);
+          }
+        } catch (error: any) {
+          message.error(error?.message || t('dashboardPage.khong_the_tai_du'));
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Nếu không chọn hoặc chọn lại Tất cả đơn vị
+        if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && !authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
+          // Admin đơn vị thường
+          setLoading(true);
+          try {
+            const res = await layThongKeDonViAdmin();
+            if (res && res.data) {
+              setThongKeDonVi(res.data);
+            }
+          } catch (error: any) {
+            message.error(error?.message || t('dashboardPage.khong_the_tai_du'));
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          setThongKeDonVi(null);
+        }
+      }
+    };
+
+    taiThongKeDonVi();
+  }, [selectedDonViId]);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -40,7 +97,7 @@ export const DashboardPage: React.FC = observer(() => {
           }
         }
         
-        if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {
+        if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && !authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {
           const res = await layThongKeDonViAdmin();
           if (res && res.data) {
             setThongKeDonVi(res.data);
@@ -106,6 +163,30 @@ export const DashboardPage: React.FC = observer(() => {
           {t('dashboardPage.thong_ke_hien_tai_cho_tai_khoan')} <strong>{authStore.tenNguoiDung}</strong>{authStore.maDonVi ? ` | ${t('dashboardPage.don_vi_id', { id: authStore.maDonVi })}` : ''}
         </Paragraph>
       </div>
+
+      {/* Bộ chọn Đơn vị dành cho Super Admin */}
+      {authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN) && (
+        <Card style={{ marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
+          <Row align="middle" gutter={16}>
+            <Col>
+              <Text strong>Chọn đơn vị để xem báo cáo chi tiết:</Text>
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <Select
+                placeholder="Hiển thị tổng hợp toàn hệ thống"
+                allowClear
+                style={{ width: '100%' }}
+                value={selectedDonViId}
+                onChange={(value) => setSelectedDonViId(value)}
+                options={donViList.map((dv) => ({
+                  value: dv.id,
+                  label: dv.tenThuongMai || dv.tenDangKy || `Đơn vị #${dv.id}`
+                }))}
+              />
+            </Col>
+          </Row>
+        </Card>
+      )}
 
       {/* ====================================================================== */}
       {/* 1. GIAO DIỆN DÀNH CHO SUPER ADMIN (QUẢN TRỊ TOÀN SẢN)                  */}
@@ -182,7 +263,7 @@ export const DashboardPage: React.FC = observer(() => {
       {/* ====================================================================== */}
       {/* 2. GIAO DIỆN DÀNH CHO ADMIN ĐƠN VỊ (XEM BÁO CÁO CHI TIẾT)             */}
       {/* ====================================================================== */}
-      {authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && thongKeDonVi ? (
+      {thongKeDonVi ? (
         <div>
           <div style={{ marginBottom: 16 }}>
             <Tag color="blue" style={{ fontSize: 13, padding: '4px 8px' }}>{t('dashboardPage.bao_cao_tong_quan')}</Tag>

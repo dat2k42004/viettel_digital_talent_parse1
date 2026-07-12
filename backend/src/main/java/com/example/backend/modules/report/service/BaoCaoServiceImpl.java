@@ -451,6 +451,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
      }
 
      @Override
+     @Transactional(readOnly = true)
      public byte[] xuatFileBaoCaoToanSanSuperAdmin() {
           boolean laQuanTriToanSan = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                     .anyMatch(a -> "XEM_QUAN_TRI_TOAN_SAN".equalsIgnoreCase(a.getAuthority()));
@@ -458,6 +459,15 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                throw new NghiepVuException("Quyền truy cập bị từ chối. Không có quyền xuất báo cáo toàn sàn", 403);
           }
           log.info("Khởi động công cụ kết xuất Excel tổng hợp ngân sách tài sản ẩn danh toàn sàn hệ thống SaaS");
-          return "Mảng byte dữ liệu file Excel tổng hợp toàn sàn Super Admin".getBytes();
+          
+          PageResponse<BaoCaoToanSanSuperAdminResponse> dataPage = layTongHopToanSanSuperAdmin(0, Integer.MAX_VALUE);
+          List<BaoCaoToanSanSuperAdminResponse> listData = dataPage.getContent();
+          
+          try {
+               return com.example.backend.modules.report.util.BaoCaoExcelTemplateHelper.taoTemplateToanSan(listData);
+          } catch (IOException e) {
+               log.error("Lỗi khi kết xuất Excel tổng hợp toàn sàn: {}", e.getMessage(), e);
+               throw new NghiepVuException("exception.report.document_generation_error", 500);
+          }
      }
 }

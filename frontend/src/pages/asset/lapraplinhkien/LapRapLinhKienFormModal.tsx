@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, message } from 'antd';
 import type { LapRapLinhKienRequest } from '../../../api-generated/models/lapRapLinhKienRequest';
-import type { SelectOption } from '../../../api-generated/models/selectOption';
 import { laySelectOptions1 } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
 import { laySelectOptions8 } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 interface LapRapFormModalProps {
   open: boolean;
@@ -19,29 +19,18 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<LapRapLinhKienRequest>();
-  const [loading, setLoading] = useState(false);
 
-  const [thietBiOptions, setThietBiOptions] = useState<SelectOption[]>([]);
-  const [linhKienOptions, setLinhKienOptions] = useState<SelectOption[]>([]);
+  const thietBi = useSearchableSelect(laySelectOptions1 as any);
+  const linhKien = useSearchableSelect(laySelectOptions8 as any);
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      setLoading(true);
-      try {
-        const [tbRes, lkRes] = await Promise.all([
-          laySelectOptions1(),
-          laySelectOptions8(),
-        ]);
-        if (tbRes.data) setThietBiOptions(tbRes.data);
-        if (lkRes.data) setLinhKienOptions(lkRes.data);
-      } catch (e) {
-        message.error(t('lapRapLinhKienFormModal.khong_the_tai_danh'));
-      } finally {
-        setLoading(false);
-      }
-    };
     if (open) {
-      fetchOptions();
+      Promise.all([
+        thietBi.fetchOptions(),
+        linhKien.fetchOptions()
+      ]).catch(() => {
+        message.error(t('lapRapLinhKienFormModal.khong_the_tai_danh'));
+      });
       form.resetFields();
     }
   }, [open, form]);
@@ -54,6 +43,8 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
       // Validation failed
     }
   };
+
+  const loading = thietBi.loading || linhKien.loading;
 
   return (
     <Modal
@@ -82,10 +73,10 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
               <Select
                 placeholder={t('lapRapLinhKienFormModal.chon_thiet_bi_phan')}
                 showSearch
-                filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={thietBiOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                filterOption={false}
+                onSearch={thietBi.handleSearch}
+                loading={thietBi.loading}
+                options={thietBi.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -101,10 +92,10 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
               <Select
                 placeholder={t('lapRapLinhKienFormModal.chon_linh_kien_co')}
                 showSearch
-                filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={linhKienOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                filterOption={false}
+                onSearch={linhKien.handleSearch}
+                loading={linhKien.loading}
+                options={linhKien.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>

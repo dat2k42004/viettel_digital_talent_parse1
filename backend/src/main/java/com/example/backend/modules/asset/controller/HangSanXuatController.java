@@ -41,8 +41,10 @@ public class HangSanXuatController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_HANG_SAN_XUAT')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(hangSanXuatService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(hangSanXuatService.laySelectOptions(keyword));
     }
 
     @PostMapping

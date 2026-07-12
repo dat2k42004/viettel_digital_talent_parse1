@@ -1536,7 +1536,8 @@
     "vi_du_moi_100_xuoc_nhe": "Vi du moi 100 xuoc nhe",
     "danh_sach_cap_phat_thiet": "Danh sach cap phat thiet bi phan cung",
     "danh_sach_cap_phat_ban": "Danh sach cap phat ban quyen phan mem",
-    "vui_long_chon_phong_ban": "Vui long chon phong ban"
+    "vui_long_chon_phong_ban": "Vui long chon phong ban",
+    "nhap_tinh_trang_luc": "Tình trạng"
   },
   "phieuCapPhatPage": {
     "xac_nhan_tu_choi": "Confirmed refusal",

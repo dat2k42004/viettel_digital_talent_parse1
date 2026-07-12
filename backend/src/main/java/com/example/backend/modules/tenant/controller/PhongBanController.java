@@ -71,9 +71,10 @@ public class PhongBanController {
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_PHONG_BAN')")
     public ApiResponse<List<SelectOption>> laySelectOptions(
-            @RequestParam(required = false) Long idDonVi
+            @RequestParam(required = false) Long idDonVi,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(phongBanService.laySelectOptions(idDonVi));
+        return ApiResponse.success(phongBanService.laySelectOptions(idDonVi, keyword));
     }
 }
 

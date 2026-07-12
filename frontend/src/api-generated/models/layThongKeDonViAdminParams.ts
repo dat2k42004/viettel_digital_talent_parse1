@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type LaySelectOptions4Params = {
+export type LayThongKeDonViAdminParams = {
 idDonVi?: number;
-keyword?: string;
 };

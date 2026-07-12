@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Space, Card, Divider, Typography } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -12,6 +12,7 @@ import { laySelectOptions5 as layNccOptions } from '../../../api-generated/endpo
 import { laySelectOptions1 as layThietBiOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
 import { laySelectOptions8 as layLinhKienOptions } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
 import { layDanhSach19 as layKeHoachList, layTheoId18 as layKeHoachDetail } from '../../../api-generated/endpoints/ke-hoach-bao-tri-controller/ke-hoach-bao-tri-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 const { Text } = Typography;
 
@@ -36,10 +37,26 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
     const [form] = Form.useForm<PhieuSuaChuaBaoTriRequest>();
     const isView = mode === 'view';
 
-    const [nccOptions, setNccOptions] = useState<SelectOption[]>([]);
+    const ncc = useSearchableSelect(layNccOptions as any);
     const [thietBiOptions, setThietBiOptions] = useState<SelectOption[]>([]);
     const [linhKienOptions, setLinhKienOptions] = useState<SelectOption[]>([]);
     const [keHoachOptions, setKeHoachOptions] = useState<KeHoachBaoTriDinhKyResponse[]>([]);
+
+    // Debounced search for thietBi and linhKien (keeps keHoach-dependency filter)
+    const tbSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lkSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleThietBiSearch = useCallback((keyword: string) => {
+        if (tbSearchTimer.current) clearTimeout(tbSearchTimer.current);
+        tbSearchTimer.current = setTimeout(() => {
+            layThietBiOptions({ keyword }).then(res => { if (res.data) setThietBiOptions(res.data); }).catch(() => { });
+        }, 400);
+    }, []);
+    const handleLinhKienSearch = useCallback((keyword: string) => {
+        if (lkSearchTimer.current) clearTimeout(lkSearchTimer.current);
+        lkSearchTimer.current = setTimeout(() => {
+            layLinhKienOptions({ keyword }).then(res => { if (res.data) setLinhKienOptions(res.data); }).catch(() => { });
+        }, 400);
+    }, []);
 
     const keHoachBaoTriId = Form.useWatch('keHoachBaoTriId', form);
 
@@ -47,13 +64,12 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
         if (open) {
             // Load dropdown data
             Promise.all([
-                layNccOptions(),
+                ncc.fetchOptions(),
                 layKeHoachList({ trangThai: 'DA_PHE_DUYET', size: 1000 })
-            ]).then(([nccRes, khRes]) => {
+            ]).then(([, khRes]) => {
                 if (khRes.data && (khRes.data as any).content) {
                     setKeHoachOptions((khRes.data as any).content);
                 }
-                if (nccRes.data) setNccOptions(nccRes.data);
             }).catch(() => { });
 
             if (selectedRecord) {
@@ -268,8 +284,9 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                 <Select
                                                     disabled={isView || !!selectedRecord}
                                                     showSearch
+                                                    filterOption={false}
+                                                    onSearch={handleThietBiSearch}
                                                     placeholder={t('phieuSuaChuaFormModal.chon_thiet_bi')}
-                                                    optionFilterProp="label"
                                                     options={thietBiOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
@@ -293,9 +310,11 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
+                                                    filterOption={false}
+                                                    onSearch={ncc.handleSearch}
+                                                    loading={ncc.loading}
                                                     placeholder={t('donHangMuaSamPage.nha_cung_cap')}
-                                                    optionFilterProp="label"
-                                                    options={nccOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                    options={ncc.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -359,8 +378,9 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                 <Select
                                                     disabled={isView || !!selectedRecord}
                                                     showSearch
+                                                    filterOption={false}
+                                                    onSearch={handleLinhKienSearch}
                                                     placeholder={t('phieuSuaChuaFormModal.chon_linh_kien')}
-                                                    optionFilterProp="label"
                                                     options={linhKienOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
@@ -384,9 +404,11 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
+                                                    filterOption={false}
+                                                    onSearch={ncc.handleSearch}
+                                                    loading={ncc.loading}
                                                     placeholder={t('donHangMuaSamPage.nha_cung_cap')}
-                                                    optionFilterProp="label"
-                                                    options={nccOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                    options={ncc.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
                                         </Col>

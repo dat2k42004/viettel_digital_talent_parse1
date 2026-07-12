@@ -13,7 +13,7 @@ public interface NhaCungCapService {
 
      NhaCungCapResponse layTheoId(Long id);
 
-     List<SelectOption> laySelectOptions();
+     List<SelectOption> laySelectOptions(String keyword);
 
      NhaCungCapResponse themMoi(NhaCungCapRequest request);
 

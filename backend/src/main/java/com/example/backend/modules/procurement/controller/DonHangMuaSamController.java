@@ -42,8 +42,10 @@ public class DonHangMuaSamController {
 
      @GetMapping("/select-options")
      @PreAuthorize("hasAuthority('XEM_DON_HANG_MUA_SAM')")
-     public ApiResponse<List<SelectOption>> laySelectOptions() {
-          return ApiResponse.success(donHangMuaSamService.laySelectOptions());
+     public ApiResponse<List<SelectOption>> laySelectOptions(
+             @RequestParam(required = false) String keyword
+     ) {
+          return ApiResponse.success(donHangMuaSamService.laySelectOptions(keyword));
      }
 
      @PostMapping

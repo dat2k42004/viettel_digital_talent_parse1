@@ -41,8 +41,10 @@ public class TaiSanPhanMemController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_TAI_SAN_PHAN_MEM')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(taiSanPhanMemService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(taiSanPhanMemService.laySelectOptions(keyword));
     }
 
     @PostMapping

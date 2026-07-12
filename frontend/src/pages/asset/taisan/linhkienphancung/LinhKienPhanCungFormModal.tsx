@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Button, Row, Col, Select, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import type { LinhKienPhanCungResponse } from '../../../../api-generated/models/linhKienPhanCungResponse';
 import type { LinhKienPhanCungRequest } from '../../../../api-generated/models/linhKienPhanCungRequest';
-import type { SelectOption } from '../../../../api-generated/models/selectOption';
 import { laySelectOptions3 } from '../../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
 import { laySelectOptions5 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { useSearchableSelect } from '../../../../hooks/useSearchableSelect';
 
 interface LinhKienPhanCungFormModalProps {
   open: boolean;
@@ -27,24 +27,15 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
   const [form] = Form.useForm<LinhKienPhanCungRequest>();
   const isView = mode === 'view';
 
-  const [mauPhanCungOptions, setMauPhanCungOptions] = useState<SelectOption[]>([]);
-  const [nhaCungCapOptions, setNhaCungCapOptions] = useState<SelectOption[]>([]);
+  const mauPhanCung = useSearchableSelect(laySelectOptions3 as any);
+  const nhaCungCap = useSearchableSelect(laySelectOptions5 as any);
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [mauRes, nccRes] = await Promise.all([
-          laySelectOptions3(), // In a real app we might query coTheThaoLap=true but let's query all first
-          laySelectOptions5(),
-        ]);
-        if (mauRes.data) setMauPhanCungOptions(mauRes.data);
-        if (nccRes.data) setNhaCungCapOptions(nccRes.data);
-      } catch (e) {
-        message.error(t('linhKienPhanCungFormModal.khong_the_tai_danh'));
-      }
-    };
     if (open) {
-      fetchOptions();
+      Promise.all([
+        mauPhanCung.fetchOptions(),
+        nhaCungCap.fetchOptions(),
+      ]).catch(() => message.error(t('linhKienPhanCungFormModal.khong_the_tai_danh')));
     }
   }, [open]);
 
@@ -122,7 +113,11 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
               <Select
                 disabled={isView}
                 placeholder={t('linhKienPhanCungFormModal.chon_mau_linh_kien')}
-                options={mauPhanCungOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={mauPhanCung.handleSearch}
+                loading={mauPhanCung.loading}
+                options={mauPhanCung.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -131,7 +126,11 @@ export const LinhKienPhanCungFormModal: React.FC<LinhKienPhanCungFormModalProps>
               <Select
                 disabled={isView}
                 placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
-                options={nhaCungCapOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={nhaCungCap.handleSearch}
+                loading={nhaCungCap.loading}
+                options={nhaCungCap.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
                 allowClear
               />
             </Form.Item>

@@ -147,12 +147,18 @@ public class TaiSanPhanCungServiceImpl implements TaiSanPhanCungService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions() {
-        Specification<TaiSanPhanCung> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
-        );
+    public List<SelectOption> laySelectOptions(String keyword) {
+        Specification<TaiSanPhanCung> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG));
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                predicates.add(cb.like(cb.lower(root.get("tenMau")), "%" + keyword.trim().toLowerCase() + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         return taiSanPhanCungRepository.findAll(spec).stream()
+                .limit(50)
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
                         .ten(item.getTenMau())

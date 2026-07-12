@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Button, Row, Col, Select, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import type { DanhSachThietBiPhanMemResponse } from '../../../../api-generated/models/danhSachThietBiPhanMemResponse';
 import type { DanhSachThietBiPhanMemRequest } from '../../../../api-generated/models/danhSachThietBiPhanMemRequest';
-import type { SelectOption } from '../../../../api-generated/models/selectOption';
 import { laySelectOptions2 } from '../../../../api-generated/endpoints/tai-san-phan-mem-controller/tai-san-phan-mem-controller';
 import { laySelectOptions5 } from '../../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
+import { useSearchableSelect } from '../../../../hooks/useSearchableSelect';
 
 interface DanhSachThietBiPhanMemFormModalProps {
   open: boolean;
@@ -27,24 +27,15 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
   const [form] = Form.useForm<DanhSachThietBiPhanMemRequest>();
   const isView = mode === 'view';
 
-  const [mauPhanMemOptions, setMauPhanMemOptions] = useState<SelectOption[]>([]);
-  const [nhaCungCapOptions, setNhaCungCapOptions] = useState<SelectOption[]>([]);
+  const mauPhanMem = useSearchableSelect(laySelectOptions2 as any);
+  const nhaCungCap = useSearchableSelect(laySelectOptions5 as any);
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [mauRes, nccRes] = await Promise.all([
-          laySelectOptions2(),
-          laySelectOptions5(),
-        ]);
-        if (mauRes.data) setMauPhanMemOptions(mauRes.data);
-        if (nccRes.data) setNhaCungCapOptions(nccRes.data);
-      } catch (e) {
-        message.error(t('danhSachThietBiPhanMemFormModal.khong_the_tai_danh'));
-      }
-    };
     if (open) {
-      fetchOptions();
+      Promise.all([
+        mauPhanMem.fetchOptions(),
+        nhaCungCap.fetchOptions(),
+      ]).catch(() => message.error(t('danhSachThietBiPhanMemFormModal.khong_the_tai_danh')));
     }
   }, [open]);
 
@@ -124,7 +115,11 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
               <Select
                 disabled={isView}
                 placeholder={t('danhSachThietBiPhanMemFormModal.chon_mau_phan_mem')}
-                options={mauPhanMemOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={mauPhanMem.handleSearch}
+                loading={mauPhanMem.loading}
+                options={mauPhanMem.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -133,7 +128,11 @@ export const DanhSachThietBiPhanMemFormModal: React.FC<DanhSachThietBiPhanMemFor
               <Select
                 disabled={isView}
                 placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
-                options={nhaCungCapOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={nhaCungCap.handleSearch}
+                loading={nhaCungCap.loading}
+                options={nhaCungCap.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
                 allowClear
               />
             </Form.Item>

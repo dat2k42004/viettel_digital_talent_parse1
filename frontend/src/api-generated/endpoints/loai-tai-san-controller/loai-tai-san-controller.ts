@@ -11,6 +11,7 @@ import type {
   ApiResponsePageResponseLoaiTaiSanResponse,
   ApiResponseString,
   LayDanhSach16Params,
+  LaySelectOptions7Params,
   LoaiTaiSanRequest,
   TrangThaiRequest
 } from '../../models';
@@ -77,10 +78,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const laySelectOptions7 = (
-
+    params?: LaySelectOptions7Params,
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
-      {url: `/api/loai-tai-san/select-options`, method: 'GET'
+      {url: `/api/loai-tai-san/select-options`, method: 'GET',
+        params
     },
       );
     }

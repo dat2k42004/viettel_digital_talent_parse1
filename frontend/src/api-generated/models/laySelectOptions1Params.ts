@@ -8,4 +8,5 @@
 
 export type LaySelectOptions1Params = {
 idTaiSanPhanCung?: number;
+keyword?: string;
 };

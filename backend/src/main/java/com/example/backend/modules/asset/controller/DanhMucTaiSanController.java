@@ -41,8 +41,10 @@ public class DanhMucTaiSanController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_DANH_MUC_TAI_SAN')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(danhMucTaiSanService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(danhMucTaiSanService.laySelectOptions(keyword));
     }
 
     @PostMapping

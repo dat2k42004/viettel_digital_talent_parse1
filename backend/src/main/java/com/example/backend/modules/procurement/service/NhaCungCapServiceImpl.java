@@ -100,26 +100,32 @@ public class NhaCungCapServiceImpl implements NhaCungCapService {
           return mapToResponse(ncc);
      }
 
-     @Override
-     @Transactional(readOnly = true)
-     public List<SelectOption> laySelectOptions() {
-          Long currentTenantId = getRequiredTenantId();
-          List<NhaCungCap> danhSach;
-          if (currentTenantId == null) {
-               danhSach = nhaCungCapRepository.findAll().stream()
-                         .filter(ncc -> ncc.getThoiGianXoa() == null && ncc.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
-                         .collect(Collectors.toList());
-          } else {
-               danhSach = nhaCungCapRepository
-                         .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, TrangThaiCoBanEnum.HOAT_DONG);
-          }
-          return danhSach.stream()
-                    .map(ncc -> SelectOption.builder()
-                              .id(ncc.getId())
-                              .ten(ncc.getTenNhaCungCap())
-                              .build())
-                    .collect(Collectors.toList());
-     }
+      @Override
+      @Transactional(readOnly = true)
+      public List<SelectOption> laySelectOptions(String keyword) {
+           Long currentTenantId = getRequiredTenantId();
+           List<NhaCungCap> danhSach;
+           if (currentTenantId == null) {
+                danhSach = nhaCungCapRepository.findAll().stream()
+                          .filter(ncc -> ncc.getThoiGianXoa() == null && ncc.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
+                          .collect(Collectors.toList());
+           } else {
+                danhSach = nhaCungCapRepository
+                          .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId, TrangThaiCoBanEnum.HOAT_DONG);
+           }
+           java.util.stream.Stream<NhaCungCap> stream = danhSach.stream();
+           if (org.springframework.util.StringUtils.hasText(keyword)) {
+                String searchKw = keyword.trim().toLowerCase();
+                stream = stream.filter(ncc -> ncc.getTenNhaCungCap() != null && ncc.getTenNhaCungCap().toLowerCase().contains(searchKw));
+           }
+           return stream
+                     .limit(50)
+                     .map(ncc -> SelectOption.builder()
+                               .id(ncc.getId())
+                               .ten(ncc.getTenNhaCungCap())
+                               .build())
+                     .collect(Collectors.toList());
+      }
 
      @Override
      @Transactional

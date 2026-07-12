@@ -7,7 +7,8 @@
  */
 import type {
   ApiResponseMapStringObject,
-  ApiResponseThongKeTongQuanDashboardResponse
+  ApiResponseThongKeTongQuanDashboardResponse,
+  LayThongKeDonViAdminParams
 } from '../../models';
 
 import { customAxiosInstance } from '../../../api/axiosInstance';
@@ -23,10 +24,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const layThongKeDonViAdmin = (
-
+    params?: LayThongKeDonViAdminParams,
  ) => {
       return customAxiosInstance<ApiResponseThongKeTongQuanDashboardResponse>(
-      {url: `/api/dashboard/don-vi`, method: 'GET'
+      {url: `/api/dashboard/don-vi`, method: 'GET',
+        params
     },
       );
     }

@@ -11,6 +11,7 @@ import type {
   ApiResponsePageResponseNhaCungCapResponse,
   ApiResponseString,
   LayDanhSach14Params,
+  LaySelectOptions5Params,
   NhaCungCapRequest,
   TrangThaiRequest
 } from '../../models';
@@ -77,10 +78,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const laySelectOptions5 = (
-
+    params?: LaySelectOptions5Params,
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
-      {url: `/api/nha-cung-cap/select-options`, method: 'GET'
+      {url: `/api/nha-cung-cap/select-options`, method: 'GET',
+        params
     },
       );
     }

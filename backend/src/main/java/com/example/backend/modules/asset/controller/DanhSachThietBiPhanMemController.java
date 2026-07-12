@@ -47,8 +47,10 @@ public class DanhSachThietBiPhanMemController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_THIET_BI_PHAN_MEM')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(thietBiPhanMemService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(thietBiPhanMemService.laySelectOptions(keyword));
     }
 
     @PostMapping

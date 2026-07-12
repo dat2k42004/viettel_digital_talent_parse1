@@ -15,5 +15,5 @@ public interface LoaiTaiSanService {
     LoaiTaiSanResponse capNhat(Long id, LoaiTaiSanRequest request);
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
-    List<SelectOption> laySelectOptions();
+    List<SelectOption> laySelectOptions(String keyword);
 }

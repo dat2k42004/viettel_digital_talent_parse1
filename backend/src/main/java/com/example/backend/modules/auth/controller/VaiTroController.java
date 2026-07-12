@@ -78,7 +78,9 @@ public class VaiTroController {
 
     @GetMapping("/dropdown")
     @PreAuthorize("hasAuthority('XEM_VAI_TRO')")
-    public ApiResponse<List<VaiTroDropdownResponse>> layDropdown() {
-        return ApiResponse.success(vaiTroService.layDropdown());
+    public ApiResponse<List<VaiTroDropdownResponse>> layDropdown(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(vaiTroService.layDropdown(keyword));
     }
 }

@@ -11,6 +11,7 @@ tenViTri?: string;
 maViTri?: string;
 trangThai?: string;
 loaiViTri?: string;
+idDonVi?: number;
 page?: number;
 size?: number;
 };

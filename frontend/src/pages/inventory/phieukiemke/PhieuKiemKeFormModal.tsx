@@ -15,6 +15,7 @@ import { laySelectOptions6 as layNguoiDungOptions } from '../../../api-generated
 import { laySelectOptions1 as layThietBiPhanCungOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
 import { laySelectOptions8 as layLinhKienPhanCungOptions } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
 import { laySelectOptions as layPhanMemOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-mem-controller/danh-sach-thiet-bi-phan-mem-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 const { Text } = Typography;
 
@@ -44,9 +45,9 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
 
     // Options dropdowns
     const [dotKiemKeKichHoat, setDotKiemKeKichHoat] = useState<LuaChonDotKiemKeResponse[]>([]);
-    const [phongBanList, setPhongBanList] = useState<SelectOption[]>([]);
+    const phongBan = useSearchableSelect(layPhongBanOptions as any);
     const [viTriList, setViTriList] = useState<any[]>([]);
-    const [nguoiDungList, setNguoiDungList] = useState<SelectOption[]>([]);
+    const nguoiDung = useSearchableSelect(layNguoiDungOptions as any);
 
     // Dropdowns for Assets (used in execute mode when room is empty or custom adding is needed)
     const [thietBiOptions, setThietBiOptions] = useState<SelectOption[]>([]);
@@ -60,9 +61,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                 if (res.data) setDotKiemKeKichHoat(res.data);
             }).catch(() => { });
 
-            layPhongBanOptions().then(res => {
-                if (res.data) setPhongBanList(res.data);
-            }).catch(() => { });
+            phongBan.fetchOptions().catch(() => { });
 
             layViTriOptions({ size: 1000 }).then(res => {
                 if (res.data && (res.data as any).content) {
@@ -71,9 +70,7 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
             }).catch(() => { });
 
             if (isExecute && selectedRecord) {
-                layNguoiDungOptions().then(res => {
-                    if (res.data) setNguoiDungList(res.data);
-                }).catch(() => { });
+                nguoiDung.fetchOptions().catch(() => { });
 
                 const details = selectedRecord.danhSachChiTiet || [];
 
@@ -307,11 +304,15 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                             name="idPhongBanKiemKe"
                             label={t('phieuKiemKeFormModal.phong_ban_kiem_ke')}
                         >
-                            <Select disabled placeholder={t('phieuKiemKeFormModal.tu_dong_nhan_dien')}>
-                                {phongBanList.map(pb => (
-                                    <Select.Option key={pb.id} value={pb.id}>{pb.ten}</Select.Option>
-                                ))}
-                            </Select>
+                            <Select
+                                disabled
+                                placeholder={t('phieuKiemKeFormModal.tu_dong_nhan_dien')}
+                                showSearch
+                                filterOption={false}
+                                onSearch={phongBan.handleSearch}
+                                loading={phongBan.loading}
+                                options={phongBan.options.map(pb => ({ value: pb.id, label: pb.ten }))}
+                            />
                         </Form.Item>
 
                         {/* <Form.Item name="idKhoKiemKe" label={t('phieuKiemKeFormModal.vi_tri_kho_doi')}>
@@ -378,11 +379,15 @@ export const PhieuKiemKeFormModal: React.FC<PhieuKiemKeFormModalProps> = ({
                                                                 name={[name, 'idNhanVienSuDungThucTe']}
                                                                 label={t('phieuKiemKeFormModal.nhan_vien_su_dung')}
                                                             >
-                                                                <Select placeholder={t('phieuKiemKeFormModal.chon_nhan_vien')} allowClear showSearch optionFilterProp="label">
-                                                                    {nguoiDungList.map(nd => (
-                                                                        <Select.Option key={nd.id} value={nd.id} label={nd.ten}>{nd.ten}</Select.Option>
-                                                                    ))}
-                                                                </Select>
+                                                                <Select
+                                                                      placeholder={t('phieuKiemKeFormModal.chon_nhan_vien')}
+                                                                      allowClear
+                                                                      showSearch
+                                                                      filterOption={false}
+                                                                      onSearch={nguoiDung.handleSearch}
+                                                                      loading={nguoiDung.loading}
+                                                                      options={nguoiDung.options.map(nd => ({ value: nd.id, label: nd.ten }))}
+                                                                  />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col span={6}>

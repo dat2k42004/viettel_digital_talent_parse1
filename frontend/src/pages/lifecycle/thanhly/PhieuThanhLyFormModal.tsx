@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, Card, Divider } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
@@ -12,14 +12,13 @@ import type { PhieuThanhLyTaiSanRequest } from '../../../api-generated/models/ph
 import { laySelectOptions1 as layThietBiPhanCungOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-cung-controller/danh-sach-thiet-bi-phan-cung-controller';
 import { laySelectOptions as layThietBiPhanMemOptions } from '../../../api-generated/endpoints/danh-sach-thiet-bi-phan-mem-controller/danh-sach-thiet-bi-phan-mem-controller';
 import { laySelectOptions8 as layThietBiLinhKienOptions } from '../../../api-generated/endpoints/linh-kien-phan-cung-controller/linh-kien-phan-cung-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 interface PhieuThanhLyFormModalProps {
     open: boolean;
     onCancel: () => void;
-    // Thay thế any bằng DTO Response
     selectedRecord: PhieuThanhLyTaiSanResponse | null;
     mode: 'add' | 'edit' | 'view';
-    // Thay thế any bằng DTO Request
     onSave: (values: PhieuThanhLyTaiSanRequest) => Promise<void>;
     loading: boolean;
 }
@@ -33,31 +32,22 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
     loading,
 }) => {
   const { t } = useTranslation();
-    // Đưa Type cho Form
     const [form] = Form.useForm<PhieuThanhLyTaiSanRequest>();
     const isView = mode === 'view';
 
-    // State lưu danh sách toàn bộ tài sản hợp lệ để thanh lý
-    const [thietBiPhanCungOptions, setThietBiPhanCungOptions] = useState<SelectOption[]>([]);
-    const [thietBiPhanMemOptions, setThietBiPhanMemOptions] = useState<SelectOption[]>([]);
-    const [thietBiLinhKienOptions, setThietBiLinhKienOptions] = useState<SelectOption[]>([]);
+    const thietBiPhanCung = useSearchableSelect(layThietBiPhanCungOptions as any);
+    const thietBiPhanMem = useSearchableSelect(layThietBiPhanMemOptions as any);
+    const thietBiLinhKien = useSearchableSelect(layThietBiLinhKienOptions as any);
 
     useEffect(() => {
         if (open) {
             Promise.all([
-                layThietBiPhanCungOptions(),
-                layThietBiPhanMemOptions(),
-                layThietBiLinhKienOptions(),
-            ])
-                .then(([pcRes, pmRes, lkRes]) => {
-                    if (pcRes.data) setThietBiPhanCungOptions(pcRes.data);
-                    if (pmRes.data) setThietBiPhanMemOptions(pmRes.data);
-                    if (lkRes.data) setThietBiLinhKienOptions(lkRes.data);
-                })
-                .catch(() => { });
+                thietBiPhanCung.fetchOptions(),
+                thietBiPhanMem.fetchOptions(),
+                thietBiLinhKien.fetchOptions(),
+            ]).catch(() => { });
 
             if (selectedRecord) {
-                // Map mảng danhSachTaiSan (hoặc chiTietTaiSan) sang đúng chuẩn các field của DTO Request
                 const danhSachTaiSan = selectedRecord.chiTietTaiSan || [];
 
                 const danhSachPhanCung = danhSachTaiSan
@@ -86,7 +76,6 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
 
                 form.setFieldsValue({
                     lyDoThanhLy: selectedRecord.lyDoThanhLy,
-                    // ghiChu: selectedRecord.ghiChu,
                     danhSachPhanCung,
                     danhSachPhanMem,
                     danhSachLinhKien,
@@ -165,11 +154,6 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
                                 <Input.TextArea disabled={isView} rows={2} placeholder={t('phieuThanhLyFormModal.nhap_ly_do_vd')} />
                             </Form.Item>
                         </Col>
-                        {/* <Col span={24}>
-                            <Form.Item name="ghiChu" label={t('phieuThanhLyFormModal.ghi_chu_them')}>
-                                <Input.TextArea disabled={isView} rows={1} placeholder={t('phieuThanhLyFormModal.nhap_cac_chu_thich')} />
-                            </Form.Item>
-                        </Col> */}
                     </Row>
                 </Card>
 
@@ -186,9 +170,11 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
-                                                    optionFilterProp="label"
+                                                    filterOption={false}
+                                                    onSearch={thietBiPhanCung.handleSearch}
+                                                    loading={thietBiPhanCung.loading}
                                                     placeholder={t('phieuThanhLyFormModal.chon_thiet_bi_can')}
-                                                    options={getOptionsWithFallback(thietBiPhanCungOptions, 'PHAN_CUNG')}
+                                                    options={getOptionsWithFallback(thietBiPhanCung.options, 'PHAN_CUNG')}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -234,9 +220,11 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
-                                                    optionFilterProp="label"
+                                                    filterOption={false}
+                                                    onSearch={thietBiPhanMem.handleSearch}
+                                                    loading={thietBiPhanMem.loading}
                                                     placeholder={t('phieuThanhLyFormModal.chon_phan_mem_can')}
-                                                    options={getOptionsWithFallback(thietBiPhanMemOptions, 'PHAN_MEM')}
+                                                    options={getOptionsWithFallback(thietBiPhanMem.options, 'PHAN_MEM')}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -269,7 +257,7 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
                     )}
                 </Form.List>
 
-                {/* 3. MẢNG THANH LÝ LINH KIÊN PHẦN CỨNG */}
+                {/* 3. MẢNG THANH LÝ LINH KIỆN PHẦN CỨNG */}
                 <Divider orientation={'left' as any}>{t('phieuThanhLyFormModal.danh_sach_linh_kien')}</Divider>
                 <Form.List name="danhSachLinhKien">
                     {(fields, { add, remove }) => (
@@ -282,9 +270,11 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
-                                                    optionFilterProp="label"
+                                                    filterOption={false}
+                                                    onSearch={thietBiLinhKien.handleSearch}
+                                                    loading={thietBiLinhKien.loading}
                                                     placeholder={t('phieuThanhLyFormModal.chon_linh_kien_can')}
-                                                    options={getOptionsWithFallback(thietBiLinhKienOptions, 'LINH_KIEN')}
+                                                    options={getOptionsWithFallback(thietBiLinhKien.options, 'LINH_KIEN')}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -321,3 +311,4 @@ export const PhieuThanhLyFormModal: React.FC<PhieuThanhLyFormModalProps> = ({
         </Modal>
     );
 };
+export default PhieuThanhLyFormModal;

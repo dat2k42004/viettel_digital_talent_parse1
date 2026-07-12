@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Space, Card, Divider, Typography } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { KeHoachBaoTriDinhKyResponse } from '../../../api-generated/models/keHoachBaoTriDinhKyResponse';
 import type { KeHoachBaoTriDinhKyRequest } from '../../../api-generated/models/keHoachBaoTriDinhKyRequest';
-import type { SelectOption } from '../../../api-generated/models/selectOption';
 import { laySelectOptions3 as layPhanCungOptions } from '../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 const { Text } = Typography;
 
@@ -30,15 +30,11 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
   const { t } = useTranslation();
     const [form] = Form.useForm<KeHoachBaoTriDinhKyRequest>();
     const isView = mode === 'view';
-    const [phanCungOptions, setPhanCungOptions] = useState<SelectOption[]>([]);
+    const phanCung = useSearchableSelect(layPhanCungOptions as any);
 
     useEffect(() => {
         if (open) {
-            layPhanCungOptions()
-                .then(res => {
-                    if (res.data) setPhanCungOptions(res.data);
-                })
-                .catch(() => { });
+            phanCung.fetchOptions().catch(() => { });
 
             if (selectedRecord) {
                 const danhSachChiTiet = selectedRecord.chiTietPhanVi?.map(item => ({
@@ -190,9 +186,11 @@ export const KeHoachBaoTriFormModal: React.FC<KeHoachBaoTriFormModalProps> = ({
                                                 <Select
                                                     disabled={isView}
                                                     showSearch
+                                                    filterOption={false}
+                                                    onSearch={phanCung.handleSearch}
+                                                    loading={phanCung.loading}
                                                     placeholder={t('keHoachBaoTriFormModal.chon_mau_tai_san')}
-                                                    optionFilterProp="label"
-                                                    options={phanCungOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                    options={phanCung.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
                                         </Col>

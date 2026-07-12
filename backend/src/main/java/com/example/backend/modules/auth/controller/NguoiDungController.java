@@ -45,9 +45,10 @@ public class NguoiDungController {
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_NGUOI_DUNG')")
     public ApiResponse<List<SelectOption>> laySelectOptions(
-            @RequestParam(required = false) Long idPhongBan
+            @RequestParam(required = false) Long idPhongBan,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(nguoiDungService.laySelectOptions(idPhongBan));
+        return ApiResponse.success(nguoiDungService.laySelectOptions(idPhongBan, keyword));
     }
 
     @PostMapping

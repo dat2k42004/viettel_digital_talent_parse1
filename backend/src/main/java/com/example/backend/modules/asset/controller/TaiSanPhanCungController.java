@@ -41,8 +41,10 @@ public class TaiSanPhanCungController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_TAI_SAN_PHAN_CUNG')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(taiSanPhanCungService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(taiSanPhanCungService.laySelectOptions(keyword));
     }
 
     @PostMapping

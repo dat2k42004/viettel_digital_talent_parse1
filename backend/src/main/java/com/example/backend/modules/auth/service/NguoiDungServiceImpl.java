@@ -501,7 +501,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan) {
+    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan, String keyword) {
         Long idDonVi = DonViContextHolder.getTenantId();
 
         Specification<NguoiDung> spec = (root, query, cb) -> {
@@ -515,10 +515,21 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
 
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("tenDangNhap")), likePattern),
+                        cb.like(cb.lower(root.get("tenNguoiDung")), likePattern),
+                        cb.like(cb.lower(root.get("hoNguoiDung")), likePattern),
+                        cb.like(cb.lower(root.get("tenDemNguoiDung")), likePattern)
+                ));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
         return nguoiDungRepository.findAll(spec).stream()
+                .limit(50)
                 .map(nd -> {
                     StringBuilder sb = new StringBuilder();
                     if (nd.getHoNguoiDung() != null)

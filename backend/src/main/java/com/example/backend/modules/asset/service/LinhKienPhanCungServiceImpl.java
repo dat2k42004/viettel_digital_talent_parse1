@@ -208,7 +208,7 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions(Long idTaiSanPhanCung) {
+    public List<SelectOption> laySelectOptions(Long idTaiSanPhanCung, String keyword) {
         Long idDonVi = getRequiredTenantId();
         Specification<LinhKienPhanCung> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -221,9 +221,17 @@ public class LinhKienPhanCungServiceImpl implements LinhKienPhanCungService {
             if (idTaiSanPhanCung != null) {
                 predicates.add(cb.equal(root.get("taiSanPhanCung").get("id"), idTaiSanPhanCung));
             }
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("soSerial")), likePattern),
+                        cb.like(cb.lower(root.get("taiSanPhanCung").get("tenMau")), likePattern)
+                ));
+            }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return linhKienRepository.findAll(spec).stream()
+                .limit(50)
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
                         .ten(item.getTaiSanPhanCung().getTenMau() + " - " + item.getSoSerial())

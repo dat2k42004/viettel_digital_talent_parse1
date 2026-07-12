@@ -15,5 +15,5 @@ public interface HangSanXuatService {
     HangSanXuatResponse capNhat(Long id, HangSanXuatRequest request);
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
-    List<SelectOption> laySelectOptions();
+    List<SelectOption> laySelectOptions(String keyword);
 }

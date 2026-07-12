@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type LaySelectOptions4Params = {
-idDonVi?: number;
+export type LaySelectOptions10Params = {
 keyword?: string;
 };

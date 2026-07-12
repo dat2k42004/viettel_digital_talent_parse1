@@ -33,7 +33,7 @@ public interface NguoiDungService {
 
     void thuHoiPhien(Long id);
 
-    java.util.List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan);
+    java.util.List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idPhongBan, String keyword);
     java.util.List<NguoiDungResponse> layAdminDonVi(Long idDonVi);
     java.util.Map<Long, String> layTenNguoiDungTheoIds(java.util.Collection<Long> ids);
     String layTenNguoiDungTheoId(Long id);

@@ -1,15 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Row, Col, Select, message, Upload, Typography } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Button, Row, Col, Select, message, Upload } from 'antd';
 import { authStore, QUYEN } from '../../../../stores/AuthStore';
-import { axiosInstance } from '../../../../api/axiosInstance';
 import type { TaiSanPhanMemResponse } from '../../../../api-generated/models/taiSanPhanMemResponse';
 import type { TaiSanPhanMemRequest } from '../../../../api-generated/models/taiSanPhanMemRequest';
-import type { SelectOption } from '../../../../api-generated/models/selectOption';
 import { laySelectOptions9 } from '../../../../api-generated/endpoints/hang-san-xuat-controller/hang-san-xuat-controller';
 import { laySelectOptions7 } from '../../../../api-generated/endpoints/loai-tai-san-controller/loai-tai-san-controller';
 import { laySelectOptions11 } from '../../../../api-generated/endpoints/danh-muc-tai-san-controller/danh-muc-tai-san-controller';
+import { useSearchableSelect } from '../../../../hooks/useSearchableSelect';
 
 interface TaiSanPhanMemFormModalProps {
   open: boolean;
@@ -30,30 +28,22 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
   const [form] = Form.useForm<TaiSanPhanMemRequest>();
   const isView = mode === 'view';
 
-  // Dropdown options
-  const [hangOptions, setHangOptions] = useState<SelectOption[]>([]);
-  const [loaiOptions, setLoaiOptions] = useState<SelectOption[]>([]);
-  const [danhmucOptions, setDanhmucOptions] = useState<SelectOption[]>([]);
+  const hang = useSearchableSelect(laySelectOptions9 as any);
+  const loai = useSearchableSelect(laySelectOptions7 as any);
+  const danhmuc = useSearchableSelect(laySelectOptions11 as any);
+
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [hangRes, loaiRes, dmRes] = await Promise.all([
-          laySelectOptions9(),
-          laySelectOptions7(),
-          laySelectOptions11(),
-        ]);
-        if (hangRes.data) setHangOptions(hangRes.data);
-        if (loaiRes.data) setLoaiOptions(loaiRes.data);
-        if (dmRes.data) setDanhmucOptions(dmRes.data);
-      } catch (e) {
-        message.error(t('taiSanPhanMemFormModal.khong_the_tai_danh'));
-      }
-    };
     if (open) {
-      fetchOptions();
+      Promise.all([
+        hang.fetchOptions(),
+        loai.fetchOptions(),
+        danhmuc.fetchOptions(),
+      ]).catch(() => {
+        message.error(t('taiSanPhanMemFormModal.khong_the_tai_danh'));
+      });
     }
   }, [open]);
 
@@ -156,7 +146,11 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
               <Select
                 disabled={isView}
                 placeholder={t('taiSanPhanMemFormModal.chon_hang')}
-                options={hangOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={hang.handleSearch}
+                loading={hang.loading}
+                options={hang.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -169,7 +163,11 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
               <Select
                 disabled={isView}
                 placeholder={t('taiSanPhanMemFormModal.chon_loai')}
-                options={loaiOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={loai.handleSearch}
+                loading={loai.loading}
+                options={loai.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -182,7 +180,11 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
               <Select
                 disabled={isView}
                 placeholder={t('taiSanPhanMemFormModal.chon_danh_muc')}
-                options={danhmucOptions.map((opt) => ({ value: opt.id, label: opt.ten }))}
+                showSearch
+                filterOption={false}
+                onSearch={danhmuc.handleSearch}
+                loading={danhmuc.loading}
+                options={danhmuc.options.map((opt) => ({ value: opt.id, label: opt.ten }))}
               />
             </Form.Item>
           </Col>
@@ -202,107 +204,32 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
             <Form.Item
               name="nenTangHoTro"
               label={t('taiSanPhanMemPage.nen_tang_ho_tro')}
-              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.nen_tang_ho_tro') }]}
+              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.nen_tang_ho_tro_khong') }]}
             >
-              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_windows_macos')} />
+              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_windows_linux_macos')} />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={isView ? 12 : 24}>
-            <Form.Item
-              name="hinhThucCapPhep"
-              label={t('taiSanPhanMemPage.hinh_thuc_cap_phep')}
-              rules={[{ max: 50, message: t('taiSanPhanMemFormModal.hinh_thuc_cap_phep') }]}
-            >
-              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_subscription_perpetual')} />
-            </Form.Item>
-          </Col>
-          {isView && (
-            <Col span={12}>
-              <Form.Item
-                name="trangThai"
-                label={t('loaiTaiSanFormModal.trang_thai')}
-              >
-                <Select disabled options={[
-                  { value: 'HOAT_DONG', label: t('loaiTaiSanFormModal.dang_hoat_dong') },
-                  { value: 'KHOA', label: t('loaiTaiSanFormModal.tam_khoa') },
-                ]} />
-              </Form.Item>
-            </Col>
-          )}
         </Row>
 
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="hinhAnh" label={t('taiSanPhanMemFormModal.hinh_anh_mau')}>
-              {isView ? (
-                form.getFieldValue('hinhAnh') ? (
-                  <div style={{ marginTop: 8 }}>
-                    <img src={form.getFieldValue('hinhAnh')} alt={t('phieuNhapTaiSanFormModal.mau_phan_mem')} style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, objectFit: 'contain' }} />
-                  </div>
-                ) : (
-                  <span>{t('taiSanPhanMemFormModal.khong_co_hinh_anh')}</span>
-                )
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <Input
-                    value={imageUrl}
-                    disabled
-                    placeholder={t('taiSanPhanMemFormModal.url_hinh_anh_se')}
-                  />
-                  {authStore.kiemTraQuyen(QUYEN.TAI_LEN_FILE) ? (
-                    <Upload
-                      accept="image/*"
-                      showUploadList={false}
-                      beforeUpload={async (file) => {
-                        const formData = new FormData();
-                        formData.append('files', file);
-                        setUploading(true);
-                        try {
-                          const res = await axiosInstance.post('/api/files/upload', formData, {
-                            headers: {
-                              'Content-Type': 'multipart/form-data',
-                            },
-                          });
-                          if (res.data && res.data.code === 200 && res.data.data && res.data.data.length > 0) {
-                            const uploadedUrl = res.data.data[0];
-                            form.setFieldValue('hinhAnh', uploadedUrl);
-                            setImageUrl(uploadedUrl);
-                            message.success(t('taiSanPhanMemFormModal.tai_anh_len_thanh'));
-                          } else {
-                            message.error(t('taiSanPhanMemFormModal.tai_anh_that_bai'));
-                          }
-                        } catch (err: any) {
-                          message.error(err?.message || t('taiSanPhanMemFormModal.loi_khi_tai_anh'));
-                        } finally {
-                          setUploading(false);
-                        }
-                        return false;
-                      }}
-                    >
-                      <Button icon={<UploadOutlined />} loading={uploading}>
-                        Tải ảnh lên (Upload)
-                      </Button>
-                    </Upload>
-                  ) : (
-                    <Typography.Text type="secondary">{t('taiSanPhanMemFormModal.ban_khong_co_quyen')}</Typography.Text>
-                  )}
-                  {imageUrl && (
-                    <div style={{ marginTop: 4 }}>
-                      <img src={imageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: 80, borderRadius: 8, objectFit: 'contain' }} />
-                    </div>
-                  )}
-                </div>
-              )}
+            <Form.Item
+              name="hinhThucCapPhep"
+              label={t('taiSanPhanMemPage.hinh_thuc_cap_phep')}
+              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.hinh_thuc_cap_phep_khong') }]}
+            >
+              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_vinh_vien_theo')} />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item name="moTa" label={t('taiSanPhanMemFormModal.mo_ta_mau_tai')}>
-          <Input.TextArea disabled={isView} rows={3} placeholder={t('taiSanPhanMemFormModal.mo_ta_thong_so')} />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item name="moTa" label={t('donViFormModal.mo_ta')}>
+              <Input.TextArea disabled={isView} rows={3} placeholder={t('taiSanPhanMemFormModal.nhap_mo_ta_chi_tiet')} />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </Modal>
   );

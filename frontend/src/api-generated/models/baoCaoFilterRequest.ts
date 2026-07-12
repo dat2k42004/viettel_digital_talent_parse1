@@ -10,6 +10,7 @@ export interface BaoCaoFilterRequest {
   loaiBaoCao?: string;
   idPhongBan?: number;
   idViTri?: number;
+  idDonVi?: number;
   tuNgay?: string;
   denNgay?: string;
   tuKhoaTimKiem?: string;

@@ -11,7 +11,8 @@ import type {
   ApiResponsePageResponseDonHangMuaSamResponse,
   ApiResponseString,
   DonHangMuaSamRequest,
-  LayDanhSach22Params
+  LayDanhSach22Params,
+  LaySelectOptions10Params
 } from '../../models';
 
 import { customAxiosInstance } from '../../../api/axiosInstance';
@@ -81,10 +82,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const laySelectOptions10 = (
-
+    params?: LaySelectOptions10Params,
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
-      {url: `/api/don-hang-mua-sam/select-options`, method: 'GET'
+      {url: `/api/don-hang-mua-sam/select-options`, method: 'GET',
+        params
     },
       );
     }

@@ -173,25 +173,31 @@ public class DonHangMuaSamServiceImpl implements DonHangMuaSamService {
 
      @Override
      @Transactional(readOnly = true)
-      public List<SelectOption> laySelectOptions() {
-           Long currentTenantId = getRequiredTenantId();
-           List<DonHangMuaSam> danhSach;
-           if (currentTenantId == null) {
-                danhSach = donHangMuaSamRepository.findAll().stream()
-                          .filter(dh -> dh.getThoiGianXoa() == null && dh.getTrangThai() == com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET)
-                          .collect(Collectors.toList());
-           } else {
-                danhSach = donHangMuaSamRepository
-                          .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId,
-                                    com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
-           }
-           return danhSach.stream()
-                     .map(dh -> SelectOption.builder()
-                               .id(dh.getId())
-                               .ten(dh.getMaDonHang())
-                               .build())
-                     .collect(Collectors.toList());
-      }
+     public List<SelectOption> laySelectOptions(String keyword) {
+          Long currentTenantId = getRequiredTenantId();
+          List<DonHangMuaSam> danhSach;
+          if (currentTenantId == null) {
+               danhSach = donHangMuaSamRepository.findAll().stream()
+                         .filter(dh -> dh.getThoiGianXoa() == null && dh.getTrangThai() == com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET)
+                         .collect(Collectors.toList());
+          } else {
+               danhSach = donHangMuaSamRepository
+                         .findByIdDonViAndTrangThaiAndThoiGianXoaIsNull(currentTenantId,
+                                   com.example.backend.shared.model.TrangThaiPhieuEnum.DA_PHE_DUYET);
+          }
+          java.util.stream.Stream<DonHangMuaSam> stream = danhSach.stream();
+          if (org.springframework.util.StringUtils.hasText(keyword)) {
+               String searchKw = keyword.trim().toLowerCase();
+               stream = stream.filter(dh -> dh.getMaDonHang() != null && dh.getMaDonHang().toLowerCase().contains(searchKw));
+          }
+          return stream
+                    .limit(50)
+                    .map(dh -> SelectOption.builder()
+                              .id(dh.getId())
+                              .ten(dh.getMaDonHang())
+                              .build())
+                    .collect(Collectors.toList());
+     }
 
      @Override
      @Transactional

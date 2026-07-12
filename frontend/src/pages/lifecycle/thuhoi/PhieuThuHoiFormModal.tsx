@@ -8,6 +8,7 @@ import type { SelectOption } from '../../../api-generated/models/selectOption';
 import { layAllocationsCuaNhanVien } from '../../../api-generated/endpoints/phieu-thu-hoi-tai-san-controller/phieu-thu-hoi-tai-san-controller';
 import { laySelectOptions6 as layNguoiDungOptions } from '../../../api-generated/endpoints/nguoi-dung-controller/nguoi-dung-controller';
 import { laySelectOptions4 as layPhongBanOptions } from '../../../api-generated/endpoints/phong-ban-controller/phong-ban-controller';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 interface PhieuThuHoiFormModalProps {
     open: boolean;
@@ -30,22 +31,22 @@ export const PhieuThuHoiFormModal: React.FC<PhieuThuHoiFormModalProps> = ({
     const [form] = Form.useForm();
     const isView = mode === 'view';
 
-    const [phongBanOptions, setPhongBanOptions] = useState<SelectOption[]>([]);
-    const [nguoiDungOptions, setNguoiDungOptions] = useState<SelectOption[]>([]);
+    const idPhongBanTra = Form.useWatch('idPhongBanTra', form);
+    const idNhanVienTra = Form.useWatch('idNhanVienTra', form);
+
+    const phongBan = useSearchableSelect(layPhongBanOptions as any);
+    const nguoiDung = useSearchableSelect(layNguoiDungOptions as any, { idPhongBan: idPhongBanTra });
 
     // State lưu danh sách tài sản nhân viên ĐANG MƯỢN (Lấy từ API active-allocations)
     const [activeHardwareOptions, setActiveHardwareOptions] = useState<any[]>([]);
     const [activeSoftwareOptions, setActiveSoftwareOptions] = useState<any[]>([]);
     const [activeComponentOptions, setActiveComponentOptions] = useState<any[]>([]);
 
-    const idPhongBanTra = Form.useWatch('idPhongBanTra', form);
-    const idNhanVienTra = Form.useWatch('idNhanVienTra', form);
+
 
     useEffect(() => {
         if (open) {
-            layPhongBanOptions()
-                .then(res => { if (res.data) setPhongBanOptions(res.data); })
-                .catch(() => { });
+            phongBan.fetchOptions().catch(() => { });
 
             if (selectedRecord) {
                 const danhSachPhanCung = selectedRecord.chiTietTaiSan
@@ -92,11 +93,9 @@ export const PhieuThuHoiFormModal: React.FC<PhieuThuHoiFormModalProps> = ({
 
     useEffect(() => {
         if (idPhongBanTra) {
-            layNguoiDungOptions({ idPhongBan: idPhongBanTra })
-                .then(res => { if (res.data) setNguoiDungOptions(res.data); })
-                .catch(() => setNguoiDungOptions([]));
+            nguoiDung.fetchOptions();
         } else {
-            setNguoiDungOptions([]);
+            nguoiDung.reset();
         }
     }, [idPhongBanTra]);
 
@@ -194,8 +193,10 @@ export const PhieuThuHoiFormModal: React.FC<PhieuThuHoiFormModalProps> = ({
                                 disabled={isView}
                                 placeholder={t('phieuThuHoiFormModal.chon_phong_ban')}
                                 showSearch
-                                optionFilterProp="label"
-                                options={phongBanOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                filterOption={false}
+                                onSearch={phongBan.handleSearch}
+                                loading={phongBan.loading}
+                                options={phongBan.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                                 onChange={() => {
                                     form.setFieldValue('idNhanVienTra', undefined);
                                     form.setFieldValue('danhSachPhanCung', []);
@@ -211,8 +212,10 @@ export const PhieuThuHoiFormModal: React.FC<PhieuThuHoiFormModalProps> = ({
                                 disabled={isView || !idPhongBanTra}
                                 placeholder={idPhongBanTra ? t('phieuThuHoiFormModal.chon_nhan_su') : t('phieuThuHoiFormModal.vui_long_chon_phong')}
                                 showSearch
-                                optionFilterProp="label"
-                                options={nguoiDungOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                filterOption={false}
+                                onSearch={nguoiDung.handleSearch}
+                                loading={nguoiDung.loading}
+                                options={nguoiDung.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                                 onChange={() => {
                                     form.setFieldValue('danhSachPhanCung', []);
                                     form.setFieldValue('danhSachPhanMem', []);

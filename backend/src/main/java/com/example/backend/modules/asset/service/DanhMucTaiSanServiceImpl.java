@@ -142,12 +142,18 @@ public class DanhMucTaiSanServiceImpl implements DanhMucTaiSanService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions() {
-        Specification<DanhMucTaiSan> spec = (root, query, cb) -> cb.and(
-                cb.isNull(root.get("thoiGianXoa")),
-                cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG)
-        );
+    public List<SelectOption> laySelectOptions(String keyword) {
+        Specification<DanhMucTaiSan> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("thoiGianXoa")));
+            predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiCoBanEnum.HOAT_DONG));
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                predicates.add(cb.like(cb.lower(root.get("tenDanhMuc")), "%" + keyword.trim().toLowerCase() + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         return danhMucTaiSanRepository.findAll(spec).stream()
+                .limit(50)
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
                         .ten(item.getTenDanhMuc())

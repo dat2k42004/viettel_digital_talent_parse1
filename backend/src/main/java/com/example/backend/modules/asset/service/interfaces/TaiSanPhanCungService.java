@@ -15,7 +15,7 @@ public interface TaiSanPhanCungService {
     TaiSanPhanCungResponse capNhat(Long id, TaiSanPhanCungRequest request);
     void xoaMem(Long id);
     void capNhatTrangThai(Long id, TrangThaiRequest request);
-    List<SelectOption> laySelectOptions();
+    List<SelectOption> laySelectOptions(String keyword);
     java.util.Optional<com.example.backend.modules.asset.model.TaiSanPhanCung> layEntityTheoId(Long id);
     void saveEntity(com.example.backend.modules.asset.model.TaiSanPhanCung entity);
     java.util.List<com.example.backend.modules.asset.model.TaiSanPhanCung> layTheoIds(java.util.Collection<Long> ids);

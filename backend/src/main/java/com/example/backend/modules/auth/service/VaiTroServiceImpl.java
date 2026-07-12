@@ -281,7 +281,7 @@ public class VaiTroServiceImpl implements VaiTroService {
     }
 
     @Override
-    public List<VaiTroDropdownResponse> layDropdown() {
+    public List<VaiTroDropdownResponse> layDropdown(String keyword) {
         Long idDonVi = DonViContextHolder.getTenantId();
         List<VaiTro> roles;
 
@@ -295,7 +295,15 @@ public class VaiTroServiceImpl implements VaiTroService {
                     TrangThaiCoBanEnum.HOAT_DONG);
         }
 
-        return roles.stream()
+        java.util.stream.Stream<VaiTro> stream = roles.stream();
+        if (org.springframework.util.StringUtils.hasText(keyword)) {
+            String searchKw = keyword.trim().toLowerCase();
+            stream = stream.filter(r -> (r.getTenVaiTro() != null && r.getTenVaiTro().toLowerCase().contains(searchKw))
+                    || (r.getMaVaiTro() != null && r.getMaVaiTro().toLowerCase().contains(searchKw)));
+        }
+
+        return stream
+                .limit(50)
                 .map(r -> VaiTroDropdownResponse.builder()
                         .id(r.getId())
                         .maVaiTro(r.getMaVaiTro())

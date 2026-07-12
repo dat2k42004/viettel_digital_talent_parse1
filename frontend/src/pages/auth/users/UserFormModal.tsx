@@ -2,15 +2,15 @@ import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Select, Row, Col, Button } from 'antd';
 import type { NguoiDungResponse } from '../../../api-generated/models/nguoiDungResponse';
-import type { VaiTroDropdownResponse } from '../../../api-generated/models/vaiTroDropdownResponse';
 import type { NguoiDungRequest } from '../../../api-generated/models/nguoiDungRequest';
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
+import { laySelectOptions4 } from '../../../api-generated/endpoints/phong-ban-controller/phong-ban-controller';
+import { layDropdown } from '../../../api-generated/endpoints/vai-tro-controller/vai-tro-controller';
 
 interface UserFormModalProps {
   open: boolean;
   onCancel: () => void;
   selectedUser: NguoiDungResponse | null;
-  danhSachVaiTro: VaiTroDropdownResponse[];
-  danhSachPhongBan: any[];
   onSave: (values: NguoiDungRequest) => Promise<void>;
 }
 
@@ -18,12 +18,28 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   open,
   onCancel,
   selectedUser,
-  danhSachVaiTro,
-  danhSachPhongBan,
   onSave
 }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<any>();
+
+  const phongBan = useSearchableSelect(laySelectOptions4 as any);
+  // layDropdown returns VaiTroDropdownResponse which has id and tenVaiTro
+  // Let's adapt it to useSearchableSelect by mapping its results or handling it directly
+  const vaiTro = useSearchableSelect(async (params) => {
+    const res = await layDropdown(params);
+    // map VaiTroDropdownResponse { id, tenVaiTro } to SelectOption { id, ten: tenVaiTro }
+    return {
+      data: res.data?.map(v => ({ id: v.id, ten: v.tenVaiTro })) || []
+    };
+  });
+
+  useEffect(() => {
+    if (open) {
+      phongBan.fetchOptions();
+      vaiTro.fetchOptions();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -154,8 +170,10 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 placeholder={t('userFormModal.chon_phong_ban')}
                 allowClear
                 showSearch
-                optionFilterProp="children"
-                options={danhSachPhongBan.map(pb => ({ value: pb.id, label: pb.tenPhongBan }))}
+                filterOption={false}
+                onSearch={phongBan.handleSearch}
+                loading={phongBan.loading}
+                options={phongBan.options.map(pb => ({ value: pb.id, label: pb.ten }))}
               />
             </Form.Item>
           </Col>
@@ -170,7 +188,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             mode="multiple"
             placeholder={t('userFormModal.chon_vai_tro')}
             style={{ width: '100%' }}
-            options={danhSachVaiTro.map(v => ({ value: v.id, label: v.tenVaiTro }))}
+            showSearch
+            filterOption={false}
+            onSearch={vaiTro.handleSearch}
+            loading={vaiTro.loading}
+            options={vaiTro.options.map(v => ({ value: v.id, label: v.ten }))}
           />
         </Form.Item>
       </Form>

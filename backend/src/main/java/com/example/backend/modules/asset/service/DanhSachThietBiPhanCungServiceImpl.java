@@ -248,7 +248,7 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions(Long idTaiSanPhanCung) {
+    public List<SelectOption> laySelectOptions(Long idTaiSanPhanCung, String keyword) {
         Long idDonVi = getRequiredTenantId();
         Specification<DanhSachThietBiPhanCung> spec = (root, query, cb) -> {
             List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
@@ -261,9 +261,18 @@ public class DanhSachThietBiPhanCungServiceImpl implements DanhSachThietBiPhanCu
             if (idTaiSanPhanCung != null) {
                 predicates.add(cb.equal(root.get("taiSanPhanCung").get("id"), idTaiSanPhanCung));
             }
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("maTheTaiSan")), likePattern),
+                        cb.like(cb.lower(root.get("soSerial")), likePattern),
+                        cb.like(cb.lower(root.get("taiSanPhanCung").get("tenMau")), likePattern)
+                ));
+            }
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
         return thietBiPhanCungRepository.findAll(spec).stream()
+                .limit(50)
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
                         .ten(item.getMaTheTaiSan() + " - " + item.getTaiSanPhanCung().getTenMau() + " - "

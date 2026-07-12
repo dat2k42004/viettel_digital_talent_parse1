@@ -40,8 +40,10 @@ public class NhaCungCapController {
 
      @GetMapping("/select-options")
      @PreAuthorize("hasAuthority('XEM_NHA_CUNG_CAP')")
-     public ApiResponse<List<SelectOption>> laySelectOptions() {
-          return ApiResponse.success(nhaCungCapService.laySelectOptions());
+     public ApiResponse<List<SelectOption>> laySelectOptions(
+             @RequestParam(required = false) String keyword
+     ) {
+          return ApiResponse.success(nhaCungCapService.laySelectOptions(keyword));
      }
 
      @PostMapping

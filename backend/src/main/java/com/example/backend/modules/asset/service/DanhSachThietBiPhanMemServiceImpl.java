@@ -257,7 +257,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
     @Override
     @Transactional(readOnly = true)
-    public List<SelectOption> laySelectOptions() {
+    public List<SelectOption> laySelectOptions(String keyword) {
         Long idDonVi = getRequiredTenantId();
         Specification<DanhSachThietBiPhanMem> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -266,9 +266,17 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 predicates.add(cb.equal(root.get("idDonVi"), idDonVi));
             }
             predicates.add(cb.equal(root.get("trangThai"), com.example.backend.shared.model.TrangThaiVanHanhEnum.HOAT_DONG));
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("keyBanQuyen")), likePattern),
+                        cb.like(cb.lower(root.get("taiSanPhanMem").get("tenMau")), likePattern)
+                ));
+            }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return thietBiPhanMemRepository.findAll(spec).stream()
+                .limit(50)
                 .map(item -> SelectOption.builder()
                         .id(item.getId())
                         .ten(item.getTaiSanPhanMem().getTenMau() + "-" + item.getKeyBanQuyen())

@@ -14,7 +14,7 @@ public interface DonHangMuaSamService {
 
      DonHangMuaSamResponse layTheoId(Long id);
 
-     List<SelectOption> laySelectOptions();
+     List<SelectOption> laySelectOptions(String keyword);
 
      DonHangMuaSamResponse themMoi(DonHangMuaSamRequest request);
 

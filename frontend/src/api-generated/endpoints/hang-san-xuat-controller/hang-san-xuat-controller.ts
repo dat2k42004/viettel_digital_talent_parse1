@@ -12,6 +12,7 @@ import type {
   ApiResponseString,
   HangSanXuatRequest,
   LayDanhSach20Params,
+  LaySelectOptions9Params,
   TrangThaiRequest
 } from '../../models';
 
@@ -77,10 +78,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const laySelectOptions9 = (
-
+    params?: LaySelectOptions9Params,
  ) => {
       return customAxiosInstance<ApiResponseListSelectOption>(
-      {url: `/api/hang-san-xuat/select-options`, method: 'GET'
+      {url: `/api/hang-san-xuat/select-options`, method: 'GET',
+        params
     },
       );
     }

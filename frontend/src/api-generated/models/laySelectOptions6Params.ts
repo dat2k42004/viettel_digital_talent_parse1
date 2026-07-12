@@ -8,4 +8,5 @@
 
 export type LaySelectOptions6Params = {
 idPhongBan?: number;
+keyword?: string;
 };

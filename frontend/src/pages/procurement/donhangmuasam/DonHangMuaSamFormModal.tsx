@@ -1,18 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Space, Card, Divider, Typography } from 'antd';
+import React, { useEffect } from 'react';
+import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, InputNumber, Card, Divider } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { DonHangMuaSamResponse } from '../../../api-generated/models/donHangMuaSamResponse';
 import type { DonHangMuaSamRequest } from '../../../api-generated/models/donHangMuaSamRequest';
-import type { SelectOption } from '../../../api-generated/models/selectOption';
 
-// Chú ý: Đổi tên hàm import sao cho khớp với file endpoint sinh ra từ Orval
 import { laySelectOptions5 as layNccOptions } from '../../../api-generated/endpoints/nha-cung-cap-controller/nha-cung-cap-controller';
 import { laySelectOptions3 as layPhanCungOptions } from '../../../api-generated/endpoints/tai-san-phan-cung-controller/tai-san-phan-cung-controller';
 import { laySelectOptions2 as layPhanMemOptions } from '../../../api-generated/endpoints/tai-san-phan-mem-controller/tai-san-phan-mem-controller';
-
-const { Text } = Typography;
+import { useSearchableSelect } from '../../../hooks/useSearchableSelect';
 
 interface DonHangMuaSamFormModalProps {
     open: boolean;
@@ -35,25 +32,18 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
     const [form] = Form.useForm<DonHangMuaSamRequest>();
     const isView = mode === 'view';
 
-    const [nccOptions, setNccOptions] = useState<SelectOption[]>([]);
-    const [phanCungOptions, setPhanCungOptions] = useState<SelectOption[]>([]);
-    const [phanMemOptions, setPhanMemOptions] = useState<SelectOption[]>([]);
+    const ncc = useSearchableSelect(layNccOptions as any);
+    const phanCung = useSearchableSelect(layPhanCungOptions as any);
+    const phanMem = useSearchableSelect(layPhanMemOptions as any);
 
     useEffect(() => {
         if (open) {
-            // Gọi 3 API đồng thời để lấy dữ liệu cho Dropdown
-            Promise.all([layNccOptions(), layPhanCungOptions(), layPhanMemOptions()])
-                .then(([nccRes, pcRes, pmRes]) => {
-                    if (nccRes.data) setNccOptions(nccRes.data);
-                    if (pcRes.data) setPhanCungOptions(pcRes.data);
-                    if (pmRes.data) setPhanMemOptions(pmRes.data);
-                })
+            Promise.all([ncc.fetchOptions(), phanCung.fetchOptions(), phanMem.fetchOptions()])
                 .catch(() => {
                     // Bỏ qua lỗi hiển thị
                 });
 
             if (selectedRecord) {
-                // Bóc tách mảng chiTietTaiSan (phẳng) thành 2 mảng riêng biệt cho Form.List
                 const chiTietPhanCung = selectedRecord.chiTietTaiSan
                     ?.filter(item => item.loai === 'PHAN_CUNG')
                     .map(item => ({
@@ -93,7 +83,6 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            // Format lại ngày tháng trước khi gửi API
             const payload = {
                 ...values,
                 thoiGianGiaoDuKien: values.thoiGianGiaoDuKien ? dayjs(values.thoiGianGiaoDuKien).format('YYYY-MM-DD') : undefined,
@@ -125,7 +114,7 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                     </Button>
                 ]
             }
-            width={1000} // Modal rộng hơn vì form Master-Detail
+            width={1000}
             style={{ top: 20 }}
         >
             <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
@@ -148,8 +137,10 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                                 disabled={isView}
                                 placeholder={t('donHangMuaSamFormModal.chon_nha_cung_cap')}
                                 showSearch
-                                optionFilterProp="label"
-                                options={nccOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                filterOption={false}
+                                onSearch={ncc.handleSearch}
+                                loading={ncc.loading}
+                                options={ncc.options.map(opt => ({ value: opt.id, label: opt.ten }))}
                             />
                         </Form.Item>
                     </Col>
@@ -199,7 +190,14 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                                     <Row gutter={16} align="middle">
                                         <Col span={9}>
                                             <Form.Item {...restField} name={[name, 'idTaiSanPhanCung']} label={t('phieuNhapTaiSanFormModal.mau_phan_cung')} rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_mau') }]}>
-                                                <Select disabled={isView} showSearch optionFilterProp="label" options={phanCungOptions.map(opt => ({ value: opt.id, label: opt.ten }))} />
+                                                <Select
+                                                    disabled={isView}
+                                                    showSearch
+                                                    filterOption={false}
+                                                    onSearch={phanCung.handleSearch}
+                                                    loading={phanCung.loading}
+                                                    options={phanCung.options.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                />
                                             </Form.Item>
                                         </Col>
                                         <Col span={4}>
@@ -245,7 +243,14 @@ export const DonHangMuaSamFormModal: React.FC<DonHangMuaSamFormModalProps> = ({
                                     <Row gutter={16} align="middle">
                                         <Col span={9}>
                                             <Form.Item {...restField} name={[name, 'idTaiSanPhanMem']} label={t('phieuNhapTaiSanFormModal.mau_phan_mem')} rules={[{ required: true, message: t('donHangMuaSamFormModal.chon_phan_mem') }]}>
-                                                <Select disabled={isView} showSearch optionFilterProp="label" options={phanMemOptions.map(opt => ({ value: opt.id, label: opt.ten }))} />
+                                                <Select
+                                                    disabled={isView}
+                                                    showSearch
+                                                    filterOption={false}
+                                                    onSearch={phanMem.handleSearch}
+                                                    loading={phanMem.loading}
+                                                    options={phanMem.options.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                />
                                             </Form.Item>
                                         </Col>
                                         <Col span={4}>

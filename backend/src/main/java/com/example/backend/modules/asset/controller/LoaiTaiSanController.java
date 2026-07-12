@@ -41,8 +41,10 @@ public class LoaiTaiSanController {
 
     @GetMapping("/select-options")
     @PreAuthorize("hasAuthority('XEM_LOAI_TAI_SAN')")
-    public ApiResponse<List<SelectOption>> laySelectOptions() {
-        return ApiResponse.success(loaiTaiSanService.laySelectOptions());
+    public ApiResponse<List<SelectOption>> laySelectOptions(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ApiResponse.success(loaiTaiSanService.laySelectOptions(keyword));
     }
 
     @PostMapping

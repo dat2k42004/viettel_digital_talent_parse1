@@ -11,6 +11,7 @@ import type {
   ApiResponseString,
   ApiResponseVaiTroResponse,
   LayDanhSach1Params,
+  LayDropdownParams,
   TrangThaiRequest,
   VaiTroQuyenUpdateRequest,
   VaiTroRequest
@@ -89,10 +90,11 @@ import { customAxiosInstance } from '../../../api/axiosInstance';
       );
     }
   export const layDropdown = (
-
+    params?: LayDropdownParams,
  ) => {
       return customAxiosInstance<ApiResponseListVaiTroDropdownResponse>(
-      {url: `/api/vai-tro/dropdown`, method: 'GET'
+      {url: `/api/vai-tro/dropdown`, method: 'GET',
+        params
     },
       );
     }

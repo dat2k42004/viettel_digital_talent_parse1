@@ -189,7 +189,7 @@ public class PhongBanServiceImpl implements PhongBanService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi) {
+    public List<com.example.backend.modules.asset.dto.SelectOption> laySelectOptions(Long idDonVi, String keyword) {
         Long targetUnitId = idDonVi != null ? idDonVi : DonViContextHolder.getTenantId();
         boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
         if (targetUnitId == null && !laSuperAdmin) {
@@ -202,9 +202,13 @@ public class PhongBanServiceImpl implements PhongBanService {
             if (targetUnitId != null) {
                 predicates.add(cb.equal(root.get("donVi").get("id"), targetUnitId));
             }
+            if (org.springframework.util.StringUtils.hasText(keyword)) {
+                predicates.add(cb.like(cb.lower(root.get("tenPhongBan")), "%" + keyword.trim().toLowerCase() + "%"));
+            }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return phongBanRepository.findAll(spec).stream()
+                .limit(50)
                 .map(pb -> com.example.backend.modules.asset.dto.SelectOption.builder()
                         .id(pb.getId())
                         .ten(pb.getTenPhongBan())

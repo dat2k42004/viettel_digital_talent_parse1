@@ -497,8 +497,6 @@ export const UserManagementPage: React.FC = observer(() => {
         open={isEditModalOpen}
         onCancel={() => setIsEditModalOpen(false)}
         selectedUser={selectedUser}
-        danhSachVaiTro={vaiTroDuocGan}
-        danhSachPhongBan={danhSachPhongBan}
         onSave={handleSaveNguoiDung}
       />
 

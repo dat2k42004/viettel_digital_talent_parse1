@@ -13,4 +13,6 @@ public class QuyenResponse {
     private Long id;
     private String maQuyen;
     private String tenQuyen;
+    private Long idQuyenCha;
+    private String loaiQuyen;
 }

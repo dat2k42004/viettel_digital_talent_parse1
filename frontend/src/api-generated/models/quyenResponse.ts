@@ -10,4 +10,6 @@ export interface QuyenResponse {
   id?: number;
   maQuyen?: string;
   tenQuyen?: string;
+  idQuyenCha?: number;
+  loaiQuyen?: string;
 }

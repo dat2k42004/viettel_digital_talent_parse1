@@ -225,6 +225,8 @@ public class VaiTroServiceImpl implements VaiTroService {
                         .id(vq.getQuyen().getId())
                         .maQuyen(vq.getQuyen().getMaQuyen())
                         .tenQuyen(vq.getQuyen().getTenQuyen())
+                        .idQuyenCha(vq.getQuyen().getIdQuyenCha())
+                        .loaiQuyen(vq.getQuyen().getLoaiQuyen())
                         .build())
                 .collect(Collectors.toList());
 

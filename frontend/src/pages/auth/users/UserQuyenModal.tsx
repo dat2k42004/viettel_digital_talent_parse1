@@ -43,27 +43,25 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
     }
   };
 
-  // Nhóm các quyền hạn
-  const extractModule = (maQuyen: string) => {
-    if (!maQuyen) return 'KHÁC';
-    if (maQuyen.includes('NGUOI_DUNG')) return 'NGƯỜI DÙNG';
-    if (maQuyen.includes('VAI_TRO')) return 'VAI TRÒ';
-    if (maQuyen.includes('DON_VI')) return t('userQuyenModal.don_vi');
-    if (maQuyen.includes('PHONG_BAN')) return 'PHÒNG BAN';
-    if (maQuyen.includes('VI_TRI')) return 'VỊ TRÍ';
-    if (maQuyen.includes('CAU_HINH')) return 'CẤU HÌNH';
-    if (maQuyen.includes('QUYEN')) return 'QUYỀN HẠN';
-    return 'KHÁC';
-  };
+  // Nhóm các quyền hạn động dựa trên loaiQuyen và idQuyenCha
+  const parentMap = new Map<number, string>();
+  danhSachQuyen.forEach(q => {
+    if (q.id && q.loaiQuyen === 'NHOM_QUYEN') {
+      parentMap.set(q.id, q.tenQuyen || q.maQuyen || '');
+    }
+  });
 
   const groupedPermissions: Record<string, QuyenResponse[]> = {};
   danhSachQuyen.forEach(q => {
-    if (q.maQuyen) {
-      const group = extractModule(q.maQuyen);
-      if (!groupedPermissions[group]) {
-        groupedPermissions[group] = [];
+    if (q.id && q.loaiQuyen === 'THAO_TAC') {
+      let groupName = 'Quyền dành cho Super Admin';
+      if (q.idQuyenCha !== null && q.idQuyenCha !== undefined) {
+        groupName = parentMap.get(q.idQuyenCha) || 'KHÁC';
       }
-      groupedPermissions[group].push(q);
+      if (!groupedPermissions[groupName]) {
+        groupedPermissions[groupName] = [];
+      }
+      groupedPermissions[groupName].push(q);
     }
   });
 

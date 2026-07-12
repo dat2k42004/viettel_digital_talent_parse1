@@ -65,14 +65,27 @@ public class QuyenServiceImpl implements QuyenService {
 
         boolean laSuperAdmin = com.example.backend.shared.utils.SecurityUtils.laSuperAdmin();
 
-        List<Quyen> activePermissions = quyenRepository.findByThoiGianXoaIsNull().stream()
+        List<Quyen> allPermissions = quyenRepository.findByThoiGianXoaIsNull();
+        Map<Long, Quyen> parentMap = allPermissions.stream()
+                .filter(q -> "NHOM_QUYEN".equals(q.getLoaiQuyen()))
+                .collect(Collectors.toMap(Quyen::getId, q -> q, (existing, replacement) -> existing));
+
+        List<Quyen> activePermissions = allPermissions.stream()
                 .filter(q -> q.getTrangThai() == TrangThaiCoBanEnum.HOAT_DONG)
                 .collect(Collectors.toList());
 
         if (laSuperAdmin) {
             return activePermissions.stream()
+                    .filter(q -> "THAO_TAC".equals(q.getLoaiQuyen()))
                     .collect(Collectors.groupingBy(
-                            q -> extractModule(q.getMaQuyen()),
+                            q -> {
+                                if (q.getIdQuyenCha() != null) {
+                                    Quyen parent = parentMap.get(q.getIdQuyenCha());
+                                    return parent != null ? parent.getTenQuyen() : "Khác";
+                                } else {
+                                    return "Quyền dành cho Super Admin";
+                                }
+                            },
                             Collectors.mapping(this::mapToResponse, Collectors.toList())
                     ));
         } else {
@@ -92,8 +105,16 @@ public class QuyenServiceImpl implements QuyenService {
 
             return activePermissions.stream()
                     .filter(q -> userAuthorities.contains(q.getMaQuyen()))
+                    .filter(q -> "THAO_TAC".equals(q.getLoaiQuyen()))
                     .collect(Collectors.groupingBy(
-                            q -> extractModule(q.getMaQuyen()),
+                            q -> {
+                                if (q.getIdQuyenCha() != null) {
+                                    Quyen parent = parentMap.get(q.getIdQuyenCha());
+                                    return parent != null ? parent.getTenQuyen() : "Khác";
+                                } else {
+                                    return "Quyền dành cho Super Admin";
+                                }
+                            },
                             Collectors.mapping(this::mapToResponse, Collectors.toList())
                     ));
         }
@@ -116,6 +137,8 @@ public class QuyenServiceImpl implements QuyenService {
                 .id(quyen.getId())
                 .maQuyen(quyen.getMaQuyen())
                 .tenQuyen(quyen.getTenQuyen())
+                .idQuyenCha(quyen.getIdQuyenCha())
+                .loaiQuyen(quyen.getLoaiQuyen())
                 .build();
     }
 }

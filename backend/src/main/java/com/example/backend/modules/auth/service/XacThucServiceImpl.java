@@ -323,6 +323,8 @@ public class XacThucServiceImpl implements XacThucService {
                         .id(nq.getQuyen().getId())
                         .maQuyen(nq.getQuyen().getMaQuyen())
                         .tenQuyen(nq.getQuyen().getTenQuyen())
+                        .idQuyenCha(nq.getQuyen().getIdQuyenCha())
+                        .loaiQuyen(nq.getQuyen().getLoaiQuyen())
                         .build())
                 .collect(Collectors.toList());
 

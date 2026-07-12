@@ -91,6 +91,32 @@ public class XacThucServiceImpl implements XacThucService {
             String accessToken = tokenProvider.generateAccessToken(userDetails);
             String refreshToken = tokenProvider.generateRefreshToken(userDetails);
 
+            // Vô hiệu hóa tất cả các phiên đăng nhập trước đó của người dùng này
+            try {
+                List<PhienDangNhap> phienTruoc = phienDangNhapRepository
+                        .findByNguoiDungIdAndTrangThaiAndThoiGianXoaIsNull(nguoiDung.getId(), "HOAT_DONG");
+                for (PhienDangNhap phienTr : phienTruoc) {
+                    phienTr.setTrangThai("EXPIRED");
+                    phienTr.setThoiGianXoa(LocalDateTime.now());
+                    phienTr.setLyDoXoa("Đăng nhập trên thiết bị khác");
+                    phienDangNhapRepository.save(phienTr);
+
+                    // Đưa access token cũ vào blacklist trên Redis để vô hiệu hóa ngay lập tức
+                    String accessTokenCu = phienTr.getTokenTruyCap();
+                    if (org.springframework.util.StringUtils.hasText(accessTokenCu) && tokenProvider.validateToken(accessTokenCu)) {
+                        long expirationTime = tokenProvider.getExpirationTimeFromToken(accessTokenCu);
+                        if (expirationTime > 0) {
+                            redisTemplate.opsForValue().set(
+                                    "jwt_blacklist:" + accessTokenCu,
+                                    "blacklisted",
+                                    java.time.Duration.ofMillis(expirationTime));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Lỗi khi vô hiệu hóa các phiên đăng nhập cũ của user ID {}: {}", nguoiDung.getId(), e.getMessage());
+            }
+
             // Ghi nhận Phiên Đăng Nhập
             PhienDangNhap phien = new PhienDangNhap();
             phien.setNguoiDung(nguoiDung);

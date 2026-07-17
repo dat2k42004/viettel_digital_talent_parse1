@@ -168,7 +168,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -182,10 +182,10 @@ export const CauHinhDonViPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Cấu hình Đơn vị
+              {t('cauHinhDonViPage.cau_hinh_don_vi')}
             </Title>
             <Text type="secondary">
-              Thiết lập các thông số hoạt động, chính sách và SMTP riêng biệt áp dụng cho đơn vị của bạn.
+              {t('cauHinhDonViPage.thiet_lap_cac_thong_so')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_CAU_HINH_DON_VI}>
@@ -197,7 +197,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm cấu hình
+              {t('cauHinhDonViPage.them_cau_hinh')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -215,7 +215,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
             <Col xs={24} md={8}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

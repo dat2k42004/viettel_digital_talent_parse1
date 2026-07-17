@@ -152,7 +152,7 @@ export const PhieuDieuChuyenFormModal: React.FC<PhieuDieuChuyenFormModalProps> =
                 if (item.chiTietCapPhatId && !merged.some(opt => opt.value === item.chiTietCapPhatId)) {
                     const labelDisplay = item.tenTaiSan
                         ? t('phieuDieuChuyenFormModal.item_mathetaisan_item_soserial_item', { soSerial: item.maTheTaiSan || item.soSerial || '', tenTaiSan: item.tenTaiSan })
-                        : t('phieuDieuChuyenFormModal.id_lich_su_cap_item_idchitietcapphat', { idChiTietCapPhat: item.chiTietCapPhatId });
+                        : t('phieuDieuChuyenFormModal.id_lich_su_cap_item', { chiTietCapPhatId: item.chiTietCapPhatId });
                     merged.push({ value: item.chiTietCapPhatId, label: labelDisplay });
                 }
             });

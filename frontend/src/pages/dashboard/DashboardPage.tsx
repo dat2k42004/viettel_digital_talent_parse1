@@ -169,11 +169,11 @@ export const DashboardPage: React.FC = observer(() => {
         <Card style={{ marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
           <Row align="middle" gutter={16}>
             <Col>
-              <Text strong>Chọn đơn vị để xem báo cáo chi tiết:</Text>
+              <Text strong>{t('dashboardPage.chon_don_vi_xem')}</Text>
             </Col>
             <Col xs={24} sm={12} md={8}>
               <Select
-                placeholder="Hiển thị tổng hợp toàn hệ thống"
+                placeholder={t('dashboardPage.hien_thi_tong_hop')}
                 allowClear
                 style={{ width: '100%' }}
                 value={selectedDonViId}

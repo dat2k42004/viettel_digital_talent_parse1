@@ -448,7 +448,10 @@
     "tim_kiem_theo_ma": "Tìm kiếm theo mã loại, tên loại...",
     "lam_moi": "Làm mới",
     "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} loại tài sản thành công!",
-    "val_thang": "{{val}} tháng"
+    "val_thang": "{{val}} tháng",
+    "loai_tai_san": "Loại tài sản",
+    "quan_ly_danh_muc_loai": "Quản lý danh mục loại tài sản, tiền tố mã thẻ tài sản và thời gian khấu hao mặc định.",
+    "them_loai_tai_san": "Thêm loại tài sản"
   },
   "taiSanPhanCungFormModal": {
     "chon_hang": "Chọn hãng",
@@ -1249,6 +1252,9 @@
     "xuat_pdf": "Xuất PDF",
     "dat_lai_bo_loc": "Đặt lại bộ lọc",
     "ap_dung_bo_loc": "Áp dụng bộ lọc",
+    "chon_don_vi_thanh_vien": "Chọn đơn vị thành viên",
+    "vui_long_chon_don_vi": "Vui lòng chọn đơn vị!",
+    "chon_don_vi": "Chọn đơn vị",
     "state_loading_data_const_loading": ");\n\n  // State loading & data\n  const [loading, setLoading] = useState<boolean>(false);\n  const [phongBanList, setPhongBanList] = useState<SelectOption[]>([]);\n  const [viTriList, setViTriList] = useState<ViTriResponse[]>([]);\n\n  // Dữ liệu báo cáo\n  const [dataTonKho, setDataTonKho] = useState<BaoCaoTonKhoResponse[]>([]);\n  const [dataCapPhat, setDataCapPhat] = useState<BaoCaoCapPhatResponse[]>([]);\n  const [dataBaoTri, setDataBaoTri] = useState<BaoCaoBaoTriResponse[]>([]);\n  const [dataToanSan, setDataToanSan] = useState<BaoCaoToanSanSuperAdminResponse[]>([]);\n\n  // Phân trang\n  const [currentPage, setCurrentPage] = useState<number>(1);\n  const [pageSize, setPageSize] = useState<number>(10);\n  const [totalElements, setTotalElements] = useState<number>(0);\n\n  // Load dropdown options\n  useEffect(() => {\n    if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {\n      layPhongBanOptions()\n        .then((res) => {\n          if (res.data) setPhongBanList(res.data);\n        })\n        .catch(() => {});\n\n      layViTriDanhSach({ page: 0, size: 1000 })\n        .then((res) => {\n          if (res.data && res.data.content) {\n            setViTriList(res.data.content);\n          }\n        })\n        .catch(() => {});\n    }\n  }, []);\n\n  // Xác định tab active mặc định khi vào trang dựa trên quyền hạn\n  useEffect(() => {\n    if (!authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {\n      setActiveTab(",
     "finally_setloading_false_useeffect_taidulieubaocao": "));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    taiDuLieuBaoCao(currentPage, pageSize, activeTab);\n  }, [currentPage, pageSize, activeTab]);\n\n  const handleTimKiem = () => {\n    setCurrentPage(1);\n    taiDuLieuBaoCao(1, pageSize, activeTab);\n  };\n\n  const handleLamMoi = () => {\n    form.resetFields();\n    setCurrentPage(1);\n    taiDuLieuBaoCao(1, pageSize, activeTab);\n  };\n\n  // Xuất file báo cáo đơn vị (Excel / PDF)\n  const handleXuatFile = async (dinhDangFile:",
     "finally_setloading_false_dinh_nghia": "));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  // Định nghĩa các cột cho Table Tồn Kho\n  const columnsTonKho = [\n    { title: t(",
@@ -1297,6 +1303,7 @@
     "thiet_bi": " thiết bị",
     "thong_ke_hien_tai_cho_tai_khoan": "Thống kê hiện tại cho tài khoản:",
     "authstore_madonvi_don_vi_id": "{authStore.maDonVi ? `| Đơn vị ID: ${authStore.maDonVi}` : ''}",
+    "hien_thi_tong_hop": "Hiển thị tổng hợp toàn hệ thống",
     "bieu_do_tron_trang_thai": "{/* Biểu đồ tròn trạng thái */}",
     "bieu_do_cot_phong_ban": "{/* Biểu đồ cột phòng ban */}",
     "const_title_paragraph_text_typography": ";\n\nconst { Title, Paragraph, Text } = Typography;\n\nexport const DashboardPage: React.FC = observer(() => {\n  const { t } = useTranslation();\n  const [loading, setLoading] = useState<boolean>(true);\n  \n  // State thống kê Tenant (Admin Đơn vị)\n  const [thongKeDonVi, setThongKeDonVi] = useState<ThongKeTongQuanDashboardResponse | null>(null);\n  \n  // State thống kê Toàn sản (SuperAdmin)\n  const [thongKeToanSan, setThongKeToanSan] = useState<any>(null);\n\n  useEffect(() => {\n    const loadData = async () => {\n      setLoading(true);\n      try {\n        if (authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN)) {\n          const res = await layThongKeToanSanSuperAdmin();\n          if (res && res.data) {\n            setThongKeToanSan(res.data);\n          }\n        }\n        \n        if (authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO)) {\n          const res = await layThongKeDonViAdmin();\n          if (res && res.data) {\n            setThongKeDonVi(res.data);\n          }\n        }\n      } catch (error: any) {\n        message.error(error?.message || t(",
@@ -1678,7 +1685,9 @@
     "vi_du_binh_thuong_tray": "Ví dụ: Bình thường, trầy xước...",
     "danh_sach_ban_quyen": "Danh sách Điều chuyển - Bản quyền phần mềm",
     "chu_thich_dieu_chuyen": "Nhập chú thích điều chuyển...",
-    "danh_sach_dieu_chuyen_linh": "Danh sách Điều chuyển - Linh kiện"
+    "danh_sach_dieu_chuyen_linh": "Danh sách Điều chuyển - Linh kiện",
+    "phong_ban_tiep": "Phòng ban nhận phải khác phòng ban chuyển!",
+    "nhap_tinh_trang": "Vui lòng nhập tình trạng sau bàn giao!"
   },
   "phieuDieuChuyenPage": {
     "ban_co_chac_chan": "Bạn có chắc chắn muốn xóa phiếu điều chuyển này?",
@@ -2370,7 +2379,11 @@
     "danh_sach_thuc_nhan_phan": "Danh sách thực nhận - Thiết bị phần mềm",
     "danh_sach_thuc_nhan_linh": "Danh sách thực nhận - Linh kiện phần cưng",
     "license_key_thuc_te": "License Key thực tế",
-    "so_ghe_nhap_ghe": "Số ghê nhập"
+    "so_ghe_nhap_ghe": "Số ghê nhập",
+    "lap_phieu_nhap_kho": "Lập phiếu nhập kho",
+    "hoan_tat_nhap_kho": "Hoàn tất nhập kho",
+    "chon_key_phan_mem": "Vui lòng chọn key phần mềm!",
+    "nhap_so_ghe_license": "Vui lòng nhập số lượng ghế!"
   },
   "phieuNhapTaiSanPage": {
     "so_hoa_don_vat": "Số hóa đơn VAT...",
@@ -2750,7 +2763,8 @@
     "dang_nhap": "Đăng nhập",
     "quay_lai_dang_ky": "Quay lại đăng ký",
     "vui_long_nhap_ma_otp": "Vui lòng nhập mã OTP được gửi tới hòm thư của bạn để kích hoạt đơn vị.",
-    "kich_hoat_don_vi": "Kích hoạt đơn vị"
+    "kich_hoat_don_vi": "Kích hoạt đơn vị",
+    "xac_thuc_otp": "Xác thực OTP"
   },
   "phongBanFormModal": {
     "ten_phong_ban": "Tên phòng ban",

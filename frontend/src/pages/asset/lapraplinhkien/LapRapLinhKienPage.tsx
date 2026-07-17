@@ -235,7 +235,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -251,10 +251,10 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Quản lý lắp ráp linh kiện
+              {t('lapRapLinhKienPage.quan_ly_lap_rap_linh_kien')}
             </Title>
             <Text type="secondary">
-              Quản lý lắp ráp nâng cấp hoặc tháo dỡ thu hồi linh kiện (RAM, HDD, SSD...) của thiết bị phần cứng.
+              {t('lapRapLinhKienPage.quan_ly_lap_rap_nang')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_LAP_RAP_LINH_KIEN}>
@@ -263,7 +263,7 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
               icon={<PlusOutlined />}
               onClick={() => setIsFormOpen(true)}
             >
-              Thực hiện lắp ráp
+              {t('lapRapLinhKienPage.thuc_hien_lap_rap_1')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -313,11 +313,9 @@ export const LapRapLinhKienPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={5}>
               <Space>
-                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>
-                  Tìm kiếm
-                </Button>
+                <Button type="primary" onClick={handleSearch} icon={<SearchOutlined />}>{t('common.search')}</Button>
                 <Button onClick={handleReset}>
-                  Làm mới
+                  {t('common.reset')}
                 </Button>
               </Space>
             </Col>

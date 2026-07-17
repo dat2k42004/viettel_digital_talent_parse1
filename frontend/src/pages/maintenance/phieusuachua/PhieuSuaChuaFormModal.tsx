@@ -58,6 +58,24 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
         }, 400);
     }, []);
 
+    const getThietBiSelectorOptions = (currentValId?: number) => {
+        const baseOptions = thietBiOptions;
+        if (!currentValId) return baseOptions;
+        if (baseOptions.some(opt => opt.id === currentValId)) return baseOptions;
+        const matchedItem = selectedRecord?.chiTietTaiSan?.find(item => item.idTaiSanGoc === currentValId && item.loai === 'THIET_BI');
+        const label = matchedItem ? matchedItem.tenMauTaiSan || `ID: ${currentValId}` : `ID: ${currentValId}`;
+        return [...baseOptions, { id: currentValId, ten: label }];
+    };
+
+    const getLinhKienSelectorOptions = (currentValId?: number) => {
+        const baseOptions = linhKienOptions;
+        if (!currentValId) return baseOptions;
+        if (baseOptions.some(opt => opt.id === currentValId)) return baseOptions;
+        const matchedItem = selectedRecord?.chiTietTaiSan?.find(item => item.idTaiSanGoc === currentValId && item.loai === 'LINH_KIEN');
+        const label = matchedItem ? matchedItem.tenMauTaiSan || `ID: ${currentValId}` : `ID: ${currentValId}`;
+        return [...baseOptions, { id: currentValId, ten: label }];
+    };
+
     const keHoachBaoTriId = Form.useWatch('keHoachBaoTriId', form);
 
     useEffect(() => {
@@ -277,7 +295,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                         <Col span={6}>
                                             <Form.Item
                                                 {...restField}
-                                                name={[name, 'tenMauTaiSan']}
+                                                name={[name, 'idDanhSachThietBiPhanCung']}
                                                 label={t('phieuSuaChuaFormModal.thiet_bi_phan_cung')}
                                                 rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_thiet_bi') }]}
                                             >
@@ -287,7 +305,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                     filterOption={false}
                                                     onSearch={handleThietBiSearch}
                                                     placeholder={t('phieuSuaChuaFormModal.chon_thiet_bi')}
-                                                    options={thietBiOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                    options={getThietBiSelectorOptions(form.getFieldValue(['danhSachThietBi', name, 'idDanhSachThietBiPhanCung'])).map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -353,7 +371,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                             {!isView && !selectedRecord && (
                                 <Form.Item>
                                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                        Thêm thiết bị cần sửa chữa
+                                        {t('phieuSuaChuaFormModal.them_thiet_bi_can_sua_chua')}
                                     </Button>
                                 </Form.Item>
                             )}
@@ -371,7 +389,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                         <Col span={6}>
                                             <Form.Item
                                                 {...restField}
-                                                name={[name, 'tenMauTaiSan']}
+                                                name={[name, 'idLinhKienPhanCung']}
                                                 label={t('phieuSuaChuaFormModal.linh_kien_thuc_the')}
                                                 rules={[{ required: true, message: t('phieuNhapTaiSanFormModal.chon_linh_kien') }]}
                                             >
@@ -381,7 +399,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                                                     filterOption={false}
                                                     onSearch={handleLinhKienSearch}
                                                     placeholder={t('phieuSuaChuaFormModal.chon_linh_kien')}
-                                                    options={linhKienOptions.map(opt => ({ value: opt.id, label: opt.ten }))}
+                                                    options={getLinhKienSelectorOptions(form.getFieldValue(['danhSachLinhKien', name, 'idLinhKienPhanCung'])).map(opt => ({ value: opt.id, label: opt.ten }))}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -447,7 +465,7 @@ export const PhieuSuaChuaFormModal: React.FC<PhieuSuaChuaFormModalProps> = ({
                             {!isView && !selectedRecord && (
                                 <Form.Item>
                                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                        Thêm linh kiện cần xử lý
+                                        {t('phieuSuaChuaFormModal.them_linh_kien_can_xu_ly')}
                                     </Button>
                                 </Form.Item>
                             )}

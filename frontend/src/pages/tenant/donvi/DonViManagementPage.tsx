@@ -299,7 +299,7 @@ export const DonViManagementPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -313,10 +313,10 @@ export const DonViManagementPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Quản trị Đơn vị đa doanh nghiệp (SaaS Tenants)
+              {t('donViManagementPage.quan_tri_don_vi_da')}
             </Title>
             <Text type="secondary">
-              Danh sách quản lý toàn bộ các đơn vị độc lập tham gia trên sàn hệ thống ITAM.
+              {t('donViManagementPage.danh_sach_quan_ly_toan')}
             </Text>
           </div>
           {(authStore.laSuperAdmin || authStore.kiemTraQuyen(QUYEN.SUA_DON_VI)) && (
@@ -325,7 +325,7 @@ export const DonViManagementPage: React.FC = observer(() => {
               icon={<PlusOutlined />}
               onClick={() => setIsCreateOpen(true)}
             >
-              Thêm mới Đơn vị
+              {t('donViManagementPage.them_moi_don_vi')}
             </Button>
           )}
         </div>
@@ -371,7 +371,7 @@ export const DonViManagementPage: React.FC = observer(() => {
             <Col xs={24} md={4}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
@@ -432,9 +432,7 @@ export const DonViManagementPage: React.FC = observer(() => {
             setDetailDonVi(null);
           }}
           footer={[
-            <Button key="close" onClick={() => setIsDetailOpen(false)}>
-              Đóng
-            </Button>,
+            <Button key="close" onClick={() => setIsDetailOpen(false)}>{t('common.close')}</Button>,
           ]}
           width={700}
         >

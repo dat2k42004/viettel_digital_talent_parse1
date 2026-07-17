@@ -255,7 +255,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -269,10 +269,10 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Mẫu mã phần mềm
+              {t('menu.softwareModels')}
             </Title>
             <Text type="secondary">
-              Quản lý danh sách các mẫu phần mềm, hệ điều hành và giấy phép bản quyền chuẩn.
+              {t('taiSanPhanMemPage.quan_ly_danh_sach_cac')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_TAI_SAN_PHAN_MEM}>
@@ -285,7 +285,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm mẫu phần mềm
+              {t('taiSanPhanMemPage.them_mau_phan_mem')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -315,9 +315,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
             </Col>
             <Col xs={24} md={6}>
               <Space>
-                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
-                </Button>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>{t('common.search')}</Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>
             </Col>

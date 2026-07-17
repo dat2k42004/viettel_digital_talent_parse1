@@ -217,7 +217,7 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -231,10 +231,10 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Danh mục cấu hình hệ thống
+              {t('danhMucCauHinhPage.danh_muc_cau_hinh_he_thong')}
             </Title>
             <Text type="secondary">
-              Định nghĩa các trường cài đặt hệ thống toàn sàn dành cho Super Admin quản trị.
+              {t('danhMucCauHinhPage.dinh_nghia_cac_truong_cai')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_DANH_MUC_CAU_HINH}>
@@ -246,7 +246,7 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm trường cấu hình
+              {t('danhMucCauHinhPage.them_truong_cau_hinh')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -271,7 +271,7 @@ export const DanhMucCauHinhPage: React.FC = observer(() => {
             <Col xs={24} md={4}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

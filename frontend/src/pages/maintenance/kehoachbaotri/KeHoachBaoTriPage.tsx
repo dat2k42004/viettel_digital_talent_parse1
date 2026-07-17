@@ -355,7 +355,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
                         <Button size="small">
-                            Thao tác <DownOutlined />
+                            {t('common.actionBtn')} <DownOutlined />
                         </Button>
                     </Dropdown>
                 );
@@ -373,7 +373,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_KHBTDK}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
-                            Lập kế hoạch mới
+                            {t('keHoachBaoTriPage.lap_ke_hoach_moi')}
                         </Button>
                     </QuyenHanGuard>
                 </div>

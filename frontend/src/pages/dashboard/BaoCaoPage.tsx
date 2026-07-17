@@ -560,10 +560,10 @@ export const BaoCaoPage: React.FC = observer(() => {
       <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <Title level={2} style={{ margin: 0 }}>
-            Hệ thống Báo cáo & Thống kê tài sản
+            {t('baoCaoPage.he_thong_bao_cao_thong_ke_tai_san')}
           </Title>
           <Text type="secondary">
-            Tổng hợp dữ liệu tồn kho, phân bổ cấp phát, sửa chữa bảo trì, và giá trị tài sản trong đơn vị.
+            {t('baoCaoPage.tong_hop_du_lieu_ton')}
           </Text>
         </div>
         {activeTab === 'TOAN_SAN' ? (
@@ -575,7 +575,7 @@ export const BaoCaoPage: React.FC = observer(() => {
               loading={loading}
               style={{ background: '#107c41', borderColor: '#107c41' }}
             >
-              Xuất Excel Toàn Sản
+              {t('baoCaoPage.xuat_excel_toan_san')}
             </Button>
           )
         ) : (
@@ -588,7 +588,7 @@ export const BaoCaoPage: React.FC = observer(() => {
                 loading={loading}
                 style={{ background: '#107c41', borderColor: '#107c41' }}
               >
-                Xuất Excel
+                {t('baoCaoPage.xuat_excel')}
               </Button>
               <Button
                 type="primary"
@@ -597,7 +597,7 @@ export const BaoCaoPage: React.FC = observer(() => {
                 onClick={() => handleXuatFile('pdf')}
                 loading={loading}
               >
-                Xuất PDF
+                {t('baoCaoPage.xuat_pdf')}
               </Button>
             </Space>
           )
@@ -611,9 +611,9 @@ export const BaoCaoPage: React.FC = observer(() => {
             <Row gutter={[16, 16]}>
               {authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN) && (
                 <Col xs={24} sm={12} md={6}>
-                  <Form.Item name="idDonVi" label="Chọn đơn vị thành viên" rules={[{ required: true, message: 'Vui lòng chọn đơn vị' }]}>
+                  <Form.Item name="idDonVi" label={t('baoCaoPage.chon_don_vi_thanh_vien')} rules={[{ required: true, message: t('baoCaoPage.vui_long_chon_don_vi') }]}>
                     <Select
-                      placeholder="Chọn đơn vị"
+                      placeholder={t('baoCaoPage.chon_don_vi')}
                       allowClear
                       onChange={() => {
                         form.setFieldsValue({ idPhongBan: undefined, idViTri: undefined });
@@ -661,10 +661,10 @@ export const BaoCaoPage: React.FC = observer(() => {
             <Row justify="end">
               <Space>
                 <Button icon={<ReloadOutlined />} onClick={handleLamMoi}>
-                  Đặt lại bộ lọc
+                  {t('baoCaoPage.dat_lai_bo_loc')}
                 </Button>
                 <Button type="primary" icon={<SearchOutlined />} htmlType="submit" loading={loading}>
-                  Áp dụng bộ lọc
+                  {t('baoCaoPage.ap_dung_bo_loc')}
                 </Button>
               </Space>
             </Row>

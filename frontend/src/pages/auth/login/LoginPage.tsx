@@ -71,7 +71,7 @@ export const LoginPage: React.FC = () => {
       >
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Title level={3} style={{ margin: 0 }}>
-            Hệ thống ITAM
+            {t('loginPage.he_thong_itam')}
           </Title>
           <Text type="secondary">{t('loginPage.quan_ly_vong_doi')}</Text>
         </div>

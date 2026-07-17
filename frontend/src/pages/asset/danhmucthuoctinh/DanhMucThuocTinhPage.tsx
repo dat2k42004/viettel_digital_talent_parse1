@@ -271,7 +271,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -285,10 +285,10 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Danh mục thuộc tính động
+              {t('danhMucThuocTinhPage.danh_muc_thuoc_tinh_dong')}
             </Title>
             <Text type="secondary">
-              Quản lý danh sách các thuộc tính cấu hình mở rộng cho từng loại thực thể tài sản (RAM, Disk, OS, License Seats...).
+              {t('danhMucThuocTinhPage.quan_ly_danh_sach_cac')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_DANH_MUC_THUOC_TINH}>
@@ -301,7 +301,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm thuộc tính
+              {t('danhMucThuocTinhPage.them_thuoc_tinh')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -333,7 +333,7 @@ export const DanhMucThuocTinhPage: React.FC = observer(() => {
             <Col xs={24} md={6}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

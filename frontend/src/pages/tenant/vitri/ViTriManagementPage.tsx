@@ -253,7 +253,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -267,10 +267,10 @@ export const ViTriManagementPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Quản lý Vị trí & Kho bãi
+              {t('viTriManagementPage.quan_ly_vi_tri_kho_bai')}
             </Title>
             <Text type="secondary">
-              Danh sách các vị trí lưu trữ tài sản, phòng lab, trung tâm dữ liệu hoặc kho bãi trực thuộc đơn vị.
+              {t('viTriManagementPage.danh_sach_cac_vi_tri')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_VI_TRI}>
@@ -282,7 +282,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm vị trí
+              {t('viTriManagementPage.them_vi_tri')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -335,7 +335,7 @@ export const ViTriManagementPage: React.FC = observer(() => {
             <Col xs={24} md={4}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

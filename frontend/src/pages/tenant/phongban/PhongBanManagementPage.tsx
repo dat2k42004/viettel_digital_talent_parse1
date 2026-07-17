@@ -231,7 +231,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -245,10 +245,10 @@ export const PhongBanManagementPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Quản lý Phòng ban
+              {t('phongBanManagementPage.quan_ly_phong_ban')}
             </Title>
             <Text type="secondary">
-              Danh sách phòng ban, bộ phận cấu trúc trực thuộc đơn vị của bạn.
+              {t('phongBanManagementPage.danh_sach_phong_ban_bo')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_PHONG_BAN}>
@@ -260,7 +260,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm phòng ban
+              {t('phongBanManagementPage.them_phong_ban')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -298,7 +298,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
             <Col xs={24} md={4}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

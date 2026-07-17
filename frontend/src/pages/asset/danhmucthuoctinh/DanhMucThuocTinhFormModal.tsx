@@ -87,17 +87,11 @@ export const DanhMucThuocTinhFormModal: React.FC<DanhMucThuocTinhFormModalProps>
       footer={
         isView
           ? [
-              <Button key="close" onClick={onCancel}>
-                Đóng
-              </Button>,
+              <Button key="close" onClick={onCancel}>{t('common.close')}</Button>,
             ]
           : [
-              <Button key="cancel" onClick={onCancel}>
-                Hủy bỏ
-              </Button>,
-              <Button key="submit" type="primary" onClick={handleSubmit}>
-                Xác nhận lưu
-              </Button>,
+              <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
+              <Button key="submit" type="primary" onClick={handleSubmit}>{t('common.save')}</Button>,
             ]
       }
       width={750}

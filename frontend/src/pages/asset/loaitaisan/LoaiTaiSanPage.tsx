@@ -243,7 +243,7 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -257,10 +257,10 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Loại tài sản
+              {t('loaiTaiSanPage.loai_tai_san')}
             </Title>
             <Text type="secondary">
-              Quản lý danh mục loại tài sản, tiền tố mã thẻ tài sản và thời gian khấu hao mặc định.
+              {t('loaiTaiSanPage.quan_ly_danh_muc_loai')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_LOAI_TAI_SAN}>
@@ -273,7 +273,7 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm loại tài sản
+              {t('loaiTaiSanPage.them_loai_tai_san')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -304,7 +304,7 @@ export const LoaiTaiSanPage: React.FC = observer(() => {
             <Col xs={24} md={6}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

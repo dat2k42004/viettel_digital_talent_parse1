@@ -64,18 +64,14 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy bỏ
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Xác nhận lưu
-        </Button>,
+        <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>{t('common.save')}</Button>,
       ]}
       width={800}
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginBottom: 16 }}>
-          Thông tin cơ bản
+          {t('donViFormModal.thong_tin_co_ban')}
         </Title>
         <Row gutter={16}>
           <Col span={12}>
@@ -138,7 +134,7 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
         </Row>
 
         <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginTop: 16, marginBottom: 16 }}>
-          Người đại diện pháp luật
+          {t('donViFormModal.nguoi_dai_dien_phap_luat')}
         </Title>
         <Row gutter={16}>
           <Col span={6}>
@@ -164,7 +160,7 @@ export const DonViFormModal: React.FC<DonViFormModalProps> = ({
         </Row>
 
         <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginTop: 16, marginBottom: 16 }}>
-          Địa chỉ trụ sở chính
+          {t('donViFormModal.dia_chi_tru_so_chinh')}
         </Title>
         <Row gutter={16}>
           <Col span={8}>

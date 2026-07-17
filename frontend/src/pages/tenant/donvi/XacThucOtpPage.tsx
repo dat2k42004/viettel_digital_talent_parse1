@@ -65,7 +65,7 @@ export const XacThucOtpPage: React.FC = () => {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <MailOutlined style={{ fontSize: 40, color: '#1677ff', marginBottom: 12 }} />
           <Title level={3} style={{ margin: 0 }}>
-            Xác thực OTP
+            {t('xacThucOtpPage.xac_thuc_otp')}
           </Title>
           <Paragraph type="secondary" style={{ marginTop: 8 }}>
             Vui lòng nhập mã OTP được gửi tới hòm thư của bạn để kích hoạt đơn vị.

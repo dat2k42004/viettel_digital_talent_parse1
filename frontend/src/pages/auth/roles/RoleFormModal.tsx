@@ -95,12 +95,8 @@ export const RoleFormModal: React.FC<RoleFormModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy bỏ
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Xác nhận lưu
-        </Button>
+        <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>{t('common.save')}</Button>
       ]}
       width={700}
     >

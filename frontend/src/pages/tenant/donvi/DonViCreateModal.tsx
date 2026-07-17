@@ -43,18 +43,14 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel} disabled={loading}>
-          Hủy bỏ
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
-          Xác nhận tạo
-        </Button>,
+        <Button key="cancel" onClick={onCancel} disabled={loading}>{t('common.cancel')}</Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>{t('donViCreateModal.xac_nhan_tao')}</Button>,
       ]}
       width={700}
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginBottom: 16 }}>
-          1. Thông tin pháp lý đơn vị
+          {t('donViCreateModal.1_thong_tin_phap_ly_don_vi')}
         </Title>
         
         <Row gutter={16}>
@@ -99,7 +95,7 @@ export const DonViCreateModal: React.FC<DonViCreateModalProps> = ({
         </Row>
 
         <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginTop: 16, marginBottom: 16 }}>
-          2. Khởi tạo tài khoản Quản trị Đơn vị (Admin)
+          {t('donViCreateModal.2_khoi_tao_tai_khoan')}
         </Title>
 
         <Row gutter={16}>

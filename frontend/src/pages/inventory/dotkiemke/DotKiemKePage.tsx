@@ -299,7 +299,7 @@ export const DotKiemKePage: React.FC = observer(() => {
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
                         <Button type="text" size="small">
-                            Hành động <DownOutlined />
+                            {t('common.actionBtn')} <DownOutlined />
                         </Button>
                     </Dropdown>
                 );
@@ -316,7 +316,7 @@ export const DotKiemKePage: React.FC = observer(() => {
                 </div>
                 <QuyenHanGuard quyenYeuCau={QUYEN.THEM_MOI_DKK}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
-                        Thêm mới đợt kiểm kê
+                        {t('dotKiemKePage.them_moi_dot_kiem_ke')}
                     </Button>
                 </QuyenHanGuard>
             </div>
@@ -352,10 +352,10 @@ export const DotKiemKePage: React.FC = observer(() => {
                     <Col xs={24} sm={6} md={6} style={{ display: 'flex', alignItems: 'flex-end', paddingTop: 24 }}>
                         <Space>
                             <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                                Tìm kiếm
+                                {t('common.search')}
                             </Button>
                             <Button onClick={handleReset}>
-                                Làm mới
+                                {t('common.reset')}
                             </Button>
                         </Space>
                     </Col>

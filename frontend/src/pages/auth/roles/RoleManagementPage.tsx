@@ -304,7 +304,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items: actItems }} trigger={['click']} placement="bottomRight">
             <Button size="small" type="primary" ghost>
-              Thao tác <DownOutlined style={{ fontSize: 10 }} />
+              {t('common.actionBtn')} <DownOutlined style={{ fontSize: 10 }} />
             </Button>
           </Dropdown>
         );
@@ -408,9 +408,7 @@ export const RoleManagementPage: React.FC = observer(() => {
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={[
-          <Button key="close" type="primary" onClick={() => setIsDetailModalOpen(false)}>
-            Đóng
-          </Button>
+          <Button key="close" type="primary" onClick={() => setIsDetailModalOpen(false)}>{t('common.close')}</Button>
         ]}
         width={650}
       >

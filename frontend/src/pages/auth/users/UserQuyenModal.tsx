@@ -71,9 +71,7 @@ export const UserQuyenModal: React.FC<UserQuyenModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy bỏ
-        </Button>,
+        <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
         <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
           Xác nhận cập nhật
         </Button>

@@ -303,7 +303,7 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -317,10 +317,10 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Thiết bị phần cứng
+              {t('menu.hardwareAssets')}
             </Title>
             <Text type="secondary">
-              Danh sách thực thể các thiết bị phần cứng (máy tính, màn hình, bàn phím...) đang quản lý tại các đơn vị.
+              {t('danhSachThietBiPhanCungPage.danh_sach_thuc_the_cac')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_THIET_BI_PHAN_CUNG}>
@@ -333,7 +333,7 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm thiết bị
+              {t('danhSachThietBiPhanCungPage.them_thiet_bi')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -389,7 +389,7 @@ export const DanhSachThietBiPhanCungPage: React.FC = observer(() => {
             <Col xs={24} md={4}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

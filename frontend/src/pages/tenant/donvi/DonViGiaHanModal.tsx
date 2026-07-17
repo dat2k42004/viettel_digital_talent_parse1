@@ -38,12 +38,8 @@ export const DonViGiaHanModal: React.FC<DonViGiaHanModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy bỏ
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Xác nhận gia hạn
-        </Button>,
+        <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>{t('donViGiaHanModal.xac_nhan_gia_han')}</Button>,
       ]}
     >
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>

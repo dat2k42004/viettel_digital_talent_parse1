@@ -463,6 +463,7 @@ export const AppLayout: React.FC = observer(() => {
       'kiem-ke': t('menu.inventory'),
       'dot-kiem-ke': t('menu.inventoryRounds'),
       'phieu-kiem-ke': t('menu.inventoryTickets'),
+      'bao-cao': t('menu.reports'),
     };
     return maps[path] || path;
   };
@@ -491,6 +492,12 @@ export const AppLayout: React.FC = observer(() => {
           theme={isDarkMode ? 'dark' : 'light'}
           trigger={null}
           style={{
+            overflow: 'auto',
+            height: '100vh',
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
             borderRight: isDarkMode ? 'none' : '1px solid #f0f0f0',
           }}
         >
@@ -536,10 +543,17 @@ export const AppLayout: React.FC = observer(() => {
           />
         </Sider>
 
-        <Layout>
+        <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'margin-left 0.2s' }}>
           {/* ===== HEADER ===== */}
           <Header
             style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              left: collapsed ? 80 : 240,
+              zIndex: 99,
+              width: `calc(100% - ${collapsed ? 80 : 240}px)`,
+              transition: 'left 0.2s, width 0.2s',
               background: isDarkMode ? '#141414' : '#fff',
               padding: '0 24px',
               display: 'flex',
@@ -586,7 +600,7 @@ export const AppLayout: React.FC = observer(() => {
           {/* ===== CONTENT ===== */}
           <Content
             style={{
-              margin: 24,
+              margin: '88px 24px 24px 24px',
               minHeight: 'calc(100vh - 64px - 48px)',
               overflow: 'auto',
             }}
@@ -602,7 +616,7 @@ export const AppLayout: React.FC = observer(() => {
           onCancel={() => setIsProfileModalOpen(false)}
           footer={[
             <Button key="close" onClick={() => setIsProfileModalOpen(false)}>
-              Đóng lại
+              {t('common.close')}
             </Button>
           ]}
         >

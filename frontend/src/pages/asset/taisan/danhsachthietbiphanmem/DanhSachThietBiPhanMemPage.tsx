@@ -314,7 +314,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
             <Button size="small">
-              Thao tác <DownOutlined />
+              {t('common.actionBtn')} <DownOutlined />
             </Button>
           </Dropdown>
         );
@@ -328,10 +328,10 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              Bản quyền phần mềm
+              {t('menu.softwareLicenses')}
             </Title>
             <Text type="secondary">
-              Quản lý danh sách các key bản quyền, license và thời hạn sử dụng phần mềm tại đơn vị.
+              {t('danhSachThietBiPhanMemPage.quan_ly_danh_sach_cac')}
             </Text>
           </div>
           <QuyenHanGuard quyenYeuCau={QUYEN.THEM_THIET_BI_PHAN_MEM}>
@@ -344,7 +344,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 setIsFormOpen(true);
               }}
             >
-              Thêm bản quyền
+              {t('danhSachThietBiPhanMemPage.them_ban_quyen')}
             </Button>
           </QuyenHanGuard>
         </div>
@@ -410,7 +410,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
             <Col xs={24} md={6}>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                  Tìm kiếm
+                  {t('common.search')}
                 </Button>
                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
               </Space>

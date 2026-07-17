@@ -39,10 +39,10 @@
     "assetCatalog": "Asset directory",
     "assetModels": "Asset model",
     "hardwareModels": "Hardware model",
-    "softwareModels": "Software code sample",
+    "softwareModels": "Software Models",
     "actualAssets": "Real device",
     "hardwareAssets": "Hardware devices",
-    "softwareLicenses": "Software equipment",
+    "softwareLicenses": "Software Copyrights",
     "hardwareComponents": "Hardware components",
     "attributes": "Attribute catalog",
     "assembly": "Assembling components",
@@ -160,9 +160,9 @@
     "quay_lai_trang_chu": "Return to home page",
     "khong_the_cap_nhat": "Unable to update personal information",
     "dang_dong_bo_cau": "Syncing configuration...",
-    "ban_khong_co_quyen_truy": "Ban khong co quyen truy cap trang nay vui long lien he quan tri vien hoac quay lai trang chu",
-    "dang_dong_bo_cau_hinh": "Dang dong bo cau hinh phan quyen he thong",
-    "khong_the_cap_nhat_ho": "Khong the cap nhat ho so ca nhan khi f5"
+    "ban_khong_co_quyen_truy": "You do not have permission to access this page. Please contact the administrator or return to the home page.",
+    "dang_dong_bo_cau_hinh": "Synchronizing system authorization configurations...",
+    "khong_the_cap_nhat_ho": "Unable to update profile on refresh:"
   },
   "danhMucTaiSanFormModal": {
     "ten_danh_muc": "Category name",
@@ -299,7 +299,7 @@
     "danh_muc_thuoc_tinh_dong": "Dynamic attribute catalog",
     "quan_ly_danh_sach_cac": "Manage lists of extended configuration properties for each asset entity type (RAM, Disk, OS, License Seats...).",
     "them_thuoc_tinh": "Add properties",
-    "bat_buoc_1": "Bat buoc",
+    "bat_buoc_1": "Required?",
     "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} attribute successfully!"
   },
   "hangSanXuatFormModal": {
@@ -377,7 +377,7 @@
     "vui_long_chon_linh": "Please select assembly components!",
     "vui_long_chon_thiet": "Please select a receiving device!",
     "xac_nhan_lap_rap": "Confirm assembly",
-    "chon_thiet_bi_phan_cung": "Chon thiet bi phan cung nhan linh kien me"
+    "chon_thiet_bi_phan_cung": "Select hardware device to assemble components (Parent)"
   },
   "lapRapLinhKienPage": {
     "ban_co_chac_chan": "Are you sure you want to remove this component from the parent device?",
@@ -448,7 +448,10 @@
     "tim_kiem_theo_ma": "Search by type code, type name...",
     "lam_moi": "Refresh",
     "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} asset type successfully!",
-    "val_thang": "Val thang"
+    "val_thang": "{{val}} months",
+    "loai_tai_san": "Asset Type",
+    "quan_ly_danh_muc_loai": "Manage asset categories, asset tag prefixes, and default depreciation periods.",
+    "them_loai_tai_san": "Add Asset Type"
   },
   "taiSanPhanCungFormModal": {
     "chon_hang": "Choose a company",
@@ -709,7 +712,7 @@
     "khong_co_thuoc_tinh_dong": "There are no dynamic properties configured that apply to the Hardware Device.",
     "khong_co_thuoc_tinh_dong_1": "There are no dynamic properties configured that apply to the Software.",
     "khong_co_thuoc_tinh_dong_2": "There are no dynamic properties configured that apply to the Hardware Component.",
-    "khong_the_tai_du_lieu": "Khong the tai du lieu thuoc tinh tai san",
+    "khong_the_tai_du_lieu": "Unable to load asset attribute data!",
     "cau_hinh_thuoc_tinh_assetname": "Cau hinh thuoc tinh assetname",
     "vui_long_chon_attr_tenthuoctinh": "Please select {{tenThuocTinh}}!",
     "chon_attr_tenthuoctinh": "Select {{tenThuocTinh}}",
@@ -909,7 +912,7 @@
     "ma_otp_da_duoc_he": "The OTP code has been sent to email by the system",
     "vui_long_kiem_tra_hop_thu_cua_ban": ". Please check your mailbox.",
     "xac_nhan_doi_mat_khau": "Confirm password change",
-    "dat_lai_mat_khau_thanh": "Dat lai mat khau thanh cong ban co the su dung mat khau moi de dang nhap"
+    "dat_lai_mat_khau_thanh": "Password reset successful! You can use the new password to log in."
   },
   "loginPage": {
     "ten_tai_khoan_hoac": "Account name or email",
@@ -952,8 +955,8 @@
     "tim_kiem": "Search",
     "lam_moi": "Refresh",
     "dong": "Close",
-    "thuc_the_tac_dong_1": "Thuc the tac dong",
-    "tai_khoan_id_id": "Tai khoan id id"
+    "thuc_the_tac_dong_1": "Target entity...",
+    "tai_khoan_id_id": "Account ID: {{id}}"
   },
   "roleFormModal": {
     "vi_du_thu_kho": "For example: General warehouse keeper",
@@ -971,7 +974,7 @@
     "ma_tran_quyen_han": "Allocation authority matrix",
     "he_thong_toan_san": "System (Whole floor)",
     "phan_he_groupname": "Subsystem {groupName}",
-    "mo_ta_tom_tat_chuc_nang": "Mo ta tom tat chuc nang"
+    "mo_ta_tom_tat_chuc_nang": "Brief description of function"
   },
   "roleManagementPage": {
     "xac_nhan_xoa_vai": "Confirm role deletion?",
@@ -1037,10 +1040,10 @@
     "danh_sach_quyen_phang_const": "));\n    }\n  };\n\n  // Flat permissions list\n  const [nameSachQuen, setNameSachQuen] = useState<Response[]>([]);\n\n  const [nameSachDonVi, setNameSachDonVi] = useState<DonViResponse[]>([]);\n\n  // Load initial data\n  useEffect(() => {\n    taiDuLieu(currentPage, pageSize, searchText, filterMaVaiTro, filterTrangThai);\n    taiMaTranQuyen();\n    taiTatCaQuyen();\n    if (authStore.laSuperAdmin) {\n      taiDanhSachDonVi();\n    }\n  }, [currentPage, pageSize]);\n\n  const taiDanhSachDonVi = async () => {\n    try {\n      const res = await layDanhSachDonVi({ page: 0, size: 1000 });\n      if (res.data?.content) {\n        setDanhSachDonVi(res.data.content);\n      }\n    } catch (e) {\n      console.error(t(",
     "val_hoat_dong_hoat_dong_bi_khoa": "Val hoat dong hoat dong bi khoa",
     "detailrole_mota_khong_co_mo_ta": "Detailrole mota khong co mo ta",
-    "khong_the_tai_danh_sach_don_vi": "Khong the tai danh sach don vi",
+    "khong_the_tai_danh_sach_don_vi": "Unable to load unit list",
     "don_vi_id": "Unit (ID: {{id}})",
     "don_vi_id_detailrole_iddonvi": "Don vi id detailrole iddonvi",
-    "khong_the_tai_danh_sach_quyen": "Khong the tai danh sach quyen",
+    "khong_the_tai_danh_sach_quyen": "Unable to load permission list",
     "cap_bac": "Level {{cap}}",
     "so_quyen_gan": "{{count}} Privileges"
   },
@@ -1159,7 +1162,7 @@
     "tai_du_lieu_ban_dau": "));\n    }\n  };\n\n  // Load initial data\n  useEffect(() => {\n    taiDuLieu(currentPage, pageSize, searchText, filterTrangThai, filterPhongBan, filterChucVu, filterMaNguoiDung);\n    taiVaiTroDropdown();\n    taiTatCaQuyen();\n    taiDanhSachPhongBan();\n  }, [currentPage, pageSize]);\n\n  const taiDanhSachPhongBan = async () => {\n    try {\n      const res = await layDanhSach6({ size: 100 });\n      if (res.data?.content) {\n        setDanhSachPhongBan(res.data.content);\n      }\n    } catch (e) {\n      console.error(t(",
     "ham_kiem_tra_xem_tai": "));\n    }\n  };\n\n  // Function to check if the account has the Unit Admin role or not\n  const laAdminDonViRecord = (record: NguoiDungResponse) => {\n    return record.danhSachVaiTro?.some(\n      r => r.maVaiTro?.toUpperCase().includes(",
     "downoutlined_style_fontsize_10_button": ")}<DownOutlined style={{ fontSize: 10 }} />\n            </Button>\n          </Dropdown>\n        );\n      },\n    },\n  ];\n\n  // Filter assignable roles in Modal Form\n  const roleTroDuocGan = nameSachVaiTro;\n\n  return (\n    <div>\n      <div style={{ display:",
-    "ma_nhan_vien_1": "Ma nhan vien",
+    "ma_nhan_vien_1": "Employee code...",
     "val_hoat_dong_dang_hoat": "Val hoat dong dang hoat dong bi khoa",
     "detailuser_honguoidung_detailuser_tendemnguoidung_detailuser": "Detailuser honguoidung detailuser tendemnguoidung detailuser tennguoidung filter boolean join chua cap nhat",
     "detailuser_email_chua_cap_nhat": "Detailuser email chua cap nhat",
@@ -1168,9 +1171,9 @@
     "detailuser_tenphongban_chua_cap_nhat": "Detailuser tenphongban chua cap nhat",
     "detailuser_trangthai_hoat_dong_hoat": "Detailuser trangthai hoat dong hoat dong bi khoa",
     "doi_trang_thai_tai_khoan": "Doi trang thai tai khoan nguoi dung sang active t usermanagementpage hoat dong khoa thanh cong",
-    "khong_the_lay_danh_sach_phong_ban": "Khong the lay danh sach phong ban",
-    "khong_the_lay_danh_muc_vai_tro": "Khong the lay danh muc vai tro",
-    "cap_nhat_quyen_truc_tiep": "Cap nhat quyen truc tiep override thanh cong",
+    "khong_the_lay_danh_sach_phong_ban": "Unable to get department list",
+    "khong_the_lay_danh_muc_vai_tro": "Unable to get roles directory",
+    "cap_nhat_quyen_truc_tiep": "Direct permission update (Override) successful!",
     "doi_trang_thai_tai_khoan_1": "Change status of user account to {{khoa}} successfully!",
     "sdt": "Phone"
   },
@@ -1250,6 +1253,9 @@
     "xuat_pdf": "Export PDF",
     "dat_lai_bo_loc": "Reset the filter",
     "ap_dung_bo_loc": "Apply filter",
+    "chon_don_vi_thanh_vien": "Select member unit",
+    "vui_long_chon_don_vi": "Please select a unit!",
+    "chon_don_vi": "Select unit",
     "state_loading_data_const_loading": ");\n\n  // State loading & data\n  const [loading, setLoading] = useState<boolean>(false);\n  const [roomBanList, setPhongBanList] = useState<SelectOption[]>([]);\n  const [viTriList, setViTriList] = useState<ViTriResponse[]>([]);\n\n  // Report data\n  const [dataTonKho, setDataTonKho] = useState<BaoCaoTonKhoResponse[]>([]);\n  const [dataCapPhat, setDataCapPhat] = useState<BaoCaoCapPhatResponse[]>([]);\n  const [dataBaoTri, setDataBaoTri] = useState<BaoCaoBaoTriResponse[]>([]);\n  const [dataToanSan, setDataToanSan] = useState<BaoCaoToanSanSuperAdminResponse[]>([]);\n\n  // Pagination\n  const [currentPage, setCurrentPage] = useState<number>(1);\n  const [pageSize, setPageSize] = useState<number>(10);\n  const [totalElements, setTotalElements] = useState<number>(0);\n\n  // Load dropdown options\n  useEffect(() => {\n    if (authStore.quiemTravel(QUYEN.VIEW_BAO_CAO)) {\n      layPhongBanOptions()\n        .then((res) => {\n          if (res.data) setPhongBanList(res.data);\n        })\n        .catch(() => {});\n\n      layViTriDanhSach({ page: 0, size: 1000 })\n        .then((res) => {\n          if (res.data && res.data.content) {\n            setViTriList(res.data.content);\n          }\n        })\n        .catch(() => {});\n    }\n  }, []);\n\n  // Determine the default active tab when entering a page based on authority\n  useEffect(() => {\n    if (!authStore.checkout(QUYEN.VIEW_REGISTRATION) && authStore.Checkout(QUYEN.VIEW_QUAN_TRI_TOAN_SAN)) {\n      setActiveTab(",
     "finally_setloading_false_useeffect_taidulieubaocao": "));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    taiDuLieuBaoCao(currentPage, pageSize, activeTab);\n  }, [currentPage, pageSize, activeTab]);\n\n  const handleTimKiem = () => {\n    setCurrentPage(1);\n    taiDuLieuBaoCao(1, pageSize, activeTab);\n  };\n\n  const handleLamMoi = () => {\n    form.resetFields();\n    setCurrentPage(1);\n    taiDuLieuBaoCao(1, pageSize, activeTab);\n  };\n\n  // Export unit report file (Excel / PDF)\n  const handleXuatFile = async (dinhDangFile:",
     "finally_setloading_false_dinh_nghia": "));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  // Define columns for Inventory Table\n  const columnsTonKho = [\n    { title: t(",
@@ -1257,10 +1263,10 @@
     "dinh_nghia_cac_cot_cho_1": "/>\n    );\n  };\n\n  // Define columns for the Maintenance Table\n  const columnsBaoTri = [\n    { title: t(",
     "dinh_nghia_cac_cot_cho_2": "/>\n    );\n  };\n\n  // Define columns for Total Table (Super Admin)\n  const columnsToanSan = [\n    { title: t(",
     "bordered_default_return_null_cac": "bordered\n          />\n        );\n      default:\n        return null;\n    }\n  };\n\n  // Permissioned tabs are displayed\n  const items = [];\n  if (authStore.quiemTravel(QUYEN.VIEW_BAO_CAO)) {\n    items.push(\n      { key:",
-    "co_loi_xay_ra_khi_xuat_file_bao_cao": "Co loi xay ra khi xuat file bao cao",
-    "tong_so_luong_phan_cung": "Tong so luong phan cung",
+    "co_loi_xay_ra_khi_xuat_file_bao_cao": "An error occurred while exporting the report file!",
+    "tong_so_luong_phan_cung": "Total quantity of hardware",
     "xuat_file_bao_cao_dang": "Export report file as {{toUpperCase}} successfully!",
-    "val_gio": "Val gio"
+    "val_gio": "{{val}} hours"
   },
   "dashboardPage": {
     "tong_so_thiet_bi": "Total number of devices",
@@ -1298,6 +1304,7 @@
     "thiet_bi": "device",
     "thong_ke_hien_tai_cho_tai_khoan": "Current statistics for account:",
     "authstore_madonvi_don_vi_id": "{authStore.maDonVi ? `| Unit ID: ${authStore.maDonVi}` : ''}",
+    "hien_thi_tong_hop": "Display system-wide summary",
     "bieu_do_tron_trang_thai": "{/* Biểu đồ tròn trạng thái */}",
     "bieu_do_cot_phong_ban": "{/* Biểu đồ cột phòng ban */}",
     "const_title_paragraph_text_typography": ";\n\nconst { Title, Paragraph, Text } = Typography;\n\nexport const DashboardPage: React.FC = observer(() => {\n  const { t } = useTranslation();\n  const [loading, setLoading] = useState<boolean>(true);\n  \n  // State statistics Tenant (Admin Unit)\n  const [thongKeDonVi, setThongKeDonVi] = useState<ThongKeTongQuanDashboardResponse | null>(null);\n  \n  // State of All Product statistics (SuperAdmin)\n  const [thongKeToanSan, setThongKeToanSan] = useState<any>(null);\n\n  useEffect(() => {\n    const loadData = async () => {\n      setLoading(true);\n      try {\n        if (authStore.review(QUYEN.VIEW_QUAN_TRI_TOAN_SAN)) {\n          const res = await layThongKeToanSanSuperAdmin();\n          if (res && res.data) {\n            setThongKeToanSan(res.data);\n          }\n        }\n        \n        if (authStore.quiemTravel(QUYEN.VIEW_BAO_CAO)) {\n          const res = await layThongKeDonViAdmin();\n          if (res && res.data) {\n            setThongKeDonVi(res.data);\n          }\n        }\n      } catch (error: any) {\n        message.error(error?.message || t(",
@@ -1306,7 +1313,7 @@
     "xu_ly_du_lieu_bieu": "];\n\n  // --- TENANT CHART DATA PROCESSING (UNIT ADMIN) ---\n  const pieData = thongKeDonVi?.bieuDoTyLeTrangThai\n    ? Object.entries(thongKeDonVi.bieuDoTyLeTrangThai).map(([key, val]) => ({\n        name: key ===",
     "number_val_xu_ly_du": ")]: Number(val)\n      }))\n    : [];\n\n  // --- PROCESSING FULL PRODUCT CHART DATA (SUPER ADMIN) ---\n  const tenantBarData = widthKeToanSan?.bieuDoSoSanhTenant\n    ? Object.entries(thongKeToanSan.bieuDoSoSanhTenant).map(([key, val]) => ({\n        name: key,\n        [t(",
     "card_col_row_div_2": ")} />\n                )}\n              </Card>\n            </Col>\n          </Row>\n        </div>\n      )}\n\n      {/* ====================================================================== */}\n      {/* 2. GIAO DIỆN DÀNH CHO ADMIN ĐƠN VỊ (XEM BÁO CÁO CHI TIẾT)             */}\n      {/* ====================================================================== */}\n      {authStore.kiemTraQuyen(QUYEN.XEM_BAO_HIGH) && thongKeDonVi ? (\n        <div>\n          <div style={{ marginBottom: 16 }}>\n            <Tag color=",
-    "khong_co_du_lieu_so_sanh_don_vi": "Khong co du lieu so sanh don vi",
+    "khong_co_du_lieu_so_sanh_don_vi": "No unit comparison data available",
     "don_vi_id_authstore_madonvi": "Don vi id authstore madonvi",
     "number_value_0_tolocalestring_vi": "{{toLocaleStringviVN}} devices",
     "value_thiet_bi": "{{value}} devices",
@@ -1326,7 +1333,7 @@
     "dong": "Close",
     "huy_bo": "Cancel",
     "selectedrecord_luu_cap_nhat_tao": "Selectedrecord luu cap nhat tao dot kiem ke",
-    "tao_dot_kiem_ke_tai_san_moi": "Tao dot kiem ke tai san moi"
+    "tao_dot_kiem_ke_tai_san_moi": "Create new asset inventory round"
   },
   "dotKiemKePage": {
     "tat_ca_trang_thai": "All status",
@@ -1374,7 +1381,7 @@
     "tong_so": "Total",
     "ban_ghi": "record",
     "them_moi_dot_kiem_ke": "Add new inventory round",
-    "tong_so_total_ban_ghi": "Tong so total ban ghi"
+    "tong_so_total_ban_ghi": "Total {{total}} records"
   },
   "phieuKiemKeFormModal": {
     "chon_dot_kiem_ke": "Select inventory period",
@@ -1484,9 +1491,9 @@
     "dong": "Close",
     "lap_phieu_kiem_ke_moi": "Create a new inventory sheet",
     "onchange_page_size_setcurrentpage_page": "),\n                        onChange: (page, size) => {\n                            setCurrentPage(page);\n                            setPageSize(size);\n                        }\n                    }}\n                />\n            </Card>\n\n            <PhieuKiemKeFormModal\n                open={isFormOpen}\n                onCancel={() => setIsFormOpen(false)}\n                selectedRecord={selectedItem}\n                mode={formMode}\n                onSaveBasic={handleSaveBasic}\n                onSaveExecute={handleSaveExecute}\n                loading={modalLoading}\n            />\n\n            <Modal\n                title={`Follow the progress of ballot counting: ${selectedPhieu?.maPhieuKiemKe ||",
-    "thuc_hien_doi_soat_1": "Thuc hien doi soat",
+    "thuc_hien_doi_soat_1": "Perform reconciliation",
     "theo_doi_tien_do_kiem": "Track inventory progress for ticket: {{maPhieuKiemKe}}",
-    "co_loi_xay_ra_khi_luu_phieu_kiem_ke": "Co loi xay ra khi luu phieu kiem ke"
+    "co_loi_xay_ra_khi_luu_phieu_kiem_ke": "An error occurred while saving the inventory sheet!"
   },
   "phieuCapPhatFormModal": {
     "tim_keyphan_mem": "Find key/software",
@@ -1538,10 +1545,10 @@
     "form_useeffect_if_open_lay": ", form);\n\n    useEffect(() => {\n        if (open) {\n            // Get the general Select Option list\n            Promise.all([\n                layPhongBanOptions(),\n                layThietBiPhanCungOptions(),\n                layThietBiPhanMemOptions(),\n                layThietBiLinhKienOptions(),\n            ])\n                .then(([depRes, pcRes, pmRes, lkRes]) => {\n                    if (depRes.data) setPhongBanOptions(depRes.data);\n                    if (pcRes.data) setThietBiPhanCungOptions(pcRes.data);\n                    if (pmRes.data) setPhanMemOptions(pmRes.data);\n                    if (lkRes.data) setThietBiLinhKienOptions(lkRes.data);\n                })\n                .catch(() => { });\n\n            if (selectedRecord) {\n                // FIX: Use the correct `type` field according to DTO ChiTietCapPhatGeneralResponse\n                const nameSachPhanCung = selectedRecord.nameSachTaiSan\n                    ?.filter((item: any) => item.type ===",
     "map_item_any_danhsachthietbiphanmemid_item": ")\n                    .map((item: any) => ({\n                        danhSachThietBiPhanMemId: item.idTaiSan,\n                        maKeyKichHoat: item.maTheTaiSan, // Key phần mềm được trả về qua trường maTheTaiSan\n                        ghiChu: item.ghiChu,\n                    })) || [];\n\n                const nameSachLinhKien = selectedRecord.nameSachTaiSan\n                    ?.filter((item: any) => item.type ===",
     "map_item_any_danhsachlinhkienphancungid_item": ")\n                    .map((item: any) => ({\n                        danhSachLinhKienPhanCungId: item.idTaiSan,\n                        tinhTrangLucGiao: item.tinhTrangLucGiao,\n                        phuKienKemTheo: item.phuKienKemTheo,\n                        ghiChu: item.ghiChu,\n                    })) || [];\n\n                // Assign data to Form\n                form.setFieldsValue({\n                    idPhongBanNhan: selectedRecord.idPhongBanNhan,\n                    idNguoiNhan: selectedRecord.idNguoiNhan,\n                    mucDichSuDung: selectedRecord.mucDichSuDung,\n                    danhSachPhanCung,\n                    danhSachPhanMem,\n                    danhSachLinhKien,\n                });\n            } else {\n                form.resetFields();\n            }\n        }\n    }, [open, selectedRecord, form]);\n\n    // Listen for Department changes to load the User list\n    useEffect(() => {\n        if (idPhongBanNhan) {\n            layNguyenDungOptions({ idPhongBan: idPhongBanNhan })\n                .then(res => {\n                    if (res.data) setNguoiDungOptions(res.data);\n                })\n                .catch(() => setNguyenOptions([]));\n        } else {\n            setNguoiDungOptions([]);\n        }\n    }, [idPhongBanNhan]);\n\n    // Utility function: Add missing Option (In case the allocated property is no longer in the select-options list)\n    const getOptionsWithFallback = (baseOptions: SelectOption[], type:",
-    "vi_du_moi_100_xuoc_nhe": "Vi du moi 100 xuoc nhe",
+    "vi_du_moi_100_xuoc_nhe": "For example: New 100%, slightly scratched...",
     "danh_sach_cap_phat_thiet": "Danh sach cap phat thiet bi phan cung",
     "danh_sach_cap_phat_ban": "Danh sach cap phat ban quyen phan mem",
-    "vui_long_chon_phong_ban": "Vui long chon phong ban",
+    "vui_long_chon_phong_ban": "Please select a department!",
     "tinh_trang_luc_ban": "Status upon handover",
     "vi_du_may_moi_nguyen": "E.g. brand new machine, working well...",
     "vi_du_sac_chuot_tui": "E.g. charger, mouse, bag...",
@@ -1550,7 +1557,8 @@
     "he_thong_tu_dong": "System auto-generated...",
     "danh_sach_cap_phat_linh": "Allocation List - Components",
     "linh_kien_kem_theo": "Accompanying components",
-    "nhap_tinh_trang_luc": "Please enter the status upon handover!"
+    "nhap_tinh_trang_luc": "Please enter the status upon handover!",
+    "key_kich_hoat_he": "Activation Key"
   },
   "phieuCapPhatPage": {
     "xac_nhan_tu_choi": "Confirmed refusal",
@@ -1609,8 +1617,8 @@
     "undefined_if_res_code_200": "): undefined,\n            });\n            if (res.code === 200 && res.data) {\n                // Depending on the project's base response, it can be res.data.content or res.data.data.content\n                const content = (res.data as any).content || [];\n                const pageInfo = (res.data as any).page_info || {};\n                setList(content);\n                setTotalCount(pageInfo.total_elements || (res.data as any).totalElements || 0);\n            }\n        } catch (e: any) {\n            message.error(e?.message || t(",
     "finally_setmodalloading_false_thuc_hien": "));\n        } finally {\n            setModalLoading(false);\n        }\n    };\n\n    // Perform actions: Submit, Approve, Complete, Delete\n    const handleHanhDong = async (action: string, id: number) => {\n        try {\n            let res;\n            if (action ===",
     "thuc_hien_hanh_dong_tu": "));\n        }\n    };\n\n    // Take action: Refuse (with reason)\n    const handleXacNhanTuChoi = async () => {\n        if (!lyDoTuChoi.trim()) {\n            message.warning(t(",
-    "xac_nhan_tu_choi_phe_duyet": "Xac nhan tu choi phe duyet",
-    "vui_long_nhap_ly_do_tu_choi": "Vui long nhap ly do tu choi"
+    "xac_nhan_tu_choi_phe_duyet": "Confirm rejection of approval",
+    "vui_long_nhap_ly_do_tu_choi": "Please enter the reason for rejection!"
   },
   "phieuDieuChuyenFormModal": {
     "chon_phong_ban_truoc": "Choose the department first",
@@ -1666,10 +1674,10 @@
     "const_phongbanoptions_setphongbanoptions_usestate_selectoption": ";\n\n    const [styleBanOptions, setPhongBanOptions] = useState<SelectOption[]>([]);\n\n    // Array to store the list of users for 2 sides: Transfer & Receive\n    const [peopleOptions, setPeopleOptions] = useState<SelectOption[]>([]);\n    const [peopleOptions, setNguyenOptions] = useState<SelectOption[]>([]);\n\n    // State stores the list of assets the TRANSFER is borrowing (for transfer)\n    const [activeHardwareOptions, setActiveHardwareOptions] = useState<any[]>([]);\n    // const [activeSoftwareOptions, setActiveSoftwareOptions] = useState<any[]>([]);\n    const [activeComponentOptions, setActiveComponentOptions] = useState<any[]>([]);\n\n    const idPhongBanChuyen = Form.useWatch(",
     "form_1_lay_danh_sach": ", form);\n\n    // 1. Get the list of general Departments\n    useEffect(() => {\n        if (open) {\n            layPhongBanOptions()\n                .then(res => { if (res.data) setPhongBanOptions(res.data); })\n                .catch(() => { });\n\n            if (selectedRecord) {\n                // Map the flat array of details to the DTO array of Transfer\n                // Note: DTO request array of transfer according to 14.18 document standard is chiTietCapPhatPhanCungId\n                const listSachPhanCung = selectedRecord.chiTietTaiSan\n                    ?.filter((item: any) => item.type ===",
     "map_item_any_chitietcapphatlinhkienid_item": ")\n                    .map((item: any) => ({\n                        chiTietCapPhatLinhKienId: item.chiTietCapPhatId,\n                        trangThaiXuat: item.trangThaiXuat,\n                        ghiChu: item.ghiChu,\n                    })) || [];\n\n                form.setFieldsValue({\n                    idPhongBanChuyen: selectedRecord.idPhongBanChuyen,\n                    idNguoiChuyen: selectedRecord.idNguoiChuyen,\n                    idPhongBanNhan: selectedRecord.idPhongBanNhan,\n                    idNguoiNhan: selectedRecord.idNguoiNhan,\n                    lyDoDieuChuyen: selectedRecord.lyDoDieuChuyen,\n                    danhSachPhanCung,\n                    danhSachPhanMem,\n                    danhSachLinhKien,\n                });\n            } else {\n                form.resetFields();\n                setActiveHardwareOptions([]);\n                // setActiveSoftwareOptions([]);\n                setActiveComponentOptions([]);\n            }\n        }\n    }, [open, selectedRecord, form]);\n\n    // 2. Logic for Transfer Party (Transfer)\n    useEffect(() => {\n        if (idPhongBanChuyen) {\n            layNguyenDungOptions({ idPhongBan: idPhongBanChuyen })\n                .then(res => { if (res.data) setNguoiChuyenOptions(res.data); })\n                .catch(() => setPeopleOptions([]));\n        } else {\n            setNguoiChuyenOptions([]);\n        }\n    }, [idPhongBanChuyen]);\n\n    useEffect(() => {\n        if (idPerson) {\n            // Reuse the layAllocationsCuaNhanVien function of Recall\n            layAllocationsCuaNhanVien({ idNhanVien: idNguoiChuyen })\n                .then(res => {\n                    if (res.code === 200 && res.data) {\n                        setActiveHardwareOptions(res.data.danhSachPhanCung || []);\n                        // setActiveSoftwareOptions(res.data.danhSachPhanMem || []);\n                        setActiveComponentOptions(res.data.danhSachLinhKien || []);\n                    }\n                })\n                .catch(() => {\n                    setActiveHardwareOptions([]);\n                    // setActiveSoftwareOptions([]);\n                    setActiveComponentOptions([]);\n                });\n        } else {\n            setActiveHardwareOptions([]);\n            // setActiveSoftwareOptions([]);\n            setActiveComponentOptions([]);\n        }\n    }, [idPeople]);\n\n    // 3. Logic for the Receiver\n    useEffect(() => {\n        if (idPhongBanNhan) {\n            layNguyenDungOptions({ idPhongBan: idPhongBanNhan })\n                .then(res => { if (res.data) setNguoiNhanOptions(res.data); })\n                .catch(() => setNguyenOptions([]));\n        } else {\n            setNguoiNhanOptions([]);\n        }\n    }, [idPhongBanNhan]);\n\n    // Get the Option with fallback for View/Edit\n    const getOptionsWithFallback = (activeOptions: any[], type:",
-    "vi_du_binh_thuong_xuoc_nhe": "Vi du binh thuong xuoc nhe",
+    "vi_du_binh_thuong_xuoc_nhe": "For example: Normal, slightly scratched...",
     "danh_sach_dieu_chuyen_thiet": "Danh sach dieu chuyen thiet bi phan cung",
     "danh_sach_dieu_chuyen_ban": "Danh sach dieu chuyen ban quyen phan mem",
-    "nhap_ly_do_dieu_chuyen": "Nhap ly do dieu chuyen",
+    "nhap_ly_do_dieu_chuyen": "Please enter the reason for transfer!",
     "item_mathetaisan_item_soserial_item": "{{soSerial}} - {{tenTaiSan}} (Selected)",
     "id_lich_su_cap_opt_keyidfield": "Allocation History ID: {{optkeyIdField}}",
     "id_lich_su_cap_item": "Allocation History ID: {{chiTietCapPhatId}}",
@@ -1677,7 +1685,9 @@
     "vi_du_binh_thuong_tray": "E.g., normal, scratched...",
     "danh_sach_ban_quyen": "Transfer List - Software License",
     "chu_thich_dieu_chuyen": "Enter transfer comments...",
-    "danh_sach_dieu_chuyen_linh": "Transfer List - Separate Components"
+    "danh_sach_dieu_chuyen_linh": "Transfer List - Separate Components",
+    "phong_ban_tiep": "The receiving department must be different from the transferring department!",
+    "nhap_tinh_trang": "Please enter the status after handover!"
   },
   "phieuDieuChuyenPage": {
     "ban_co_chac_chan": "Are you sure you want to delete this transfer ticket?",
@@ -1776,7 +1786,7 @@
     "state_luu_danh_sach_toan": ";\n\n    // State stores a list of all assets eligible for liquidation\n    const [thietBiPhanCungOptions, setBinhPhanCungOptions] = useState<SelectOption[]>([]);\n    const [nameBiPhanMemOptions, setPhanMemOptions] = useState<SelectOption[]>([]);\n    const [thietBiLinhKienOptions, setThietBiLinhKienOptions] = useState<SelectOption[]>([]);\n\n    useEffect(() => {\n        if (open) {\n            Promise.all([\n                layThietBiPhanCungOptions(),\n                layThietBiPhanMemOptions(),\n                layThietBiLinhKienOptions(),\n            ])\n                .then(([pcRes, pmRes, lkRes]) => {\n                    if (pcRes.data) setThietBiPhanCungOptions(pcRes.data);\n                    if (pmRes.data) setPhanMemOptions(pmRes.data);\n                    if (lkRes.data) setThietBiLinhKienOptions(lkRes.data);\n                })\n                .catch(() => { });\n\n            if (selectedRecord) {\n                // Map the list of SachTaiSan (or chiTietTaiSan) to the correct fields of the DTO Request\n                const listSachTaiSan = selectedRecord.chiTietTaiSan || [];\n\n                const nameSachPhanCung = nameSachTaiSan\n                    .filter((item: any) => item.type ===",
     "map_item_any_idlinhkienphancung_item": ")\n                    .map((item: any) => ({\n                        idLinhKienPhanCung: item.idTaiSan || item.thietBiId,\n                        tienThuHoi: item.tienThuHoi || item.giaThanhLy,\n                        ghiChu: item.ghiChu,\n                    }));\n\n                form.setFieldsValue({\n                    lyDoThanhLy: selectedRecord.lyDoThanhLy,\n                    // ghiChu: selectedRecord.ghiChu,\n                    danhSachPhanCung,\n                    danhSachPhanMem,\n                    danhSachLinhKien,\n                } as any);\n            } else {\n                form.resetFields();\n            }\n        }\n    }, [open, selectedRecord, form]);\n\n    // Get fallback options when viewing/editing liquidated assets that are no longer present in the original Options list\n    const getOptionsWithFallback = (baseOptions: SelectOption[], type:",
     "selectedrecord_luu_cap_nhat_xac": "Selectedrecord luu cap nhat xac nhan lap phieu",
-    "id_tai_san_idtaisan": "Id tai san idtaisan"
+    "id_tai_san_idtaisan": "Asset ID: {{idTaiSan}}"
   },
   "phieuThanhLyPage": {
     "xac_nhan_tu_choi": "Confirmed refusal",
@@ -1877,10 +1887,10 @@
     "them_linh_kien_roi_can_thu_hoi": "More separate components need to be recalled",
     "da_cap_nhat_ham_layallocationscuanhanvien": ";\n\n// Updated the layAllocationsCuaNhanVien function\nimport { layAllocationsCuaNhanVien } from",
     "const_phongbanoptions_setphongbanoptions_usestate_selectoption": ";\n\n    const [styleBanOptions, setPhongBanOptions] = useState<SelectOption[]>([]);\n    const [peopleOptions, setPeopleOptions] = useState<SelectOption[]>([]);\n\n    // State stores the list of employee assets ON BORROW (Taken from active-allocations API)\n    const [activeHardwareOptions, setActiveHardwareOptions] = useState<any[]>([]);\n    const [activeSoftwareOptions, setActiveSoftwareOptions] = useState<any[]>([]);\n    const [activeComponentOptions, setActiveComponentOptions] = useState<any[]>([]);\n\n    const idPhongBanTra = Form.useWatch(",
-    "vi_du_binh_thuong_xuoc": "Vi du binh thuong xuoc",
+    "vi_du_binh_thuong_xuoc": "For example: Normal, scratched...",
     "danh_sach_thu_hoi_thiet": "Danh sach thu hoi thiet bi phan cung",
     "danh_sach_thu_hoi_ban": "Danh sach thu hoi ban quyen phan mem",
-    "nhap_ly_do_thu_hoi": "Nhap ly do thu hoi",
+    "nhap_ly_do_thu_hoi": "Please enter the reason for retrieval!",
     "id_phieu_cap_opt_keyidfield": "Allocation Ticket ID: {{optkeyIdField}}",
     "id_phieu_cap_item_idchitietcapphat": "Allocation Ticket ID: {{idChiTietCapPhat}}"
   },
@@ -2031,7 +2041,7 @@
     "lam_moi": "Refresh",
     "huy_bo": "Cancel",
     "lap_ke_hoach_moi": "Make new plans",
-    "xoa_ke_hoach_bao_tri_thanh_cong": "Xoa ke hoach bao tri thanh cong"
+    "xoa_ke_hoach_bao_tri_thanh_cong": "Deleted maintenance plan successfully!"
   },
   "phieuSuaChuaFormModal": {
     "ke_hoach_bao_tri": "Maintenance plan applies",
@@ -2141,10 +2151,10 @@
     "lam_moi": "Refresh",
     "lap_phieu_sua_moi": "Create a new correction form",
     "loading_loading_pagination_current_currentpage": "loading={loading}\n                        pagination={{\n                            current: currentPage,\n                            pageSize,\n                            total: totalCount,\n                            onChange: (p, s) => { setCurrentPage(p); setPageSize(s); },\n                            showSizeChanger: true,\n                        }}\n                    />\n                </Card>\n\n                <PhieuSuaChuaFormModal\n                    open={isFormOpen}\n                    loading={modalLoading}\n                    selectedRecord={selectedItem}\n                    mode={formMode}\n                    onCancel={() => { setIsFormOpen(false); setSelectedItem(null); }}\n                    onSave={handleSaveForm}\n                />\n\n                <Modal\n                    title={`Update progress: ${selectedItem?.maPhieuSuaChua ||",
-    "cap_nhat_tien_do_thuc": "Cap nhat tien do thuc hien sua chua thanh cong",
-    "cap_nhat_tien_do_that_bai": "Cap nhat tien do that bai",
+    "cap_nhat_tien_do_thuc": "Updated repair progress successfully!",
+    "cap_nhat_tien_do_that_bai": "Update progress failed!",
     "cap_nhat_tien_do_thuc_1": "Update implementation progress: {{maPhieuSuaChua}}",
-    "xoa_phieu_sua_chua_thanh_cong": "Xoa phieu sua chua thanh cong"
+    "xoa_phieu_sua_chua_thanh_cong": "Deleted repair ticket successfully!"
   },
   "donHangMuaSamFormModal": {
     "don_gia": "Unit price",
@@ -2301,7 +2311,7 @@
     "quan_ly_danh_ba_cac": "Manage the list of partners supplying materials, equipment and software copyrights.",
     "them_nha_cung_cap": "Add supplier",
     "import_laydanhsach14_todo_tro_dung": ";\nimport {\n    layDanhSach14, // TODO: Trỏ đúng tên hàm Orval sinh ra (VD: layDanhSach20)\n    themMoi14,\n    capNhat14,\n    capNhatTrangThai8,\n    xoaMem14,\n} from",
-    "xoa_nha_cung_cap_thanh_cong": "Xoa nha cung cap thanh cong",
+    "xoa_nha_cung_cap_thanh_cong": "Deleted supplier successfully!",
     "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} supplier successfully!"
   },
   "phieuNhapTaiSanFormModal": {
@@ -2365,7 +2375,15 @@
     "thiet_bi_matcheditem_tentaisan": "Device: {{tenTaiSan}}",
     "phan_mem_matcheditem_tentaisan": "Software: {{tenTaiSan}}",
     "linh_kien_matcheditem_tentaisan": "Component: {{tenTaiSan}}",
-    "dong_id_currentvalid": "Dong id currentvalid"
+    "dong_id_currentvalid": "Line ID: {{currentValId}}",
+    "danh_sach_thuc_nhan_phan": "Actual list received - Software License",
+    "danh_sach_thuc_nhan_linh": "Actual list received - Hardware components",
+    "license_key_thuc_te": "Actual License Key",
+    "so_ghe_nhap_ghe": "Number of seats imported",
+    "lap_phieu_nhap_kho": "Create receipt voucher",
+    "hoan_tat_nhap_kho": "Complete import",
+    "chon_key_phan_mem": "Please select software key!",
+    "nhap_so_ghe_license": "Please enter the number of seats!"
   },
   "phieuNhapTaiSanPage": {
     "so_hoa_don_vat": "VAT invoice number...",
@@ -2558,10 +2576,10 @@
     "xac_thuc_kich_hoat": "Authentication & Activation",
     "quay_lai_sua_thong_tin_dang_ky": "Go back to editing registration information",
     "dang_nhap_ngay": "Sign in now",
-    "vi_du_nguyen_van_a": "Vi du nguyen van a",
-    "vui_long_nhap_ho_ten_nguoi_dai_dien": "Vui long nhap ho ten nguoi dai dien",
-    "vui_long_nhap_ten_phap_ly": "Vui long nhap ten phap ly",
-    "vui_long_nhap_ten_mien_he_thong": "Vui long nhap ten mien he thong"
+    "vi_du_nguyen_van_a": "For example: John Doe",
+    "vui_long_nhap_ho_ten_nguoi_dai_dien": "Please enter representative's full name!",
+    "vui_long_nhap_ten_phap_ly": "Please enter legal name!",
+    "vui_long_nhap_ten_mien_he_thong": "Please enter system domain name!"
   },
   "dangKyPage": {
     "mat_khau_tai_khoan": "Admin account password",
@@ -2591,7 +2609,7 @@
     "quay_lai_dang_nhap": "Return to login",
     "dang_ky_don_vi_1": "Unit Registration",
     "tiep_tuc_dang_ky": "Continue registration",
-    "vui_long_nhap_ten_mien": "Vui long nhap ten mien"
+    "vui_long_nhap_ten_mien": "Please enter domain name!"
   },
   "donViCreateModal": {
     "mat_khau_tai_khoan": "Admin account password",
@@ -2723,12 +2741,12 @@
     "quan_tri_don_vi_da": "SaaS Tenants Administration",
     "danh_sach_quan_ly_toan": "Management list of all independent units participating on the ITAM system floor.",
     "them_moi_don_vi": "Add new Unit",
-    "ma_don_vi_1": "Ma don vi",
-    "ma_so_thue_1": "Ma so thue",
-    "co_loi_xay_ra_khi_tao_don_vi": "Co loi xay ra khi tao don vi",
+    "ma_don_vi_1": "Unit code...",
+    "ma_so_thue_1": "Tax code...",
+    "co_loi_xay_ra_khi_tao_don_vi": "An error occurred while creating the unit!",
     "nextstatus_hoat_dong_mo_khoa": "Nextstatus hoat dong mo khoa khoa don vi thanh cong",
-    "co_loi_xay_ra_khi_cap_nhat": "Co loi xay ra khi cap nhat",
-    "co_loi_xay_ra_khi_gia_han": "Co loi xay ra khi gia han",
+    "co_loi_xay_ra_khi_cap_nhat": "An error occurred while updating!",
+    "co_loi_xay_ra_khi_gia_han": "An error occurred while renewing!",
     "nextstatus_hoat_dong_t_vitrimanagementpage": "{{khoa}} unit successfully!"
   },
   "xacThucOtpPage": {
@@ -2745,7 +2763,8 @@
     "dang_nhap": "Sign in",
     "quay_lai_dang_ky": "Return to registration",
     "vui_long_nhap_ma_otp": "Please enter the OTP code sent to your mailbox to activate the unit.",
-    "kich_hoat_don_vi": "Activate the unit"
+    "kich_hoat_don_vi": "Activate the unit",
+    "xac_thuc_otp": "Verify OTP"
   },
   "phongBanFormModal": {
     "ten_phong_ban": "Department name",
@@ -2916,24 +2935,24 @@
     "const_onopenchange_keys_string_const": "];\n\n  const onOpenChange = (keys: string[]) => {\n    const latestOpenKey = keys.find(key => !openKeys.includes(key));\n    if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey) === -1) {\n      setOpenKeys(keys);\n    } else {\n      setOpenKeys(latestOpenKey ? [latestOpenKey] : []);\n    }\n  };\n\n  // Convert the path name into accented Vietnamese on the Breadcrumb\n  const translatePath = (path: string) => {\n    const maps: Record<string, string> = {",
     "img_src_itamicon_nho_tro": ")}>\n                <img\n                  src={ItamIcon} // Remember to point to the correct import variable for your image\n                  alt=",
     "img_src_itamicon_nho_tro_1": ")}>\n              <img\n                src={ItamIcon} // Remember to point to the correct import variable for your image\n                alt=",
-    "danh_sach_don_vi": "Danh sach don vi",
+    "danh_sach_don_vi": "Units List",
     "phai_dark_mode_role_selector": "Phai dark mode role selector profile",
     "authstore_currentuserprofile_email_chua_thiet": "Authstore currentuserprofile email chua thiet lap",
     "authstore_currentuserprofile_sodienthoai_chua_thiet": "Authstore currentuserprofile sodienthoai chua thiet lap",
     "authstore_currentuserprofile_chucvu_chuyen_vien": "Authstore currentuserprofile chucvu chuyen vien ky thuat",
     "authstore_currentuserprofile_tenphongban_phong_ban": "Authstore currentuserprofile tenphongban phong ban mac dinh",
-    "phieu_dieu_chuyen": "Phieu dieu chuyen",
-    "quan_ly_don_vi": "Quan ly don vi",
-    "don_hang_mua_sam": "Don hang mua sam",
-    "quan_ly_tai_san": "Quan ly tai san",
-    "mau_tai_san": "Mau tai san",
-    "phieu_cap_phat": "Phieu cap phat",
-    "phieu_thu_hoi": "Phieu thu hoi",
-    "phieu_thanh_ly": "Phieu thanh ly",
-    "bao_hanh_va_bao_tri": "Bao hanh va bao tri",
-    "quan_ly_kiem_ke": "Quan ly kiem ke",
-    "phieu_nhap_tai_san": "Phieu nhap tai san",
-    "nguoi_dung": "Nguoi dung"
+    "phieu_dieu_chuyen": "Transfer Tickets",
+    "quan_ly_don_vi": "Unit Management",
+    "don_hang_mua_sam": "Purchase Orders",
+    "quan_ly_tai_san": "Asset Management",
+    "mau_tai_san": "Asset Models",
+    "phieu_cap_phat": "Allocation Tickets",
+    "phieu_thu_hoi": "Retrieval Tickets",
+    "phieu_thanh_ly": "Liquidation Tickets",
+    "bao_hanh_va_bao_tri": "Warranty & Maintenance",
+    "quan_ly_kiem_ke": "Inventory Management",
+    "phieu_nhap_tai_san": "Asset Receipt Tickets",
+    "nguoi_dung": "Users"
   },
   "loaiTaiSanFormModal": {
     "chi_tiet_loai_tai": "Asset type details",
@@ -2974,6 +2993,6 @@
     "cac_nut_bam_hanh_dong": "{/* Các nút bấm hành động */}"
   },
   "languageSwitcher": {
-    "tieng_viet_vi": "Tieng viet vi"
+    "tieng_viet_vi": "Vietnamese (VI)"
   }
 }

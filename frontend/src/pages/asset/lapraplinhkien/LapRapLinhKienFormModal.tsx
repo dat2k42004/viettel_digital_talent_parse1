@@ -53,9 +53,7 @@ export const LapRapFormModal: React.FC<LapRapFormModalProps> = ({
       onCancel={onCancel}
       confirmLoading={loading}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy bỏ
-        </Button>,
+        <Button key="cancel" onClick={onCancel}>{t('common.cancel')}</Button>,
         <Button key="submit" type="primary" onClick={handleSubmit} loading={loading}>
           Xác nhận lắp ráp
         </Button>,

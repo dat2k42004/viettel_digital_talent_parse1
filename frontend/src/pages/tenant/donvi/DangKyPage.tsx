@@ -62,7 +62,7 @@ export const DangKyPage: React.FC = () => {
       >
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Title level={3} style={{ margin: 0 }}>
-            Đăng ký Đơn vị
+            {t('dangKyPage.dang_ky_don_vi_1')}
           </Title>
           <Text type="secondary">{t('dangKyPage.cung_cap_thong_tin')}</Text>
         </div>
@@ -73,7 +73,7 @@ export const DangKyPage: React.FC = () => {
           onFinish={handleDangKy}
         >
           <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginBottom: 16 }}>
-            1. Thông tin Đơn vị
+            {t('dangKyDonViPage.1_thong_tin_don_vi')}
           </Title>
           
           <Row gutter={16}>
@@ -118,7 +118,7 @@ export const DangKyPage: React.FC = () => {
           </Row>
 
           <Title level={5} style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 8, marginTop: 12, marginBottom: 16 }}>
-            2. Thông tin Tài khoản Admin Đơn vị
+            {t('dangKyDonViPage.2_thong_tin_tai_khoan_admin_don_vi')}
           </Title>
 
           <Row gutter={16}>
@@ -173,7 +173,7 @@ export const DangKyPage: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Link to="/login">{t('dangKyPage.quay_lai_dang_nhap')}</Link>
               <Button type="primary" htmlType="submit" loading={loading} size="large">
-                Tiếp tục đăng ký
+                {t('dangKyPage.tiep_tuc_dang_ky')}
               </Button>
             </div>
           </Form.Item>

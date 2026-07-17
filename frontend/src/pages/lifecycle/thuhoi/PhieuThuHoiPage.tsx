@@ -327,7 +327,7 @@ export const PhieuThuHoiPage: React.FC = observer(() => {
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_PHIEU_THU_HOI_TAI_SAN}>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
-                            Lập phiếu thu hồi
+                            {t('phieuThuHoiPage.lap_phieu_thu_hoi')}
                         </Button>
                     </QuyenHanGuard>
                 </div>

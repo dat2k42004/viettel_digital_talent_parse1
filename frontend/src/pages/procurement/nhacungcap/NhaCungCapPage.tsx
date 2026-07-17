@@ -243,7 +243,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
                         <Button size="small">
-                            Thao tác <DownOutlined />
+                            {t('common.actionBtn')} <DownOutlined />
                         </Button>
                     </Dropdown>
                 );
@@ -257,10 +257,10 @@ export const NhaCungCapPage: React.FC = observer(() => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <div>
                         <Title level={3} style={{ margin: 0 }}>
-                            Nhà cung cấp & Đối tác
+                            {t('nhaCungCapPage.nha_cung_cap_doi_tac')}
                         </Title>
                         <Text type="secondary">
-                            Quản lý danh bạ các đối tác cung ứng vật tư, trang thiết bị và bản quyền phần mềm.
+                            {t('nhaCungCapPage.quan_ly_danh_ba_cac')}
                         </Text>
                     </div>
                     <QuyenHanGuard quyenYeuCau={QUYEN.THEM_NHA_CUNG_CAP}>
@@ -273,7 +273,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                                 setIsFormOpen(true);
                             }}
                         >
-                            Thêm nhà cung cấp
+                            {t('nhaCungCapPage.them_nha_cung_cap')}
                         </Button>
                     </QuyenHanGuard>
                 </div>
@@ -305,7 +305,7 @@ export const NhaCungCapPage: React.FC = observer(() => {
                         <Col xs={24} md={6}>
                             <Space>
                                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                                    Tìm kiếm
+                                    {t('common.search')}
                                 </Button>
                                 <Button onClick={handleReset}>{t('viTriManagementPage.lam_moi')}</Button>
                             </Space>

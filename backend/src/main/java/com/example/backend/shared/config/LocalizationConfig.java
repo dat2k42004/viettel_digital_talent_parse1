@@ -1,4 +1,4 @@
-package com.example.backend.config;
+package com.example.backend.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,8 @@ import java.util.Locale;
 public class LocalizationConfig {
 
      /**
-      * LocaleResolver tự động trích xuất thông tin ngôn ngữ từ HTTP Header "Accept-Language"
+      * LocaleResolver tự động trích xuất thông tin ngôn ngữ từ HTTP Header
+      * "Accept-Language"
       */
      @Bean
      public LocaleResolver localeResolver() {
@@ -27,12 +28,14 @@ public class LocalizationConfig {
      }
 
      /**
-      * MessageSource liên kết các file message .properties phục vụ tra cứu thông tin dịch
+      * MessageSource liên kết các file message .properties phục vụ tra cứu thông tin
+      * dịch
       */
      @Bean
      public ResourceBundleMessageSource messageSource() {
           ResourceBundleMessageSource source = new ResourceBundleMessageSource();
-          // Đường dẫn file bắt đầu bằng messages (tìm messages_vi.properties, messages_en.properties)
+          // Đường dẫn file bắt đầu bằng messages (tìm messages_vi.properties,
+          // messages_en.properties)
           source.setBasenames("messages");
           source.setDefaultEncoding(StandardCharsets.UTF_8.name());
           // Cho phép trả về mã code nếu không tìm thấy key dịch tương ứng thay vì ném lỗi

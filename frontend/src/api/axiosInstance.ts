@@ -6,8 +6,9 @@ import i18n from '../config/i18n';
 
 // Instance gốc kết nối Backend Spring Boot
 export const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080',
-  timeout: 15000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  timeout: 30000,
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use((config) => {

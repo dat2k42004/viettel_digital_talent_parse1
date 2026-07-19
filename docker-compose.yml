@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # 1. MySQL Database Service
+  mysql_db:
+    image: mysql:8.0
+    container_name: itam_mysql_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "24102004"
+      MYSQL_DATABASE: "itam_db"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Automatically execute SQL script to initialize DB structure, roles, and permissions
+      - ./backend/src/main/resources/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - itam_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p24102004"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # 2. Redis Caching Service
+  redis_cache:
+    image: redis:7-alpine
+    container_name: itam_redis_cache
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 24102004
+    volumes:
+      - redis_data:/data
+    networks:
+      - itam_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. RabbitMQ Message Broker Service
+  rabbitmq_broker:
+    image: rabbitmq:3-management-alpine
+    container_name: itam_rabbitmq_broker
+    ports:
+      - "5672:5672"       # AMQP port
+      - "15672:15672"     # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "24102004"
+    networks:
+      - itam_network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # 4. Spring Boot Backend Service
+  backend_app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: itam_backend_app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8080
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_NAME=itam_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=24102004
+      - REDIS_HOST=redis_cache
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=24102004
+      - RABBITMQ_HOST=rabbitmq_broker
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=admin
+      - RABBITMQ_PASSWORD=24102004
+      - JWT_SECRET=m9enVDe6U4uBwv9NpYaLhQE3nVQpqIoi1HuiPanBPC8=
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+      redis_cache:
+        condition: service_healthy
+      rabbitmq_broker:
+        condition: service_healthy
+    networks:
+      - itam_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/swagger-ui.html || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # 5. React Frontend Service
+  frontend_app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: itam_frontend_app
+    ports:
+      - "80:80"
+    depends_on:
+      backend_app:
+        condition: service_healthy
+    networks:
+      - itam_network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  itam_network:
+    driver: bridge

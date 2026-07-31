@@ -30,11 +30,15 @@ public class R2StorageConfig {
     @Bean
     public S3Client s3Client() {
         Region s3Region = "auto".equalsIgnoreCase(region) ? Region.US_EAST_1 : Region.of(region);
+        URI endpointUri = parseEndpointUri(endpoint);
 
         return S3Client.builder()
-                .endpointOverride(URI.create(endpoint))
+                .endpointOverride(endpointUri)
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
+                        AwsBasicCredentials.create(
+                                (accessKey != null && !accessKey.isBlank()) ? accessKey : "dummy_access_key",
+                                (secretKey != null && !secretKey.isBlank()) ? secretKey : "dummy_secret_key"
+                        )
                 ))
                 .region(s3Region)
                 .serviceConfiguration(S3Configuration.builder()
@@ -46,16 +50,39 @@ public class R2StorageConfig {
     @Bean
     public S3Presigner s3Presigner() {
         Region s3Region = "auto".equalsIgnoreCase(region) ? Region.US_EAST_1 : Region.of(region);
+        URI endpointUri = parseEndpointUri(endpoint);
 
         return S3Presigner.builder()
-                .endpointOverride(URI.create(endpoint))
+                .endpointOverride(endpointUri)
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
+                        AwsBasicCredentials.create(
+                                (accessKey != null && !accessKey.isBlank()) ? accessKey : "dummy_access_key",
+                                (secretKey != null && !secretKey.isBlank()) ? secretKey : "dummy_secret_key"
+                        )
                 ))
                 .region(s3Region)
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .build())
                 .build();
+    }
+
+    private URI parseEndpointUri(String rawEndpoint) {
+        if (rawEndpoint == null || rawEndpoint.isBlank()) {
+            return URI.create("https://placeholder.r2.cloudflarestorage.com");
+        }
+        String formatted = rawEndpoint.trim();
+        if (!formatted.startsWith("http://") && !formatted.startsWith("https://")) {
+            formatted = "https://" + formatted;
+        }
+        try {
+            URI uri = URI.create(formatted);
+            if (uri.getScheme() == null) {
+                return URI.create("https://" + formatted);
+            }
+            return uri;
+        } catch (Exception e) {
+            return URI.create("https://placeholder.r2.cloudflarestorage.com");
+        }
     }
 }

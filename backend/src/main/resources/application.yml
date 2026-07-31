@@ -105,7 +105,7 @@ app:
 
   # Cloudflare R2 Config (Tuong thich voi AWS S3 API)
   r2:
-    endpoint: ${R2_ENDPOINT:your_cloudflare_r2_endpoint_url}
+    endpoint: ${R2_ENDPOINT:https://your_cloudflare_r2_endpoint_url}
     region: ${R2_REGION:auto} # R2 thuong dung auto region
     access-key: ${R2_ACCESS_KEY:your_cloudflare_r2_access_key}
     secret-key: ${R2_SECRET_KEY:your_cloudflare_r2_secret_key}

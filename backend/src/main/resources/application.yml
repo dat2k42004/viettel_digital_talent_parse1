@@ -19,11 +19,21 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+
+  # ===============================
+  # AUTOMATIC DATA INITIALIZATION
+  # ===============================
+  sql:
+    init:
+      mode: ${SPRING_SQL_INIT_MODE:always}
+      schema-locations: classpath:sql/init.sql
+      continue-on-error: true
 
   # ===============================
   # FLYWAY MIGRATION (DISABLED)

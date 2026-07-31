@@ -297,7 +297,7 @@ FROM quyen;
 -- =======================================================================
 INSERT INTO nguoi_dung (id_don_vi, id_phong_ban, ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_nguoi_dung, ten_dem_nguoi_dung, ten_nguoi_dung, email, so_dien_thoai, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES 
-(NULL, NULL, 'NV-00000', 'admin', '$2a$10$7R9rR5.2f93gQjU2p5fKneM8rS.b3qZ8h2Tz2R8xW/HjGZ9vH6w1S', 'Hệ Thống', 'Quản Trị', 'Tối Cao', 'superadmin@itam.com', '0123456789', 'HOAT_DONG', NOW(), NOW());
+(NULL, NULL, 'NV-00000', 'admin', '$2a$10$kxkYprwzh882ZxqwBJGUoeeMdQa/s3cMg3by3D1DdZSFjbdJYhnde', 'Hệ Thống', 'Quản Trị', 'Tối Cao', 'superadmin@itam.com', '0123456789', 'HOAT_DONG', NOW(), NOW());
 
 
 -- =======================================================================

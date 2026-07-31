@@ -35,6 +35,8 @@ public interface VaiTroRepository extends JpaRepository<VaiTro, Long>, JpaSpecif
 
     boolean existsByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull(String maVaiTro);
 
+    Optional<VaiTro> findByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull(String maVaiTro);
+
     @Modifying
     @Query("UPDATE VaiTro v SET v.trangThai = :trangThai WHERE v.idDonVi = :idDonVi AND v.thoiGianXoa IS NULL")
     void updateTrangThaiByIdDonVi(Long idDonVi, TrangThaiCoBanEnum trangThai);

@@ -198,9 +198,9 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
             <Form.Item
               name="nenTangHoTro"
               label={t('taiSanPhanMemPage.nen_tang_ho_tro')}
-              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.nen_tang_ho_tro_khong') }]}
+              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.nen_tang_ho_tro') }]}
             >
-              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_windows_linux_macos')} />
+              <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_windows_macos')} />
             </Form.Item>
           </Col>
         </Row>
@@ -210,7 +210,7 @@ export const TaiSanPhanMemFormModal: React.FC<TaiSanPhanMemFormModalProps> = ({
             <Form.Item
               name="hinhThucCapPhep"
               label={t('taiSanPhanMemPage.hinh_thuc_cap_phep')}
-              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.hinh_thuc_cap_phep_khong') }]}
+              rules={[{ max: 100, message: t('taiSanPhanMemFormModal.hinh_thuc_cap_phep') }]}
             >
               <Input disabled={isView} placeholder={t('taiSanPhanMemFormModal.vi_du_vinh_vien_theo')} />
             </Form.Item>

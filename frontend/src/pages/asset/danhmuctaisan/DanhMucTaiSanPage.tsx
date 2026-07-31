@@ -249,7 +249,7 @@ export const DanhMucTaiSanPage: React.FC = observer(() => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <Title level={3} style={{ margin: 0 }}>
-              {t('menu.assetCategories')}
+              {t('menu.categories')}
             </Title>
             <Text type="secondary">
               {t('danhMucTaiSanPage.phan_loai_tai_san_theo')}

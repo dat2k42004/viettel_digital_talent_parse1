@@ -193,7 +193,7 @@ export const TaiSanPhanCungFormModal: React.FC<TaiSanPhanCungFormModalProps> = (
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item name="moTa" label={t('donViFormModal.mo_ta')}>
-              <Input.TextArea disabled={isView} rows={3} placeholder={t('taiSanPhanCungFormModal.nhap_mo_ta_chi_tiet')} />
+              <Input.TextArea disabled={isView} rows={3} placeholder={t('taiSanPhanCungFormModal.mo_ta_thong_so')} />
             </Form.Item>
           </Col>
         </Row>

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Row, Col, Select, Card, Divider } from 'antd';
+import { Modal, Form, Input, Button, Row, Col, Select, Card, Divider, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import type { SelectOption } from '../../../api-generated/models/selectOption';
 

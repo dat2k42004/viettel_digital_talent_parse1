@@ -1,8 +1,8 @@
-// tạo database
-CREATE DATABASE itam_db;
-USE itam_db;
+-- tạo database
+-- CREATE DATABASE IF NOT EXISTS itam_db;
+-- USE itam_db;
 
-// tạo phân quyền
+-- tạo phân quyền
 -- =======================================================================
 -- BƯỚC 1: KHỞI TẠO 29 NHÓM QUYỀN CHA (QUẢN LÝ DANH MỤC MENU)
 -- Không truyền cột 'id' để hệ thống tự động tăng (GenerationType.IDENTITY)

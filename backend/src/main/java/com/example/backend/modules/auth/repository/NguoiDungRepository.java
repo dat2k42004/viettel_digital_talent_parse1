@@ -15,6 +15,8 @@ import com.example.backend.shared.model.TrangThaiCoBanEnum;
 public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long>, JpaSpecificationExecutor<NguoiDung> {
     Optional<NguoiDung> findByTenDangNhapOrEmail(String tenDangNhap, String email);
 
+    List<NguoiDung> findAllByTenDangNhap(String tenDangNhap);
+
     Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
 
     Optional<NguoiDung> findByTenDangNhapAndThoiGianXoaIsNull(String tenDangNhap);

@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 })
 public class KeHoachBaoTriDinhKy extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @Column(name = "ma_ke_hoach", length = 50)

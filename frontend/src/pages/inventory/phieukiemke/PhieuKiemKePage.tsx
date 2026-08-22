@@ -353,7 +353,7 @@ export const PhieuKiemKePage: React.FC = observer(() => {
 
     return (
         <div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="page-header">
                 <div>
                     <Title level={3} style={{ margin: 0 }}>{t('phieuKiemKePage.quan_ly_phieu_kiem')}</Title>
                     <Text type="secondary">{t('phieuKiemKePage.thuc_hien_doi_soat')}</Text>

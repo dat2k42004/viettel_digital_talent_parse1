@@ -334,7 +334,7 @@ export const PhieuDieuChuyenPage: React.FC = observer(() => {
     return (
         <QuyenHanGuard quyenYeuCau={QUYEN.XEM_PHIEU_DIEU_CHUYEN}>
             <div style={{ padding: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div className="page-header">
                     <div>
                         <Title level={3} style={{ margin: 0 }}>{t('phieuDieuChuyenPage.phieu_dieu_chuyen_tai')}</Title>
                         <Text type="secondary">{t('phieuDieuChuyenPage.quan_ly_viec_luan')}</Text>

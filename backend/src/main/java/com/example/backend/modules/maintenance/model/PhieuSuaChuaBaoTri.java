@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 })
 public class PhieuSuaChuaBaoTri extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @ManyToOne(fetch = FetchType.LAZY)

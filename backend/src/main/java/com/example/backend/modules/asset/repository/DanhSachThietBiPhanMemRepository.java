@@ -21,4 +21,11 @@ public interface DanhSachThietBiPhanMemRepository
     List<DanhSachThietBiPhanMem> findAllByIdInAndThoiGianXoaIsNull(Set<Long> ids);
 
     long countByThoiGianXoaIsNull();
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("UPDATE DanhSachThietBiPhanMem d SET d.qrCodeUrl = :url WHERE d.id = :id")
+    void updateQrCodeUrl(@org.springframework.data.repository.query.Param("id") Long id, @org.springframework.data.repository.query.Param("url") String url);
+
+    org.springframework.data.domain.Page<DanhSachThietBiPhanMem> findAllByQrCodeUrlIsNullAndThoiGianXoaIsNull(org.springframework.data.domain.Pageable pageable);
 }

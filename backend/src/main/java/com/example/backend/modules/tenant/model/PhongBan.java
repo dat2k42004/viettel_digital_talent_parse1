@@ -20,7 +20,7 @@ import java.time.LocalDate;
 public class PhongBan extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_don_vi")
+    @JoinColumn(name = "id_don_vi", nullable = false)
     private DonVi donVi;
 
     @Column(name = "ma_phong_ban", length = 50, unique = true)

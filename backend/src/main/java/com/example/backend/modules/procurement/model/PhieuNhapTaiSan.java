@@ -17,11 +17,11 @@ import lombok.Setter;
 })
 public class PhieuNhapTaiSan extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "id_don_hang_mua_sam")
+     @JoinColumn(name = "id_don_hang_mua_sam", nullable = false)
      private DonHangMuaSam donHangMuaSam;
 
      @Column(name = "id_nguoi_nhap")

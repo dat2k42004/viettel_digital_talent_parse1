@@ -266,7 +266,7 @@ export const TaiSanPhanMemPage: React.FC = observer(() => {
   return (
     <QuyenHanGuard quyenYeuCau={QUYEN.XEM_TAI_SAN_PHAN_MEM}>
       <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="page-header">
           <div>
             <Title level={3} style={{ margin: 0 }}>
               {t('menu.softwareModels')}

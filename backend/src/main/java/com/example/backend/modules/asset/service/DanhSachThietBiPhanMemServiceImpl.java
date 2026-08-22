@@ -38,6 +38,8 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
 
     private final DanhSachThietBiPhanMemRepository thietBiPhanMemRepository;
     private final TaiSanPhanMemRepository taiSanPhanMemRepository;
+    @org.springframework.context.annotation.Lazy
+    private final org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate;
 
     private Long getRequiredTenantId() {
         Long tenantId = DonViContextHolder.getTenantId();
@@ -157,6 +159,7 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                             .trangThai(t.getTrangThai() != null ? t.getTrangThai().getValue() : null)
                             .thoiGianTao(t.getThoiGianTao())
                             .thoiGianCapNhat(t.getThoiGianCapNhat())
+                            .qrCodeUrl(t.getQrCodeUrl())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -198,6 +201,8 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
         capNhatThongTin(thietBi, request);
         thietBi.setTrangThai(com.example.backend.shared.model.TrangThaiVanHanhEnum.KHOA);
         thietBi = thietBiPhanMemRepository.save(thietBi);
+
+        publishQrEvent(thietBi.getId(), com.example.backend.modules.asset.event.AssetType.SOFTWARE_LICENSE, thietBi.getKeyBanQuyen(), idDonVi);
 
         return mapToResponse(thietBi);
     }
@@ -327,7 +332,29 @@ public class DanhSachThietBiPhanMemServiceImpl implements DanhSachThietBiPhanMem
                 .trangThai(thietBi.getTrangThai() != null ? thietBi.getTrangThai().getValue() : null)
                 .thoiGianTao(thietBi.getThoiGianTao())
                 .thoiGianCapNhat(thietBi.getThoiGianCapNhat())
+                .qrCodeUrl(thietBi.getQrCodeUrl())
                 .build();
+    }
+
+    private void publishQrEvent(Long id, com.example.backend.modules.asset.event.AssetType type, String code, Long tenantId) {
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        com.example.backend.modules.asset.event.AssetQrCodeEvent event = com.example.backend.modules.asset.event.AssetQrCodeEvent.builder()
+                                .assetId(id)
+                                .assetType(type)
+                                .assetCode(code)
+                                .tenantId(tenantId != null ? tenantId.toString() : null)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                        rabbitTemplate.convertAndSend(
+                                com.example.backend.shared.config.RabbitMQConfig.EXCHANGE_ASSET_QR,
+                                com.example.backend.shared.config.RabbitMQConfig.ROUTING_KEY_ASSET_QR,
+                                event);
+                    }
+                }
+        );
     }
 
     @Override

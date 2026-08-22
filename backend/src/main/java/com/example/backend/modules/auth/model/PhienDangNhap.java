@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class PhienDangNhap extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_nguoi_dung")
+    @JoinColumn(name = "id_nguoi_dung", nullable = false)
     private NguoiDung nguoiDung;
 
     @Column(name = "id_don_vi")

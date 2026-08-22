@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 })
 public class PhieuKiemKe extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "dot_kiem_ke", referencedColumnName = "id")
+     @JoinColumn(name = "dot_kiem_ke", referencedColumnName = "id", nullable = false)
      private DotKiemKe dotKiemKe;
 
      @Column(name = "ma_phieu_kiem_ke", length = 50)

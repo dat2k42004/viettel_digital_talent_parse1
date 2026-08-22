@@ -488,6 +488,7 @@ export const BaoCaoPage: React.FC = observer(() => {
             dataSource={dataTonKho}
             loading={loading}
             pagination={commonPagination}
+            scroll={{ x: 'max-content' }}
             expandable={{
               expandedRowRender: expandedRowTonKho,
               rowExpandable: (record) => !!record.danhSachChiTiet && record.danhSachChiTiet.length > 0,
@@ -503,6 +504,7 @@ export const BaoCaoPage: React.FC = observer(() => {
             dataSource={dataCapPhat}
             loading={loading}
             pagination={commonPagination}
+            scroll={{ x: 'max-content' }}
             expandable={{
               expandedRowRender: expandedRowCapPhat,
               rowExpandable: (record) => !!record.danhSachChiTiet && record.danhSachChiTiet.length > 0,
@@ -518,6 +520,7 @@ export const BaoCaoPage: React.FC = observer(() => {
             dataSource={dataBaoTri}
             loading={loading}
             pagination={commonPagination}
+            scroll={{ x: 'max-content' }}
             expandable={{
               expandedRowRender: expandedRowBaoTri,
               rowExpandable: (record) => !!record.danhSachChiTiet && record.danhSachChiTiet.length > 0,
@@ -533,6 +536,7 @@ export const BaoCaoPage: React.FC = observer(() => {
             dataSource={dataToanSan}
             loading={loading}
             pagination={commonPagination}
+            scroll={{ x: 'max-content' }}
             rowKey="idDonVi"
             bordered
           />
@@ -556,8 +560,8 @@ export const BaoCaoPage: React.FC = observer(() => {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ width: '100%', minWidth: 0 }}>
+      <div className="page-header">
         <div>
           <Title level={2} style={{ margin: 0 }}>
             {t('baoCaoPage.he_thong_bao_cao_thong_ke_tai_san')}
@@ -580,7 +584,7 @@ export const BaoCaoPage: React.FC = observer(() => {
           )
         ) : (
           authStore.kiemTraQuyen(QUYEN.XEM_BAO_CAO) && (
-            <Space>
+            <Space wrap>
               <Button
                 type="primary"
                 icon={<FileExcelOutlined />}

@@ -23,4 +23,11 @@ public interface DanhSachThietBiPhanCungRepository
     boolean existsByMaTheTaiSanAndIdDonViAndThoiGianXoaIsNull(String maTheTaiSan, Long idDonVi);
 
     long countByThoiGianXoaIsNull();
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("UPDATE DanhSachThietBiPhanCung d SET d.qrCodeUrl = :url WHERE d.id = :id")
+    void updateQrCodeUrl(@org.springframework.data.repository.query.Param("id") Long id, @org.springframework.data.repository.query.Param("url") String url);
+
+    org.springframework.data.domain.Page<DanhSachThietBiPhanCung> findAllByQrCodeUrlIsNullAndThoiGianXoaIsNull(org.springframework.data.domain.Pageable pageable);
 }

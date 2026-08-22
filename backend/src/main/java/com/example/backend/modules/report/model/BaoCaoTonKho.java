@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class BaoCaoTonKho extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @Column(name = "id_vi_tri")

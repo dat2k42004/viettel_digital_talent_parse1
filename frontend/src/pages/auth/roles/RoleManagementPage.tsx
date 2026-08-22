@@ -314,7 +314,7 @@ export const RoleManagementPage: React.FC = observer(() => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="page-header">
         <div>
           <Title level={2} style={{ margin: 0, fontSize: 24 }}>{t('roleManagementPage.quan_ly_vai_tro')}</Title>
           <Text type="secondary">{t('roleManagementPage.cau_hinh_nhom_vai')}</Text>

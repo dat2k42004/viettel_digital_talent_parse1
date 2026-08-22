@@ -314,8 +314,8 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
 
   return (
     <QuyenHanGuard quyenYeuCau={QUYEN.XEM_LINH_KIEN_PHAN_CUNG}>
-      <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ width: '100%', minWidth: 0 }}>
+        <div className="page-header">
           <div>
             <Title level={3} style={{ margin: 0 }}>
               {t('menu.hardwareComponents')}
@@ -340,8 +340,8 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
         </div>
 
         <Card style={{ marginBottom: 24 }}>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={6}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col xs={24} sm={12} lg={6}>
               <Input
                 placeholder={t('linhKienPhanCungPage.so_serial_ma_thiet')}
                 value={keyword}
@@ -349,7 +349,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 prefix={<SearchOutlined />}
               />
             </Col>
-            <Col xs={24} md={6}>
+            <Col xs={24} sm={12} lg={6}>
               <DatePicker.RangePicker
                 style={{ width: '100%' }}
                 value={dateRange}
@@ -358,7 +358,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 format="DD/MM/YYYY"
               />
             </Col>
-            <Col xs={24} md={4}>
+            <Col xs={24} sm={12} lg={4}>
               <Select
                 placeholder={t('linhKienPhanCungPage.trang_thai_kho')}
                 style={{ width: '100%' }}
@@ -373,7 +373,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 ]}
               />
             </Col>
-            <Col xs={24} md={4}>
+            <Col xs={24} sm={12} lg={4}>
               <Select
                 placeholder={t('linhKienPhanCungPage.van_hanh')}
                 style={{ width: '100%' }}
@@ -387,8 +387,8 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
                 ]}
               />
             </Col>
-            <Col xs={24} md={4}>
-              <Space>
+            <Col xs={24} sm={12} lg={4}>
+              <Space wrap style={{ width: '100%', justifyContent: 'flex-start' }}>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   {t('common.search')}
                 </Button>
@@ -404,6 +404,7 @@ export const LinhKienPhanCungPage: React.FC = observer(() => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: currentPage,
               pageSize,

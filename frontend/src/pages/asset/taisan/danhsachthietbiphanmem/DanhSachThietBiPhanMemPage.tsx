@@ -324,8 +324,8 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
 
   return (
     <QuyenHanGuard quyenYeuCau={QUYEN.XEM_THIET_BI_PHAN_MEM}>
-      <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ width: '100%', minWidth: 0 }}>
+        <div className="page-header">
           <div>
             <Title level={3} style={{ margin: 0 }}>
               {t('menu.softwareLicenses')}
@@ -350,8 +350,8 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
         </div>
 
         <Card style={{ marginBottom: 24 }}>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={6}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col xs={24} sm={12} lg={8}>
               <Input
                 placeholder={t('danhSachThietBiPhanMemPage.key_ban_quyen_ma')}
                 value={keyword}
@@ -359,7 +359,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 prefix={<SearchOutlined />}
               />
             </Col>
-            <Col xs={24} md={6}>
+            <Col xs={24} sm={12} lg={8}>
               <DatePicker.RangePicker
                 style={{ width: '100%' }}
                 value={dateRangeMua}
@@ -368,7 +368,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 format="DD/MM/YYYY"
               />
             </Col>
-            <Col xs={24} md={6}>
+            <Col xs={24} sm={12} lg={8}>
               <DatePicker.RangePicker
                 style={{ width: '100%' }}
                 value={dateRangeHetHan}
@@ -377,9 +377,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 format="DD/MM/YYYY"
               />
             </Col>
-          </Row>
-          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-            <Col xs={24} md={6}>
+            <Col xs={24} sm={12} lg={8}>
               <Select
                 placeholder={t('linhKienPhanCungPage.trang_thai_kho')}
                 style={{ width: '100%' }}
@@ -393,7 +391,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 ]}
               />
             </Col>
-            <Col xs={24} md={6}>
+            <Col xs={24} sm={12} lg={8}>
               <Select
                 placeholder={t('linhKienPhanCungPage.van_hanh')}
                 style={{ width: '100%' }}
@@ -407,8 +405,8 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
                 ]}
               />
             </Col>
-            <Col xs={24} md={6}>
-              <Space>
+            <Col xs={24} sm={12} lg={8}>
+              <Space wrap style={{ width: '100%', justifyContent: 'flex-start' }}>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                   {t('common.search')}
                 </Button>
@@ -424,6 +422,7 @@ export const DanhSachThietBiPhanMemPage: React.FC = observer(() => {
             columns={columns}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: currentPage,
               pageSize,

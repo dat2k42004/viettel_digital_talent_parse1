@@ -21,4 +21,11 @@ public interface LinhKienPhanCungRepository
     List<LinhKienPhanCung> findAllByIdInAndThoiGianXoaIsNull(Set<Long> ids);
 
     long countByThoiGianXoaIsNull();
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("UPDATE LinhKienPhanCung l SET l.qrCodeUrl = :url WHERE l.id = :id")
+    void updateQrCodeUrl(@org.springframework.data.repository.query.Param("id") Long id, @org.springframework.data.repository.query.Param("url") String url);
+
+    org.springframework.data.domain.Page<LinhKienPhanCung> findAllByQrCodeUrlIsNullAndThoiGianXoaIsNull(org.springframework.data.domain.Pageable pageable);
 }

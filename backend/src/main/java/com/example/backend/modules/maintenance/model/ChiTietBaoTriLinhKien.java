@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class ChiTietBaoTriLinhKien extends BaseEntity {
 
      @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "phieu_sua_chua_bao_tri", referencedColumnName = "id")
+     @JoinColumn(name = "phieu_sua_chua_bao_tri", referencedColumnName = "id", nullable = false)
      private PhieuSuaChuaBaoTri phieuSuaChuaBaoTri;
 
      @Column(name = "id_linh_kien_phan_cung")

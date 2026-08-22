@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 public class ViTri extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_don_vi")
+    @JoinColumn(name = "id_don_vi", nullable = false)
     private DonVi donVi;
 
     @Column(name = "ma_vi_tri", length = 50, unique = true)

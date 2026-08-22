@@ -16,7 +16,7 @@ import com.example.backend.shared.model.BaseEntity;
 })
 public class DotKiemKe extends BaseEntity {
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @Column(name = "ma_dot_kiem_ke", length = 50)

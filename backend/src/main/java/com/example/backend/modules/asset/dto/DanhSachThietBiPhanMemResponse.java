@@ -30,4 +30,5 @@ public class DanhSachThietBiPhanMemResponse {
     private String trangThai;
     private LocalDateTime thoiGianTao;
     private LocalDateTime thoiGianCapNhat;
+    private String qrCodeUrl;
 }

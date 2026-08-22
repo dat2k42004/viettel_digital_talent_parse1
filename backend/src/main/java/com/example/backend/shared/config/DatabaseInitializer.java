@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -33,46 +34,46 @@ public class DatabaseInitializer implements CommandLineRunner {
         try {
             log.info("Khởi tạo / Kiểm tra tài khoản Super Admin (username: admin)...");
 
-            Optional<NguoiDung> adminOpt = nguoiDungRepository.findByTenDangNhap("admin");
-            NguoiDung admin;
-
-            if (adminOpt.isPresent()) {
-                admin = adminOpt.get();
-                log.info("Tìm thấy tài khoản admin (ID: {}). Tiến hành cập nhật lại mật khẩu admin@123 chuẩn BCrypt...", admin.getId());
-            } else {
-                admin = new NguoiDung();
-                admin.setTenDangNhap("admin");
-                admin.setMaNguoiDung("NV-00000");
-                admin.setHoNguoiDung("Hệ Thống");
-                admin.setTenDemNguoiDung("Quản Trị");
-                admin.setTenNguoiDung("Tối Cao");
-                admin.setEmail("superadmin@itam.com");
-                admin.setSoDienThoai("0123456789");
+            List<NguoiDung> adminList = nguoiDungRepository.findAllByTenDangNhap("admin");
+            if (adminList.isEmpty()) {
+                NguoiDung newAdmin = new NguoiDung();
+                newAdmin.setTenDangNhap("admin");
+                newAdmin.setMaNguoiDung("NV-00000");
+                newAdmin.setHoNguoiDung("Hệ Thống");
+                newAdmin.setTenDemNguoiDung("Quản Trị");
+                newAdmin.setTenNguoiDung("Tối Cao");
+                newAdmin.setEmail("superadmin@itam.com");
+                newAdmin.setSoDienThoai("0123456789");
+                adminList.add(newAdmin);
                 log.info("Tạo mới tài khoản admin với mật khẩu admin@123...");
+            } else {
+                log.info("Tìm thấy {} bản ghi tài khoản admin. Tiến hành đồng bộ mật khẩu admin@123 chuẩn BCrypt...", adminList.size());
             }
 
-            // Mã hóa mật khẩu "admin@123" trực tiếp bằng Bean PasswordEncoder của Spring Boot
-            admin.setMatKhau(passwordEncoder.encode("admin@123"));
-            admin.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
-            admin.setThoiGianXoa(null);
-            admin = nguoiDungRepository.save(admin);
+            for (NguoiDung admin : adminList) {
+                // Mã hóa mật khẩu "admin@123" trực tiếp bằng Bean PasswordEncoder của Spring Boot
+                admin.setMatKhau(passwordEncoder.encode("admin@123"));
+                admin.setTrangThai(TrangThaiCoBanEnum.HOAT_DONG);
+                admin.setThoiGianXoa(null);
+                NguoiDung savedAdmin = nguoiDungRepository.save(admin);
 
-            // Đảm bảo gán vai trò ROLE_SUPER_ADMIN cho tài khoản admin
-            Optional<VaiTro> roleOpt = vaiTroRepository.findByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull("ROLE_SUPER_ADMIN");
-            if (roleOpt.isPresent()) {
-                VaiTro superAdminRole = roleOpt.get();
-                boolean hasRole = nguoiDungVaiTroRepository
-                        .findByNguoiDungId(admin.getId()).stream()
-                        .anyMatch(nv -> nv.getVaiTro() != null && superAdminRole.getId().equals(nv.getVaiTro().getId()));
+                // Đảm bảo gán vai trò ROLE_SUPER_ADMIN cho tài khoản admin
+                Optional<VaiTro> roleOpt = vaiTroRepository.findByMaVaiTroAndIdDonViIsNullAndThoiGianXoaIsNull("ROLE_SUPER_ADMIN");
+                if (roleOpt.isPresent()) {
+                    VaiTro superAdminRole = roleOpt.get();
+                    boolean hasRole = nguoiDungVaiTroRepository
+                            .findByNguoiDungId(savedAdmin.getId()).stream()
+                            .anyMatch(nv -> nv.getVaiTro() != null && superAdminRole.getId().equals(nv.getVaiTro().getId()));
 
-                if (!hasRole) {
-                    NguoiDungVaiTro userRole = new NguoiDungVaiTro();
-                    userRole.setNguoiDung(admin);
-                    userRole.setVaiTro(superAdminRole);
-                    userRole.setThoiGianBatDau(LocalDateTime.now());
-                    userRole.setGhiChuGan("Kích hoạt đặc quyền quản trị tối cao toàn diện hệ thống");
-                    nguoiDungVaiTroRepository.save(userRole);
-                    log.info("Đã gán vai trò ROLE_SUPER_ADMIN cho tài khoản admin.");
+                    if (!hasRole) {
+                        NguoiDungVaiTro userRole = new NguoiDungVaiTro();
+                        userRole.setNguoiDung(savedAdmin);
+                        userRole.setVaiTro(superAdminRole);
+                        userRole.setThoiGianBatDau(LocalDateTime.now());
+                        userRole.setGhiChuGan("Kích hoạt đặc quyền quản trị tối cao toàn diện hệ thống");
+                        nguoiDungVaiTroRepository.save(userRole);
+                        log.info("Đã gán vai trò ROLE_SUPER_ADMIN cho tài khoản admin (ID: {}).", savedAdmin.getId());
+                    }
                 }
             }
 

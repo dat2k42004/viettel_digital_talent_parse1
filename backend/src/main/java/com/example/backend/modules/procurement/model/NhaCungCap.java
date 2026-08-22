@@ -23,7 +23,7 @@ public class NhaCungCap extends BaseEntity {
      @Column(name = "ma_nha_cung_cap", length = 50)
      private String maNhaCungCap;
 
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @Column(name = "ten_nha_cung_cap", length = 255)

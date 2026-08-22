@@ -167,8 +167,8 @@ export const DashboardPage: React.FC = observer(() => {
       {/* Bộ chọn Đơn vị dành cho Super Admin */}
       {authStore.kiemTraQuyen(QUYEN.XEM_QUAN_TRI_TOAN_SAN) && (
         <Card style={{ marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', borderRadius: 8 }}>
-          <Row align="middle" gutter={16}>
-            <Col>
+          <Row align="middle" gutter={[16, 8]}>
+            <Col xs={24} sm="auto">
               <Text strong>{t('dashboardPage.chon_don_vi_xem')}</Text>
             </Col>
             <Col xs={24} sm={12} md={8}>

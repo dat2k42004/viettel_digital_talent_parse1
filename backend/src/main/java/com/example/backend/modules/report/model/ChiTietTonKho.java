@@ -18,7 +18,7 @@ public class ChiTietTonKho extends BaseEntity {
      private Long idDonVi;
 
      @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "bao_cao_ton_kho_id")
+     @JoinColumn(name = "bao_cao_ton_kho_id", nullable = false)
      private BaoCaoTonKho baoCaoTonKho;
 
      @Column(name = "id_tai_san_cu_the")

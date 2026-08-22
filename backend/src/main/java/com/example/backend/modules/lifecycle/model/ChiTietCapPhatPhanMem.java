@@ -13,7 +13,7 @@ import lombok.Setter;
 public class ChiTietCapPhatPhanMem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phieu_cap_phat_tai_san")
+    @JoinColumn(name = "id_phieu_cap_phat_tai_san", nullable = false)
     private PhieuCapPhatTaiSan phieuCapPhatTaiSan;
 
     @Column(name = "id_tai_san_phan_mem")

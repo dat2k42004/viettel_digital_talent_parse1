@@ -1,0 +1,12 @@
+.git
+.gitignore
+.gradle
+build
+out
+bin
+tmp
+.vscode
+.idea
+*.log
+*.tmp
+*.bat

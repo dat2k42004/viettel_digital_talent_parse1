@@ -18,11 +18,11 @@ import java.time.LocalDateTime;
 public class NguoiDungQuyen extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_nguoi_dung")
+    @JoinColumn(name = "id_nguoi_dung", nullable = false)
     private NguoiDung nguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_quyen")
+    @JoinColumn(name = "id_quyen", nullable = false)
     private Quyen quyen;
 
     @Column(name = "id_don_vi")

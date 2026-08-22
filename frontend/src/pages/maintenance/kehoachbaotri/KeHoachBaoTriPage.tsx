@@ -366,7 +366,7 @@ export const KeHoachBaoTriPage: React.FC = observer(() => {
     return (
         <QuyenHanGuard quyenYeuCau={QUYEN.NHOM_KE_HOACH_BAO_TRI}>
             <div style={{ padding: 24, minHeight: 'calc(100vh - 112px)', borderRadius: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div className="page-header">
                     <div>
                         <Title level={3} style={{ margin: 0 }}>{t('keHoachBaoTriPage.ke_hoach_bao_tri')}</Title>
                         <Text type="secondary">{t('keHoachBaoTriPage.quan_ly_lap_ke')}</Text>

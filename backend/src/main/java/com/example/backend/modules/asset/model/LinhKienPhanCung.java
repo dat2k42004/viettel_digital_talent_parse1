@@ -49,4 +49,7 @@ public class LinhKienPhanCung extends BaseEntity {
     @Column(name = "trang_thai", length = 30)
     @Enumerated(EnumType.STRING)
     private com.example.backend.shared.model.TrangThaiVanHanhEnum trangThai;
+
+    @Column(name = "qr_code_url", length = 500)
+    private String qrCodeUrl;
 }

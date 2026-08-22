@@ -7,7 +7,7 @@
 -- BƯỚC 1: KHỞI TẠO 29 NHÓM QUYỀN CHA (QUẢN LÝ DANH MỤC MENU)
 -- Không truyền cột 'id' để hệ thống tự động tăng (GenerationType.IDENTITY)
 -- =======================================================================
-INSERT INTO quyen (id_quyen_cha, ma_quyen, ten_quyen, loai_quyen, duong_dan, biu_tuong, thu_tu_hien_thi, phuong_thuc_http, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
+INSERT IGNORE INTO quyen (id_quyen_cha, ma_quyen, ten_quyen, loai_quyen, duong_dan, biu_tuong, thu_tu_hien_thi, phuong_thuc_http, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES
 (NULL, 'NHOM_NGUOI_DUNG', 'Người dùng', 'NHOM_QUYEN', NULL, NULL, 1, NULL, 'HOAT_DONG', NOW(), NOW()),
 (NULL, 'NHOM_VAI_TRO', 'Vai trò', 'NHOM_QUYEN', NULL, NULL, 2, NULL, 'HOAT_DONG', NOW(), NOW()),
@@ -47,7 +47,7 @@ VALUES
 -- BƯỚC 2: KHỞI TẠO 153 BẢN GHI QUYỀN CON THAO TÁC (TỰ ĐỘNG TĂNG ID)
 -- (Đã map cứng id_quyen_cha từ 1 đến 27 tương ứng với nhóm cha tạo trước đó)
 -- =======================================================================
-INSERT INTO quyen (id_quyen_cha, ma_quyen, ten_quyen, loai_quyen, duong_dan, biu_tuong, thu_tu_hien_thi, phuong_thuc_http, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
+INSERT IGNORE INTO quyen (id_quyen_cha, ma_quyen, ten_quyen, loai_quyen, duong_dan, biu_tuong, thu_tu_hien_thi, phuong_thuc_http, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES
 -- Nhóm 1: Người dùng (id_quyen_cha = 1)
 (1, 'XEM_NGUOI_DUNG', 'Xem người dùng', 'THAO_TAC', NULL, NULL, 1, NULL, 'HOAT_DONG', NOW(), NOW()),
@@ -265,12 +265,12 @@ VALUES
 (27, 'THEM_LAP_RAP_LINH_KIEN', 'Thêm lắp ráp linh kiện', 'THAO_TAC', NULL, NULL, 2, NULL, 'HOAT_DONG', NOW(), NOW()),
 (27, 'SUA_LAP_RAP_LINH_KIEN', 'Sửa lắp ráp linh kiện', 'THAO_TAC', NULL, NULL, 3, NULL, 'HOAT_DONG', NOW(), NOW());
 
-// tạo tài khoản cho super admin và vai trò tương ứng với super admin 
+-- tạo tài khoản cho super admin và vai trò tương ứng với super admin 
 -- =======================================================================
 -- BƯỚC 1: KHỞI TẠO VAI TRÒ SUPER ADMIN
 -- (Bỏ trống cột 'id' để tự động tăng, id_don_vi = NULL để cô lập toàn sàn)
 -- =======================================================================
-INSERT INTO vai_tro (id_don_vi, ma_vai_tro, ten_vai_tro, mo_ta_vai_tro, la_he_thong, cap_do_uu_tien, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
+INSERT IGNORE INTO vai_tro (id_don_vi, ma_vai_tro, ten_vai_tro, mo_ta_vai_tro, la_he_thong, cap_do_uu_tien, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES 
 (NULL, 'ROLE_SUPER_ADMIN', 'Quản trị viên tối cao hệ thống', 'Tài khoản đặc quyền tối cao của hệ thống. Kiểm soát toàn diện thiết lập, phân quyền và dữ liệu của tất cả các đơn vị.', 1, 1, 'HOAT_DONG', NOW(), NOW());
 
@@ -279,7 +279,7 @@ VALUES
 -- BƯỚC 2: GÁN TOÀN BỘ QUYỀN TRONG BẢNG "QUYEN" CHO VAI TRÒ SUPER ADMIN
 -- (Dùng SELECT để bốc tự động toàn bộ 175+ ID quyền mà không cần gõ cứng)
 -- =======================================================================
-INSERT INTO vai_tro_quyen (id_vai_tro, id_quyen, id_nguoi_cap_quyen, ghi_chu_cap_quyen, thoi_gian_tao, thoi_gian_cap_nhat)
+INSERT IGNORE INTO vai_tro_quyen (id_vai_tro, id_quyen, id_nguoi_cap_quyen, ghi_chu_cap_quyen, thoi_gian_tao, thoi_gian_cap_nhat)
 SELECT 
     (SELECT id FROM vai_tro WHERE ma_vai_tro = 'ROLE_SUPER_ADMIN'), -- Tự động tìm ID của vai trò vừa tạo
     id,                                                             -- Bốc toàn bộ ID từ bảng quyền
@@ -295,7 +295,7 @@ FROM quyen;
 -- username: admin / password: admin@123 (Đã mã hóa chuẩn BCrypt)
 -- (Bỏ trống 'id', id_don_vi = NULL, id_phong_ban = NULL)
 -- =======================================================================
-INSERT INTO nguoi_dung (id_don_vi, id_phong_ban, ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_nguoi_dung, ten_dem_nguoi_dung, ten_nguoi_dung, email, so_dien_thoai, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
+INSERT IGNORE INTO nguoi_dung (id_don_vi, id_phong_ban, ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_nguoi_dung, ten_dem_nguoi_dung, ten_nguoi_dung, email, so_dien_thoai, trang_thai, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES 
 (NULL, NULL, 'NV-00000', 'admin', '$2a$10$kxkYprwzh882ZxqwBJGUoeeMdQa/s3cMg3by3D1DdZSFjbdJYhnde', 'Hệ Thống', 'Quản Trị', 'Tối Cao', 'superadmin@itam.com', '0123456789', 'HOAT_DONG', NOW(), NOW());
 
@@ -304,7 +304,7 @@ VALUES
 -- BƯỚC 4: LIÊN KẾT TÀI KHOẢN "admin" VỚI VAI TRÒ "ROLE_SUPER_ADMIN"
 -- (Dùng Subquery tìm ID tự động để ánh xạ vào bảng trung gian)
 -- =======================================================================
-INSERT INTO nguoi_dung_vai_tro (id_nguoi_dung, id_vai_tro, thoi_gian_bat_dau, thoi_gian_het_han, ghi_chu_gan, thoi_gian_tao, thoi_gian_cap_nhat) 
+INSERT IGNORE INTO nguoi_dung_vai_tro (id_nguoi_dung, id_vai_tro, thoi_gian_bat_dau, thoi_gian_het_han, ghi_chu_gan, thoi_gian_tao, thoi_gian_cap_nhat) 
 VALUES (
     (SELECT id FROM nguoi_dung WHERE ten_dang_nhap = 'admin'),      -- Tự động lấy ID user
     (SELECT id FROM vai_tro WHERE ma_vai_tro = 'ROLE_SUPER_ADMIN'), -- Tự động lấy ID role
@@ -320,7 +320,7 @@ VALUES (
 -- (Bảng: nguoi_dung_quyen)
 -- Tự động quét và copy các trường thuộc tính từ bảng 'quyen' sang
 -- =======================================================================
-INSERT INTO nguoi_dung_quyen (
+INSERT IGNORE INTO nguoi_dung_quyen (
     id_nguoi_dung, 
     id_quyen, 
     id_don_vi, 

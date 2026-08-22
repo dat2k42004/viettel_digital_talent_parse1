@@ -321,7 +321,7 @@ export const DonHangMuaSamPage: React.FC = observer(() => {
     return (
         <QuyenHanGuard quyenYeuCau={QUYEN.XEM_DON_HANG_MUA_SAM}>
             <div style={{ padding: 24, minHeight: 'calc(100vh - 112px)', borderRadius: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div className="page-header">
                     <div>
                         <Title level={3} style={{ margin: 0 }}>{t('donHangMuaSamPage.don_hang_mua_sam')}</Title>
                         <Text type="secondary">{t('donHangMuaSamPage.quan_ly_lap_ke')}</Text>

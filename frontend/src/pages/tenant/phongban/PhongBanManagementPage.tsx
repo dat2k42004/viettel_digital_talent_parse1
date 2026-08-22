@@ -242,7 +242,7 @@ export const PhongBanManagementPage: React.FC = observer(() => {
   return (
     <QuyenHanGuard quyenYeuCau={QUYEN.XEM_PHONG_BAN}>
       <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="page-header">
           <div>
             <Title level={3} style={{ margin: 0 }}>
               {t('phongBanManagementPage.quan_ly_phong_ban')}

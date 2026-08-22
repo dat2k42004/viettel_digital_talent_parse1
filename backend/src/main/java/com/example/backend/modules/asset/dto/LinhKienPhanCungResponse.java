@@ -29,4 +29,5 @@ public class LinhKienPhanCungResponse {
     private String trangThai;
     private LocalDateTime thoiGianTao;
     private LocalDateTime thoiGianCapNhat;
+    private String qrCodeUrl;
 }

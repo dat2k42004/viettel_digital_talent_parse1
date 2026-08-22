@@ -76,16 +76,34 @@ public class XacThucServiceImpl implements XacThucService {
     @Override
     @Transactional
     public XacThucResponse login(DangNhapRequest request, HttpServletRequest httpRequest) {
-        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhapAndThoiGianXoaIsNull(request.getUsername())
-                .orElseThrow(() -> new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401));
+        String username = request.getUsername() != null ? request.getUsername().trim() : "";
+        String rawPassword = request.getPassword() != null ? request.getPassword() : "";
+
+        log.info("[AUTH-LOGIN] Đang thử đăng nhập cho username: '{}'", username);
+
+        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhapAndThoiGianXoaIsNull(username)
+                .orElseThrow(() -> {
+                    log.warn("[AUTH-LOGIN FAILED] Không tìm thấy user với ten_dang_nhap='{}' (thoi_gian_xoa IS NULL)", username);
+                    return new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401);
+                });
 
         if (nguoiDung.getTrangThai() != TrangThaiCoBanEnum.HOAT_DONG) {
+            log.warn("[AUTH-LOGIN FAILED] User '{}' có trang_thai={}", username, nguoiDung.getTrangThai());
             throw new NghiepVuException("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động", 401);
+        }
+
+        // Kiểm tra mật khẩu khớp chuẩn BCrypt
+        boolean isPasswordMatch = passwordEncoder.matches(rawPassword, nguoiDung.getMatKhau());
+        log.info("[AUTH-LOGIN] Kết quả kiểm tra PasswordEncoder.matches({}, DB_HASH): {}", username, isPasswordMatch);
+
+        if (!isPasswordMatch) {
+            log.warn("[AUTH-LOGIN FAILED] Mật khẩu nhập vào không khớp với hash BCrypt trong CSDL cho user '{}'", username);
+            throw new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401);
         }
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(username, rawPassword));
 
             NguoiDungUserDetails userDetails = (NguoiDungUserDetails) authentication.getPrincipal();
             String accessToken = tokenProvider.generateAccessToken(userDetails);
@@ -143,14 +161,22 @@ public class XacThucServiceImpl implements XacThucService {
                     .build();
 
         } catch (Exception e) {
+            log.error("Lỗi khi thực hiện đăng nhập cho username '{}': {}", request.getUsername(), e.getMessage(), e);
             // Phát sự kiện đăng nhập thất bại
-            eventPublisher.publishEvent(new DangNhapEvent(
-                    null, request.getUsername(), "THAT_BAI",
-                    httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")));
+            try {
+                eventPublisher.publishEvent(new DangNhapEvent(
+                        null, request.getUsername(), "THAT_BAI",
+                        httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent")));
+            } catch (Exception ex) {
+                log.warn("Không thể phát sự kiện đăng nhập thất bại: {}", ex.getMessage());
+            }
             if (e instanceof NghiepVuException) {
                 throw (NghiepVuException) e;
             }
-            throw new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401);
+            if (e instanceof org.springframework.security.core.AuthenticationException) {
+                throw new NghiepVuException("Tên đăng nhập hoặc mật khẩu không chính xác", 401);
+            }
+            throw new NghiepVuException("Lỗi hệ thống khi đăng nhập: " + e.getMessage(), 500);
         }
     }
 
@@ -336,6 +362,7 @@ public class XacThucServiceImpl implements XacThucService {
     private NguoiDungResponse mapToNguoiDungResponse(NguoiDung nguoiDung) {
         List<com.example.backend.modules.auth.dto.VaiTroResponse> danhSachVaiTro = nguoiDungVaiTroRepository
                 .findByNguoiDungId(nguoiDung.getId()).stream()
+                .filter(nv -> nv != null && nv.getVaiTro() != null)
                 .map(nv -> com.example.backend.modules.auth.dto.VaiTroResponse.builder()
                         .id(nv.getVaiTro().getId())
                         .maVaiTro(nv.getVaiTro().getMaVaiTro())
@@ -345,6 +372,7 @@ public class XacThucServiceImpl implements XacThucService {
 
         List<com.example.backend.modules.auth.dto.QuyenResponse> danhSachQuyen = nguoiDungQuyenRepository
                 .findByNguoiDungId(nguoiDung.getId()).stream()
+                .filter(nq -> nq != null && nq.getQuyen() != null)
                 .map(nq -> com.example.backend.modules.auth.dto.QuyenResponse.builder()
                         .id(nq.getQuyen().getId())
                         .maQuyen(nq.getQuyen().getMaQuyen())
@@ -355,7 +383,9 @@ public class XacThucServiceImpl implements XacThucService {
                 .collect(Collectors.toList());
 
         List<String> danhSachQuyenPhanGiai = quyenRepository.findAllByNguoiDungId(nguoiDung.getId()).stream()
+                .filter(java.util.Objects::nonNull)
                 .map(com.example.backend.modules.auth.model.Quyen::getMaQuyen)
+                .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toList());
 
         String tenPhongBan = null;

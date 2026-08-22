@@ -1,6 +1,10 @@
-# Stage 1: Build React/Vite application
-FROM node:18-alpine AS build
+# Stage 1: Build React/Vite application (Node 20+ required by Vite 8)
+FROM node:20-alpine AS build
 WORKDIR /app
+
+# Support dynamic API Base URL during build time (Defaults to relative /api reverse proxying)
+ARG VITE_API_BASE_URL=
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Copy package lock and install dependencies to optimize caching
 COPY package.json package-lock.json ./

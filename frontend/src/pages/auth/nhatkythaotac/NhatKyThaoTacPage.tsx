@@ -176,7 +176,7 @@ export const NhatKyThaoTacPage: React.FC = observer(() => {
     return (
         <QuyenHanGuard quyenYeuCau={QUYEN.XEM_NHAT_KY_THAO_TAC}>
             <div style={{ padding: 24 }}>
-                <div style={{ marginBottom: 24 }}>
+                <div className="page-header">
                     <Title level={3} style={{ margin: 0 }}>{t('nhatKyThaoTacPage.nhat_ky_thao_tac')}</Title>
                     <Text type="secondary">{t('nhatKyThaoTacPage.truy_vet_lich_su')}</Text>
                 </div>

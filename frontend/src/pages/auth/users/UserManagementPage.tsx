@@ -396,7 +396,7 @@ export const UserManagementPage: React.FC = observer(() => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="page-header">
         <div>
           <Title level={2} style={{ margin: 0, fontSize: 24 }}>{t('userManagementPage.quan_ly_tai_khoan')}</Title>
           <Text type="secondary">{t('userManagementPage.cap_phat_tai_khoan')}</Text>

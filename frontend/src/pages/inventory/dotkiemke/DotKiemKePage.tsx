@@ -309,7 +309,7 @@ export const DotKiemKePage: React.FC = observer(() => {
 
     return (
         <div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="page-header">
                 <div>
                     <Title level={3} style={{ margin: 0 }}>{t('dotKiemKePage.quan_ly_dot_kiem')}</Title>
                     <Text type="secondary">{t('dotKiemKePage.quan_ly_va_lap')}</Text>

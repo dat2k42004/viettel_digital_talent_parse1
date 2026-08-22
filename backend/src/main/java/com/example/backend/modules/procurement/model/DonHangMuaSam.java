@@ -22,11 +22,11 @@ import lombok.Setter;
           @Index(name = "idx_dhms_don_vi_xoa", columnList = "id_don_vi, thoi_gian_xoa")
 })
 public class DonHangMuaSam extends BaseEntity {
-     @Column(name = "id_don_vi")
+     @Column(name = "id_don_vi", nullable = false)
      private Long idDonVi;
 
      @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "id_nha_cung_cap")
+     @JoinColumn(name = "id_nha_cung_cap", nullable = false)
      private NhaCungCap nhaCungCap;
 
      @Column(name = "id_nguoi_lap")

@@ -179,7 +179,7 @@ export const CauHinhDonViPage: React.FC = observer(() => {
   return (
     <QuyenHanGuard quyenYeuCau={QUYEN.XEM_CAU_HINH_DON_VI}>
       <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="page-header">
           <div>
             <Title level={3} style={{ margin: 0 }}>
               {t('cauHinhDonViPage.cau_hinh_don_vi')}

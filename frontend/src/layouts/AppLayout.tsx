@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Button, Dropdown, Avatar, Space,
-  Typography, Breadcrumb, theme, Badge, Modal, Form, Input, Descriptions, message, Tag, ConfigProvider, Tooltip
+  Typography, Breadcrumb, theme, Badge, Modal, Form, Input, Descriptions, message, Tag, ConfigProvider, Tooltip, Drawer
 } from 'antd';
 import type { MenuProps } from 'antd';
 import { observer } from 'mobx-react-lite';
@@ -14,13 +14,15 @@ import Icon, {
   ToolOutlined, ScanOutlined, BarChartOutlined, SettingOutlined,
   KeyOutlined, SolutionOutlined, SunOutlined, MoonOutlined,
   BankOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  MenuOutlined
 } from '@ant-design/icons';
 import { authStore, QUYEN } from '../stores/AuthStore';
 import { doiMatKhau, logout } from '../api-generated/endpoints/xac-thuc-controller/xac-thuc-controller';
 import ItamIcon from '../assets/icon.png';
 import { keys } from 'mobx';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useResponsive } from '../hooks/useResponsive';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -28,9 +30,16 @@ const { Text } = Typography;
 export const AppLayout: React.FC = observer(() => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
+  const { isMobile } = useResponsive();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { token } = theme.useToken();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Tự động đóng mobile menu khi chuyển trang
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   // Trạng thái giao diện tối (Dark Mode)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -483,98 +492,160 @@ export const AppLayout: React.FC = observer(() => {
       }}
     >
       <Layout style={{ minHeight: '100vh' }}>
-        {/* ===== SIDEBAR ===== */}
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
-          width={240}
-          theme={isDarkMode ? 'dark' : 'light'}
-          trigger={null}
-          style={{
-            overflow: 'auto',
-            height: '100vh',
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            borderRight: isDarkMode ? 'none' : '1px solid #f0f0f0',
-          }}
-        >
-          <div
+        {/* ===== SIDEBAR / DRAWER ===== */}
+        {isMobile ? (
+          <Drawer
+            placement="left"
+            closable={false}
+            onClose={() => setMobileMenuOpen(false)}
+            open={mobileMenuOpen}
+            width={240}
+            styles={{ body: { padding: 0, backgroundColor: isDarkMode ? '#141414' : '#fff' } }}
+          >
+            <div
+              style={{
+                height: 64,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 24px',
+                borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #f0f0f0',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                navigate('/');
+                setMobileMenuOpen(false);
+              }}
+            >
+              <img
+                src={ItamIcon}
+                alt="ITAM Logo"
+                style={{ width: 32, height: 32, objectFit: 'contain', marginRight: 8, filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
+              />
+              <Text strong style={{ fontSize: 24, margin: 0 }}>
+                ITAM
+              </Text>
+            </div>
+            <Menu
+              theme={isDarkMode ? 'dark' : 'light'}
+              mode="inline"
+              selectedKeys={[location.pathname, selectedKey]}
+              openKeys={openKeys}
+              onOpenChange={onOpenChange}
+              items={menuItems}
+              style={{ borderRight: 0, marginTop: 8 }}
+            />
+          </Drawer>
+        ) : (
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={setCollapsed}
+            width={240}
+            theme={isDarkMode ? 'dark' : 'light'}
+            trigger={null}
             style={{
-              height: 64,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              padding: collapsed ? 0 : '0 24px',
-              borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #f0f0f0',
+              overflow: 'auto',
+              height: '100vh',
+              position: 'fixed',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              borderRight: isDarkMode ? 'none' : '1px solid #f0f0f0',
             }}
           >
-            {!collapsed && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
-                <img
-                  src={ItamIcon} // Nhớ trỏ đúng biến import ảnh của cậu nhé
-                  alt="ITAM Logo"
-                  style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
-                />
-                <Text strong style={{ fontSize: 24, margin: 0 }}>
-                  ITAM
-                </Text>
-              </div>
-            )}
-            {collapsed && <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
-              <img
-                src={ItamIcon} // Nhớ trỏ đúng biến import ảnh của cậu nhé
-                alt="ITAM Logo"
-                style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
-              />
-            </div>}
-          </div>
+            <div
+              style={{
+                height: 64,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                padding: collapsed ? 0 : '0 24px',
+                borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid #f0f0f0',
+              }}
+            >
+              {!collapsed && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
+                  <img
+                    src={ItamIcon}
+                    alt="ITAM Logo"
+                    style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
+                  />
+                  <Text strong style={{ fontSize: 24, margin: 0 }}>
+                    ITAM
+                  </Text>
+                </div>
+              )}
+              {collapsed && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', cursor: 'pointer' }} onClick={() => navigate("/")}>
+                  <img
+                    src={ItamIcon}
+                    alt="ITAM Logo"
+                    style={{ width: 32, height: 32, objectFit: 'contain', filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
+                  />
+                </div>
+              )}
+            </div>
 
-          <Menu
-            theme={isDarkMode ? 'dark' : 'light'}
-            mode="inline"
-            selectedKeys={[location.pathname, selectedKey]}
-            openKeys={openKeys}
-            onOpenChange={onOpenChange}
-            items={menuItems}
-            style={{ borderRight: 0, marginTop: 8 }}
-          />
-        </Sider>
+            <Menu
+              theme={isDarkMode ? 'dark' : 'light'}
+              mode="inline"
+              selectedKeys={[location.pathname, selectedKey]}
+              openKeys={openKeys}
+              onOpenChange={onOpenChange}
+              items={menuItems}
+              style={{ borderRight: 0, marginTop: 8 }}
+            />
+          </Sider>
+        )}
 
-        <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'margin-left 0.2s' }}>
+        <Layout
+          style={{
+            marginLeft: isMobile ? 0 : (collapsed ? 80 : 240),
+            transition: 'margin-left 0.2s',
+            minWidth: 0,
+            minHeight: '100vh',
+          }}
+        >
           {/* ===== HEADER ===== */}
           <Header
             style={{
               position: 'fixed',
               top: 0,
               right: 0,
-              left: collapsed ? 80 : 240,
+              left: isMobile ? 0 : (collapsed ? 80 : 240),
               zIndex: 99,
-              width: `calc(100% - ${collapsed ? 80 : 240}px)`,
+              width: isMobile ? '100%' : `calc(100% - ${collapsed ? 80 : 240}px)`,
               transition: 'left 0.2s, width 0.2s',
               background: isDarkMode ? '#141414' : '#fff',
-              padding: '0 24px',
+              padding: isMobile ? '0 12px' : '0 24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               borderBottom: isDarkMode ? '1px solid #303030' : '1px solid #f0f0f0',
               height: 64,
+              minWidth: 0,
             }}
           >
             {/* Trái: Triggers & Breadcrumbs */}
-            <Space>
+            <Space size={isMobile ? 'small' : 'middle'} style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
               <Button
                 type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
+                icon={isMobile ? <MenuOutlined /> : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)}
+                onClick={() => {
+                  if (isMobile) {
+                    setMobileMenuOpen(!mobileMenuOpen);
+                  } else {
+                    setCollapsed(!collapsed);
+                  }
+                }}
               />
-              <Breadcrumb items={breadcrumbItems} />
+              <div className="header-breadcrumb-wrapper">
+                <Breadcrumb items={breadcrumbItems} />
+              </div>
             </Space>
 
-            {/* Phải: Dark Mode + Role Selector + Profile */}
-            <Space size="middle">
+            {/* Phải: Dark Mode + Language + Profile */}
+            <Space size={isMobile ? 'small' : 'middle'} style={{ flexShrink: 0 }}>
               {/* Bộ chuyển đổi giao diện Sáng/Tối */}
               <Tooltip title={isDarkMode ? t('common.switch_light') : t('common.switch_dark')}>
                 <Button
@@ -591,7 +662,7 @@ export const AppLayout: React.FC = observer(() => {
                   <Badge dot status="success">
                     <Avatar style={{ backgroundColor: token.colorPrimary }} icon={<UserOutlined />} />
                   </Badge>
-                  <Text strong>{authStore.tenNguoiDung}</Text>
+                  {!isMobile && <Text strong>{authStore.tenNguoiDung}</Text>}
                 </Space>
               </Dropdown>
             </Space>
@@ -600,9 +671,11 @@ export const AppLayout: React.FC = observer(() => {
           {/* ===== CONTENT ===== */}
           <Content
             style={{
-              margin: '88px 24px 24px 24px',
+              margin: isMobile ? '76px 12px 16px 12px' : '88px 24px 24px 24px',
               minHeight: 'calc(100vh - 64px - 48px)',
               overflow: 'auto',
+              minWidth: 0,
+              maxWidth: '100%',
             }}
           >
             <Outlet />

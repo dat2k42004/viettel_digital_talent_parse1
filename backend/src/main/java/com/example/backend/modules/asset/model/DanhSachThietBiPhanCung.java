@@ -55,4 +55,7 @@ public class DanhSachThietBiPhanCung extends BaseEntity {
 
     @Column(name = "thoi_gian_het_han_bao_hanh")
     private LocalDate thoiGianHetHanBaoHanh;
+
+    @Column(name = "qr_code_url", length = 500)
+    private String qrCodeUrl;
 }
